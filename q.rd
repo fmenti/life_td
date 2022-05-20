@@ -27,10 +27,10 @@
 		<meta name="title">Basic stellar parameters</meta>
 		<meta name="description">
 		A list of all basic stellar parameters.</meta>
-		<primary>oidref</primary>
-                <column name="oidref" type="text"
+		<primary>star_id</primary>
+                <column name="star_id" type="text"
                         ucd="meta.record;meta.id"
-                        tablehead="oidref"
+                        tablehead="star_id"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
@@ -53,12 +53,13 @@
                 <meta name="description">
                 A list of the object parameters.</meta>
                 <primary>main_id</primary>
-                <foreignKey inTable="star_basic"
-                        source="oidref" />
-		<column name="oidref" type="text"
+                <foreignKey dest="star_id" inTable="star_basic"
+                        source="object_id" />
+		<column name="object_id" type="text"
                         ucd="meta.record;meta.id"
-                        tablehead="oidref"
+                        tablehead="object_id"
                         description="Object internal identifier."
+                        required="True"
                         verbLevel="1"/>
                 <column name="main_id" type="text"
                         ucd="meta.id;meta.main"
@@ -79,12 +80,12 @@
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        <map dest="oidref" src="oid"/>
+                        <map dest="star_id" src="oid"/>
                         </rowmaker>
                 </make>      
                 <make table="object">
                         <rowmaker idmaps="*">
-                        <map dest="oidref" src="oid"/>                        
+                        <map dest="object_id" src="oid"/>                        
                         </rowmaker>
                 </make>
                           
