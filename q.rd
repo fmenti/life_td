@@ -27,13 +27,13 @@
 		<meta name="title">Basic stellar parameters</meta>
 		<meta name="description">
 		A list of all basic stellar parameters.</meta>
-		<primary>main_id</primary>
-		<column name="main_id" type="text"
-			ucd="meta.id;meta.main"
-			tablehead="main_id"
-			description="Main stellar identifier."
-			required="True" 
-			verbLevel="1"/>
+		<primary>oidref</primary>
+                <column name="oidref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="oidref"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
 		<column name="ra" type="double precision"
 			ucd="pos.eq.ra;meta.main" unit="deg" 
 			tablehead="RA (ICRS)" 
@@ -46,20 +46,52 @@
 			description="Declination"
 			verbLevel="1">
 		</column>
-	</table>    
+	</table>
+
+	<table id="object" onDisk="True" adql="True">
+                <meta name="title">Object table</meta>
+                <meta name="description">
+                A list of the object parameters.</meta>
+                <primary>main_id</primary>
+                <foreignKey inTable="star_basic"
+                        source="oidref" />
+		<column name="oidref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="oidref"
+                        description="Object internal identifier."
+                        verbLevel="1"/>
+                <column name="main_id" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="main_id"
+                        description="Main stellar identifier."
+                        required="True"
+                        verbLevel="1"/>
+        </table>
+
     
-	<data id="import_main_id">
+	<data id="import_csv">
 		<sources pattern="data/simbad_main_id.csv"/>
-			<!-- aquired via TopCat TAP SIMBAD query:
-			SELECT TOP 10 main_id,ra,dec
+		<!--Data aquired via TopCat TAP SIMBAD query:
+			SELECT TOP 10 main_id,ra,dec,oid
 			FROM basic
-			WHERE otype='*' -->
+			WHERE basic.plx_value >=50. -->
 		<csvGrammar/>
-		<make table="star_basic">
-			<rowmaker idmaps="*"> 
-			</rowmaker>
-		</make>
-	</data>
+
+                <make table="star_basic">
+                        <rowmaker idmaps="*">
+                        <map dest="oidref" src="oid"/>
+                        </rowmaker>
+                </make>      
+                <make table="object">
+                        <rowmaker idmaps="*">
+                        <map dest="oidref" src="oid"/>                        
+                        </rowmaker>
+                </make>
+                          
+		
+	</data>	
+
+
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
