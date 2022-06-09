@@ -88,6 +88,10 @@
                         </rowmaker>
                 </make>                       		
 	</data>	
+		<!-- <sources pattern="data/exomercat_10_id.fits"/>
+		 Data aquired via TopCat TAP exomercat query:
+			SELECT TOP 10 id, name, bestmass
+			FROM exomercat.exomercat -->
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
