@@ -47,7 +47,6 @@
 			verbLevel="1">
 		</column>
 	</table>
-
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
                 <meta name="description">
@@ -68,15 +67,15 @@
                         required="True"
                         verbLevel="1"/>
         </table>
-
     
-	<data id="import_csv">
-		<sources pattern="data/simbad_main_id.csv"/>
+	<data id="import_stars_fits">
+		<sources pattern="data/simbad_main_id.fits"/>
 		<!--Data aquired via TopCat TAP SIMBAD query:
 			SELECT TOP 10 main_id,ra,dec,oid
 			FROM basic
 			WHERE basic.plx_value >=50. -->
-		<csvGrammar/>
+		<fitsTableGrammar/>
+		<!-- csvGrammar/ -->
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
@@ -85,14 +84,10 @@
                 </make>      
                 <make table="object">
                         <rowmaker idmaps="*">
-                        <map dest="object_id" src="oid"/>                        
+                        <map dest="object_id" src="oid"/>                
                         </rowmaker>
-                </make>
-                          
-		
+                </make>                       		
 	</data>	
-
-
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
