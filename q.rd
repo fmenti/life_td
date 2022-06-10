@@ -47,13 +47,31 @@
 			verbLevel="1">
 		</column>
 	</table>
+	<table id="planet_basic" onDisk="True" adql="True">
+		<meta name="title">Basic planetarz parameters</meta>
+		<meta name="description">
+		A list of all basic planetarz parameters.</meta>
+		<primary>planet_id</primary>
+                <column name="planet_id" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="star_id"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+		<column name="mass" type="double precision"
+			ucd="phys.mass" unit="Mjup" 
+			tablehead="mass" 
+			description="ExoMercat Bestmass parameter." 
+			verbLevel="1">
+		</column>
+	</table>
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
                 <meta name="description">
                 A list of the object parameters.</meta>
                 <primary>main_id</primary>
-                <foreignKey dest="star_id" inTable="star_basic"
-                        source="object_id" />
+                <!-- <foreignKey dest="star_id" inTable="star_basic"
+                        source="object_id" /> -->
 		<column name="object_id" type="text"
                         ucd="meta.record;meta.id"
                         tablehead="object_id"
@@ -63,7 +81,7 @@
                 <column name="main_id" type="text"
                         ucd="meta.id;meta.main"
                         tablehead="main_id"
-                        description="Main stellar identifier."
+                        description="Main identifier."
                         required="True"
                         verbLevel="1"/>
         </table>
@@ -88,10 +106,28 @@
                         </rowmaker>
                 </make>                       		
 	</data>	
-		<!-- <sources pattern="data/exomercat_10_id.fits"/>
-		 Data aquired via TopCat TAP exomercat query:
+	<data id="import_planets_fits">
+		<sources pattern="data/exomercat_10_id.fits"/>
+		<!--Data aquired via TopCat TAP exomercat query:
 			SELECT TOP 10 id, name, bestmass
 			FROM exomercat.exomercat -->
+		<fitsTableGrammar/>
+		<!-- csvGrammar/ -->
+
+                <make table="planet_basic">
+                        <rowmaker idmaps="*">
+                        <map dest="planet_id" src="id"/>
+                        <map dest="mass" src="bestmass"/>
+                        </rowmaker>
+                </make>      
+                <make table="object">
+                        <rowmaker idmaps="*">
+                        <map dest="object_id" src="id"/>
+                        <map dest="main_id" src="name"/>                
+                        </rowmaker>
+                </make>                       		
+	</data>
+
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
