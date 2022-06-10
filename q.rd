@@ -47,7 +47,7 @@
 			verbLevel="1">
 		</column>
 	</table>
-	<table id="planet_basic" onDisk="True" adql="True">
+	<!-- <table id="planet_basic" onDisk="True" adql="True">
 		<meta name="title">Basic planetarz parameters</meta>
 		<meta name="description">
 		A list of all basic planetarz parameters.</meta>
@@ -64,14 +64,14 @@
 			description="ExoMercat Bestmass parameter." 
 			verbLevel="1">
 		</column>
-	</table>
+	</table> -->
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
                 <meta name="description">
                 A list of the object parameters.</meta>
                 <primary>main_id</primary>
-                <!-- <foreignKey dest="star_id" inTable="star_basic"
-                        source="object_id" /> -->
+                <foreignKey dest="star_id" inTable="star_basic"
+                        source="object_id" /> 
 		<column name="object_id" type="text"
                         ucd="meta.record;meta.id"
                         tablehead="object_id"
@@ -86,12 +86,18 @@
                         verbLevel="1"/>
         </table>
     
-	<data id="import_stars_fits">
-		<sources pattern="data/simbad_main_id.fits"/>
-		<!--Data aquired via TopCat TAP SIMBAD query:
-			SELECT TOP 10 main_id,ra,dec,oid
-			FROM basic
-			WHERE basic.plx_value >=50. -->
+	<data id="import">
+		<sources>
+			<pattern>data/simbad_main_id.fits</pattern>
+				<!--Data queried from SIMBAD:
+					SELECT TOP 10 main_id,ra,dec,oid
+					FROM basic
+					WHERE basic.plx_value >=50. -->
+			<!-- <pattern>data/exomercat_10_id.fits</pattern>
+				Data queried from exomercat:
+					SELECT TOP 10 id, name, bestmass
+					FROM exomercat.exomercat  -->
+		</sources>
 		<fitsTableGrammar/>
 		<!-- csvGrammar/ -->
 
@@ -99,35 +105,22 @@
                         <rowmaker idmaps="*">
                         <map dest="star_id" src="oid"/>
                         </rowmaker>
-                </make>      
-                <make table="object">
-                        <rowmaker idmaps="*">
-                        <map dest="object_id" src="oid"/>                
-                        </rowmaker>
-                </make>                       		
-	</data>	
-	<data id="import_planets_fits">
-		<sources pattern="data/exomercat_10_id.fits"/>
-		<!--Data aquired via TopCat TAP exomercat query:
-			SELECT TOP 10 id, name, bestmass
-			FROM exomercat.exomercat -->
-		<fitsTableGrammar/>
-		<!-- csvGrammar/ -->
-
-                <make table="planet_basic">
+                </make>
+                <!--<make table="planet_basic">
                         <rowmaker idmaps="*">
                         <map dest="planet_id" src="id"/>
                         <map dest="mass" src="bestmass"/>
                         </rowmaker>
-                </make>      
+                </make> -->            
                 <make table="object">
                         <rowmaker idmaps="*">
-                        <map dest="object_id" src="id"/>
-                        <map dest="main_id" src="name"/>                
+                        <map dest="object_id" src="oid"/>
+                        <!-- <map dest="object_id" src="id"/>
+                        <map dest="main_id" src="name"/>  -->              
                         </rowmaker>
                 </make>                       		
-	</data>
-
+	</data>	
+                                      
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
