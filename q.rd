@@ -46,6 +46,13 @@
 			description="Declination"
 			verbLevel="1">
 		</column>
+		<column name="new_id" type="text"
+			ucd="meta.record;meta.id"
+                        tablehead="new_id"
+                        description="New internal identifier."
+                        required="True"
+                	verbLevel="1"/>
+			
 	</table>
 	<!-- <table id="planet_basic" onDisk="True" adql="True">
 		<meta name="title">Basic planetarz parameters</meta>
@@ -103,20 +110,21 @@
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        <map dest="star_id" src="oid"/>
+                        	<var key="new_id">"STAR%"%(@oid)</var>
+                        	<map dest="star_id" src="oid"/>
                         </rowmaker>
                 </make>
                 <!--<make table="planet_basic">
                         <rowmaker idmaps="*">
-                        <map dest="planet_id" src="id"/>
-                        <map dest="mass" src="bestmass"/>
+                        	<map dest="planet_id" src="id"/>
+                        	<map dest="mass" src="bestmass"/>
                         </rowmaker>
                 </make> -->            
                 <make table="object">
                         <rowmaker idmaps="*">
-                        <map dest="object_id" src="oid"/>
-                        <!-- <map dest="object_id" src="id"/>
-                        <map dest="main_id" src="name"/>  -->              
+                        	<map dest="object_id" src="oid"/>
+                        	<!-- <map dest="object_id" src="id"/>
+                        	<map dest="main_id" src="name"/>  -->              
                         </rowmaker>
                 </make>                       		
 	</data>	
