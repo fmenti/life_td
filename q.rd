@@ -23,14 +23,58 @@
 	<meta name="type">Archive</meta>  
 	<meta name="coverage.waveband">Infrared</meta>  
   
+	<table id="object" onDisk="True" adql="True">
+                <meta name="title">Object table</meta>
+                <meta name="description">
+                A list of the object parameters.</meta>
+                <primary>object_id</primary>
+		<column name="object_id" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_id"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+        </table> 
+        
+        <data id="import_object_table">
+		<sources>
+			<pattern>data/simbad_main_id.fits</pattern>
+				<!--Data queried from SIMBAD:
+					SELECT TOP 10 main_id,ra,dec,oid
+					FROM basic
+					WHERE basic.plx_value >=50. -->
+			<!-- <pattern>data/exomercat_10_id.fits</pattern>
+				Data queried from exomercat:
+					SELECT TOP 10 id, name, bestmass
+					FROM exomercat.exomercat  -->
+		</sources>
+		<fitsTableGrammar/>
+
+                <make table="object">
+                        <rowmaker idmaps="*">
+                        	<var key="object_id">"STAR-%s"%@oid</var> 
+                        	<!-- <var key="object_id">"PLANET-%s"%@oid</var> -->            
+                        </rowmaker>
+                </make>    
+                                       		
+	</data>	
+        
 	<table id="star_basic" onDisk="True" adql="True">
 		<meta name="title">Basic stellar parameters</meta>
 		<meta name="description">
 		A list of all basic stellar parameters.</meta>
 		<primary>star_id</primary>
+		<foreignKey source="object_idref" inTable="object"
+                        dest="object_id" />
                 <column name="star_id" type="text"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.id;meta.main"
                         tablehead="star_id"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="object_idref" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_idref"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
@@ -46,12 +90,6 @@
 			description="Declination"
 			verbLevel="1">
 		</column>
-		<column name="new_id" type="text"
-			ucd="meta.record;meta.id"
-                        tablehead="new_id"
-                        description="New internal identifier."
-                        required="True"
-                	verbLevel="1"/>
 			
 	</table>
 	<!-- <table id="planet_basic" onDisk="True" adql="True">
@@ -72,28 +110,8 @@
 			verbLevel="1">
 		</column>
 	</table> -->
-	<table id="object" onDisk="True" adql="True">
-                <meta name="title">Object table</meta>
-                <meta name="description">
-                A list of the object parameters.</meta>
-                <primary>main_id</primary>
-                <foreignKey dest="star_id" inTable="star_basic"
-                        source="object_id" /> 
-		<column name="object_id" type="text"
-                        ucd="meta.record;meta.id"
-                        tablehead="object_id"
-                        description="Object internal identifier."
-                        required="True"
-                        verbLevel="1"/>
-                <column name="main_id" type="text"
-                        ucd="meta.id;meta.main"
-                        tablehead="main_id"
-                        description="Main identifier."
-                        required="True"
-                        verbLevel="1"/>
-        </table>
     
-	<data id="import">
+	<data id="import_star_basic_table">
 		<sources>
 			<pattern>data/simbad_main_id.fits</pattern>
 				<!--Data queried from SIMBAD:
@@ -106,27 +124,20 @@
 					FROM exomercat.exomercat  -->
 		</sources>
 		<fitsTableGrammar/>
-		<!-- csvGrammar/ -->
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<var key="new_id">"STAR%"%(@oid)</var>
                         	<map dest="star_id" src="oid"/>
+                        	<var key="object_idref">"STAR-%s"%@oid</var> 
                         </rowmaker>
                 </make>
-                <!--<make table="planet_basic">
+                <!-- <make table="planet_basic">
                         <rowmaker idmaps="*">
                         	<map dest="planet_id" src="id"/>
                         	<map dest="mass" src="bestmass"/>
                         </rowmaker>
-                </make> -->            
-                <make table="object">
-                        <rowmaker idmaps="*">
-                        	<map dest="object_id" src="oid"/>
-                        	<!-- <map dest="object_id" src="id"/>
-                        	<map dest="main_id" src="name"/>  -->              
-                        </rowmaker>
-                </make>                       		
+                </make>  -->         
+                                       		
 	</data>	
                                       
   
