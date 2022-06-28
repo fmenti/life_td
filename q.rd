@@ -22,50 +22,14 @@
 	<meta name="contentLevel">Research</meta>
 	<meta name="type">Archive</meta>  
 	<meta name="coverage.waveband">Infrared</meta>  
-  
-	<table id="object" onDisk="True" adql="True">
-                <meta name="title">Object table</meta>
-                <meta name="description">
-                A list of the object parameters.</meta>
-                <primary>object_id</primary>
-		<column name="object_id" type="text"
-                        ucd="meta.id;meta.main"
-                        tablehead="object_id"
-                        description="Object internal identifier."
-                        required="True"
-                        verbLevel="1"/>
-        </table> 
-        
-        <data id="import_object_table">
-		<sources>
-			<pattern>data/simbad_main_id.fits</pattern>
-				<!--Data queried from SIMBAD:
-					SELECT TOP 10 main_id,ra,dec,oid
-					FROM basic
-					WHERE basic.plx_value >=50. -->
-			<!-- <pattern>data/exomercat_10_id.fits</pattern>
-				Data queried from exomercat:
-					SELECT TOP 10 id, name, bestmass
-					FROM exomercat.exomercat  -->
-		</sources>
-		<fitsTableGrammar/>
-
-                <make table="object">
-                        <rowmaker idmaps="*">
-                        	<var key="object_id">"STAR-%s"%@oid</var> 
-                        	<!-- <var key="object_id">"PLANET-%s"%@oid</var> -->            
-                        </rowmaker>
-                </make>    
-                                       		
-	</data>	
-        
-	<table id="star_basic" onDisk="True" adql="True">
+       
+	<table id="star_basic" onDisk="True" adql="True" mixin="//scs#q3cindex">
 		<meta name="title">Basic stellar parameters</meta>
 		<meta name="description">
 		A list of all basic stellar parameters.</meta>
 		<primary>star_id</primary>
-		<foreignKey source="object_idref" inTable="object"
-                        dest="object_id" />
+		<!-- <foreignKey source="object_idref" inTable="object"
+                        dest="object_id" /> -->
                 <column name="star_id" type="text"
                         ucd="meta.id;meta.main"
                         tablehead="star_id"
@@ -92,7 +56,25 @@
 		</column>
 			
 	</table>
-	<!-- <table id="planet_basic" onDisk="True" adql="True">
+	<data id="import_star_basic_table">
+		<sources>
+			<pattern>data/simbad_main_id.fits</pattern>
+				<!--Data queried from SIMBAD:
+					SELECT TOP 10 main_id,ra,dec,oid
+					FROM basic
+					WHERE basic.plx_value >=50. -->
+		</sources>
+		<fitsTableGrammar/>
+
+                <make table="star_basic">
+                        <rowmaker idmaps="*">
+                        	<map dest="star_id" src="oid"/>
+                        	<var key="object_idref">"STAR-%s"%@oid</var> 
+                        </rowmaker>
+                </make>                                       		
+	</data>	
+	
+	<table id="planet_basic" onDisk="True" adql="True">
 		<meta name="title">Basic planetarz parameters</meta>
 		<meta name="description">
 		A list of all basic planetarz parameters.</meta>
@@ -103,43 +85,86 @@
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
+                <column name="object_idref" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_idref"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
 		<column name="mass" type="double precision"
 			ucd="phys.mass" unit="Mjup" 
 			tablehead="mass" 
 			description="ExoMercat Bestmass parameter." 
 			verbLevel="1">
 		</column>
-	</table> -->
+	</table>
     
-	<data id="import_star_basic_table">
+	<data id="import_plant_basic_table">
 		<sources>
-			<pattern>data/simbad_main_id.fits</pattern>
-				<!--Data queried from SIMBAD:
-					SELECT TOP 10 main_id,ra,dec,oid
-					FROM basic
-					WHERE basic.plx_value >=50. -->
-			<!-- <pattern>data/exomercat_10_id.fits</pattern>
-				Data queried from exomercat:
+			<pattern>data/exomercat_10_id.fits</pattern>
+			<!--	Data queried from exomercat:
 					SELECT TOP 10 id, name, bestmass
 					FROM exomercat.exomercat  -->
 		</sources>
 		<fitsTableGrammar/>
 
-                <make table="star_basic">
-                        <rowmaker idmaps="*">
-                        	<map dest="star_id" src="oid"/>
-                        	<var key="object_idref">"STAR-%s"%@oid</var> 
-                        </rowmaker>
-                </make>
-                <!-- <make table="planet_basic">
+		<make table="planet_basic">
                         <rowmaker idmaps="*">
                         	<map dest="planet_id" src="id"/>
                         	<map dest="mass" src="bestmass"/>
+                        	<var key="object_idref">"PLANET-%s"%@id</var> 
                         </rowmaker>
-                </make>  -->         
+                </make>       
                                        		
 	</data>	
-                                      
+
+	<table id="object" onDisk="True" adql="True">
+                <meta name="title">Object table</meta>
+                <meta name="description">
+                A list of the object parameters.</meta>
+                <primary>object_id</primary>
+		<column name="object_id" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_id"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+        <!-- 
+        <FEED source="//procs#declare-indexes-for"
+        	sourceTables="star_basic planet_basic"/> 
+        <viewStatement>
+        	CREATE VIEW \curtable AS ( 
+        		SELECT \colNames FROM 
+        			(SELECT object_idref AS object_id,
+        			FROM \schema.star_basic )
+        		Union
+        		SELECT object_idref as object_id
+        		FROM \schema.planet_basic)
+        </viewStatement> -->
+        </table> 
+        
+        <data id="import_object_table">
+		<sources>
+			<pattern>data/simbad_main_id.fits</pattern>
+				<!-- Data queried from SIMBAD:
+					SELECT TOP 10 main_id,ra,dec,oid
+					FROM basic
+					WHERE basic.plx_value >=50. -->
+			<!-- <pattern>data/exomercat_10_id.fits</pattern>
+				 Data queried from exomercat:
+					SELECT TOP 10 id, name, bestmass
+					FROM exomercat.exomercat  -->
+		</sources>
+		<fitsTableGrammar/> 
+
+                <make table="object">
+                        <rowmaker idmaps="*">
+                        	<var key="object_id">"STAR-%s"%@oid</var> 
+                        	<!-- <var key="object_id">"PLANET-%s"%@id</var>   -->          
+                        </rowmaker> 
+                </make>    
+                                       		
+	</data>	                                       
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
