@@ -118,50 +118,48 @@
                                        		
 	</data>	
 
+
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
                 <meta name="description">
                 A list of the object parameters.</meta>
-                <primary>object_id</primary>
+               <!--  <primary>object_id</primary>
 		<column name="object_id" type="text"
                         ucd="meta.id;meta.main"
                         tablehead="object_id"
                         description="Object internal identifier."
                         required="True"
-                        verbLevel="1"/>
-        <!-- 
-        <FEED source="//procs#declare-indexes-for"
-        	sourceTables="star_basic planet_basic"/> 
+                        verbLevel="1"/> -->
+                <column original="star_basic.object_idref" name="object_id"/>
+        
+        <!--  <FEED source="//procs#declare-indexes-for"
+        	sourceTables="star_basic planet_basic"/> -->
+        	
+        	
         <viewStatement>
         	CREATE VIEW \curtable AS ( 
-        		SELECT \colNames FROM 
-        			(SELECT object_idref AS object_id,
-        			FROM \schema.star_basic )
-        		Union
-        		SELECT object_idref as object_id
-        		FROM \schema.planet_basic)
-        </viewStatement> -->
+        		SELECT \colNames FROM
+        			(SELECT object_idref AS object_id
+        			FROM \schema.star_basic) as subquery1
+        			UNION
+        			(SELECT object_idref as object_id
+        			FROM \schema.planet_basic) 
+        			)
+        </viewStatement> 
         </table> 
+       
         
         <data id="import_object_table">
-		<sources>
+		<!-- <sources>
 			<pattern>data/simbad_main_id.fits</pattern>
-				<!-- Data queried from SIMBAD:
-					SELECT TOP 10 main_id,ra,dec,oid
-					FROM basic
-					WHERE basic.plx_value >=50. -->
-			<!-- <pattern>data/exomercat_10_id.fits</pattern>
-				 Data queried from exomercat:
-					SELECT TOP 10 id, name, bestmass
-					FROM exomercat.exomercat  -->
 		</sources>
-		<fitsTableGrammar/> 
+		<fitsTableGrammar/> -->   
 
-                <make table="object">
+                <make table="object"> <!--
                         <rowmaker idmaps="*">
                         	<var key="object_id">"STAR-%s"%@oid</var> 
-                        	<!-- <var key="object_id">"PLANET-%s"%@id</var>   -->          
-                        </rowmaker> 
+                        	 <var key="object_id">"PLANET-%s"%@id</var>   
+                        </rowmaker> -->          
                 </make>    
                                        		
 	</data>	                                       
