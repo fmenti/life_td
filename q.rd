@@ -42,20 +42,25 @@
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-		<column name="ra" type="double precision"
+		<column name="coord_ra" type="double precision"
 			ucd="pos.eq.ra;meta.main" unit="deg" 
 			tablehead="RA (ICRS)" 
 			description="Right Ascension" 
-			verbLevel="1">
-		</column>
-		<column name="dec" type="double precision" 
+			verbLevel="1"/>
+		<column name="coord_dec" type="double precision" 
 			ucd="pos.eq.dec;meta.main" unit="deg"
 			tablehead="Dec (ICRS)" 
 			description="Declination"
-			verbLevel="1">
-		</column>
-			
+			verbLevel="1"/>
+		<column name="coord_source_idref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="coord_source_idref"
+                        description="Identifier of the source of the coordinate
+                         parameter."
+                        required="True"
+                        verbLevel="1"/>	
 	</table>
+	
 	<data id="import_star_basic_table">
 		<sources>
 			<pattern>data/simbad_main_id.fits</pattern>
@@ -68,20 +73,23 @@
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<map dest="star_id" src="oid"/>
                         	<var key="object_idref">"STAR-%s"%@oid</var> 
+                        	<var key="coord_source_idref">"simbad"</var>
+                        	<map dest="star_id" src="oid"/>
+                        	<map dest="coord_ra" src="ra"/>
+                        	<map dest="coord_dec" src="dec"/>
                         </rowmaker>
                 </make>                                       		
 	</data>	
 	
 	<table id="planet_basic" onDisk="True" adql="True">
-		<meta name="title">Basic planetarz parameters</meta>
+		<meta name="title">Basic planetary parameters</meta>
 		<meta name="description">
-		A list of all basic planetarz parameters.</meta>
+		A list of all basic planetary parameters.</meta>
 		<primary>planet_id</primary>
                 <column name="planet_id" type="text"
                         ucd="meta.record;meta.id"
-                        tablehead="star_id"
+                        tablehead="planet_id"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
@@ -150,19 +158,34 @@
        
         
         <data id="import_object_table">
-		<!-- <sources>
-			<pattern>data/simbad_main_id.fits</pattern>
-		</sources>
-		<fitsTableGrammar/> -->   
+                <make table="object">      
+                </make>                           		
+	</data>	 
+	
+	<table id="source" onDisk="True" adql="True">
+		<meta name="title">Source Table</meta>
+		<meta name="description">
+		A list of all the sources for the parameters in the other
+		 tables.</meta>
+		<primary>source_id</primary>
+                <column name="source_id" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="source_id"
+                        description="Source identifier."
+                        required="True"
+                        verbLevel="1"/> 
+        </table>
+        
+        <data id="import_source_table">
+        	<sources>data/source.csv</sources>
+		<csvGrammar/>
 
-                <make table="object"> <!--
+                <make table="source">
                         <rowmaker idmaps="*">
-                        	<var key="object_id">"STAR-%s"%@oid</var> 
-                        	 <var key="object_id">"PLANET-%s"%@id</var>   
-                        </rowmaker> -->          
-                </make>    
-                                       		
-	</data>	                                       
+                        </rowmaker>    
+                </make>  
+        </data>
+                                           
   
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
