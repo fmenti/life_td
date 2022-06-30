@@ -62,22 +62,22 @@
 	</table>
 	
 	<data id="import_star_basic_table">
-		<sources>
-			<pattern>data/simbad_main_id.fits</pattern>
-				<!--Data queried from SIMBAD:
-					SELECT TOP 10 main_id,ra,dec,oid
-					FROM basic
-					WHERE basic.plx_value >=50. -->
-		</sources>
+		<sources>data/star.fits</sources>
+		<!--Data queried from SIMBAD:
+				SELECT TOP 10 main_id,ra,dec,oid,
+				 coo_bibcode
+				FROM basic
+				WHERE basic.plx_value >=50. -->
 		<fitsTableGrammar/>
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<var key="object_idref">"STAR-%s"%@oid</var> 
-                        	<var key="coord_source_idref">"simbad"</var>
+                        	<var key="object_idref">"STAR-%s"%@oid</var>
                         	<map dest="star_id" src="oid"/>
                         	<map dest="coord_ra" src="ra"/>
                         	<map dest="coord_dec" src="dec"/>
+                        	<map dest="coord_source_idref" 
+                        		src="coo_bibcode"/>
                         </rowmaker>
                 </make>                                       		
 	</data>	
@@ -103,15 +103,21 @@
 			ucd="phys.mass" unit="Mjup" 
 			tablehead="mass" 
 			description="ExoMercat Bestmass parameter." 
-			verbLevel="1">
-		</column>
+			verbLevel="1"/>
+		<column name="mass_source_idref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="coord_source_idref"
+                        description="Identifier of the source of the mass
+                         parameter."
+                        required="True"
+                        verbLevel="1"/>	
 	</table>
     
 	<data id="import_plant_basic_table">
 		<sources>
-			<pattern>data/exomercat_10_id.fits</pattern>
+			<pattern>data/planets.fits</pattern>
 			<!--	Data queried from exomercat:
-					SELECT TOP 10 id, name, bestmass
+					SELECT TOP 20 id, name, bestmass, bestmass_url
 					FROM exomercat.exomercat  -->
 		</sources>
 		<fitsTableGrammar/>
@@ -120,6 +126,7 @@
                         <rowmaker idmaps="*">
                         	<map dest="planet_id" src="id"/>
                         	<map dest="mass" src="bestmass"/>
+                        	<map dest="mass_source_idref" src="bestmass_url"/>
                         	<var key="object_idref">"PLANET-%s"%@id</var> 
                         </rowmaker>
                 </make>       
@@ -131,29 +138,18 @@
                 <meta name="title">Object table</meta>
                 <meta name="description">
                 A list of the object parameters.</meta>
-               <!--  <primary>object_id</primary>
-		<column name="object_id" type="text"
-                        ucd="meta.id;meta.main"
-                        tablehead="object_id"
-                        description="Object internal identifier."
-                        required="True"
-                        verbLevel="1"/> -->
-                <column original="star_basic.object_idref" name="object_id"/>
-        
-        <!--  <FEED source="//procs#declare-indexes-for"
-        	sourceTables="star_basic planet_basic"/> -->
+		<primary>object_id</primary>
+                <column original="star_basic.object_idref" name="object_id"/>        	
         	
-        	
-        <viewStatement>
-        	CREATE VIEW \curtable AS ( 
-        		SELECT \colNames FROM
-        			(SELECT object_idref AS object_id
-        			FROM \schema.star_basic) as subquery1
-        			UNION
-        			(SELECT object_idref as object_id
-        			FROM \schema.planet_basic) 
-        			)
-        </viewStatement> 
+        	<viewStatement>
+        		CREATE VIEW \curtable AS ( 
+        			SELECT \colNames FROM
+        				(SELECT object_idref AS object_id
+        					FROM \schema.star_basic) as subquery1
+        				UNION
+        				(SELECT object_idref as object_id
+        					FROM \schema.planet_basic))
+        	</viewStatement> 
         </table> 
        
         
@@ -173,16 +169,37 @@
                         tablehead="source_id"
                         description="Source identifier."
                         required="True"
+                        verbLevel="1"/>
+                <column name="bibcode" type="text"
+                        ucd="meta.bib.bibcode"
+                        tablehead="bibcode"
+                        description="Bibcode"
                         verbLevel="1"/> 
+                <column name="acquired_through" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="acquired_through"
+                        description="By what source the parameter was acquired."
+                        required="True"
+                        verbLevel="1"/>
+                         
         </table>
         
         <data id="import_source_table">
-        	<sources>data/source.csv</sources>
-		<csvGrammar/>
+        	<sources>data/source.fits</sources>
+		<!-- Data queried from SIMBAD:
+				SELECT DISTINCT * FROM (
+					SELECT TOP 10 coo_bibcode
+					FROM basic
+					WHERE basic.plx_value >=50.) AS subquery
+				JOIN ref ON bibcode=coo_bibcode -->
+		<fitsTableGrammar/>
 
-                <make table="source">
-                        <rowmaker idmaps="*">
-                        </rowmaker>    
+                <make table="source">  
+                	<rowmaker idmaps="*">
+                		<var key="acquired_through">"simbad"</var>  
+                		<map dest="source_id" src="coo_bibcode"/>
+                		<map dest="bibcode" src="coo_bibcode"/>
+                	</rowmaker>
                 </make>  
         </data>
                                            
