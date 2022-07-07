@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.0
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE>
+   <FIELD ID="ref" arraysize="62" datatype="unicodeChar" name="ref"/>
+   <FIELD ID="provider_name" arraysize="10" datatype="unicodeChar" name="provider_name"/>
+   <FIELD ID="provider_url" arraysize="44" datatype="unicodeChar" name="provider_url"/>
+   <FIELD ID="provider_bibcode" arraysize="19" datatype="unicodeChar" name="provider_bibcode"/>
+   <FIELD ID="source_id" datatype="long" name="source_id"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>SIMBAD</TD>
+      <TD>http://simbad.u-strasbg.fr:80/simbad/sim-tap</TD>
+      <TD>2000A&amp;AS..143....9W</TD>
+      <TD>1</TD>
+     </TR>
+     <TR>
+      <TD>2018arXiv180806257S</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>2</TD>
+     </TR>
+     <TR>
+      <TD>EU</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>3</TD>
+     </TR>
+     <TR>
+      <TD>OEC</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>4</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2008ApJ...672..553L/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>5</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2008PASJ...60..539S/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>6</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2009A&amp;A...499..935D/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>7</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>8</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403.1703J/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>9</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010arXiv1007.4552J/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>10</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>11</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157..149L/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>12</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>
