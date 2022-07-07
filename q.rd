@@ -22,20 +22,65 @@
 	<meta name="contentLevel">Research</meta>
 	<meta name="type">Archive</meta>  
 	<meta name="coverage.waveband">Infrared</meta>  
-       
+
+	<table id="source" onDisk="True" adql="True">
+		<meta name="title">Source Table</meta>
+		<meta name="description">
+		A list of all the sources for the parameters in the other
+		 tables.</meta>
+		<primary>source_id</primary>
+                <column name="source_id" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="source_id"
+                        description="Source identifier."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="ref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="ref"
+                        description="Reference, bibcode if possible."
+                        verbLevel="1"/> 
+                <column name="provider_name" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="provider_name"
+                        description="By what source the parameter was acquired."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="provider_url" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="provider_url"
+                        description="Provider URL."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="provider_bibcode" type="text"
+                        ucd="meta.bib.bibcode"
+                        tablehead="provider_bibcode"
+                        description="Provider bibcode."
+                        required="True"
+                        verbLevel="1"/>              
+        </table>
+        
+        <data id="import_source_table">
+        	<sources>data/sources.xml</sources>
+		<!-- Data queried with data_acquisition.py -->
+		<voTableGrammar/>
+                <make table="source">  
+                	<rowmaker idmaps="*">
+                	</rowmaker>
+                </make>  
+        </data>
+               
 	<table id="star_basic" onDisk="True" adql="True" mixin="//scs#q3cindex">
 		<meta name="title">Basic stellar parameters</meta>
 		<meta name="description">
 		A list of all basic stellar parameters.</meta>
-		<primary>star_id</primary>
+		<primary>object_idref</primary>
 		<!-- <foreignKey source="object_idref" inTable="object"
                         dest="object_id" /> -->
-                <column name="star_id" type="text"
-                        ucd="meta.id;meta.main"
-                        tablehead="star_id"
-                        description="Object internal identifier."
-                        required="True"
-                        verbLevel="1"/>
+		<foreignKey source="coord_source_idref" inTable="source"
+                        dest="source_id" />
+                <foreignKey source="plx_source_idref" inTable="source"
+                        dest="source_id" />
                 <column name="object_idref" type="text"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
@@ -54,30 +99,30 @@
 			verbLevel="1"/>
 		<column name="coord_source_idref" type="text"
                         ucd="meta.record;meta.id"
-                        tablehead="coord_source_idref"
-                        description="Identifier of the source of the coordinate
-                         parameter."
+                        tablehead="coord_source_id"
+                        description="Source identifier corresponding 
+                        to the position (coord) parameters."
                         required="True"
-                        verbLevel="1"/>	
+                        verbLevel="1"/>
+                <column name="plx_source_idref" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="plx_source_id"
+                        description="Source identifier corresponding 
+                        to the parallax parameters."
+                        required="True"
+                        verbLevel="1"/>
 	</table>
 	
 	<data id="import_star_basic_table">
-		<sources>data/star.fits</sources>
-		<!--Data queried from SIMBAD:
-				SELECT TOP 10 main_id,ra,dec,oid,
-				 coo_bibcode
-				FROM basic
-				WHERE basic.plx_value >=50. -->
-		<fitsTableGrammar/>
+		<sources>data/stars.xml</sources>
+		<!--Data acquired using the data_acquisition.py skript -->
+		<voTableGrammar/>
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<var key="object_idref">"STAR-%s"%@oid</var>
-                        	<map dest="star_id" src="oid"/>
+                        	<var key="object_idref">"S%s"%@oid</var>
                         	<map dest="coord_ra" src="ra"/>
                         	<map dest="coord_dec" src="dec"/>
-                        	<map dest="coord_source_idref" 
-                        		src="coo_bibcode"/>
                         </rowmaker>
                 </make>                                       		
 	</data>	
@@ -86,13 +131,9 @@
 		<meta name="title">Basic planetary parameters</meta>
 		<meta name="description">
 		A list of all basic planetary parameters.</meta>
-		<primary>planet_id</primary>
-                <column name="planet_id" type="text"
-                        ucd="meta.record;meta.id"
-                        tablehead="planet_id"
-                        description="Object internal identifier."
-                        required="True"
-                        verbLevel="1"/>
+		<primary>object_idref</primary>
+		<foreignKey source="mass_source_idref" inTable="source"
+                        dest="source_id" />
                 <column name="object_idref" type="text"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
@@ -106,7 +147,7 @@
 			verbLevel="1"/>
 		<column name="mass_source_idref" type="text"
                         ucd="meta.record;meta.id"
-                        tablehead="coord_source_idref"
+                        tablehead="mass_source_idref"
                         description="Identifier of the source of the mass
                          parameter."
                         required="True"
@@ -114,20 +155,16 @@
 	</table>
     
 	<data id="import_plant_basic_table">
-		<sources>
-			<pattern>data/planets.fits</pattern>
-			<!--	Data queried from exomercat:
-					SELECT TOP 20 id, name, bestmass, bestmass_url
-					FROM exomercat.exomercat  -->
-		</sources>
-		<fitsTableGrammar/>
+		<sources>data/planets.xml</sources>
+		<!--	Data acquired using the data_acquisition.py skript -->
+		<voTableGrammar/>
 
 		<make table="planet_basic">
                         <rowmaker idmaps="*">
-                        	<map dest="planet_id" src="id"/>
                         	<map dest="mass" src="bestmass"/>
-                        	<map dest="mass_source_idref" src="bestmass_url"/>
-                        	<var key="object_idref">"PLANET-%s"%@id</var> 
+                        	<map dest="mass_source_idref"
+                        	 src="bestmass_source_idref"/>
+                        	<var key="object_idref">"P%s"%@id</var> 
                         </rowmaker>
                 </make>       
                                        		
@@ -158,50 +195,6 @@
                 </make>                           		
 	</data>	 
 	
-	<table id="source" onDisk="True" adql="True">
-		<meta name="title">Source Table</meta>
-		<meta name="description">
-		A list of all the sources for the parameters in the other
-		 tables.</meta>
-		<primary>source_id</primary>
-                <column name="source_id" type="text"
-                        ucd="meta.record;meta.id"
-                        tablehead="source_id"
-                        description="Source identifier."
-                        required="True"
-                        verbLevel="1"/>
-                <column name="bibcode" type="text"
-                        ucd="meta.bib.bibcode"
-                        tablehead="bibcode"
-                        description="Bibcode"
-                        verbLevel="1"/> 
-                <column name="acquired_through" type="text"
-                        ucd="meta.record;meta.id"
-                        tablehead="acquired_through"
-                        description="By what source the parameter was acquired."
-                        required="True"
-                        verbLevel="1"/>
-                         
-        </table>
-        
-        <data id="import_source_table">
-        	<sources>data/source.fits</sources>
-		<!-- Data queried from SIMBAD:
-				SELECT DISTINCT * FROM (
-					SELECT TOP 10 coo_bibcode
-					FROM basic
-					WHERE basic.plx_value >=50.) AS subquery
-				JOIN ref ON bibcode=coo_bibcode -->
-		<fitsTableGrammar/>
-
-                <make table="source">  
-                	<rowmaker idmaps="*">
-                		<var key="acquired_through">"simbad"</var>  
-                		<map dest="source_id" src="coo_bibcode"/>
-                		<map dest="bibcode" src="coo_bibcode"/>
-                	</rowmaker>
-                </make>  
-        </data>
                                            
   
 	<service id="cone" allowed="form,scs.xml">
