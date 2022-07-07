@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.0
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE ID="result_1657192749528" name="result_1657192749528">
+   <FIELD ID="id" arraysize="*" datatype="char" name="id"/>
+   <FIELD ID="name" arraysize="*" datatype="char" name="name" ucd="meta.id">
+    <DESCRIPTION>
+     The name of the planet
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="bestmass" datatype="double" name="bestmass" ucd="phys.mass" unit="MJup">
+    <DESCRIPTION>
+     The most precise value between mass and minimum mass of the
+     planet in Jovian masses
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="bestmass_source_idref" datatype="long" name="bestmass_source_idref"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>0</TD>
+      <TD>6 Lyn b</TD>
+      <TD>2.01</TD>
+      <TD>12</TD>
+     </TR>
+     <TR>
+      <TD>1</TD>
+      <TD>8 UMi b</TD>
+      <TD>1.31</TD>
+      <TD>11</TD>
+     </TR>
+     <TR>
+      <TD>2</TD>
+      <TD>11 Com b</TD>
+      <TD>19.4</TD>
+      <TD>5</TD>
+     </TR>
+     <TR>
+      <TD>3</TD>
+      <TD>11 UMi b</TD>
+      <TD>11.2</TD>
+      <TD>4</TD>
+     </TR>
+     <TR>
+      <TD>4</TD>
+      <TD>14 And b</TD>
+      <TD>5.33</TD>
+      <TD>3</TD>
+     </TR>
+     <TR>
+      <TD>5</TD>
+      <TD>14 Her b</TD>
+      <TD>4.66</TD>
+      <TD>11</TD>
+     </TR>
+     <TR>
+      <TD>6</TD>
+      <TD>16 Cyg B b</TD>
+      <TD>1.77</TD>
+      <TD>4</TD>
+     </TR>
+     <TR>
+      <TD>7</TD>
+      <TD>18 del b</TD>
+      <TD/>
+      <TD>6</TD>
+     </TR>
+     <TR>
+      <TD>8</TD>
+      <TD>HD 134987 b</TD>
+      <TD>1.59</TD>
+      <TD>3</TD>
+     </TR>
+     <TR>
+      <TD>9</TD>
+      <TD>HD 134987 c</TD>
+      <TD>0.82</TD>
+      <TD>9</TD>
+     </TR>
+     <TR>
+      <TD>10</TD>
+      <TD>24 Sex b</TD>
+      <TD>1.99</TD>
+      <TD>10</TD>
+     </TR>
+     <TR>
+      <TD>11</TD>
+      <TD>24 Sex c</TD>
+      <TD>0.86</TD>
+      <TD>10</TD>
+     </TR>
+     <TR>
+      <TD>12</TD>
+      <TD>30 Ari B b</TD>
+      <TD>9.88</TD>
+      <TD>3</TD>
+     </TR>
+     <TR>
+      <TD>13</TD>
+      <TD>HD 113996 b</TD>
+      <TD>6.3</TD>
+      <TD>4</TD>
+     </TR>
+     <TR>
+      <TD>14</TD>
+      <TD>HD 81688 b</TD>
+      <TD>1.77</TD>
+      <TD>3</TD>
+     </TR>
+     <TR>
+      <TD>15</TD>
+      <TD>42 Dra b</TD>
+      <TD>3.88</TD>
+      <TD>7</TD>
+     </TR>
+     <TR>
+      <TD>16</TD>
+      <TD>47 UMa b</TD>
+      <TD>2.53</TD>
+      <TD>8</TD>
+     </TR>
+     <TR>
+      <TD>34</TD>
+      <TD>bet Pic b</TD>
+      <TD>11</TD>
+      <TD>2</TD>
+     </TR>
+     <TR>
+      <TD>17</TD>
+      <TD>47 UMa c</TD>
+      <TD>0.54</TD>
+      <TD>8</TD>
+     </TR>
+     <TR>
+      <TD>18</TD>
+      <TD>51 Eri b</TD>
+      <TD>2.6</TD>
+      <TD>3</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>
