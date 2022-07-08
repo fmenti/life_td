@@ -12,88 +12,102 @@
    <DATA>
     <TABLEDATA>
      <TR>
-      <TD>2020yCat.1350....0G</TD>
+      <TD>2007A&amp;A...474..653V</TD>
       <TD>SIMBAD</TD>
       <TD>http://simbad.u-strasbg.fr:80/simbad/sim-tap</TD>
       <TD>2000A&amp;AS..143....9W</TD>
       <TD>1</TD>
      </TR>
      <TR>
-      <TD>2018arXiv180806257S</TD>
-      <TD>Exo-MerCat</TD>
-      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
-      <TD>2020A&amp;C....3100370A</TD>
+      <TD>2018yCat.1345....0G</TD>
+      <TD>SIMBAD</TD>
+      <TD>http://simbad.u-strasbg.fr:80/simbad/sim-tap</TD>
+      <TD>2000A&amp;AS..143....9W</TD>
       <TD>2</TD>
      </TR>
      <TR>
-      <TD>EU</TD>
-      <TD>Exo-MerCat</TD>
-      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
-      <TD>2020A&amp;C....3100370A</TD>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>SIMBAD</TD>
+      <TD>http://simbad.u-strasbg.fr:80/simbad/sim-tap</TD>
+      <TD>2000A&amp;AS..143....9W</TD>
       <TD>3</TD>
      </TR>
      <TR>
-      <TD>OEC</TD>
+      <TD>2018arXiv180806257S</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>4</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2008ApJ...672..553L/abstract</TD>
+      <TD>EU</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>5</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2008PASJ...60..539S/abstract</TD>
+      <TD>OEC</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>6</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2009A&amp;A...499..935D/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2008ApJ...672..553L/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>7</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2008PASJ...60..539S/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>8</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403.1703J/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2009A&amp;A...499..935D/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>9</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010arXiv1007.4552J/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>10</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403.1703J/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>11</TD>
      </TR>
      <TR>
-      <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157..149L/abstract</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010arXiv1007.4552J/abstract</TD>
       <TD>Exo-MerCat</TD>
       <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
       <TD>2020A&amp;C....3100370A</TD>
       <TD>12</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>13</TD>
+     </TR>
+     <TR>
+      <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157..149L/abstract</TD>
+      <TD>Exo-MerCat</TD>
+      <TD>http://archives.ia2.inaf.it/vo/tap/projects</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+      <TD>14</TD>
      </TR>
     </TABLEDATA>
    </DATA>
