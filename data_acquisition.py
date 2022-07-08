@@ -41,7 +41,7 @@ def idref(cat,oldcolnames,newcolnames):
 #defining quantities
 adql_query=[
 """
-SELECT TOP 10 main_id,ra,dec,oid, coo_bibcode, plx_bibcode
+SELECT TOP 20 main_id,ra,dec,oid, coo_bibcode, plx_err, plx_value, plx_bibcode
 FROM basic
 WHERE basic.plx_value >=50.
 """,
@@ -56,6 +56,11 @@ ref_columns=[['coo_bibcode','plx_bibcode'],['bestmass_url']]
 new_columns=[['coord','plx'],['bestmass']]
 provider_name=['SIMBAD','Exo-MerCat']
 provider_bibcode=['2000A&AS..143....9W','2020A&C....3100370A']
+
+#disk data
+disks=ap.io.votable.parse_single_table("data/disks.xml").to_table()
+disks['object_idref']=[i for i in range(len(disks))]
+save(disks,'data/disks')
 
 #initializing tables
 catalog = [ap.table.Table() for i in range(len(catalog_names))]
@@ -83,4 +88,5 @@ save(sources,'data/sources')
 #do the same for the stars and the planets tables
 for i in range(len(catalog_names)):
     catalog[i]=idref(catalog[i][:],ref_columns[i],new_columns[i])
+    catalog[i]['object_idref']=[j for j in range(len(catalog[i]))]
     save(catalog[i],'data/'+catalog_names[i])
