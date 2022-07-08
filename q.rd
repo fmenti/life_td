@@ -170,6 +170,49 @@
                                        		
 	</data>	
 
+	<table id="disk_basic" onDisk="True" adql="True">
+		<meta name="title">Basic disk parameters</meta>
+		<meta name="description">
+		A list of all basic disk parameters.</meta>
+		<primary>object_idref</primary>
+		<!-- <foreignKey source="mass_source_idref" inTable="source"
+                        dest="source_id" /> -->
+                <column name="object_idref" type="text"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_idref"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+		<column name="radius" type="double precision"
+			ucd="phys.siye.radius"  
+			tablehead="radius" 
+			description="Black body radius." 
+			verbLevel="1"/>
+		<column name="radius_error" type="text"
+                        ucd="meta.record;meta.id"
+                        tablehead="radius_error"
+                        description="Uncertainty of the radius parameter."
+                        verbLevel="1"/>	
+	</table>
+    
+	<data id="import_disk_basic_table">
+		<sources>data/disk.fits</sources>
+		<!--	Data acquired through personal communication with 
+		Grant Kennedy -->
+		<fitsTableGrammar/>
+
+		<make table="disk_basic">
+                        <rowmaker idmaps="*">
+                        	<map dest="radius">
+                        		parseWithNull(@rdisk_bb,float,"None")</map>
+                        	<map dest="radius_error"
+                        	 src="e_rdisk_bb"/>
+                        	<var key="object_idref">"D%s"%@id</var>
+                        	<!-- <var key="object_idref">"D%s"%@id</var> -->
+                        </rowmaker>
+                </make>       
+                                       		
+	</data>	
 
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
@@ -185,7 +228,10 @@
         					FROM \schema.star_basic) as subquery1
         				UNION
         				(SELECT object_idref as object_id
-        					FROM \schema.planet_basic))
+        					FROM \schema.planet_basic)
+        				UNION
+        				(SELECT object_idref as object_id
+        					FROM \schema.disk_basic))
         	</viewStatement> 
         </table> 
        
