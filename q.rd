@@ -104,6 +104,16 @@
                         to the position (coord) parameters."
                         required="True"
                         verbLevel="1"/>
+                <column name="plx_value" type="text"
+                        ucd="pos.parallax"
+                        tablehead="plx_value"
+                        description="Parallax value."
+                        verbLevel="1"/>
+                <column name="plx_err" type="text"
+                        ucd="pos.parallax"
+                        tablehead="plx_err"
+                        description="Parallax uncertainty."
+                        verbLevel="1"/>
                 <column name="plx_source_idref" type="text"
                         ucd="meta.record;meta.id"
                         tablehead="plx_source_id"
@@ -120,7 +130,7 @@
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<var key="object_idref">"S%s"%@oid</var>
+                        	<var key="object_idref">"S%s"%@object_idref</var>
                         	<map dest="coord_ra" src="ra"/>
                         	<map dest="coord_dec" src="dec"/>
                         </rowmaker>
@@ -164,7 +174,7 @@
                         	<map dest="mass" src="bestmass"/>
                         	<map dest="mass_source_idref"
                         	 src="bestmass_source_idref"/>
-                        	<var key="object_idref">"P%s"%@id</var> 
+                        	<var key="object_idref">"P%s"%@object_idref</var> 
                         </rowmaker>
                 </make>       
                                        		
@@ -196,10 +206,10 @@
 	</table>
     
 	<data id="import_disk_basic_table">
-		<sources>data/disk.fits</sources>
+		<sources>data/disks.xml</sources>
 		<!--	Data acquired through personal communication with 
 		Grant Kennedy -->
-		<fitsTableGrammar/>
+		<voTableGrammar/>
 
 		<make table="disk_basic">
                         <rowmaker idmaps="*">
@@ -207,7 +217,7 @@
                         		parseWithNull(@rdisk_bb,float,"None")</map>
                         	<map dest="radius_error"
                         	 src="e_rdisk_bb"/>
-                        	<var key="object_idref">"D%s"%@id</var>
+                        	<var key="object_idref">"D%s"%@object_idref</var>
                         	<!-- <var key="object_idref">"D%s"%@id</var> -->
                         </rowmaker>
                 </make>       
@@ -260,3 +270,4 @@
 		</regTest>
 	</regSuite>
 </resource>
+
