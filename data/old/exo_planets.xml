@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.0
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE ID="result_1660139705951" name="result_1660139705951">
+   <FIELD ID="host_main_id" arraysize="*" datatype="char" name="host_main_id" ucd="meta.id;meta.main">
+    <DESCRIPTION>
+     Main identifier for an object
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="parent_oid" datatype="long" name="parent_oid" ucd="meta.record;meta.id">
+    <DESCRIPTION>
+     Object internal identifier
+    </DESCRIPTION>
+    <VALUES null="-9223372036854775808"/>
+   </FIELD>
+   <FIELD ID="id" arraysize="*" datatype="char" name="id" ucd="meta.id">
+    <DESCRIPTION>
+     The name of the planet
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="bestmass" datatype="double" name="bestmass" ucd="phys.mass" unit="MJup">
+    <DESCRIPTION>
+     The most precise value between mass and minimum mass of the
+     planet in Jovian masses
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="bestmass_url" arraysize="*" datatype="char" name="bestmass_url" ucd="meta.bib.bibcode">
+    <DESCRIPTION>
+     The bibcode of the reference paper in which the mass/minimum mass
+     value first appeared
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="host" arraysize="*" datatype="char" name="host">
+    <DESCRIPTION>
+     The name of the host star
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="alias" arraysize="*" datatype="char" name="alias" ucd="meta.id">
+    <DESCRIPTION>
+     Known aliases for the host star.
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="parent_object_idref" arraysize="5" datatype="unicodeChar" name="parent_object_idref"/>
+   <FIELD ID="main_id" arraysize="*" datatype="char" name="main_id" ucd="meta.id;meta.main">
+    <DESCRIPTION>
+     Main identifier for an object
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="oid" datatype="long" name="oid" ucd="meta.record;meta.id">
+    <DESCRIPTION>
+     Object internal identifier
+    </DESCRIPTION>
+    <VALUES null="-9223372036854775808"/>
+   </FIELD>
+   <FIELD ID="object_idref" arraysize="5" datatype="unicodeChar" name="object_idref"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>*  14 Her</TD>
+      <TD>470988</TD>
+      <TD>14 Her b</TD>
+      <TD>4.66</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
+      <TD>14 Her</TD>
+      <TD>HIP 79248,HD 145675,HD 145675,HIP 79248,TYC 3067-576-1,SAO 45933,Gliese 614,GJ 614,BD+44 2549,2MASS J16102432+4349037,Gaia DR2 1385293808145621504</TD>
+      <TD>S0313</TD>
+      <TD>*  14 Her b</TD>
+      <TD>470799</TD>
+      <TD>P0001</TD>
+     </TR>
+     <TR>
+      <TD>*  47 UMa</TD>
+      <TD>1763141</TD>
+      <TD>47 UMa b</TD>
+      <TD>2.53</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
+      <TD>47 UMa</TD>
+      <TD>HIP 53721,HD 95128,HR 4277,47 Ursae Majoris,HD 95128,HIP 53721,TYC 3009-2703-1,SAO 43557,HR 4277,Gliese 407,GJ 407,BD+41 2147,2MASS J10592802+4025485,Chalawan,Gaia DR2 777254360337133312</TD>
+      <TD>S1192</TD>
+      <TD>*  47 UMa b</TD>
+      <TD>1762637</TD>
+      <TD>P0002</TD>
+     </TR>
+     <TR>
+      <TD>*  47 UMa</TD>
+      <TD>1763141</TD>
+      <TD>47 UMa c</TD>
+      <TD>0.54</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
+      <TD>47 UMa</TD>
+      <TD>HIP 53721,HD 95128,HR 4277,47 Ursae Majoris,HD 95128,HIP 53721,TYC 3009-2703-1,SAO 43557,HR 4277,Gliese 407,GJ 407,BD+41 2147,2MASS J10592802+4025485,Chalawan,Gaia DR2 777254360337133312</TD>
+      <TD>S1192</TD>
+      <TD>*  47 UMa c</TD>
+      <TD>1763121</TD>
+      <TD>P0003</TD>
+     </TR>
+     <TR>
+      <TD>* bet Pic</TD>
+      <TD>2997572</TD>
+      <TD>bet Pic b</TD>
+      <TD>11</TD>
+      <TD>2018arXiv180806257S</TD>
+      <TD>bet Pic</TD>
+      <TD>HIP 27321,HD 39060,HR 2020,beta Pi,bet Pi,bet Pi,beta Pi,bet Pi,HD 39060,HIP 27321,TYC 8099-1392-1,GJ 219,GJ 219.0,Gaia DR2 4792774797545105664</TD>
+      <TD>S1894</TD>
+      <TD>* bet Pic b</TD>
+      <TD>3694116</TD>
+      <TD>P0004</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

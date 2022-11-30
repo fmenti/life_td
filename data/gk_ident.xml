@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.1
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE ID="result_1668168568921" name="result_1668168568921">
+   <FIELD ID="main_id" arraysize="26" datatype="char" name="main_id"/>
+   <FIELD ID="id" arraysize="26" datatype="char" name="id"/>
+   <FIELD ID="id_ref" arraysize="13" datatype="char" name="id_ref"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>sdb-v2-000910.69+590859.2</TD>
+      <TD>sdb-v2-000910.69+590859.2</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-003921.81+211501.7</TD>
+      <TD>sdb-v2-003921.81+211501.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-004906.29+574854.7</TD>
+      <TD>sdb-v2-004906.29+574854.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-013647.84+412419.6</TD>
+      <TD>sdb-v2-013647.84+412419.6</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-014229.76+201606.7</TD>
+      <TD>sdb-v2-014229.76+201606.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-014404.08-155614.9</TD>
+      <TD>sdb-v2-014404.08-155614.9</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-024411.99+491342.4</TD>
+      <TD>sdb-v2-024411.99+491342.4</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-033255.84-092729.7a</TD>
+      <TD>sdb-v2-033255.84-092729.7a</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-033255.84-092729.7b</TD>
+      <TD>sdb-v2-033255.84-092729.7b</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-033652.14+002358.5</TD>
+      <TD>sdb-v2-033652.14+002358.5</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-044950.41+065740.6</TD>
+      <TD>sdb-v2-044950.41+065740.6</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-055624.29-141003.7</TD>
+      <TD>sdb-v2-055624.29-141003.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-064517.36+125344.1</TD>
+      <TD>sdb-v2-064517.36+125344.1</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-081823.95-123755.8</TD>
+      <TD>sdb-v2-081823.95-123755.8</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-111406.50+203125.4</TD>
+      <TD>sdb-v2-111406.50+203125.4</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-114903.58+143419.4</TD>
+      <TD>sdb-v2-114903.58+143419.4</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-115041.72+014553.0</TD>
+      <TD>sdb-v2-115041.72+014553.0</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-123204.23-161145.6a</TD>
+      <TD>sdb-v2-123204.23-161145.6a</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-123204.23-161145.6b</TD>
+      <TD>sdb-v2-123204.23-161145.6b</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-132825.81+134643.6</TD>
+      <TD>sdb-v2-132825.81+134643.6</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-143440.82+294442.5</TD>
+      <TD>sdb-v2-143440.82+294442.5</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-145123.38+190601.7</TD>
+      <TD>sdb-v2-145123.38+190601.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-154626.62+072111.0</TD>
+      <TD>sdb-v2-154626.62+072111.0</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-155240.54+422705.5</TD>
+      <TD>sdb-v2-155240.54+422705.5</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-155627.18+153941.8</TD>
+      <TD>sdb-v2-155627.18+153941.8</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-174627.51+274314.4</TD>
+      <TD>sdb-v2-174627.51+274314.4</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-183656.34+384701.3</TD>
+      <TD>sdb-v2-183656.34+384701.3</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-184539.73+203246.7</TD>
+      <TD>sdb-v2-184539.73+203246.7</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-193221.59+693940.2</TD>
+      <TD>sdb-v2-193221.59+693940.2</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-195047.00+085206.0</TD>
+      <TD>sdb-v2-195047.00+085206.0</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-210653.94+384457.9</TD>
+      <TD>sdb-v2-210653.94+384457.9</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-210655.26+384431.4</TD>
+      <TD>sdb-v2-210655.26+384431.4</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+     <TR>
+      <TD>sdb-v2-211834.77+623508.1</TD>
+      <TD>sdb-v2-211834.77+623508.1</TD>
+      <TD>Grant Kennedy</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

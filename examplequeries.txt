@@ -1,0 +1,74 @@
+SELECT object_id, coord_ra, coord_dec, plx_value
+FROM star_basic
+JOIN object ON object_id=object_idref
+WHERE type="st";
+
+show all children of object with identifier  '* alf Cen':
+SELECT object_id as Child
+FROM h_link 
+JOIN ident as p on p.object_idref=parent_object_idref
+JOIN objects on object_id=child_object_idref
+WHERE p.id = '* alf Cen'; 
+
+show all parents of object with identifier  '* alf Cen':
+SELECT object_id as Parent
+FROM h_link
+JOIN ident as c on c.object_idref=child_object_idref
+JOIN objects on object_id=parent_object_idref
+WHERE c.id =  '* alf Cen';
+
+show all siblings of object with identifier  '* alf Cen':
+SELECT DISTINCT(object_id) 
+FROM 
+	(SELECT parent_object_idref AS object_id, membership, child_object_idref AS myself
+	FROM h_link
+	JOIN indent ON child_object_idref=object_idref
+	WHERE id='* alf Cen')
+AS parents
+JOIN h_link ON parent_object_idref=parents.object_id
+JOIN objects ON objects.object_id=child_object_idref
+WHERE (h_link.membership >=95 OR h_link.membership IS NULL) AND 
+(parents.membership >=95 OR parents.membership IS NULL) AND object.object_id != parents.myself
+
+SELECT object_id
+FROM object
+(WHERE type="st")
+
+missing:
+SELECT object_id
+FROM objects
+JOIN star_basic ON object_id=object_idref
+WHERE plx.value='NULL' OR plx.quality IN ('D','E');
+
+moredata:
+SELECT *
+FROM mesDist
+JOIN ident USING(object_idref)
+WHERE id = ' Gaia EDR3 6366571314402539008';
+
+datalist:
+SELECT *
+FROM star_basic
+
+SELECT *
+FROM star_basic 
+JOIN ident USING(object_idref)
+WHERE id = '* alf Cen';
+
+SELECT  *
+FROM star_basic
+JOIN object ON object_id=object_idref
+WHERE type='st' AND plx_value > 50 ;
+
+nondetections: 
+
+SELECT  count(*)
+FROM h_link
+JOIN ident as p on p.object_idref=parent_object_idref
+JOIN objects on object_id=child_object_idref
+WHERE p.id = '* alf Cen' and type='pl;
+
+SELECT *
+FROM planet_basic
+JOIN ident USING(oidref)
+WHERE id = ' Proxima b';

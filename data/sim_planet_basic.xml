@@ -1,0 +1,876 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.0
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE>
+   <FIELD ID="main_id" arraysize="31" datatype="char" name="main_id" ucd="meta.id;meta.main">
+    <DESCRIPTION>
+     Main identifier for an object
+    </DESCRIPTION>
+   </FIELD>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>*  14 Her b</TD>
+     </TR>
+     <TR>
+      <TD>*  47 UMa b</TD>
+     </TR>
+     <TR>
+      <TD>*  47 UMa c</TD>
+     </TR>
+     <TR>
+      <TD>*  47 UMa d</TD>
+     </TR>
+     <TR>
+      <TD>*  51 Peg b</TD>
+     </TR>
+     <TR>
+      <TD>*  54 Psc b</TD>
+     </TR>
+     <TR>
+      <TD>*  54 Psc c</TD>
+     </TR>
+     <TR>
+      <TD>*  61 Vir b</TD>
+     </TR>
+     <TR>
+      <TD>*  61 Vir c</TD>
+     </TR>
+     <TR>
+      <TD>*  61 Vir d</TD>
+     </TR>
+     <TR>
+      <TD>*  70 Vir b</TD>
+     </TR>
+     <TR>
+      <TD>*  83 Leo Bb</TD>
+     </TR>
+     <TR>
+      <TD>*  83 Leo Bc</TD>
+     </TR>
+     <TR>
+      <TD>* alf PsA b</TD>
+     </TR>
+     <TR>
+      <TD>* bet Gem b</TD>
+     </TR>
+     <TR>
+      <TD>* bet Pic b</TD>
+     </TR>
+     <TR>
+      <TD>* bet Pic c</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri b</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri c</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri d</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri e</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri f</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri g</TD>
+     </TR>
+     <TR>
+      <TD>* e Vir b</TD>
+     </TR>
+     <TR>
+      <TD>* eps Eri b</TD>
+     </TR>
+     <TR>
+      <TD>* eps Eri c</TD>
+     </TR>
+     <TR>
+      <TD>* eps Ind b</TD>
+     </TR>
+     <TR>
+      <TD>* eps Ret b</TD>
+     </TR>
+     <TR>
+      <TD>* gam Cep b</TD>
+     </TR>
+     <TR>
+      <TD>* iot Hor b</TD>
+     </TR>
+     <TR>
+      <TD>* ksi UMa Bb</TD>
+     </TR>
+     <TR>
+      <TD>* mu. Ara b</TD>
+     </TR>
+     <TR>
+      <TD>* mu. Ara c</TD>
+     </TR>
+     <TR>
+      <TD>* mu. Ara d</TD>
+     </TR>
+     <TR>
+      <TD>* mu. Ara e</TD>
+     </TR>
+     <TR>
+      <TD>* nu. Oct b</TD>
+     </TR>
+     <TR>
+      <TD>* nu.02 CMa b</TD>
+     </TR>
+     <TR>
+      <TD>* nu.02 CMa c</TD>
+     </TR>
+     <TR>
+      <TD>* nu.02 Lup b</TD>
+     </TR>
+     <TR>
+      <TD>* nu.02 Lup c</TD>
+     </TR>
+     <TR>
+      <TD>* nu.02 Lup d</TD>
+     </TR>
+     <TR>
+      <TD>* omi02 Eri b</TD>
+     </TR>
+     <TR>
+      <TD>* pi. Men b</TD>
+     </TR>
+     <TR>
+      <TD>* pi. Men c</TD>
+     </TR>
+     <TR>
+      <TD>* q01 Eri b</TD>
+     </TR>
+     <TR>
+      <TD>* rho CrB b</TD>
+     </TR>
+     <TR>
+      <TD>* rho CrB c</TD>
+     </TR>
+     <TR>
+      <TD>* rho01 Cnc b</TD>
+     </TR>
+     <TR>
+      <TD>* rho01 Cnc c</TD>
+     </TR>
+     <TR>
+      <TD>* rho01 Cnc d</TD>
+     </TR>
+     <TR>
+      <TD>* rho01 Cnc e</TD>
+     </TR>
+     <TR>
+      <TD>* rho01 Cnc f</TD>
+     </TR>
+     <TR>
+      <TD>* tau Boo b</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet b</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet c</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet d</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet e</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet f</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet g</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet h</TD>
+     </TR>
+     <TR>
+      <TD>* ups And b</TD>
+     </TR>
+     <TR>
+      <TD>* ups And c</TD>
+     </TR>
+     <TR>
+      <TD>* ups And d</TD>
+     </TR>
+     <TR>
+      <TD>* ups And e</TD>
+     </TR>
+     <TR>
+      <TD>BD+05  1668b</TD>
+     </TR>
+     <TR>
+      <TD>BD+05  1668c</TD>
+     </TR>
+     <TR>
+      <TD>BD+11  3149b</TD>
+     </TR>
+     <TR>
+      <TD>BD+11  3149c</TD>
+     </TR>
+     <TR>
+      <TD>BD+18  3421b</TD>
+     </TR>
+     <TR>
+      <TD>BD+25  3173b</TD>
+     </TR>
+     <TR>
+      <TD>BD+47   612b</TD>
+     </TR>
+     <TR>
+      <TD>BD+48  1829b</TD>
+     </TR>
+     <TR>
+      <TD>BD+61   195b</TD>
+     </TR>
+     <TR>
+      <TD>BD+68   946b</TD>
+     </TR>
+     <TR>
+      <TD>BD-05  5715b</TD>
+     </TR>
+     <TR>
+      <TD>BD-05  5715c</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003b</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003c</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003d</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003e</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003f</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003g</TD>
+     </TR>
+     <TR>
+      <TD>BD-12  4523b</TD>
+     </TR>
+     <TR>
+      <TD>BD-12  4523c</TD>
+     </TR>
+     <TR>
+      <TD>BD-12  4523d</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290b</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290c</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290d</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290e</TD>
+     </TR>
+     <TR>
+      <TD>BD-18  3106b</TD>
+     </TR>
+     <TR>
+      <TD>BD-18  3106c</TD>
+     </TR>
+     <TR>
+      <TD>CD-31  9113b</TD>
+     </TR>
+     <TR>
+      <TD>CD-31  9113c</TD>
+     </TR>
+     <TR>
+      <TD>CD-31  9113d</TD>
+     </TR>
+     <TR>
+      <TD>CD-44 11909b</TD>
+     </TR>
+     <TR>
+      <TD>CD-44 11909c</TD>
+     </TR>
+     <TR>
+      <TD>CD-46 11540b</TD>
+     </TR>
+     <TR>
+      <TD>CD-51 10924b</TD>
+     </TR>
+     <TR>
+      <TD>CD-51 10924c</TD>
+     </TR>
+     <TR>
+      <TD>CD-51 10924d</TD>
+     </TR>
+     <TR>
+      <TD>CD-51 10924e</TD>
+     </TR>
+     <TR>
+      <TD>CD-54   269b</TD>
+     </TR>
+     <TR>
+      <TD>GJ    15 Ab</TD>
+     </TR>
+     <TR>
+      <TD>GJ    15 Ac</TD>
+     </TR>
+     <TR>
+      <TD>GJ   173 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   251 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   273 d</TD>
+     </TR>
+     <TR>
+      <TD>GJ   273 e</TD>
+     </TR>
+     <TR>
+      <TD>GJ   357 e</TD>
+     </TR>
+     <TR>
+      <TD>GJ   411 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ   414 Ab</TD>
+     </TR>
+     <TR>
+      <TD>GJ   414 Ac</TD>
+     </TR>
+     <TR>
+      <TD>GJ   480 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   620 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   620 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ   687 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ   699 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   720 Ab</TD>
+     </TR>
+     <TR>
+      <TD>GJ   739 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ   739 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ   740 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ  3512 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ  3512 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ  3779 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ  3942 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ  3942 c</TD>
+     </TR>
+     <TR>
+      <TD>GJ  9066 b</TD>
+     </TR>
+     <TR>
+      <TD>GJ  9066 c</TD>
+     </TR>
+     <TR>
+      <TD>HD   1237b</TD>
+     </TR>
+     <TR>
+      <TD>HD   4747b</TD>
+     </TR>
+     <TR>
+      <TD>HD   7924b</TD>
+     </TR>
+     <TR>
+      <TD>HD   7924c</TD>
+     </TR>
+     <TR>
+      <TD>HD   7924d</TD>
+     </TR>
+     <TR>
+      <TD>HD  13445b</TD>
+     </TR>
+     <TR>
+      <TD>HD  21749b</TD>
+     </TR>
+     <TR>
+      <TD>HD  21749c</TD>
+     </TR>
+     <TR>
+      <TD>HD  33793b</TD>
+     </TR>
+     <TR>
+      <TD>HD  33793c</TD>
+     </TR>
+     <TR>
+      <TD>HD  38858b</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307b</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307c</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307d</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307e</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307f</TD>
+     </TR>
+     <TR>
+      <TD>HD  40307g</TD>
+     </TR>
+     <TR>
+      <TD>HD  42581b</TD>
+     </TR>
+     <TR>
+      <TD>HD  42581c</TD>
+     </TR>
+     <TR>
+      <TD>HD  69830b</TD>
+     </TR>
+     <TR>
+      <TD>HD  69830c</TD>
+     </TR>
+     <TR>
+      <TD>HD  69830d</TD>
+     </TR>
+     <TR>
+      <TD>HD  85512b</TD>
+     </TR>
+     <TR>
+      <TD>HD  87883b</TD>
+     </TR>
+     <TR>
+      <TD>HD  95735b</TD>
+     </TR>
+     <TR>
+      <TD>HD 102365b</TD>
+     </TR>
+     <TR>
+      <TD>HD 113538b</TD>
+     </TR>
+     <TR>
+      <TD>HD 113538c</TD>
+     </TR>
+     <TR>
+      <TD>HD 122303b</TD>
+     </TR>
+     <TR>
+      <TD>HD 128311b</TD>
+     </TR>
+     <TR>
+      <TD>HD 128311c</TD>
+     </TR>
+     <TR>
+      <TD>HD 128311d</TD>
+     </TR>
+     <TR>
+      <TD>HD 131977b</TD>
+     </TR>
+     <TR>
+      <TD>HD 145675c</TD>
+     </TR>
+     <TR>
+      <TD>HD 147379b</TD>
+     </TR>
+     <TR>
+      <TD>HD 147379c</TD>
+     </TR>
+     <TR>
+      <TD>HD 147513b</TD>
+     </TR>
+     <TR>
+      <TD>HD 154088b</TD>
+     </TR>
+     <TR>
+      <TD>HD 154345b</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Cb</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Cc</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Cd</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Ce</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Cf</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Cg</TD>
+     </TR>
+     <TR>
+      <TD>HD 156384Ch</TD>
+     </TR>
+     <TR>
+      <TD>HD 176051b</TD>
+     </TR>
+     <TR>
+      <TD>HD 177565b</TD>
+     </TR>
+     <TR>
+      <TD>HD 180617b</TD>
+     </TR>
+     <TR>
+      <TD>HD 189567b</TD>
+     </TR>
+     <TR>
+      <TD>HD 189733b</TD>
+     </TR>
+     <TR>
+      <TD>HD 190007b</TD>
+     </TR>
+     <TR>
+      <TD>HD 190007c</TD>
+     </TR>
+     <TR>
+      <TD>HD 190360b</TD>
+     </TR>
+     <TR>
+      <TD>HD 190360c</TD>
+     </TR>
+     <TR>
+      <TD>HD 192263b</TD>
+     </TR>
+     <TR>
+      <TD>HD 192310b</TD>
+     </TR>
+     <TR>
+      <TD>HD 192310c</TD>
+     </TR>
+     <TR>
+      <TD>HD 204961b</TD>
+     </TR>
+     <TR>
+      <TD>HD 204961c</TD>
+     </TR>
+     <TR>
+      <TD>HD 211970b</TD>
+     </TR>
+     <TR>
+      <TD>HD 216520b</TD>
+     </TR>
+     <TR>
+      <TD>HD 216520c</TD>
+     </TR>
+     <TR>
+      <TD>HD 217987b</TD>
+     </TR>
+     <TR>
+      <TD>HD 217987c</TD>
+     </TR>
+     <TR>
+      <TD>HD 217987d</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134b</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134c</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134d</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134e</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134f</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134g</TD>
+     </TR>
+     <TR>
+      <TD>HD 219134h</TD>
+     </TR>
+     <TR>
+      <TD>HD 283750b</TD>
+     </TR>
+     <TR>
+      <TD>HD 285968b</TD>
+     </TR>
+     <TR>
+      <TD>HD 304043b</TD>
+     </TR>
+     <TR>
+      <TD>LHS  1478b</TD>
+     </TR>
+     <TR>
+      <TD>LHS  1678b</TD>
+     </TR>
+     <TR>
+      <TD>LHS  1678c</TD>
+     </TR>
+     <TR>
+      <TD>LSPM J2116+0234b</TD>
+     </TR>
+     <TR>
+      <TD>NAME AU Mic b</TD>
+     </TR>
+     <TR>
+      <TD>NAME AU Mic c</TD>
+     </TR>
+     <TR>
+      <TD>NAME BD-17 588Ab</TD>
+     </TR>
+     <TR>
+      <TD>NAME BD-17 588Ac</TD>
+     </TR>
+     <TR>
+      <TD>NAME CD Cet b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 139-21b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 202-48b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 226-66b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 264-012 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 264-012 c</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 268-38b</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 268-38c</TD>
+     </TR>
+     <TR>
+      <TD>NAME G 268-38d</TD>
+     </TR>
+     <TR>
+      <TD>NAME GJ 393 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME HIP 38594 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME HIP 38594 c</TD>
+     </TR>
+     <TR>
+      <TD>NAME HIP 48714 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME HIP 60559 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME HIP 67164 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 119-213b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 229-91b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 229-91c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 229-91d</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 320-124b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 320-124c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 372-58b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 372-58c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 372-58d</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 675-81b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 675-81c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 678-39b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 678-39c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 678-39d</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 736-30b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 736-30c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 736-30d</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 788-37b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 98-59 b</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 98-59 c</TD>
+     </TR>
+     <TR>
+      <TD>NAME L 98-59 d</TD>
+     </TR>
+     <TR>
+      <TD>NAME LP 656-38b</TD>
+     </TR>
+     <TR>
+      <TD>NAME LP 656-38c</TD>
+     </TR>
+     <TR>
+      <TD>NAME LP 804-27b</TD>
+     </TR>
+     <TR>
+      <TD>NAME Proxima Centauri b</TD>
+     </TR>
+     <TR>
+      <TD>NAME Proxima Centauri c</TD>
+     </TR>
+     <TR>
+      <TD>NAME Proxima d</TD>
+     </TR>
+     <TR>
+      <TD>NAME TVLM 513b</TD>
+     </TR>
+     <TR>
+      <TD>NAME Teegarden's Star b</TD>
+     </TR>
+     <TR>
+      <TD>NAME Teegarden's Star c</TD>
+     </TR>
+     <TR>
+      <TD>NAME WISEP J121756.91+162640.2b</TD>
+     </TR>
+     <TR>
+      <TD>NAME YZ Cet b</TD>
+     </TR>
+     <TR>
+      <TD>NAME YZ Cet c</TD>
+     </TR>
+     <TR>
+      <TD>NAME YZ Cet d</TD>
+     </TR>
+     <TR>
+      <TD>Ross  128b</TD>
+     </TR>
+     <TR>
+      <TD>Ross  905b</TD>
+     </TR>
+     <TR>
+      <TD>Ross  905c</TD>
+     </TR>
+     <TR>
+      <TD>Ross  905d</TD>
+     </TR>
+     <TR>
+      <TD>Ross 1003b</TD>
+     </TR>
+     <TR>
+      <TD>Ross 1003c</TD>
+     </TR>
+     <TR>
+      <TD>TOI-1827.01</TD>
+     </TR>
+     <TR>
+      <TD>TOI-486.01</TD>
+     </TR>
+     <TR>
+      <TD>TOI-540b</TD>
+     </TR>
+     <TR>
+      <TD>TOI-696.01</TD>
+     </TR>
+     <TR>
+      <TD>TOI-696.02</TD>
+     </TR>
+     <TR>
+      <TD>TOI-696.03</TD>
+     </TR>
+     <TR>
+      <TD>TOI-731.01</TD>
+     </TR>
+     <TR>
+      <TD>TOI-741.01</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1b</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1c</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1d</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1e</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1f</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1g</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1h</TD>
+     </TR>
+     <TR>
+      <TD>TRAPPIST-1i</TD>
+     </TR>
+     <TR>
+      <TD>Wolf  359b</TD>
+     </TR>
+     <TR>
+      <TD>Wolf  359c</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1539b</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

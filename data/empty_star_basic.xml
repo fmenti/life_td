@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.1
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
+ <RESOURCE type="results">
+  <TABLE>
+   <FIELD ID="object_idref" datatype="long" name="object_idref"/>
+   <FIELD ID="coo_ra" datatype="double" name="coo_ra"/>
+   <FIELD ID="coo_dec" datatype="double" name="coo_dec"/>
+   <FIELD ID="coo_err_angle" datatype="double" name="coo_err_angle"/>
+   <FIELD ID="coo_err_maj" datatype="double" name="coo_err_maj"/>
+   <FIELD ID="coo_err_min" datatype="double" name="coo_err_min"/>
+   <FIELD ID="coo_qual" arraysize="1" datatype="unicodeChar" name="coo_qual"/>
+   <FIELD ID="coo_source_idref" datatype="long" name="coo_source_idref"/>
+   <FIELD ID="coo_ref" arraysize="1" datatype="unicodeChar" name="coo_ref"/>
+   <FIELD ID="plx_value" datatype="double" name="plx_value"/>
+   <FIELD ID="plx_err" datatype="double" name="plx_err"/>
+   <FIELD ID="plx_qual" arraysize="1" datatype="unicodeChar" name="plx_qual"/>
+   <FIELD ID="plx_source_idref" datatype="long" name="plx_source_idref"/>
+   <FIELD ID="plx_ref" arraysize="1" datatype="unicodeChar" name="plx_ref"/>
+   <FIELD ID="dist_value" datatype="double" name="dist_value"/>
+   <FIELD ID="dist_err" datatype="double" name="dist_err"/>
+   <FIELD ID="dist_qual" arraysize="1" datatype="unicodeChar" name="dist_qual"/>
+   <FIELD ID="dist_source_idref" datatype="long" name="dist_source_idref"/>
+   <FIELD ID="dist_ref" arraysize="1" datatype="unicodeChar" name="dist_ref"/>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>
