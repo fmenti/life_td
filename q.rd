@@ -1,4 +1,4 @@
-<resource schema="lifetest">
+<resource schema="life">
 	<meta name="creationDate">2021-12-03T09:33:44Z</meta>
 
 	<meta name="title">The LIFE Target Star Database LIFETD</meta>
