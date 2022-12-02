@@ -1,74 +1,94 @@
-SELECT object_id, coord_ra, coord_dec, plx_value
-FROM star_basic
-JOIN object ON object_id=object_idref
-WHERE type="st";
+SELECT TOP 10 object_id, coo_ra, coo_dec, plx_value
+FROM lifetest.star_basic
+JOIN lifetest.object ON object_id=object_idref
+WHERE type='st'
+-> works
 
-show all children of object with identifier  '* alf Cen':
-SELECT object_id as Child
-FROM h_link 
-JOIN ident as p on p.object_idref=parent_object_idref
-JOIN objects on object_id=child_object_idref
-WHERE p.id = '* alf Cen'; 
+SELECT main_id as Child_main_id, object_id as child_object_id
+FROM lifetest.h_link 
+JOIN lifetest.ident as p on p.object_idref=parent_object_idref
+JOIN lifetest.object on object_id=child_object_idref
+WHERE p.id = '* alf Cen'
+-> worked 
 
-show all parents of object with identifier  '* alf Cen':
-SELECT object_id as Parent
-FROM h_link
-JOIN ident as c on c.object_idref=child_object_idref
-JOIN objects on object_id=parent_object_idref
-WHERE c.id =  '* alf Cen';
+show all parents of object with identifier  '* alf Cen A':
+SELECT main_id as arent_main_id, object_id as parent_object_id
+FROM lifetest.h_link
+JOIN lifetest.ident as c on c.object_idref=child_object_idref
+JOIN lifetest.object on object_id=parent_object_idref
+WHERE c.id =  '* alf Cen A'
+-> worked
 
-show all siblings of object with identifier  '* alf Cen':
+show all siblings of object with identifier  '* alf Cen A':
 SELECT DISTINCT(object_id) 
 FROM 
 	(SELECT parent_object_idref AS object_id, membership, child_object_idref AS myself
 	FROM h_link
 	JOIN indent ON child_object_idref=object_idref
-	WHERE id='* alf Cen')
+	WHERE id='* alf Cen A')
 AS parents
 JOIN h_link ON parent_object_idref=parents.object_id
 JOIN objects ON objects.object_id=child_object_idref
 WHERE (h_link.membership >=95 OR h_link.membership IS NULL) AND 
 (parents.membership >=95 OR parents.membership IS NULL) AND object.object_id != parents.myself
+-> need to solve membership null error
 
-SELECT object_id
-FROM object
-(WHERE type="st")
+SELECT TOP 10 object_id
+FROM lifetest.object
+WHERE type='st'
+-> works
 
 missing:
 SELECT object_id
 FROM objects
 JOIN star_basic ON object_id=object_idref
 WHERE plx.value='NULL' OR plx.quality IN ('D','E');
+->first need to get null value and quality working properly
 
 moredata:
 SELECT *
-FROM mesDist
-JOIN ident USING(object_idref)
-WHERE id = ' Gaia EDR3 6366571314402539008';
+FROM lifetest.mesDist
+JOIN lifetest.ident USING(object_idref)
+WHERE id = 'GJ    10'
+-> works... not any longer with Gaia EDR3 6366571314402539008 but does with GJ    10
 
 datalist:
-SELECT *
-FROM star_basic
+SELECT TOP 10 *
+FROM lifetest.star_basic
+-> works
 
 SELECT *
-FROM star_basic 
-JOIN ident USING(object_idref)
-WHERE id = '* alf Cen';
+FROM lifetest.star_basic 
+JOIN lifetest.ident USING(object_idref)
+WHERE id = '* alf Cen'
+-> works
 
 SELECT  *
-FROM star_basic
-JOIN object ON object_id=object_idref
-WHERE type='st' AND plx_value > 50 ;
+FROM lifetest.star_basic
+JOIN lifetest.object ON object_id=object_idref
+WHERE type='st' AND plx_value > 50
+-> works
 
 nondetections: 
-
+number of planetary children
 SELECT  count(*)
-FROM h_link
-JOIN ident as p on p.object_idref=parent_object_idref
-JOIN objects on object_id=child_object_idref
-WHERE p.id = '* alf Cen' and type='pl;
+FROM lifetest.h_link
+JOIN lifetest.ident as p on p.object_idref=parent_object_idref
+JOIN lifetest.object on object_id=child_object_idref
+WHERE p.id = '* alf Cen A' and type='pl'
 
 SELECT *
-FROM planet_basic
-JOIN ident USING(oidref)
-WHERE id = ' Proxima b';
+FROM lifetest.planet_basic
+JOIN lifetest.ident USING(object_idref)
+WHERE id = ' Proxima b'
+-> not working
+
+disk query
+SELECT main_id disk_main_id, object_id as disk_object_id, db.*
+FROM lifetest.h_link 
+JOIN lifetest.disk_basic as db on db.object_idref=child_object_idref
+JOIN lifetest.ident as p on p.object_idref=parent_object_idref
+JOIN lifetest.object on object_id=child_object_idref
+WHERE p.id = '* bet Cas' and type='di'
+-> works
+

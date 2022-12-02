@@ -29,7 +29,7 @@
 		A list of all the sources for the parameters in the other
 		 tables.</meta>
 		<primary>source_id</primary>
-                <column name="source_id" type="text"
+                <column name="source_id" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="source_id"
                         description="Source identifier."
@@ -43,7 +43,7 @@
                 <column name="provider_name" type="text"
                         ucd="meta.record;meta.id"
                         tablehead="provider_name"
-                        description="By what source the parameter was acquired."
+                        description="Parameter acquisition source."
                         required="True"
                         verbLevel="1"/>
                 <column name="provider_url" type="text"
@@ -75,7 +75,7 @@
                 <meta name="description">
                 A list of the object parameters.</meta>
 		<primary>object_id</primary>
-                <column name="object_id" type="text"
+                <column name="object_id" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_id"
                         description="Object internal identifier."
@@ -85,6 +85,18 @@
                         ucd="meta.record"
                         tablehead="type"
                         description="Object type."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="main_id" type="text"
+                        ucd="meta.id"
+                        tablehead="main_id"
+                        description="Main object identifier."
+                        required="True"
+                        verbLevel="1"/>
+                <column name="ids" type="text"
+                        ucd="meta.id"
+                        tablehead="ids"
+                        description="All identifiers of the object."
                         required="True"
                         verbLevel="1"/>
         </table> 
@@ -105,66 +117,121 @@
 		A list of all basic stellar parameters.</meta>
 		<primary>object_idref</primary>
 		<foreignKey source="object_idref" inTable="object"
-                        dest="object_id" /> 
-		<!-- <foreignKey source="coord_source_idref" inTable="source"
-                        dest="source_id" /> -->
-                <!-- <foreignKey source="plx_source_idref" inTable="source"
-                        dest="source_id" /> -->
-		<column name="object_idref" type="text"
+                        dest="object_id" />
+  
+		<column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-		<column name="coord_ra" type="double precision"
+		<column name="coo_ra" type="double precision"
 			ucd="pos.eq.ra;meta.main" unit="deg" 
 			tablehead="RA (ICRS)" 
 			description="Right Ascension" 
 			verbLevel="1"/>
-		<column name="coord_dec" type="double precision" 
+		<column name="coo_dec" type="double precision" 
 			ucd="pos.eq.dec;meta.main" unit="deg"
 			tablehead="Dec (ICRS)" 
 			description="Declination"
 			verbLevel="1"/>
-		<column name="coord_source_idref" type="text"
+		<column name="coo_err_angle" type="smallint" 
+			ucd="pos.posAng;pos.errorEllipse;pos.eq" unit="deg"
+			tablehead="coo_err_angle" 
+			description="Coordinate error angle"
+			verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
+                <column name="coo_err_maj" type="real" 
+			ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.eq" 
+			unit="mas"
+			tablehead="coo_err_maj" 
+			description="Coordinate error major axis"
+			verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
+                <column name="coo_err_min" type="real" 
+			ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.eq" 
+			unit="mas"
+			tablehead="coo_err_min" 
+			description="Coordinate error minor axis"
+			verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
+                <column name="coo_qual" type="text" 
+			ucd="meta.code.qual;pos.eq"
+			tablehead="coo_qual" 
+			description="Coordinate quality"
+			verbLevel="1"/>
+		<column name="coo_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="coord_source_id"
                         description="Source identifier corresponding 
                         to the position (coord) parameters."
-                        verbLevel="1"/>
-                <column name="plx_value" type="text"
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
+                <column name="plx_value" type="double precision"
                         ucd="pos.parallax"
                         tablehead="plx_value"
                         description="Parallax value."
                         verbLevel="1"/>
-                <column name="plx_err" type="text"
-                        ucd="pos.parallax"
+                <column name="plx_err" type="double precision"
+                        ucd="stat.error;pos.parallax"
                         tablehead="plx_err"
                         description="Parallax uncertainty."
                         verbLevel="1"/>
-                <column name="plx_source_idref" type="text"
+                <column name="plx_qual" type="text" 
+			ucd="meta.code.qual;pos.parallax"
+			tablehead="plx_qual" 
+			description="Parallax quality"
+			verbLevel="1"/>
+                <column name="plx_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="plx_source_id"
                         description="Source identifier corresponding 
                         to the parallax parameters."
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
+                <column name="dist_value" type="double precision"
+                        ucd="pos.distance"
+                        tablehead="dist"
+                        description="Object distance."
+                        required="True"
                         verbLevel="1"/>
+                <column name="dist_err" type="double precision"
+                        ucd="stat.error;pos.distance"
+                        tablehead="dist_err"
+                        description="Object distance error."
+                        verbLevel="1"/>
+                <column name="dist_qual" type="text" 
+			ucd="meta.code.qual;pos.distance"
+			tablehead="dist_qual" 
+			description="Distance quality"
+			verbLevel="1"/>
+                <column name="dist_source_idref" type="integer"
+                        ucd="meta.record;meta.id"
+                        tablehead="mesDist_source_idref"
+                        description="Identifier of the source of the distance measurement."
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
 	</table>
 	
 	<data id="import_star_basic_table">
-		<sources>data/stars.xml</sources>
+		<sources>data/star_basic.xml</sources>
 		<!--Data acquired using the data_acquisition.py skript -->
 		<voTableGrammar/>
 
                 <make table="star_basic">
                         <rowmaker idmaps="*">
-                        	<map dest="coord_ra" src="ra"/>
-                        	<map dest="coord_source_idref"
-                        	 src="coord_source_idref"
+                        	<map dest="coo_source_idref"
+                        	 src="coo_source_idref"
                         	 nullExpr="0" />
                         	<map dest="plx_source_idref"
                         	 src="plx_source_idref"
                         	 nullExpr="0" />
-                        	<map dest="coord_dec" src="dec"/>
                         </rowmaker>
                 </make>                                       		
 	</data>	
@@ -178,34 +245,51 @@
                         dest="object_id" /> 
 		<!-- <foreignKey source="bestmass_source_idref" inTable="source"
                         dest="source_id" /> -->
-                <column name="object_idref" type="text"
+                <column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-		<column name="bestmass" type="double precision"
+		<column name="mass_val" type="double precision"
 			ucd="phys.mass" unit="Mjup" 
-			tablehead="bestmass" 
-			description="ExoMercat bestmass parameter." 
+			tablehead="mass_val" 
+			description="Mass" 
 			verbLevel="1"/>
-		<column name="bestmass_source_idref" type="text"
+		<column name="mass_err" type="double precision"
+                        ucd="stat.error;phys.mass"
+                        tablehead="mass_err"
+                        description="Mass error"
+                        verbLevel="1"/>
+                <column name="mass_qual" type="text" 
+			ucd="meta.code.qual;phys.mass"
+			tablehead="mass_qual" 
+			description="Mass quality"
+			verbLevel="1"/>
+		<column name="mass_rel" type="text" 
+			ucd="meta.record;phys.mass"
+			tablehead="mass_rel" 
+			description="Mass relation"
+			verbLevel="1"/>
+		<column name="mass_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="bestmass_source_idref"
                         description="Identifier of the source of the bestmass
                          parameter."
-                        verbLevel="1"/>	
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
 	</table>
     
 	<data id="import_plant_basic_table">
-		<sources>data/planets.xml</sources>
+		<sources>data/planet_basic.xml</sources>
 		<!--	Data acquired using the data_acquisition.py skript -->
 		<voTableGrammar/>
 
 		<make table="planet_basic">
                         <rowmaker idmaps="*">
-                        	<map dest="bestmass_source_idref"
-                        	 src="bestmass_source_idref"
+                        	<map dest="mass_source_idref"
+                        	 src="mass_source_idref"
                         	 nullExpr="0" />
                         </rowmaker>
                 </make>       
@@ -221,43 +305,52 @@
                         dest="object_id" /> 
 		<!-- <foreignKey source="ref" inTable="source"
                         dest="source_id" />  -->
-                <column name="object_idref" type="text"
+                <column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-		<column name="radius" type="double precision"
-			ucd="phys.siye.radius"  
+		<column name="rad_value" type="double precision"
+			ucd="phys.size.radius"  
 			tablehead="radius" 
 			description="Black body radius." 
 			verbLevel="1"/>
-		<column name="radius_error" type="text"
-                        ucd="meta.record;meta.id"
+		<column name="rad_err" type="double precision"
+                        ucd="stat.error;phys.size.radius"
                         tablehead="radius_error"
-                        description="Uncertainty of the radius parameter."
+                        description="Radius error"
                         verbLevel="1"/>
-                <column name="_source_idref" type="text"
+                <column name="rad_qual" type="text" 
+			ucd="meta.code.qual;phys.size.radius"
+			tablehead="rad_qual" 
+			description="Radius quality"
+			verbLevel="1"/>
+                <column name="rad_rel" type="text" 
+			ucd="meta.record;phys.size.radius"
+			tablehead="rad_rel" 
+			description="Radius relation"
+			verbLevel="1"/>
+                <column name="rad_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="mass_source_idref"
                         description="Identifier of the source of the disk
                          parameters."
-                        required="True"
-                        verbLevel="1"/>	
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>
 	</table>
     
 	<data id="import_disk_basic_table">
-		<sources>data/disks.xml</sources>
+		<sources>data/disk_basic.xml</sources>
 		<!--	Data acquired through personal communication with 
 		Grant Kennedy -->
 		<voTableGrammar/>
 
 		<make table="disk_basic">
                         <rowmaker idmaps="*">
-                        	<map dest="radius">
-                        		parseWithNull(@rdisk_bb,float,"None")</map>
-                        	<map dest="radius_error"
-                        	 src="e_rdisk_bb"/>
+                        	<map dest="rad_value">
+                        		parseWithNull(@rad_value,float,"None")</map>
                         </rowmaker>
                 </make>                                             		
 	</data>	
@@ -267,25 +360,27 @@
                 <meta name="title">Object relation table</meta>
                 <meta name="description">
                 A list of the object relations.</meta>
-		<primary>parent_object_idref,child_object_idref,membership,h_link_source_idref</primary>
-                <column name="parent_object_idref" type="text"
+		<primary>parent_object_idref,child_object_idref,h_link_source_idref</primary>
+                <column name="parent_object_idref" type="integer"
                         ucd="meta.id.parent;meta.main"
                         tablehead="parent"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-                <column name="child_object_idref" type="text"
+                <column name="child_object_idref" type="integer"
                         ucd="meta.id"
                         tablehead="child"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-                <column name="membership" type="text"
+                <column name="membership" type="smallint"
                         ucd="meta.record"
                         tablehead="membership"
                         description="Membership probability."
-                        verbLevel="1"/>
-                <column name="h_link_source_idref" type="text"
+                        verbLevel="1">
+                      <values nullLiteral="-1"/>
+                </column>      
+                <column name="h_link_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="h_link_source_idref"
                         description="Identifier of the source of the relationship
@@ -301,6 +396,9 @@
 		<voTableGrammar/>
                 <make table="h_link">  
                 	 <rowmaker idmaps="*">
+                	 	<map dest="membership"
+                        	 src="membership"
+                        	 nullExpr="-1" />
                 	 </rowmaker>
                 </make>                           		
 	</data>
@@ -310,7 +408,7 @@
                 <meta name="description">
                 A list of the object identifiers.</meta>
 		<primary>object_idref,id,id_source_idref</primary>
-                <column name="object_idref" type="text"
+                <column name="object_idref" type="integer"
                         ucd="meta.id"
                         tablehead="object_id"
                         description="Object internal identifier."
@@ -322,7 +420,7 @@
                         description="Object identifier."
                         required="True"
                         verbLevel="1"/>
-                <column name="id_source_idref" type="text"
+                <column name="id_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="id_source_idref"
                         description="Identifier of the source of the identifier."
@@ -345,22 +443,34 @@
                 <meta name="title">Distance measurement table</meta>
                 <meta name="description">
                 A list of the stellar distance measurements.</meta>
-		<primary>object_idref,dist,mesDist_source_idref</primary>
-                <column name="object_idref" type="text"
+		<primary>object_idref,dist_value,dist_err,dist_source_idref</primary>
+                <column name="object_idref" type="integer"
                         ucd="meta.id"
                         tablehead="object_id"
                         description="Object internal identifier."
                         required="True"
                         verbLevel="1"/>
-                <column name="dist" type="text"
+                <column name="dist_value" type="double precision"
                         ucd="pos.distance"
-                        tablehead="dist"
+                        tablehead="dist_value"
                         description="Object distance."
+                        required="True"
                         verbLevel="1"/>
-                <column name="mesDist_source_idref" type="text"
+                <column name="dist_err" type="double precision"
+                        ucd="stat.error;pos.distance"
+                        tablehead="dist_err"
+                        description="Distance error."
+                        verbLevel="1"/>
+                <column name="dist_qual" type="text" 
+			ucd="meta.code.qual;pos.distance"
+			tablehead="dist_qual" 
+			description="Distance quality"
+			verbLevel="1"/>
+                <column name="dist_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="mesDist_source_idref"
                         description="Identifier of the source of the distance measurement."
+                        required="True"
                         verbLevel="1"/>	
         </table> 
        
@@ -375,6 +485,59 @@
                 </make>                           		
 	</data>                                          
   
+	<table id="mesMass" onDisk="True" adql="True">
+                <meta name="title">Mass measurement table</meta>
+                <meta name="description">
+                A list of the planetarz mass measurements.</meta>
+		<primary>object_idref,mass_val,mass_source_idref</primary>
+                <foreignKey source="object_idref" inTable="object"
+                        dest="object_id" /> 
+                <column name="object_idref" type="integer"
+                        ucd="meta.id;meta.main"
+                        tablehead="object_idref"
+                        description="Object internal identifier."
+                        required="True"
+                        verbLevel="1"/>
+		<column name="mass_val" type="double precision"
+			ucd="phys.mass" unit="Mjup" 
+			tablehead="mass_val" 
+			description="Mass" 
+			verbLevel="1"/>
+		<column name="mass_err" type="double precision"
+                        ucd="stat.error;phys.mass"
+                        tablehead="mass_err"
+                        description="Mass error"
+                        verbLevel="1"/>
+                <column name="mass_qual" type="text" 
+			ucd="meta.code.qual;phys.mass"
+			tablehead="mass_qual" 
+			description="Mass quality"
+			verbLevel="1"/>
+		<column name="mass_rel" type="text" 
+			ucd="meta.record;phys.mass"
+			tablehead="mass_rel" 
+			description="Mass relation"
+			verbLevel="1"/>
+		<column name="mass_source_idref" type="integer"
+                        ucd="meta.record;meta.id"
+                        tablehead="bestmass_source_idref"
+                        description="Identifier of the source of the bestmass
+                         parameter."
+                        required="True"
+                        verbLevel="1"/>
+        </table> 
+       
+        
+        <data id="import_mesMass_table">
+        	<sources>data/mesMass.xml</sources>
+		<!--	Data acquired using the data_acquisition.py skript -->
+		<voTableGrammar/>
+                <make table="mesMass">  
+                	 <rowmaker idmaps="*">
+                	 </rowmaker>
+                </make>                           		
+	</data>                                      
+ 
 	<service id="cone" allowed="form,scs.xml">
 		<meta name="shortName">service short name</meta>
 		<publish render="form" sets="ivo_managed, local"/>
@@ -392,5 +555,4 @@
 		</regTest>
 	</regSuite>
 </resource>
-
 
