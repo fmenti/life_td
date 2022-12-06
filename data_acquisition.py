@@ -8,22 +8,23 @@ The document is structured as follows:
 - Definition of functions
 - Main code
 """
-########################################################################
-#-------------------------definition of functions-----------------------
-########################################################################
+###############################################################################
+#-------------------------definition of functions------------------------------
+###############################################################################
 #general
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 
-#-------------------global helper functions-----------------------
+#-------------------global helper functions------------------------------------
 def save(cats,paths):
     """
     This functions saves the tables given as python list in the cats parameter.
     The saving location is 'data/{path}.xml' where path is given in the paths 
     parameter.
     :param cats: Python list of astropy table to be saved.
-    :param paths: Python list of paths to where to save the tables given in cats.
+    :param paths: Python list of paths to where to save the tables given in 
+    	cats.
     """
     #go through all the elements in both lists
     for cat,path in zip(cats,paths):
@@ -34,7 +35,8 @@ def save(cats,paths):
                 #transform the type into string
                 cat[i] = cat[i].astype(str)
         #save the table
-        ap.io.votable.writeto(ap.io.votable.from_table(cat), f'data/{path}.xml')
+        ap.io.votable.writeto(
+        	    ap.io.votable.from_table(cat), f'data/{path}.xml')
     return
 
 def stringtoobject(cat,number=100):
@@ -43,11 +45,12 @@ def stringtoobject(cat,number=100):
     The later has the advantace of allowing strings of varying length. 
     Without it strings can get truncated.
     :param cat: Astropy table.
-    :param number: Length of longest string type element in the table. Defeault is 100.
+    :param number: Length of longest string type element in the table. 
+    	Defeault is 100.
     :return cat: Astropy table.
     """
-    #defining string types as calling them string does not work and instead the type name 
-    #<U3 is needed for a string of length 3
+    #defining string types as calling them string does not work and instead 
+    #the type name <U3 is needed for a string of length 3
     stringtypes=[np.dtype(f'<U{j}') for j in range(1,number)]
     #for each column header
     for i in cat.colnames:
@@ -59,7 +62,8 @@ def stringtoobject(cat,number=100):
 
 def load(paths):
     """
-    This function loads the tables saved in XML format at saving locations specified in paths.
+    This function loads the tables saved in XML format at saving locations 
+    specified in paths.
     :param paths: Python list of saving locations.
     :return cats: Python list of loaded astropy tables.
     """
@@ -68,7 +72,8 @@ def load(paths):
     #go through all the elements in the paths list
     for path in paths:
         #read the saved data into the cats lists as astropy votable element
-        cats.append(ap.io.votable.parse_single_table(f'data/{path}.xml').to_table())
+        to_append=ap.io.votable.parse_single_table(f'data/{path}.xml')
+        cats.append(to_append.to_table())
     #go through all the tables in the cats list
     for cat in cats:
         cat=stringtoobject(cat,3000)
