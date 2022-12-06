@@ -58,6 +58,9 @@ FROM life.star_basic
 -> works
 
 SELECT *
+http://localhost:8080/tap
+
+SELECT  *
 FROM life.star_basic 
 JOIN life.ident USING(object_idref)
 WHERE id = '* alf Cen'
