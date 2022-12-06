@@ -213,7 +213,8 @@
                 <column name="dist_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="mesDist_source_idref"
-                        description="Identifier of the source of the distance measurement."
+                        description="Identifier of the source of the 
+                        	distance measurement."
                         verbLevel="1">
                       <values nullLiteral="-1"/>
                 </column>
@@ -335,7 +336,7 @@
                         ucd="meta.record;meta.id"
                         tablehead="mass_source_idref"
                         description="Identifier of the source of the disk
-                         parameters."
+                        	parameters."
                         verbLevel="1">
                       <values nullLiteral="-1"/>
                 </column>
@@ -350,7 +351,8 @@
 		<make table="disk_basic">
                         <rowmaker idmaps="*">
                         	<map dest="rad_value">
-                        		parseWithNull(@rad_value,float,"None")</map>
+                        		parseWithNull(@rad_value,float,"None")
+                		</map>
                         </rowmaker>
                 </make>                                             		
 	</data>	
@@ -360,7 +362,9 @@
                 <meta name="title">Object relation table</meta>
                 <meta name="description">
                 A list of the object relations.</meta>
-		<primary>parent_object_idref,child_object_idref,h_link_source_idref</primary>
+		<primary>parent_object_idref,child_object_idref,
+			h_link_source_idref
+		</primary>
                 <column name="parent_object_idref" type="integer"
                         ucd="meta.id.parent;meta.main"
                         tablehead="parent"
@@ -383,8 +387,8 @@
                 <column name="h_link_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="h_link_source_idref"
-                        description="Identifier of the source of the relationship
-                         parameters."
+                        description="Identifier of the source of the 
+                        	relationship parameters."
                         required="True"
                         verbLevel="1"/>	
         </table> 
@@ -423,7 +427,8 @@
                 <column name="id_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="id_source_idref"
-                        description="Identifier of the source of the identifier."
+                        description="Identifier of the source of the 
+                        	identifier."
                         required="True"
                         verbLevel="1"/>	
         </table> 
@@ -443,7 +448,9 @@
                 <meta name="title">Distance measurement table</meta>
                 <meta name="description">
                 A list of the stellar distance measurements.</meta>
-		<primary>object_idref,dist_value,dist_err,dist_source_idref</primary>
+		<primary>object_idref,dist_value,dist_err,
+			dist_source_idref
+		</primary>
                 <column name="object_idref" type="integer"
                         ucd="meta.id"
                         tablehead="object_id"
@@ -469,7 +476,8 @@
                 <column name="dist_source_idref" type="integer"
                         ucd="meta.record;meta.id"
                         tablehead="mesDist_source_idref"
-                        description="Identifier of the source of the distance measurement."
+                        description="Identifier of the source of the 
+                        	distance measurement."
                         required="True"
                         verbLevel="1"/>	
         </table> 
