@@ -79,19 +79,20 @@ def load(paths):
         cat=stringtoobject(cat,3000)
     return cats
 
-#-------------------initialization function----------------------------
+#-------------------initialization function------------------------------------
 def initialize_database_tables():
     """
-    This function initializes the database tables with no data in them.
+    This function initializes the database tables with column name and data 
+    type specified but no actual data in them.
     :return return_list: List of astropy tables in the order sources, objects,
                 ident (identifiers), h_link (relation between 
                 objects),star_basic,planet_basic, disk_basic,
                 mesDist (distance measurements) and 
                 mesMass (mass measurements). 
     """
-    #id stands for identifier, idref for reference identifier
-    #initialize tables with no data but column names and data type specified.
-    #parameter source idref is the identifier in the source table corresponding to this parameter
+    #explanation of abbreviations: id stands for identifier, idref for 
+    # reference identifier and parameter_source_idref for the identifier in the  
+    # source table corresponding to the mentioned parameter
     
     objects=ap.table.Table(
         #object id, type of object, all identifiers, main id
@@ -104,7 +105,7 @@ def initialize_database_tables():
         names=['object_idref','id','id_source_idref','id_ref'],
         dtype=[int,object,int,object])
     
-    #hierarchical link table (= relation between objects)
+    #hierarchical link table (which means relation between objects)
     h_link=ap.table.Table(
         #child object idref (e.g. planet X), 
         #parent object idref (e.g. host star of planet X)
@@ -143,8 +144,8 @@ def initialize_database_tables():
         dtype=[int,float,float,object,object,int,object])
     
     disk_basic=ap.table.Table(
-        #object idref, black body radius value, bbr error, bbr relation (min, max, equal),
-        #bbr quality,...
+        #object idref, black body radius value, bbr error, 
+        #bbr relation (min, max, equal), bbr quality,...
         names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
                'rad_source_iderf','rad_ref'],
         dtype=[int,float,float,object,object,int,object])
