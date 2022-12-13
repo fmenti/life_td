@@ -1,3 +1,5 @@
+http://localhost:8080/tap
+
 SELECT TOP 10 object_id, coo_ra, coo_dec, plx_value
 FROM life.star_basic
 JOIN life.object ON object_id=object_idref
@@ -56,9 +58,6 @@ datalist:
 SELECT TOP 10 *
 FROM life.star_basic
 -> works
-
-SELECT *
-http://localhost:8080/tap
 
 SELECT  *
 FROM life.star_basic 
