@@ -119,12 +119,51 @@
 				SELECT * FROM tap_schema.columns 
 				  WHERE description LIKE '%em.IR.8-15um%'
 		</meta>  -->
-		<meta name="_example" title="stellar objects example">
+		<meta name="_example" title="Filter objects by type">
 			.. tapquery::
-
-                                SELECT TOP 10 object_id FROM life.object
-				 WHERE type='st'
+				SELECT TOP 10 object_id, main_id FROM life.object
+				WHERE type='st'
 		</meta>
+		<meta name="_example" title="All children of an object">
+			.. tapquery::
+				SELECT main_id as Child_main_id, object_id as child_object_id
+				FROM life.h_link 
+				JOIN life.ident as p on p.object_idref=parent_object_idref
+				JOIN life.object on object_id=child_object_idref
+				WHERE p.id = '* alf Cen'
+                </meta>
+		<meta name="_example" title="All parents of an object">
+			.. tapquery::
+				SELECT main_id as parent_main_id, object_id as parent_object_id
+				FROM life.h_link
+				JOIN life.ident as c on c.object_idref=child_object_idref
+				JOIN life.object on object_id=parent_object_idref
+				WHERE c.id =  '* alf Cen A'
+                </meta>
+		<meta name="_example" title="All specific measurements of an object">
+			.. tapquery::
+				SELECT *
+				FROM life.mesDist
+				JOIN life.ident USING(object_idref)
+				WHERE id = 'GJ    10'
+                </meta>
+		<meta name="_example" title="All basic stellar data from an object name">
+			.. tapquery::
+				SELECT  *
+				FROM life.star_basic 
+				JOIN life.ident USING(object_idref)
+				WHERE id = '* alf Cen'
+                </meta>
+		<meta name="_example" title="All basic disk data from host name">
+			.. tapquery::
+				SELECT main_id disk_main_id, object_id as disk_object_id, db.*
+				FROM life.h_link 
+				JOIN life.disk_basic as db on db.object_idref=child_object_idref
+				JOIN life.ident as p on p.object_idref=parent_object_idref
+				JOIN life.object on object_id=child_object_idref
+				WHERE p.id = '* bet Cas' and type='di'
+                </meta>
+				
 	</STREAM>
 
 	
