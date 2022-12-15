@@ -84,8 +84,8 @@ def initialize_database_tables():
     """
     This function initializes the database tables with column name and data 
     type specified but no actual data in them.
-    :return return_list: List of astropy tables in the order sources, objects,
-                ident (identifiers), h_link (relation between 
+    :return list_of_tables: List of astropy tables in the order sources, 
+    		objects, ident (identifiers), h_link (relation between 
                 objects),star_basic,planet_basic, disk_basic,
                 mesDist (distance measurements) and 
                 mesMass (mass measurements). 
@@ -94,16 +94,27 @@ def initialize_database_tables():
     # reference identifier and parameter_source_idref for the identifier in the  
     # source table corresponding to the mentioned parameter
     
+    list_of_tables=[]
+    
+    sources=ap.table.Table(
+        #reference,...
+        names=['ref','provider_name','provider_url','provider_bibcode',
+        	'source_id'],
+        dtype=[object,object,object,object,int])
+    list_of_tables.append(sources)
+    
     objects=ap.table.Table(
         #object id, type of object, all identifiers, main id
         names=['object_id','type','ids','main_id'],
         dtype=[int,object,object,object])
+    list_of_tables.append(objects)
     
     #identifier table
     ident=ap.table.Table(
         #object idref, id, source idref for the id parameter, id reference
         names=['object_idref','id','id_source_idref','id_ref'],
         dtype=[int,object,int,object])
+    list_of_tables.append(ident)
     
     #hierarchical link table (which means relation between objects)
     h_link=ap.table.Table(
@@ -114,6 +125,7 @@ def initialize_database_tables():
         names=['child_object_idref','parent_object_idref',
                'h_link_source_idref','h_link_ref','membership'],
         dtype=[int,int,int,object,int])
+    list_of_tables.append(h_link)
     
     star_basic=ap.table.Table(
         #object idref, RA coordinate, DEC coordinate, 
@@ -135,6 +147,7 @@ def initialize_database_tables():
                object,
                float,float,object,int,
                object])
+    list_of_tables.append(star_basic)
     
     planet_basic=ap.table.Table(
         #object idref, mass value, mass error, mass realtion (min, max, equal),
@@ -142,6 +155,7 @@ def initialize_database_tables():
         names=['object_idref','mass_val','mass_err','mass_rel','mass_qual',
                'mass_source_idref','mass_ref'],
         dtype=[int,float,float,object,object,int,object])
+    list_of_tables.append(planet_basic)
     
     disk_basic=ap.table.Table(
         #object idref, black body radius value, bbr error, 
@@ -149,29 +163,27 @@ def initialize_database_tables():
         names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
                'rad_source_iderf','rad_ref'],
         dtype=[int,float,float,object,object,int,object])
-    
-    sources=ap.table.Table(
-        #reference,...
-        names=['ref','provider_name','provider_url','provider_bibcode','source_id'],
-        dtype=[object,object,object,object,int])
+    list_of_tables.append(disk_basic)
     
     mesDist=ap.table.Table(
         names=['object_idref','dist_value','dist_err','dist_qual',
                'dist_source_idref','dist_ref'],
         dtype=[int,float,float,object,
                int,object])
+    list_of_tables.append(mesDist)
     
     mesMass=ap.table.Table(
         names=['object_idref','mass_val','mass_err','mass_rel','mass_qual',
                'mass_source_idref','mass_ref'],
         dtype=[int,float,float,object,object,int,object])
+    list_of_tables.append(mesMass)
     
     #save all tables
-    save([sources,objects,ident,h_link,star_basic,planet_basic,disk_basic,mesDist,mesMass],
-         ['empty_sources','empty_objects','empty_ident','empty_h_link','empty_star_basic',
-          'empty_planet_basic','empty_disk_basic','empty_mesDist','empty_mesMass'])
-    return_list=[sources,objects,ident,h_link,star_basic,planet_basic,disk_basic,mesDist,mesMass]
-    return return_list
+    save(list_of_tables,
+         ['empty_sources','empty_objects','empty_ident','empty_h_link',
+         'empty_star_basic','empty_planet_basic','empty_disk_basic',
+         'empty_mesDist','empty_mesMass'])
+    return list_of_tables
 
 #------------------------------provider helper functions--------------------------
 def query(link,query,catalogs=[]):
