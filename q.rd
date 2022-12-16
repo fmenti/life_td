@@ -15,7 +15,7 @@
 	<meta name="subject">astrometry</meta>
 	<meta name="subject">proper-motions</meta>
 
-	<meta name="creator">Menti, F.; Quanz, S.; LIFE team</meta>
+	<meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
 	<meta name="instrument">LIFE</meta> 
 	<meta name="facility">ETH Zurich</meta>
 	<meta name="source">LIFE source</meta>
@@ -62,7 +62,7 @@
         
         <data id="import_source_table">
         	<sources>data/sources.xml</sources>
-		<!-- Data queried with data_acquisition.py -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="source">  
                 	<rowmaker idmaps="*">
@@ -100,11 +100,10 @@
                         required="True"
                         verbLevel="1"/>
         </table> 
-       
         
         <data id="import_object_table">
         	<sources>data/objects.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="object"> 
                 	 <rowmaker idmaps="*"/>  
@@ -222,9 +221,8 @@
 	
 	<data id="import_star_basic_table">
 		<sources>data/star_basic.xml</sources>
-		<!--Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
-
                 <make table="star_basic">
                         <rowmaker idmaps="*">
                         	<map dest="coo_source_idref"
@@ -284,9 +282,8 @@
     
 	<data id="import_plant_basic_table">
 		<sources>data/planet_basic.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
-
 		<make table="planet_basic">
                         <rowmaker idmaps="*">
                         	<map dest="mass_source_idref"
@@ -344,10 +341,8 @@
     
 	<data id="import_disk_basic_table">
 		<sources>data/disk_basic.xml</sources>
-		<!--	Data acquired through personal communication with 
-		Grant Kennedy -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
-
 		<make table="disk_basic">
                         <rowmaker idmaps="*">
                         	<map dest="rad_value">
@@ -393,10 +388,9 @@
                         verbLevel="1"/>	
         </table> 
        
-        
         <data id="import_h_link_table">
         	<sources>data/h_link.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="h_link">  
                 	 <rowmaker idmaps="*">
@@ -433,10 +427,9 @@
                         verbLevel="1"/>	
         </table> 
        
-        
         <data id="import_ident_table">
         	<sources>data/ident.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="ident">  
                 	 <rowmaker idmaps="*">
@@ -482,10 +475,9 @@
                         verbLevel="1"/>	
         </table> 
        
-        
         <data id="import_mesDist_table">
         	<sources>data/mesDist.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="mesDist">  
                 	 <rowmaker idmaps="*">
@@ -535,10 +527,9 @@
                         verbLevel="1"/>
         </table> 
        
-        
         <data id="import_mesMass_table">
         	<sources>data/mesMass.xml</sources>
-		<!--	Data acquired using the data_acquisition.py skript -->
+		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
                 <make table="mesMass">  
                 	 <rowmaker idmaps="*">
