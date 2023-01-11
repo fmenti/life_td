@@ -13,15 +13,11 @@
 	<meta name="subject">planets</meta>
 	<meta name="subject">disks</meta>
 	<meta name="subject">astrometry</meta>
-	<meta name="subject">proper-motions</meta>
 
 	<meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
 	<meta name="instrument">LIFE</meta> 
-	<meta name="facility">ETH Zurich</meta>
-	<meta name="source">LIFE source</meta>
 	<meta name="contentLevel">Research</meta>
 	<meta name="type">Archive</meta>  
-	<meta name="coverage.waveband">Infrared</meta>  
 
 	<table id="source" onDisk="True" adql="True">
 		<meta name="title">Source Table</meta>
@@ -43,7 +39,7 @@
                 <column name="provider_name" type="text"
                         ucd="meta.record;meta.id"
                         tablehead="provider_name"
-                        description="Parameter acquisition source."
+                        description="Provider / parameter acquisition source."
                         required="True"
                         verbLevel="1"/>
                 <column name="provider_url" type="text"
@@ -73,7 +69,7 @@
 	<table id="object" onDisk="True" adql="True">
                 <meta name="title">Object table</meta>
                 <meta name="description">
-                A list of the object parameters.</meta>
+                A list of the astrophysical objects.</meta>
 		<primary>object_id</primary>
                 <column name="object_id" type="integer"
                         ucd="meta.id;meta.main"
@@ -166,7 +162,7 @@
                         ucd="meta.record;meta.id"
                         tablehead="coord_source_id"
                         description="Source identifier corresponding 
-                        to the position (coord) parameters."
+                        to the position (coo) parameters."
                         verbLevel="1">
                       <values nullLiteral="-1"/>
                 </column>
@@ -213,7 +209,7 @@
                         ucd="meta.record;meta.id"
                         tablehead="mesDist_source_idref"
                         description="Identifier of the source of the 
-                        	distance measurement."
+                        	distance parameter."
                         verbLevel="1">
                       <values nullLiteral="-1"/>
                 </column>
@@ -242,8 +238,7 @@
 		<primary>object_idref</primary>
 		<foreignKey source="object_idref" inTable="object"
                         dest="object_id" /> 
-		<!-- <foreignKey source="bestmass_source_idref" inTable="source"
-                        dest="source_id" /> -->
+
                 <column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
@@ -272,8 +267,8 @@
 			verbLevel="1"/>
 		<column name="mass_source_idref" type="integer"
                         ucd="meta.record;meta.id"
-                        tablehead="bestmass_source_idref"
-                        description="Identifier of the source of the bestmass
+                        tablehead="mass_source_idref"
+                        description="Identifier of the source of the mass
                          parameter."
                         verbLevel="1">
                       <values nullLiteral="-1"/>
@@ -290,8 +285,7 @@
                         	 src="mass_source_idref"
                         	 nullExpr="0" />
                         </rowmaker>
-                </make>       
-                                       		
+                </make>                               		
 	</data>	
 
 	<table id="disk_basic" onDisk="True" adql="True">
@@ -301,8 +295,7 @@
 		<primary>object_idref</primary>
 		<foreignKey source="object_idref" inTable="object"
                         dest="object_id" /> 
-		<!-- <foreignKey source="ref" inTable="source"
-                        dest="source_id" />  -->
+		
                 <column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
@@ -422,7 +415,7 @@
                         ucd="meta.record;meta.id"
                         tablehead="id_source_idref"
                         description="Identifier of the source of the 
-                        	identifier."
+                        	identifier parameter."
                         required="True"
                         verbLevel="1"/>	
         </table> 
@@ -444,6 +437,7 @@
 		<primary>object_idref,dist_value,dist_err,
 			dist_source_idref
 		</primary>
+		
                 <column name="object_idref" type="integer"
                         ucd="meta.id"
                         tablehead="object_id"
@@ -470,7 +464,7 @@
                         ucd="meta.record;meta.id"
                         tablehead="mesDist_source_idref"
                         description="Identifier of the source of the 
-                        	distance measurement."
+                        	distance parameter."
                         required="True"
                         verbLevel="1"/>	
         </table> 
@@ -488,10 +482,11 @@
 	<table id="mesMass" onDisk="True" adql="True">
                 <meta name="title">Mass measurement table</meta>
                 <meta name="description">
-                A list of the planetarz mass measurements.</meta>
+                A list of the planetary mass measurements.</meta>
 		<primary>object_idref,mass_val,mass_source_idref</primary>
                 <foreignKey source="object_idref" inTable="object"
                         dest="object_id" /> 
+                        
                 <column name="object_idref" type="integer"
                         ucd="meta.id;meta.main"
                         tablehead="object_idref"
@@ -520,8 +515,8 @@
 			verbLevel="1"/>
 		<column name="mass_source_idref" type="integer"
                         ucd="meta.record;meta.id"
-                        tablehead="bestmass_source_idref"
-                        description="Identifier of the source of the bestmass
+                        tablehead="mass_source_idref"
+                        description="Identifier of the source of the mass
                          parameter."
                         required="True"
                         verbLevel="1"/>
