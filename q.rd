@@ -10,8 +10,8 @@
 	planetary and disk properties. The data itself is mainly
 	a collection from different other catalogs.</meta>
 	<meta name="subject">stars</meta>
-	<meta name="subject">planets</meta>
-	<meta name="subject">disks</meta>
+	<meta name="subject">exoplanets</meta>
+	<meta name="subject">circumstellar-disks</meta>
 	<meta name="subject">astrometry</meta>
 
 	<meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
@@ -26,24 +26,24 @@
 		 tables.</meta>
 		<primary>source_id</primary>
                 <column name="source_id" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.id"
                         tablehead="source_id"
                         description="Source identifier."
                         required="True"
                         verbLevel="1"/>
                 <column name="ref" type="text"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="ref"
                         description="Reference, bibcode if possible."
                         verbLevel="1"/> 
                 <column name="provider_name" type="text"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.bib.author"
                         tablehead="provider_name"
                         description="Provider / parameter acquisition source."
                         required="True"
                         verbLevel="1"/>
                 <column name="provider_url" type="text"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref.url"
                         tablehead="provider_url"
                         description="Provider URL."
                         required="True"
@@ -159,7 +159,7 @@
 			description="Coordinate quality"
 			verbLevel="1"/>
 		<column name="coo_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="coord_source_id"
                         description="Source identifier corresponding 
                         to the position (coo) parameters."
@@ -182,7 +182,7 @@
 			description="Parallax quality"
 			verbLevel="1"/>
                 <column name="plx_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="plx_source_id"
                         description="Source identifier corresponding 
                         to the parallax parameters."
@@ -206,7 +206,7 @@
 			description="Distance quality"
 			verbLevel="1"/>
                 <column name="dist_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="mesDist_source_idref"
                         description="Identifier of the source of the 
                         	distance parameter."
@@ -246,7 +246,7 @@
                         required="True"
                         verbLevel="1"/>
 		<column name="mass_val" type="double precision"
-			ucd="phys.mass" unit="Mjup" 
+			ucd="phys.mass" unit="'Mjup'" 
 			tablehead="mass_val" 
 			description="Mass" 
 			verbLevel="1"/>
@@ -266,7 +266,7 @@
 			description="Mass relation"
 			verbLevel="1"/>
 		<column name="mass_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="mass_source_idref"
                         description="Identifier of the source of the mass
                          parameter."
@@ -323,7 +323,7 @@
 			description="Radius relation"
 			verbLevel="1"/>
                 <column name="rad_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="mass_source_idref"
                         description="Identifier of the source of the disk
                         	parameters."
@@ -373,7 +373,7 @@
                       <values nullLiteral="-1"/>
                 </column>      
                 <column name="h_link_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="h_link_source_idref"
                         description="Identifier of the source of the 
                         	relationship parameters."
@@ -412,7 +412,7 @@
                         required="True"
                         verbLevel="1"/>
                 <column name="id_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="id_source_idref"
                         description="Identifier of the source of the 
                         	identifier parameter."
@@ -461,7 +461,7 @@
 			description="Distance quality"
 			verbLevel="1"/>
                 <column name="dist_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="mesDist_source_idref"
                         description="Identifier of the source of the 
                         	distance parameter."
@@ -494,7 +494,7 @@
                         required="True"
                         verbLevel="1"/>
 		<column name="mass_val" type="double precision"
-			ucd="phys.mass" unit="Mjup" 
+			ucd="phys.mass" unit="'Mjup'" 
 			tablehead="mass_val" 
 			description="Mass" 
 			verbLevel="1"/>
@@ -514,7 +514,7 @@
 			description="Mass relation"
 			verbLevel="1"/>
 		<column name="mass_source_idref" type="integer"
-                        ucd="meta.record;meta.id"
+                        ucd="meta.ref"
                         tablehead="mass_source_idref"
                         description="Identifier of the source of the mass
                          parameter."
@@ -526,14 +526,19 @@
         	<sources>data/mesMass.xml</sources>
 		<!-- Data acquired using the skript data_acquisition.py. -->
 		<voTableGrammar/>
-                <make table="mesMass">  
+               <make table="mesMass">  
                 	 <rowmaker idmaps="*">
                 	 </rowmaker>
                 </make>                           		
 	</data>                                      
  
 	<service id="cone" allowed="form,scs.xml">
-		<meta name="shortName">service short name</meta>
+		<meta name="shortName">lifetd cone</meta>
+		<meta>
+			testQuery.ra: 312.27
+			testQuery.dec: 37.47
+			testQuery.sr: 0.01
+		</meta>
 		<publish render="form" sets="ivo_managed, local"/>
 		<publish render="scs.xml" sets="ivo_managed"/>
 		<scsCore queriedTable="star_basic">
@@ -549,4 +554,5 @@
 		</regTest>
 	</regSuite>
 </resource>
-
+<!-- vim:et:sw=4:sta
+-->
