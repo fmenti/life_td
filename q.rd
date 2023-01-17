@@ -74,13 +74,15 @@
         <column name="object_id" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_id"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="type" type="text"
-            ucd="meta.record"
+            ucd="src.class"
             tablehead="type"
-            description="Object type."
+            description="Object type (sy=multi-object system, st=star, 
+            pl=planet and di=disk)."
             required="True"
             verbLevel="1"/>
         <column name="main_id" type="text"
@@ -92,7 +94,7 @@
         <column name="ids" type="text"
             ucd="meta.id"
             tablehead="ids"
-            description="All identifiers of the object."
+            description="All identifiers of the object separated by '|'."
             required="True"
             verbLevel="1"/>
     </table> 
@@ -117,7 +119,8 @@
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="coo_ra" type="double precision"
@@ -167,12 +170,12 @@
               <values nullLiteral="-1"/>
         </column>
         <column name="plx_value" type="double precision"
-            ucd="pos.parallax"
+            ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
             description="Parallax value."
             verbLevel="1"/>
         <column name="plx_err" type="double precision"
-            ucd="stat.error;pos.parallax"
+            ucd="stat.error;pos.parallax" unit="mas"
             tablehead="plx_err"
             description="Parallax uncertainty."
             verbLevel="1"/>
@@ -207,7 +210,7 @@
             verbLevel="1"/>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
-            tablehead="mesDist_source_idref"
+            tablehead="dist_source_idref"
             description="Identifier of the source of the 
                 distance parameter."
             verbLevel="1">
@@ -242,16 +245,17 @@
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
-            ucd="phys.mass" unit="'Mjup'" 
+            ucd="phys.mass" unit="'jupiterMass'" 
             tablehead="mass_val" 
             description="Mass" 
             verbLevel="1"/>
         <column name="mass_err" type="double precision"
-            ucd="stat.error;phys.mass"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="mass_err"
             description="Mass error"
             verbLevel="1"/>
@@ -261,9 +265,10 @@
             description="Mass quality"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
-            ucd="meta.record;phys.mass"
+            ucd="arith.ratio;phys.mass"
             tablehead="mass_rel" 
-            description="Mass relation"
+            description="Mass relation defining upper / lower limit or exact 
+            measurement through '<','>' and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
             ucd="meta.ref"
@@ -299,16 +304,17 @@
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="rad_value" type="double precision"
-            ucd="phys.size.radius"  
+            ucd="phys.size.radius"  unit="AU"
             tablehead="radius" 
             description="Black body radius." 
             verbLevel="1"/>
         <column name="rad_err" type="double precision"
-            ucd="stat.error;phys.size.radius"
+            ucd="stat.error;phys.size.radius" unit="AU"
             tablehead="radius_error"
             description="Radius error"
             verbLevel="1"/>
@@ -318,9 +324,10 @@
             description="Radius quality"
             verbLevel="1"/>
         <column name="rad_rel" type="text" 
-            ucd="meta.record;phys.size.radius"
+            ucd="arith.ratio;phys.size.radius"
             tablehead="rad_rel" 
-            description="Radius relation"
+            description="Radius relation defining upper / lower limit or exact 
+            measurement through '<','>' and '='."
             verbLevel="1"/>
         <column name="rad_source_idref" type="integer"
             ucd="meta.ref"
@@ -349,20 +356,23 @@
     <table id="h_link" onDisk="True" adql="True">
         <meta name="title">Object relation table</meta>
         <meta name="description">
-        A list of the object relations.</meta>
+        This table links subordinate objects (e.g. a planets of a star, or
+        a star in a multiple star system) to their parent objects.</meta>
         <primary>parent_object_idref,child_object_idref,
             h_link_source_idref
         </primary>
         <column name="parent_object_idref" type="integer"
             ucd="meta.id.parent;meta.main"
             tablehead="parent"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="child_object_idref" type="integer"
             ucd="meta.id"
             tablehead="child"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="membership" type="smallint"
@@ -402,7 +412,8 @@
         <column name="object_idref" type="integer"
             ucd="meta.id"
             tablehead="object_id"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="id" type="text"
@@ -430,7 +441,7 @@
         </make>                       
     </data>        
 
-    <table id="mesDist" onDisk="True" adql="True">
+    <table id="mes_dist" onDisk="True" adql="True">
         <meta name="title">Distance measurement table</meta>
         <meta name="description">
         A list of the stellar distance measurements.</meta>
@@ -441,17 +452,18 @@
         <column name="object_idref" type="integer"
             ucd="meta.id"
             tablehead="object_id"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="dist_value" type="double precision"
-            ucd="pos.distance"
+            ucd="pos.distance" unit="AU"
             tablehead="dist_value"
             description="Object distance."
             required="True"
             verbLevel="1"/>
         <column name="dist_err" type="double precision"
-            ucd="stat.error;pos.distance"
+            ucd="stat.error;pos.distance" unit="AU"
             tablehead="dist_err"
             description="Distance error."
             verbLevel="1"/>
@@ -462,24 +474,24 @@
             verbLevel="1"/>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
-            tablehead="mesDist_source_idref"
+            tablehead="mes_dist_source_idref"
             description="Identifier of the source of the 
                 distance parameter."
             required="True"
             verbLevel="1"/>    
     </table> 
        
-    <data id="import_mesDist_table">
+    <data id="import_mes_dist_table">
         <sources>data/mesDist.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="mesDist">  
+        <make table="mes_dist">  
              <rowmaker idmaps="*">
              </rowmaker>
         </make>                       
     </data>                      
   
-    <table id="mesMass" onDisk="True" adql="True">
+    <table id="mes_mass" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
         A list of the planetary mass measurements.</meta>
@@ -490,16 +502,17 @@
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object internal identifier."
+            description="Object key (unstable, use only for joining to the 
+            other tables)."
             required="True"
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
-            ucd="phys.mass" unit="'Mjup'" 
+            ucd="phys.mass" unit="'jupiterMass'" 
             tablehead="mass_val" 
             description="Mass" 
             verbLevel="1"/>
         <column name="mass_err" type="double precision"
-            ucd="stat.error;phys.mass"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="mass_err"
             description="Mass error"
             verbLevel="1"/>
@@ -509,9 +522,10 @@
             description="Mass quality"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
-            ucd="meta.record;phys.mass"
+            ucd="arith.ratio;phys.mass"
             tablehead="mass_rel" 
-            description="Mass relation"
+            description="Mass relation defining upper / lower limit or exact 
+            measurement through '<','>' and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
             ucd="meta.ref"
@@ -522,11 +536,11 @@
             verbLevel="1"/>
     </table> 
        
-    <data id="import_mesMass_table">
+    <data id="import_mes_mass_table">
         <sources>data/mesMass.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-           <make table="mesMass">  
+           <make table="mes_mass">  
              <rowmaker idmaps="*">
              </rowmaker>
         </make>                       
