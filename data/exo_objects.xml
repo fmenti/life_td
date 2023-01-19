@@ -76,12 +76,12 @@
      </TR>
      <TR>
       <TD>*  83 Leo B b</TD>
-      <TD>HD 99492 b|83 Leo B b|*  83 Leo B b|*  83 Leo B b</TD>
+      <TD>83 Leo B b|HD 99492 b|*  83 Leo B b|*  83 Leo B b</TD>
       <TD>pl</TD>
      </TR>
      <TR>
       <TD>*  83 Leo B c</TD>
-      <TD>83 Leo B c|HD 99492 c|*  83 Leo B c|*  83 Leo B c</TD>
+      <TD>HD 99492 c|83 Leo B c|*  83 Leo B c|*  83 Leo B c</TD>
       <TD>pl</TD>
      </TR>
      <TR>
@@ -317,6 +317,11 @@
      <TR>
       <TD>2MASS J00470038+6803543 h</TD>
       <TD>WISE0047|2MASS J00470038+6803543 h</TD>
+      <TD>pl</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J03480772-6022270 c</TD>
+      <TD>2MASS J0348-6022|2MASS J03480772-6022270 c</TD>
       <TD>pl</TD>
      </TR>
      <TR>
@@ -1322,6 +1327,11 @@
      <TR>
       <TD>Wolf  940 b</TD>
       <TD>Wolf 940 b|Wolf  940 b</TD>
+      <TD>pl</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1130 B e</TD>
+      <TD>WISE 2005+5424|Wolf 1130 B e</TD>
       <TD>pl</TD>
      </TR>
      <TR>

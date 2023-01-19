@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1668168551067" name="result_1668168551067">
+  <TABLE ID="result_1674142367935" name="result_1674142367935">
    <FIELD ID="main_id" arraysize="27" datatype="unicodeChar" name="main_id"/>
    <FIELD ID="mass_val" datatype="double" name="mass_val"/>
    <FIELD ID="mass_err" datatype="double" name="mass_err"/>
@@ -92,7 +92,7 @@
       <TD>*  83 Leo B b</TD>
       <TD/>
       <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
+      <TD>OEC</TD>
      </TR>
      <TR>
       <TD>*  83 Leo B c</TD>
@@ -380,6 +380,12 @@
       <TD>2MASS J00470038+6803543 h</TD>
       <TD>20</TD>
       <TD>7</TD>
+      <TD>EU</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J03480772-6022270 c</TD>
+      <TD/>
+      <TD>999</TD>
       <TD>EU</TD>
      </TR>
      <TR>
@@ -1586,6 +1592,12 @@
       <TD>Wolf  940 b</TD>
       <TD>26</TD>
       <TD>6</TD>
+      <TD>EU</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1130 B e</TD>
+      <TD>29</TD>
+      <TD>12</TD>
       <TD>EU</TD>
      </TR>
      <TR>

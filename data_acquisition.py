@@ -563,16 +563,20 @@ def provider_exo(temp=True):
     else:
         exomercat=query(TAP_service,adql_query)
     #----------------putting object main identifiers together-------------------
-    #for planet and host for later comparison of objects from different sources 
+
     # initializing column   
     exomercat['planet_main_id']=ap.table.Column(dtype=object, 
     						length=len(exomercat))
     exomercat['host_main_id']=exomercat['main_id']
+    
     for i in range(len(exomercat)):
+    	# if there is a main id use that
         if type(exomercat['main_id'][i])!=np.ma.core.MaskedConstant:
             hostname=exomercat['main_id'][i]
+        # else use host column entry
         else:
             hostname=exomercat['host'][i]
+        # if there is a binary entry
         if type(exomercat['binary'][i])!=np.ma.core.MaskedConstant:
             exomercat['host_main_id'][i]=hostname+' '+exomercat['binary'][i]
         else:
@@ -580,24 +584,20 @@ def provider_exo(temp=True):
         exomercat['planet_main_id'][i]=exomercat[
         		'host_main_id'][i]+' '+exomercat['letter'][i]
 
-    def sort_out_20pc(cat,colnames):
+    def sort_out_20pc(cat,colname):
         """
         This Function sorts out objects not within 20pc. The value comes from 
         the LIFE database distance cut.
         """
         [sim_objects]=load(['sim_objects'])
-        sim_objects.rename_column('main_id','temp')
-        cat_old=ap.table.Table()
-        for colname in colnames:
-            cat=ap.table.join(cat,sim_objects['temp','ids'],
+        sim_objects.rename_column('main_id','temp') 
+        cat=ap.table.join(cat,sim_objects['temp','ids'],
             		      keys_left=colname,keys_right='temp')
-            cat.remove_columns(['temp','ids'])
-            cat_old=ap.table.vstack([cat,cat_old])
-        cat=ap.table.unique(cat_old,silent=True)
+        cat.remove_columns(['temp','ids'])
         return cat
         
     exo=exomercat
-    exomercat=sort_out_20pc(exomercat,['host_main_id'])
+    exomercat=sort_out_20pc(exomercat,'host_main_id')
 
     #removing whitespace in front of main_id and name. 
     #if it were done before sort_out_20pc issue with missing values would occur 
@@ -793,7 +793,7 @@ def building(sim,gk,exo,temp=False):
                 #if those reference columns are masked
                 if type(cat[para+'_ref'])==ap.table.column.MaskedColumn:
                     cat[para+'_ref'].fill_value=''
-                    cat=cat.filled()
+                    cat[para+'_ref']=cat[para+'_ref'].filled()
                 #join to each reference parameter its source_id
                 cat=ap.table.join(cat,
                     sources['ref','source_id'][np.where(sources['provider_name']==provider)],
