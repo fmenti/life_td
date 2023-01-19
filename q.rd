@@ -593,11 +593,39 @@ tables may change at any time without prior warning.
         </scsCore>
     </service> 
   
-    <regSuite title="life regression">
-        <regTest title="LIFE form service appears to work."
-            url="scs/form">
+    <regSuite title="LIFE regression">
+        <!-- NOTE: These tests will break per release right now because
+        they use refs/idrefs; let's make them more stable when the next
+        release comes around. -->
+
+        <regTest title="LIFE form service appears to work.">
+        <url RA="312.27" DEC="37.47" SR="0.01">cone/scs.xml</url>
+        <code>
+            row = self.getFirstVOTableRow()
+            self.assertEqual(row["coo_source_idref"], 214)
+            self.assertEqual(row["coo_qual"], 'A')
+            self.assertAlmostEqual(row["coo_ra"], 312.2779151636)
+        </code>
+        </regTest>
+
+        <regTest title="LIFE tables appear to be in place.">
+            <url parSet="TAP" QUERY="
+SELECT * FROM 
+  life.planet_basic AS p
+  JOIN life.object ON (p.object_idref=object_id)
+  JOIN life.h_link ON (child_object_idref=object_id)
+  JOIN life.star_basic AS s ON (parent_object_idref=s.object_idref)
+WHERE
+  main_id='*  14 Her b'
+            ">/tap/sync</url>
             <code>
-                assert False
+                rows = self.getVOTableRows()
+                self.assertEqual(len(rows), 2)
+                self.assertAlmostEqual(rows[0]["coo_ra"],
+                    242.60131531625294)
+                self.assertEqual(set(r["h_link_source_idref"]
+                        for r in rows), 
+                    {1, 201})
             </code>
         </regTest>
     </regSuite>
