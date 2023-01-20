@@ -1,6 +1,14 @@
 <resource schema="life">
     <meta name="creationDate">2021-12-03T09:33:44Z</meta>
 
+<!-- Adjust the following text when you'd like to tone the beta
+    warning text up or down.  And don't indent it to avoid spurious
+    whitespace. -->
+<macDef name="betawarning">Note that LIFE's target database is living
+data.  The content – and to some extent even structure – of these
+tables may change at any time without prior warning.
+</macDef>
+
     <meta name="title">The LIFE Target Star Database LIFETD</meta>
     <meta name="description">
     The LIFE Target Star Database contains information useful
@@ -8,7 +16,9 @@
     interferometer in space). It characterizes possible
     target systems including information about stellar,
     planetary and disk properties. The data itself is mainly
-    a collection from different other catalogs.</meta>
+    a collection from different other catalogs.
+
+    \betawarning</meta>
     <meta name="subject">stars</meta>
     <meta name="subject">exoplanets</meta>
     <meta name="subject">circumstellar-disks</meta>
@@ -23,7 +33,9 @@
         <meta name="title">Source Table</meta>
         <meta name="description">
         A list of all the sources for the parameters in the other
-         tables.</meta>
+        tables.
+
+        \betawarning</meta>
         <primary>source_id</primary>
         <column name="source_id" type="integer"
             ucd="meta.id"
@@ -69,7 +81,9 @@
     <table id="object" onDisk="True" adql="True">
         <meta name="title">Object table</meta>
         <meta name="description">
-        A list of the astrophysical objects.</meta>
+        A list of the astrophysical objects.
+
+        \betawarning</meta>
         <primary>object_id</primary>
         <column name="object_id" type="integer"
             ucd="meta.id;meta.main"
@@ -111,7 +125,9 @@
     <table id="star_basic" onDisk="True" adql="True" mixin="//scs#q3cindex">
         <meta name="title">Basic stellar parameters</meta>
         <meta name="description">
-        A list of all basic stellar parameters.</meta>
+        A list of all basic stellar parameters.
+
+        \betawarning</meta>
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
@@ -237,7 +253,10 @@
     <table id="planet_basic" onDisk="True" adql="True">
         <meta name="title">Basic planetary parameters</meta>
         <meta name="description">
-        A list of all basic planetary parameters.</meta>
+        A list of all basic planetary parameters.
+        
+        \betawarning
+        </meta>
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" /> 
@@ -265,10 +284,10 @@
             description="Mass quality"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
-            ucd="arith.ratio;phys.mass"
+            ucd="phys.mass;arith.ratio"
             tablehead="mass_rel" 
             description="Mass relation defining upper / lower limit or exact 
-            measurement through '<','>' and '='."
+            measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
             ucd="meta.ref"
@@ -296,7 +315,10 @@
     <table id="disk_basic" onDisk="True" adql="True">
         <meta name="title">Basic disk parameters</meta>
         <meta name="description">
-        A list of all basic disk parameters.</meta>
+        A list of all basic disk parameters.
+        
+        \betawarning
+        </meta>
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" /> 
@@ -324,10 +346,10 @@
             description="Radius quality"
             verbLevel="1"/>
         <column name="rad_rel" type="text" 
-            ucd="arith.ratio;phys.size.radius"
+            ucd="phys.size.radius;arith.ratio"
             tablehead="rad_rel" 
             description="Radius relation defining upper / lower limit or exact 
-            measurement through '<','>' and '='."
+            measurement through '&lt;' ,'>', and '='."
             verbLevel="1"/>
         <column name="rad_source_idref" type="integer"
             ucd="meta.ref"
@@ -357,7 +379,10 @@
         <meta name="title">Object relation table</meta>
         <meta name="description">
         This table links subordinate objects (e.g. a planets of a star, or
-        a star in a multiple star system) to their parent objects.</meta>
+        a star in a multiple star system) to their parent objects.
+
+        \betawarning
+        </meta>
         <primary>parent_object_idref,child_object_idref,
             h_link_source_idref
         </primary>
@@ -407,7 +432,10 @@
     <table id="ident" onDisk="True" adql="True">
         <meta name="title">Object identifiers table</meta>
         <meta name="description">
-        A list of the object identifiers.</meta>
+        A list of the object identifiers.
+        
+        \betawarning
+        </meta>
         <primary>object_idref,id,id_source_idref</primary>
         <column name="object_idref" type="integer"
             ucd="meta.id"
@@ -444,7 +472,10 @@
     <table id="mes_dist" onDisk="True" adql="True">
         <meta name="title">Distance measurement table</meta>
         <meta name="description">
-        A list of the stellar distance measurements.</meta>
+        A list of the stellar distance measurements.
+
+        \betawarning
+        </meta>
         <primary>object_idref,dist_value,dist_err,
             dist_source_idref
         </primary>
@@ -494,7 +525,10 @@
     <table id="mes_mass" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
-        A list of the planetary mass measurements.</meta>
+        A list of the planetary mass measurements.
+
+        \betawarning
+        </meta>
         <primary>object_idref,mass_val,mass_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" /> 
@@ -522,10 +556,10 @@
             description="Mass quality"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
-            ucd="arith.ratio;phys.mass"
+            ucd="phys.mass;arith.ratio"
             tablehead="mass_rel" 
             description="Mass relation defining upper / lower limit or exact 
-            measurement through '<','>' and '='."
+            measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
             ucd="meta.ref"
@@ -558,12 +592,98 @@
         <scsCore queriedTable="star_basic">
         </scsCore>
     </service> 
-  
-    <regSuite title="life regression">
-        <regTest title="LIFE form service appears to work."
-            url="scs/form">
+ 
+    <service id="ex" allowed="examples">
+        <meta name="_example" title="Filter objects by type">
+            In LIFE, we have a single table for all kinds of objects
+            (planets, stars, disks, clusters…).  They are kept in
+            :taptable:`life.object`:
+
+            .. tapquery::
+                SELECT TOP 10 object_id, main_id FROM life.object
+                WHERE type='st'
+        </meta>
+        <meta name="_example" title="All children of an object">
+            Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
+            star).  The parent/child relationships are given in the 
+            :taptable:`life.h_link` table which you can join to all other 
+            tables that have an object_idref column.  For instance,
+            to find (direct) children or a star, you would run:
+
+            .. tapquery::
+                SELECT main_id as Child_main_id, object_id as child_object_id
+                FROM life.h_link 
+                JOIN life.ident as p on p.object_idref=parent_object_idref
+                JOIN life.object on object_id=child_object_idref
+                WHERE p.id = '* alf Cen'
+                </meta>
+        <meta name="_example" title="All parents of an object">
+            .. tapquery::
+                SELECT main_id as parent_main_id, object_id as parent_object_id
+                FROM life.h_link
+                JOIN life.ident as c on c.object_idref=child_object_idref
+                JOIN life.object on object_id=parent_object_idref
+                WHERE c.id =  '* alf Cen A'
+                </meta>
+        <meta name="_example" title="All specific measurements of an object">
+            .. tapquery::
+                SELECT *
+                FROM life.mesDist
+                JOIN life.ident USING(object_idref)
+                WHERE id = 'GJ    10'
+                </meta>
+        <meta name="_example" title="All basic stellar data from an object name">
+            .. tapquery::
+                SELECT  *
+                FROM life.star_basic 
+                JOIN life.ident USING(object_idref)
+                WHERE id = '* alf Cen'
+                </meta>
+        <meta name="_example" title="All basic disk data from host name">
+            .. tapquery::
+                SELECT main_id disk_main_id, object_id as disk_object_id, db.*
+                FROM life.h_link 
+                JOIN life.disk_basic as db on db.object_idref=child_object_idref
+                JOIN life.ident as p on p.object_idref=parent_object_idref
+                JOIN life.object on object_id=child_object_idref
+                WHERE p.id = '* bet Cas' and type='di'
+                </meta>
+        <nullCore/>
+    </service>
+
+    <regSuite title="LIFE regression">
+        <!-- NOTE: These tests will break per release right now because
+        they use refs/idrefs; let's make them more stable when the next
+        release comes around. -->
+
+        <regTest title="LIFE form service appears to work.">
+        <url RA="312.27" DEC="37.47" SR="0.01">cone/scs.xml</url>
+        <code>
+            row = self.getFirstVOTableRow()
+            self.assertEqual(row["coo_source_idref"], 214)
+            self.assertEqual(row["coo_qual"], 'A')
+            self.assertAlmostEqual(row["coo_ra"], 312.2779151636)
+        </code>
+        </regTest>
+
+        <regTest title="LIFE tables appear to be in place.">
+            <url parSet="TAP" QUERY="
+SELECT * FROM 
+  life.planet_basic AS p
+  JOIN life.object ON (p.object_idref=object_id)
+  JOIN life.h_link ON (child_object_idref=object_id)
+  JOIN life.star_basic AS s ON (parent_object_idref=s.object_idref)
+WHERE
+  main_id='*  14 Her b'
+            ">/tap/sync</url>
             <code>
-                assert False
+                rows = self.getVOTableRows()
+                self.assertEqual(len(rows), 2)
+                self.assertAlmostEqual(rows[0]["coo_ra"],
+                    242.60131531625294)
+                self.assertEqual(set(r["h_link_source_idref"]
+                        for r in rows), 
+                    {1, 201})
             </code>
         </regTest>
     </regSuite>
