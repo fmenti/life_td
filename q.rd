@@ -51,21 +51,15 @@ tables may change at any time without prior warning.
         <column name="provider_name" type="text"
             ucd="meta.bib.author"
             tablehead="provider_name"
-            description="Provider / parameter acquisition source."
+            description="Name for the service through which the data was 
+            acquired. SIMBAD: service = 
+            http://simbad.u-strasbg.fr:80/simbad/sim-tap, 
+            bibcode = 2000A&AS..143....9W. ExoMercat: service =
+            http://archives.ia2.inaf.it/vo/tap/projects, 
+            bibcode = 2020A&C....3100370A. Everything else is acquired through 
+            private communication."
             required="True"
-            verbLevel="1"/>
-        <column name="provider_url" type="text"
-            ucd="meta.ref.url"
-            tablehead="provider_url"
-            description="Provider URL."
-            required="True"
-            verbLevel="1"/>
-        <column name="provider_bibcode" type="text"
-            ucd="meta.bib.bibcode"
-            tablehead="provider_bibcode"
-            description="Provider bibcode."
-            required="True"
-            verbLevel="1"/>          
+            verbLevel="1"/>       
     </table>
     
     <data id="import_source_table">
