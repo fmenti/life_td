@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1668168568921" name="result_1668168568921">
+  <TABLE ID="result_1674142385029" name="result_1674142385029">
    <FIELD ID="rad_value" datatype="double" name="rad_value"/>
    <FIELD ID="rad_err" datatype="double" name="rad_err"/>
    <FIELD ID="rad_rel" arraysize="1" datatype="unicodeChar" name="rad_rel"/>
@@ -27,8 +27,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-000910.69+590859.2</TD>
-      <TD>231</TD>
-      <TD>3577</TD>
+      <TD>239</TD>
+      <TD>3640</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -38,8 +38,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-003921.81+211501.7</TD>
-      <TD>231</TD>
-      <TD>3578</TD>
+      <TD>239</TD>
+      <TD>3641</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -49,8 +49,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-004906.29+574854.7</TD>
-      <TD>231</TD>
-      <TD>3579</TD>
+      <TD>239</TD>
+      <TD>3642</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -60,8 +60,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-013647.84+412419.6</TD>
-      <TD>231</TD>
-      <TD>3580</TD>
+      <TD>239</TD>
+      <TD>3643</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -71,8 +71,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-014229.76+201606.7</TD>
-      <TD>231</TD>
-      <TD>3581</TD>
+      <TD>239</TD>
+      <TD>3644</TD>
      </TR>
      <TR>
       <TD>5.2585</TD>
@@ -82,8 +82,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-014404.08-155614.9</TD>
-      <TD>231</TD>
-      <TD>3582</TD>
+      <TD>239</TD>
+      <TD>3645</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -93,8 +93,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-024411.99+491342.4</TD>
-      <TD>231</TD>
-      <TD>3583</TD>
+      <TD>239</TD>
+      <TD>3646</TD>
      </TR>
      <TR>
       <TD>17.4674</TD>
@@ -104,8 +104,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-033255.84-092729.7a</TD>
-      <TD>231</TD>
-      <TD>3584</TD>
+      <TD>239</TD>
+      <TD>3647</TD>
      </TR>
      <TR>
       <TD>4.10093</TD>
@@ -115,8 +115,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-033255.84-092729.7b</TD>
-      <TD>231</TD>
-      <TD>3585</TD>
+      <TD>239</TD>
+      <TD>3648</TD>
      </TR>
      <TR>
       <TD>17.5192</TD>
@@ -126,8 +126,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-033652.14+002358.5</TD>
-      <TD>231</TD>
-      <TD>3586</TD>
+      <TD>239</TD>
+      <TD>3649</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -137,8 +137,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-044950.41+065740.6</TD>
-      <TD>231</TD>
-      <TD>3587</TD>
+      <TD>239</TD>
+      <TD>3650</TD>
      </TR>
      <TR>
       <TD>7.51107</TD>
@@ -148,8 +148,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-055624.29-141003.7</TD>
-      <TD>231</TD>
-      <TD>3588</TD>
+      <TD>239</TD>
+      <TD>3651</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -159,8 +159,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-064517.36+125344.1</TD>
-      <TD>231</TD>
-      <TD>3589</TD>
+      <TD>239</TD>
+      <TD>3652</TD>
      </TR>
      <TR>
       <TD>0.271107</TD>
@@ -170,8 +170,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-081823.95-123755.8</TD>
-      <TD>231</TD>
-      <TD>3590</TD>
+      <TD>239</TD>
+      <TD>3653</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -181,8 +181,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-111406.50+203125.4</TD>
-      <TD>231</TD>
-      <TD>3591</TD>
+      <TD>239</TD>
+      <TD>3654</TD>
      </TR>
      <TR>
       <TD>21.6656</TD>
@@ -192,8 +192,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-114903.58+143419.4</TD>
-      <TD>231</TD>
-      <TD>3592</TD>
+      <TD>239</TD>
+      <TD>3655</TD>
      </TR>
      <TR>
       <TD>204.21</TD>
@@ -203,8 +203,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-115041.72+014553.0</TD>
-      <TD>231</TD>
-      <TD>3593</TD>
+      <TD>239</TD>
+      <TD>3656</TD>
      </TR>
      <TR>
       <TD>73.9096</TD>
@@ -214,8 +214,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-123204.23-161145.6a</TD>
-      <TD>231</TD>
-      <TD>3594</TD>
+      <TD>239</TD>
+      <TD>3657</TD>
      </TR>
      <TR>
       <TD>2.27393</TD>
@@ -225,8 +225,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-123204.23-161145.6b</TD>
-      <TD>231</TD>
-      <TD>3595</TD>
+      <TD>239</TD>
+      <TD>3658</TD>
      </TR>
      <TR>
       <TD>226.402</TD>
@@ -236,8 +236,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-132825.81+134643.6</TD>
-      <TD>231</TD>
-      <TD>3596</TD>
+      <TD>239</TD>
+      <TD>3659</TD>
      </TR>
      <TR>
       <TD>14.8521</TD>
@@ -247,8 +247,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-143440.82+294442.5</TD>
-      <TD>231</TD>
-      <TD>3597</TD>
+      <TD>239</TD>
+      <TD>3660</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -258,8 +258,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-145123.38+190601.7</TD>
-      <TD>231</TD>
-      <TD>3598</TD>
+      <TD>239</TD>
+      <TD>3661</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -269,8 +269,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-154626.62+072111.0</TD>
-      <TD>231</TD>
-      <TD>3599</TD>
+      <TD>239</TD>
+      <TD>3662</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -280,8 +280,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-155240.54+422705.5</TD>
-      <TD>231</TD>
-      <TD>3600</TD>
+      <TD>239</TD>
+      <TD>3663</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -291,8 +291,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-155627.18+153941.8</TD>
-      <TD>231</TD>
-      <TD>3601</TD>
+      <TD>239</TD>
+      <TD>3664</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -302,8 +302,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-174627.51+274314.4</TD>
-      <TD>231</TD>
-      <TD>3602</TD>
+      <TD>239</TD>
+      <TD>3665</TD>
      </TR>
      <TR>
       <TD>81.5903</TD>
@@ -313,8 +313,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-183656.34+384701.3</TD>
-      <TD>231</TD>
-      <TD>3603</TD>
+      <TD>239</TD>
+      <TD>3666</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -324,8 +324,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-184539.73+203246.7</TD>
-      <TD>231</TD>
-      <TD>3604</TD>
+      <TD>239</TD>
+      <TD>3667</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -335,8 +335,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-193221.59+693940.2</TD>
-      <TD>231</TD>
-      <TD>3605</TD>
+      <TD>239</TD>
+      <TD>3668</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -346,8 +346,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-195047.00+085206.0</TD>
-      <TD>231</TD>
-      <TD>3606</TD>
+      <TD>239</TD>
+      <TD>3669</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -357,8 +357,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-210653.94+384457.9</TD>
-      <TD>231</TD>
-      <TD>3607</TD>
+      <TD>239</TD>
+      <TD>3670</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -368,8 +368,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-210655.26+384431.4</TD>
-      <TD>231</TD>
-      <TD>3608</TD>
+      <TD>239</TD>
+      <TD>3671</TD>
      </TR>
      <TR>
       <TD>NaN</TD>
@@ -379,8 +379,8 @@
       <TD/>
       <TD>Grant Kennedy</TD>
       <TD>sdb-v2-211834.77+623508.1</TD>
-      <TD>231</TD>
-      <TD>3609</TD>
+      <TD>239</TD>
+      <TD>3672</TD>
      </TR>
     </TABLEDATA>
    </DATA>

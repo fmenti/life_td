@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1668168551067" name="result_1668168551067">
+  <TABLE ID="result_1674142367935" name="result_1674142367935">
    <FIELD ID="main_id" arraysize="30" datatype="char" name="main_id" ucd="meta.id;meta.main">
     <DESCRIPTION>
      Main identifier for an object
@@ -150,20 +150,6 @@
       <TD>*  15 LMi</TD>
       <TD>18.9038</TD>
       <TD>0.045</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04134574+3709087</TD>
-      <TD>19.2652</TD>
-      <TD>0.0848</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04134574+3709087</TD>
-      <TD>19.3589</TD>
-      <TD>0.1245</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -315,16 +301,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>1RXS J185504.7+425952</TD>
-      <TD>19.216</TD>
-      <TD>0.007</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>1RXS J185504.7+425952</TD>
-      <TD>19.1801</TD>
-      <TD>0.0171</TD>
+      <TD>* psi Vel B</TD>
+      <TD>18.4144</TD>
+      <TD>0.1116</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -476,32 +455,18 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>1RXS J205308.8-013310</TD>
-      <TD>17.121</TD>
-      <TD>0.0176</TD>
+      <TD>2MASS J00045753-1709369</TD>
+      <TD>17.058</TD>
+      <TD>0.0143</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>1RXS J205308.8-013310</TD>
-      <TD>17.1046</TD>
-      <TD>0.0197</TD>
+      <TD>2MASS J00045753-1709369</TD>
+      <TD>17.0426</TD>
+      <TD>0.0355</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>1RXS J205308.8-013310</TD>
-      <TD>14</TD>
-      <TD>3</TD>
-      <TD/>
-      <TD>2012ApJ...758...56S</TD>
-     </TR>
-     <TR>
-      <TD>1RXS J205308.8-013310</TD>
-      <TD>16.5</TD>
-      <TD>1.5</TD>
-      <TD/>
-      <TD>2009ApJ...699..649S</TD>
      </TR>
      <TR>
       <TD>*  54 Psc</TD>
@@ -635,6 +600,27 @@
       <TD>0.0051</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00145575-4844171</TD>
+      <TD>19.6942</TD>
+      <TD>0.0932</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00145575-4844171</TD>
+      <TD>19.9575</TD>
+      <TD>0.1553</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00145575-4844171</TD>
+      <TD>21</TD>
+      <TD>2</TD>
+      <TD/>
+      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
       <TD>*  70 Oph B</TD>
@@ -854,11 +840,11 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00001354+2554180</TD>
-      <TD>11</TD>
-      <TD>1</TD>
+      <TD>2MASS J00310928+5749364</TD>
+      <TD>11.6</TD>
+      <TD>1.4</TD>
       <TD/>
-      <TD>2009AJ....137....1F</TD>
+      <TD>2015ApJ...814..118B</TD>
      </TR>
      <TR>
       <TD>* alf Cha</TD>
@@ -924,35 +910,21 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00045753-1709369</TD>
-      <TD>17.058</TD>
-      <TD>0.0143</TD>
+      <TD>2MASS J00345157+0523050</TD>
+      <TD>14</TD>
+      <TD>2</TD>
       <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00045753-1709369</TD>
-      <TD>17.0426</TD>
-      <TD>0.0355</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
+      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
       <TD>* alf For</TD>
-      <TD>13.9505</TD>
-      <TD>0.0597</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>* alf For A</TD>
       <TD>13.999</TD>
       <TD>0.0258</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>* alf For A</TD>
+      <TD>* alf For</TD>
       <TD>13.9505</TD>
       <TD>0.0597</TD>
       <TD/>
@@ -1013,27 +985,6 @@
       <TD>0.2111</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00145575-4844171</TD>
-      <TD>19.6942</TD>
-      <TD>0.0932</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00145575-4844171</TD>
-      <TD>19.9575</TD>
-      <TD>0.1553</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00145575-4844171</TD>
-      <TD>21</TD>
-      <TD>2</TD>
-      <TD/>
-      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
       <TD>* b Aql</TD>
@@ -1351,11 +1302,11 @@
       <TD>2009ApJ...694.1085V</TD>
      </TR>
      <TR>
-      <TD>2MASS J00310928+5749364</TD>
-      <TD>11.6</TD>
-      <TD>1.4</TD>
+      <TD>2MASS J00345684-0706013</TD>
+      <TD>37</TD>
+      <TD>3</TD>
       <TD/>
-      <TD>2015ApJ...814..118B</TD>
+      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
       <TD>* del Pav</TD>
@@ -1589,11 +1540,11 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00345157+0523050</TD>
-      <TD>14</TD>
-      <TD>2</TD>
+      <TD>2MASS J00402492+0900547</TD>
+      <TD>15</TD>
+      <TD>3</TD>
       <TD/>
-      <TD>2009AJ....137....1F</TD>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>* eta Ser</TD>
@@ -1855,11 +1806,18 @@
       <TD>2009ApJ...694.1085V</TD>
      </TR>
      <TR>
-      <TD>2MASS J00345684-0706013</TD>
-      <TD>37</TD>
-      <TD>3</TD>
+      <TD>2MASS J00492565+6518038</TD>
+      <TD>14.3103</TD>
+      <TD>0.0031</TD>
       <TD/>
-      <TD>2009AJ....137....1F</TD>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00492565+6518038</TD>
+      <TD>14.3106</TD>
+      <TD>0.0118</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>* iot Psc</TD>
@@ -2247,11 +2205,11 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00402492+0900547</TD>
-      <TD>15</TD>
-      <TD>3</TD>
+      <TD>* psi Vel A</TD>
+      <TD>18.313</TD>
+      <TD>0.1503</TD>
       <TD/>
-      <TD>2014yCat.5144....0M</TD>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>* omi02 Eri C</TD>
@@ -2394,32 +2352,32 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J04124640-0734097</TD>
-      <TD>16.6693</TD>
-      <TD>0.0668</TD>
+      <TD>2MASS J04390101-2353083</TD>
+      <TD>12.387</TD>
+      <TD>0.055</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J04124640-0734097</TD>
-      <TD>16.7535</TD>
-      <TD>0.0944</TD>
+      <TD>2MASS J04390101-2353083</TD>
+      <TD>12.3775</TD>
+      <TD>0.0787</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>* psi Vel A</TD>
-      <TD>18.313</TD>
-      <TD>0.1503</TD>
+      <TD>2MASS J04390101-2353083</TD>
+      <TD>11</TD>
+      <TD>1</TD>
       <TD/>
-      <TD>2018yCat.1345....0G</TD>
+      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
-      <TD>* psi Vel B</TD>
-      <TD>18.4144</TD>
-      <TD>0.1116</TD>
+      <TD>2MASS J04390101-2353083</TD>
+      <TD>10.8</TD>
+      <TD>1.1</TD>
       <TD/>
-      <TD>2018yCat.1345....0G</TD>
+      <TD>2003AJ....126.2421C</TD>
      </TR>
      <TR>
       <TD>* psi05 Aur</TD>
@@ -2534,20 +2492,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>* zet Dor</TD>
-      <TD>11.693</TD>
-      <TD>0.0103</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>* zet Dor</TD>
-      <TD>11.6247</TD>
-      <TD>0.0205</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>* sig Boo</TD>
       <TD>15.756</TD>
       <TD>0.0291</TD>
@@ -2581,6 +2525,27 @@
       <TD>0.015</TD>
       <TD/>
       <TD>2009ApJ...694.1085V</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00452143+1634446</TD>
+      <TD>15.2892</TD>
+      <TD>0.041</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00452143+1634446</TD>
+      <TD>15.381</TD>
+      <TD>0.0538</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00452143+1634446</TD>
+      <TD>14</TD>
+      <TD>1</TD>
+      <TD/>
+      <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
       <TD>* tau Boo</TD>
@@ -2693,13 +2658,6 @@
       <TD>77</TD>
       <TD/>
       <TD>2017AJ....153...75K</TD>
-     </TR>
-     <TR>
-      <TD>1RXS J161700.0-313639</TD>
-      <TD>18.3338</TD>
-      <TD>0.101</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>* tet Boo</TD>
@@ -2835,16 +2793,16 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>1RXS J172615.6-031131</TD>
-      <TD>18.591</TD>
-      <TD>0.0081</TD>
+      <TD>* zet Dor</TD>
+      <TD>11.693</TD>
+      <TD>0.0103</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>1RXS J172615.6-031131</TD>
-      <TD>18.5771</TD>
-      <TD>0.0243</TD>
+      <TD>* zet Dor</TD>
+      <TD>11.6247</TD>
+      <TD>0.0205</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -2861,6 +2819,13 @@
       <TD>0.0254</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00454267+3611406</TD>
+      <TD>16</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>* zet Tuc</TD>
@@ -2954,20 +2919,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>** WJG    5C</TD>
-      <TD>18.46</TD>
-      <TD>0.0267</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>** WJG    5C</TD>
-      <TD>18.5038</TD>
-      <TD>0.0411</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>1RXS J010228.1+633256</TD>
       <TD>16.6091</TD>
       <TD>0.0122</TD>
@@ -3024,46 +2975,74 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00452143+1634446</TD>
-      <TD>15.2892</TD>
-      <TD>0.041</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00452143+1634446</TD>
-      <TD>15.381</TD>
-      <TD>0.0538</TD>
+      <TD>1RXS J161700.0-313639</TD>
+      <TD>18.3338</TD>
+      <TD>0.101</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>2MASS J00452143+1634446</TD>
+      <TD>1RXS J172615.6-031131</TD>
+      <TD>18.591</TD>
+      <TD>0.0081</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J172615.6-031131</TD>
+      <TD>18.5771</TD>
+      <TD>0.0243</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J185504.7+425952</TD>
+      <TD>19.216</TD>
+      <TD>0.007</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J185504.7+425952</TD>
+      <TD>19.1801</TD>
+      <TD>0.0171</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J205308.8-013310</TD>
+      <TD>17.121</TD>
+      <TD>0.0176</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J205308.8-013310</TD>
+      <TD>17.1046</TD>
+      <TD>0.0197</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J205308.8-013310</TD>
       <TD>14</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2012ApJ...758...56S</TD>
+     </TR>
+     <TR>
+      <TD>1RXS J205308.8-013310</TD>
+      <TD>16.5</TD>
+      <TD>1.5</TD>
+      <TD/>
+      <TD>2009ApJ...699..649S</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J00001354+2554180</TD>
+      <TD>11</TD>
       <TD>1</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00454267+3611406</TD>
-      <TD>16</TD>
-      <TD>3</TD>
-      <TD/>
-      <TD>2014yCat.5144....0M</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00492565+6518038</TD>
-      <TD>14.3103</TD>
-      <TD>0.0031</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J00492565+6518038</TD>
-      <TD>14.3106</TD>
-      <TD>0.0118</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>2MASS J00501994-3322402</TD>
@@ -3290,6 +3269,13 @@
       <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
+      <TD>2MASS J03480772-6022270</TD>
+      <TD>9</TD>
+      <TD>1</TD>
+      <TD/>
+      <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
       <TD>2MASS J03521086+0210479</TD>
       <TD>19.5061</TD>
       <TD>0.0803</TD>
@@ -3381,6 +3367,34 @@
       <TD>2009AJ....137....1F</TD>
      </TR>
      <TR>
+      <TD>2MASS J04124640-0734097</TD>
+      <TD>16.6693</TD>
+      <TD>0.0668</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J04124640-0734097</TD>
+      <TD>16.7535</TD>
+      <TD>0.0944</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J04134574+3709087</TD>
+      <TD>19.2652</TD>
+      <TD>0.0848</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J04134574+3709087</TD>
+      <TD>19.3589</TD>
+      <TD>0.1245</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>2MASS J04291842-3123568</TD>
       <TD>17.009</TD>
       <TD>0.0411</TD>
@@ -3405,34 +3419,6 @@
       <TD>2MASS J04291842-3123568</TD>
       <TD>9.7</TD>
       <TD>0.9</TD>
-      <TD/>
-      <TD>2003AJ....126.2421C</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04390101-2353083</TD>
-      <TD>12.387</TD>
-      <TD>0.055</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04390101-2353083</TD>
-      <TD>12.3775</TD>
-      <TD>0.0787</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04390101-2353083</TD>
-      <TD>11</TD>
-      <TD>1</TD>
-      <TD/>
-      <TD>2009AJ....137....1F</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J04390101-2353083</TD>
-      <TD>10.8</TD>
-      <TD>1.1</TD>
       <TD/>
       <TD>2003AJ....126.2421C</TD>
      </TR>
@@ -3575,6 +3561,20 @@
       <TD>3</TD>
       <TD/>
       <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J05512511+5511208</TD>
+      <TD>19.743</TD>
+      <TD>0.0221</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J05512511+5511208</TD>
+      <TD>19.6778</TD>
+      <TD>0.0506</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>2MASS J05560053+1546011</TD>
@@ -4081,6 +4081,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>2MASS J09365564-2609422</TD>
+      <TD>18.46</TD>
+      <TD>0.0267</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J09365564-2609422</TD>
+      <TD>18.5038</TD>
+      <TD>0.0411</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>2MASS J09393548-2448279</TD>
       <TD>10</TD>
       <TD>2</TD>
@@ -4536,6 +4550,13 @@
       <TD>2008AJ....136.1290R</TD>
      </TR>
      <TR>
+      <TD>2MASS J12215175-3136054</TD>
+      <TD>15</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>2MASS J12255432-2739466</TD>
       <TD>13.3</TD>
       <TD>0.4</TD>
@@ -4653,6 +4674,20 @@
       <TD>2</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J13313937-6513056</TD>
+      <TD>15.928</TD>
+      <TD>0.0234</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J13313937-6513056</TD>
+      <TD>16.0228</TD>
+      <TD>0.0406</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>2MASS J13464634-0031501</TD>
@@ -4856,6 +4891,13 @@
       <TD>2</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
+      <TD>Gaia DR3 1858619304629874816</TD>
+      <TD>17.5664</TD>
+      <TD>0.3054</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>2MASS J15203974+3546210</TD>
@@ -5173,6 +5215,20 @@
       <TD>2008AJ....136.1290R</TD>
      </TR>
      <TR>
+      <TD>2MASS J17134048-3952120</TD>
+      <TD>19.3945</TD>
+      <TD>0.0669</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J17134048-3952120</TD>
+      <TD>19.4371</TD>
+      <TD>0.1038</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>2MASS J17312716-0759488</TD>
       <TD>18.447</TD>
       <TD>0.0348</TD>
@@ -5183,6 +5239,20 @@
       <TD>2MASS J17312716-0759488</TD>
       <TD>18.4621</TD>
       <TD>0.058</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J17364180-3425459</TD>
+      <TD>18.857</TD>
+      <TD>0.0215</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J17364180-3425459</TD>
+      <TD>18.8386</TD>
+      <TD>0.0427</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -5379,6 +5449,20 @@
       <TD>2MASS J18361069+0315224</TD>
       <TD>18.3172</TD>
       <TD>0.2865</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J18365842-3507176</TD>
+      <TD>19.052</TD>
+      <TD>0.0223</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>2MASS J18365842-3507176</TD>
+      <TD>19.0636</TD>
+      <TD>0.0451</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -5747,6 +5831,13 @@
       <TD>2015ApJ...814..118B</TD>
      </TR>
      <TR>
+      <TD>2MASS J22372056+7228351</TD>
+      <TD>14</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>2MASS J22443167+2043433</TD>
       <TD>27.9</TD>
       <TD>4.3</TD>
@@ -5759,6 +5850,13 @@
       <TD>2</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
+      <TD>Gaia DR3 4196294515486508288</TD>
+      <TD>16.3835</TD>
+      <TD>0.271</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>2MASS J22521073-1730134</TD>
@@ -6608,13 +6706,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>OGLE BLG-ECL-216148</TD>
-      <TD>11.106</TD>
-      <TD>0.1849</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>APMPM J2101-4125</TD>
       <TD>18.7731</TD>
       <TD>0.0115</TD>
@@ -6755,6 +6846,13 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>Gaia DR3 478823780455331968</TD>
+      <TD>9.942</TD>
+      <TD>0.0732</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>BD+02  1729</TD>
       <TD>15.074</TD>
       <TD>0.0047</TD>
@@ -6823,20 +6921,6 @@
       <TD>0.11</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>BD+19  3268B</TD>
-      <TD>13.627</TD>
-      <TD>0.0167</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD+19  3268B</TD>
-      <TD>13.0584</TD>
-      <TD>0.0346</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>BD+06  2986</TD>
@@ -6972,6 +7056,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>Gaia DR3 4975284381905517824</TD>
+      <TD>15.095</TD>
+      <TD>0.0256</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Gaia DR3 4975284381905517824</TD>
+      <TD>16.8605</TD>
+      <TD>0.1529</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>BD+11  2576</TD>
       <TD>7.6276</TD>
       <TD>0.0015</TD>
@@ -7047,20 +7145,6 @@
       <TD>0.79</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>BD+35  2439</TD>
-      <TD>16.6585</TD>
-      <TD>0.0053</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD+35  2439</TD>
-      <TD>16.6454</TD>
-      <TD>0.0117</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>BD+13  2618</TD>
@@ -7196,6 +7280,13 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>BD+21  2486</TD>
+      <TD>18.8</TD>
+      <TD>0.61</TD>
+      <TD/>
+      <TD>2010MNRAS.403.1949K</TD>
+     </TR>
+     <TR>
       <TD>BD+18  2776</TD>
       <TD>12.913</TD>
       <TD>0.0028</TD>
@@ -7269,6 +7360,20 @@
       <TD>BD+19  3268A</TD>
       <TD>13.6788</TD>
       <TD>0.0062</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD+19  3268B</TD>
+      <TD>13.627</TD>
+      <TD>0.0167</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD+19  3268B</TD>
+      <TD>13.0584</TD>
+      <TD>0.0346</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -7355,13 +7460,6 @@
       <TD>0.0626</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD+21  2486</TD>
-      <TD>18.8</TD>
-      <TD>0.61</TD>
-      <TD/>
-      <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
       <TD>BD+21  2486A</TD>
@@ -7560,6 +7658,27 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>BD-15  4394</TD>
+      <TD>18.992</TD>
+      <TD>0.0071</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  4394</TD>
+      <TD>18.9625</TD>
+      <TD>0.0182</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  4394</TD>
+      <TD>18.23</TD>
+      <TD>0.72</TD>
+      <TD/>
+      <TD>2010MNRAS.403.1949K</TD>
+     </TR>
+     <TR>
       <TD>BD+33   529</TD>
       <TD>14.7767</TD>
       <TD>0.0032</TD>
@@ -7602,25 +7721,18 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>BD-02  2198</TD>
-      <TD>14.2298</TD>
-      <TD>0.0265</TD>
+      <TD>BD+35  2439</TD>
+      <TD>16.6585</TD>
+      <TD>0.0053</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>BD-02  2198</TD>
-      <TD>14.0688</TD>
-      <TD>0.0271</TD>
+      <TD>BD+35  2439</TD>
+      <TD>16.6454</TD>
+      <TD>0.0117</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-02  2198</TD>
-      <TD>14.17</TD>
-      <TD>0.33</TD>
-      <TD/>
-      <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
       <TD>BD+36  1970</TD>
@@ -7707,6 +7819,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>Gaia DR3 4975284381907834752</TD>
+      <TD>14.95</TD>
+      <TD>0.0305</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Gaia DR3 4975284381907834752</TD>
+      <TD>13.6108</TD>
+      <TD>0.1441</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>BD+40  4631</TD>
       <TD>19.837</TD>
       <TD>0.0054</TD>
@@ -7754,20 +7880,6 @@
       <TD>0.0007</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-08  2582B</TD>
-      <TD>14.4913</TD>
-      <TD>0.0077</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-08  2582B</TD>
-      <TD>14.4601</TD>
-      <TD>0.0172</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>BD+44  2051B</TD>
@@ -7931,20 +8043,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>HD 189733B</TD>
-      <TD>19.751</TD>
-      <TD>0.0053</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>HD 189733B</TD>
-      <TD>19.7221</TD>
-      <TD>0.0186</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>BD+46  1951</TD>
       <TD>19.433</TD>
       <TD>0.0049</TD>
@@ -8057,6 +8155,13 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>Gaia DR3 5715492411643646976</TD>
+      <TD>18.3281</TD>
+      <TD>1.0505</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>BD+57  1274</TD>
       <TD>17.541</TD>
       <TD>0.0042</TD>
@@ -8097,41 +8202,6 @@
       <TD>0.0033</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745B</TD>
-      <TD>15.605</TD>
-      <TD>0.0175</TD>
-      <TD/>
-      <TD>2020AJ....160...83S</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745B</TD>
-      <TD>15.65</TD>
-      <TD>0.0078</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745B</TD>
-      <TD>15.6102</TD>
-      <TD>0.0168</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745B</TD>
-      <TD>2904.06</TD>
-      <TD>5</TD>
-      <TD/>
-      <TD>2017AJ....153...75K</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745B</TD>
-      <TD>10.9</TD>
-      <TD>1.8</TD>
-      <TD/>
-      <TD>2009ApJ...699..649S</TD>
      </TR>
      <TR>
       <TD>BD+62   780</TD>
@@ -8232,6 +8302,27 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>BD-13  5069</TD>
+      <TD>16.9949</TD>
+      <TD>0.0086</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-13  5069</TD>
+      <TD>16.9741</TD>
+      <TD>0.0139</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-13  5069</TD>
+      <TD>16.35</TD>
+      <TD>0.55</TD>
+      <TD/>
+      <TD>2010MNRAS.403.1949K</TD>
+     </TR>
+     <TR>
       <TD>BD+68   946</TD>
       <TD>4.5498</TD>
       <TD>0.0004</TD>
@@ -8288,18 +8379,25 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>LP  833-42 A</TD>
-      <TD>18.4573</TD>
-      <TD>0.0162</TD>
+      <TD>BD-02  2198</TD>
+      <TD>14.2298</TD>
+      <TD>0.0265</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>LP  833-42 A</TD>
-      <TD>18.482</TD>
-      <TD>0.0406</TD>
+      <TD>BD-02  2198</TD>
+      <TD>14.0688</TD>
+      <TD>0.0271</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-02  2198</TD>
+      <TD>14.17</TD>
+      <TD>0.33</TD>
+      <TD/>
+      <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
       <TD>BD-02  3000</TD>
@@ -8456,6 +8554,13 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>Gaia DR3 5824888595970910336</TD>
+      <TD>19.6486</TD>
+      <TD>0.2725</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>BD-07   699</TD>
       <TD>15.6706</TD>
       <TD>0.0055</TD>
@@ -8559,6 +8664,20 @@
       <TD>0.27</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
+     </TR>
+     <TR>
+      <TD>BD-08  2582B</TD>
+      <TD>14.4913</TD>
+      <TD>0.0077</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>BD-08  2582B</TD>
+      <TD>14.4601</TD>
+      <TD>0.0172</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>BD-09   956</TD>
@@ -8694,48 +8813,6 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
-      <TD>BD-13  5069</TD>
-      <TD>16.9949</TD>
-      <TD>0.0086</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-13  5069</TD>
-      <TD>16.9741</TD>
-      <TD>0.0139</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-13  5069</TD>
-      <TD>16.35</TD>
-      <TD>0.55</TD>
-      <TD/>
-      <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  4394</TD>
-      <TD>18.992</TD>
-      <TD>0.0071</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  4394</TD>
-      <TD>18.9625</TD>
-      <TD>0.0182</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  4394</TD>
-      <TD>18.23</TD>
-      <TD>0.72</TD>
-      <TD/>
-      <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
       <TD>BD-15  6290</TD>
       <TD>4.672</TD>
       <TD>0.0007</TD>
@@ -8790,20 +8867,6 @@
       <TD>0.49</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 176</TD>
-      <TD>19.0588</TD>
-      <TD>0.014</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 176</TD>
-      <TD>19.091</TD>
-      <TD>0.0226</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>BD-17  6785</TD>
@@ -9070,20 +9133,6 @@
       <TD>0.61</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745</TD>
-      <TD>15.67</TD>
-      <TD>0.0032</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>CD-28  1745</TD>
-      <TD>15.6683</TD>
-      <TD>0.0057</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>CD-23  9765</TD>
@@ -9387,6 +9436,55 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>CD-28  1745</TD>
+      <TD>15.67</TD>
+      <TD>0.0032</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745</TD>
+      <TD>15.6683</TD>
+      <TD>0.0057</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745B</TD>
+      <TD>15.605</TD>
+      <TD>0.0175</TD>
+      <TD/>
+      <TD>2020AJ....160...83S</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745B</TD>
+      <TD>15.65</TD>
+      <TD>0.0078</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745B</TD>
+      <TD>15.6102</TD>
+      <TD>0.0168</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745B</TD>
+      <TD>2904.06</TD>
+      <TD>5</TD>
+      <TD/>
+      <TD>2017AJ....153...75K</TD>
+     </TR>
+     <TR>
+      <TD>CD-28  1745B</TD>
+      <TD>10.9</TD>
+      <TD>1.8</TD>
+      <TD/>
+      <TD>2009ApJ...699..649S</TD>
+     </TR>
+     <TR>
       <TD>CD-28 16676</TD>
       <TD>14.3</TD>
       <TD>0.0165</TD>
@@ -9667,20 +9765,6 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
-      <TD>EGGR 535</TD>
-      <TD>14.1168</TD>
-      <TD>0.009</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 535</TD>
-      <TD>14.1316</TD>
-      <TD>0.0151</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>CD-32 15723</TD>
       <TD>14.6808</TD>
       <TD>0.0071</TD>
@@ -9870,6 +9954,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>CD-42  1943</TD>
+      <TD>19.867</TD>
+      <TD>0.0183</TD>
+      <TD/>
+      <TD>2020AJ....160...83S</TD>
+     </TR>
+     <TR>
+      <TD>CD-42  1943</TD>
+      <TD>6702</TD>
+      <TD>895</TD>
+      <TD/>
+      <TD>2017AJ....153...75K</TD>
+     </TR>
+     <TR>
       <TD>CD-36  6589</TD>
       <TD>16.34</TD>
       <TD>0.41</TD>
@@ -9938,20 +10036,6 @@
       <TD>0.18</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>LP  833-42 B</TD>
-      <TD>18.4081</TD>
-      <TD>0.0198</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  833-42 B</TD>
-      <TD>18.4355</TD>
-      <TD>0.0392</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>CD-37 10765B</TD>
@@ -10120,20 +10204,6 @@
       <TD>0.43</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>CD-42  1943</TD>
-      <TD>19.867</TD>
-      <TD>0.0183</TD>
-      <TD/>
-      <TD>2020AJ....160...83S</TD>
-     </TR>
-     <TR>
-      <TD>CD-42  1943</TD>
-      <TD>6702</TD>
-      <TD>895</TD>
-      <TD/>
-      <TD>2017AJ....153...75K</TD>
      </TR>
      <TR>
       <TD>CD-42  1943A</TD>
@@ -10388,6 +10458,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>EGGR  45</TD>
+      <TD>6.4417</TD>
+      <TD>0.0007</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR  45</TD>
+      <TD>6.4412</TD>
+      <TD>0.0011</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>CD-45  5627</TD>
       <TD>15.4513</TD>
       <TD>0.0048</TD>
@@ -10449,20 +10533,6 @@
       <TD>0.03</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 566</TD>
-      <TD>16.9301</TD>
-      <TD>0.0165</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 566</TD>
-      <TD>16.9149</TD>
-      <TD>0.0337</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>CD-46 12902</TD>
@@ -10629,6 +10699,20 @@
       <TD>CD-51  5974</TD>
       <TD>11.0133</TD>
       <TD>0.0043</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 140</TD>
+      <TD>19.57</TD>
+      <TD>0.0098</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 140</TD>
+      <TD>19.6165</TD>
+      <TD>0.0207</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -11130,6 +11214,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>EGGR 471</TD>
+      <TD>16.6708</TD>
+      <TD>0.0103</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 471</TD>
+      <TD>16.6685</TD>
+      <TD>0.0153</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>CPD-58  7400</TD>
       <TD>14.3759</TD>
       <TD>0.0039</TD>
@@ -11177,6 +11275,13 @@
       <TD>0.19</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
+     </TR>
+     <TR>
+      <TD>CWISEP J181006.00-101001.1</TD>
+      <TD>8.9</TD>
+      <TD>-0.6</TD>
+      <TD/>
+      <TD>2021ApJS..253....7K</TD>
      </TR>
      <TR>
       <TD>DENIS J025503.3-470049</TD>
@@ -11459,30 +11564,16 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>EGGR  45</TD>
-      <TD>6.4417</TD>
-      <TD>0.0007</TD>
+      <TD>G 192-39B</TD>
+      <TD>18.9019</TD>
+      <TD>0.0206</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>EGGR  45</TD>
-      <TD>6.4412</TD>
-      <TD>0.0011</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 140</TD>
-      <TD>19.57</TD>
-      <TD>0.0098</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 140</TD>
-      <TD>19.6165</TD>
-      <TD>0.0207</TD>
+      <TD>G 192-39B</TD>
+      <TD>18.9641</TD>
+      <TD>0.0323</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -11595,6 +11686,20 @@
       <TD>EGGR 169</TD>
       <TD>16.0296</TD>
       <TD>0.0113</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 176</TD>
+      <TD>19.0588</TD>
+      <TD>0.014</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 176</TD>
+      <TD>19.091</TD>
+      <TD>0.0226</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -11858,27 +11963,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>G  39-29A</TD>
-      <TD>13.2159</TD>
-      <TD>0.0133</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G  39-29A</TD>
-      <TD>13.6206</TD>
-      <TD>0.0854</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G  39-29A</TD>
-      <TD>8</TD>
-      <TD>3</TD>
-      <TD/>
-      <TD>2012ApJ...758...56S</TD>
-     </TR>
-     <TR>
       <TD>EGGR 372</TD>
       <TD>6.2113</TD>
       <TD>0.0004</TD>
@@ -12082,16 +12166,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>EGGR 471</TD>
-      <TD>16.6708</TD>
-      <TD>0.0103</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>EGGR 471</TD>
-      <TD>16.6685</TD>
-      <TD>0.0153</TD>
+      <TD>Gaia DR3 5825187972369019264</TD>
+      <TD>14.6655</TD>
+      <TD>0.154</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -12190,6 +12267,34 @@
       <TD>EGGR 498</TD>
       <TD>17.3123</TD>
       <TD>0.024</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 535</TD>
+      <TD>14.1168</TD>
+      <TD>0.009</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 535</TD>
+      <TD>14.1316</TD>
+      <TD>0.0151</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 566</TD>
+      <TD>16.9301</TD>
+      <TD>0.0165</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>EGGR 566</TD>
+      <TD>16.9149</TD>
+      <TD>0.0337</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -12656,20 +12761,6 @@
       <TD>2014AJ....147...85R</TD>
      </TR>
      <TR>
-      <TD>G  39-29B</TD>
-      <TD>13.1049</TD>
-      <TD>0.028</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G  39-29B</TD>
-      <TD>13.2475</TD>
-      <TD>0.0329</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>G  21-10A</TD>
       <TD>17.7731</TD>
       <TD>0.0142</TD>
@@ -12775,6 +12866,27 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>G 247-22</TD>
+      <TD>19.3291</TD>
+      <TD>0.0088</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-22</TD>
+      <TD>21.9</TD>
+      <TD>1.5</TD>
+      <TD/>
+      <TD>1997PASP..109..849G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-22</TD>
+      <TD>19.3868</TD>
+      <TD>0.0228</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G  25-8</TD>
       <TD>12.8303</TD>
       <TD>0.0048</TD>
@@ -12843,20 +12955,6 @@
       <TD>0.045</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>PM J17394-2327</TD>
-      <TD>18.6652</TD>
-      <TD>0.0102</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>PM J17394-2327</TD>
-      <TD>18.6848</TD>
-      <TD>0.0347</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>G  31-39</TD>
@@ -12985,6 +13083,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>G 247-23</TD>
+      <TD>19.3209</TD>
+      <TD>0.0125</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-23</TD>
+      <TD>19.4348</TD>
+      <TD>0.0266</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G  33-35B</TD>
       <TD>15.9323</TD>
       <TD>0.0295</TD>
@@ -13060,6 +13172,41 @@
       <TD>3.8</TD>
       <TD/>
       <TD>2009ApJ...699..649S</TD>
+     </TR>
+     <TR>
+      <TD>G  39-29A</TD>
+      <TD>13.2159</TD>
+      <TD>0.0133</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G  39-29A</TD>
+      <TD>13.6206</TD>
+      <TD>0.0854</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>G  39-29A</TD>
+      <TD>8</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2012ApJ...758...56S</TD>
+     </TR>
+     <TR>
+      <TD>G  39-29B</TD>
+      <TD>13.1049</TD>
+      <TD>0.028</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G  39-29B</TD>
+      <TD>13.2475</TD>
+      <TD>0.0329</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>G  41-14</TD>
@@ -13394,6 +13541,20 @@
       <TD>G  62-18</TD>
       <TD>19.5128</TD>
       <TD>0.0206</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>HD 189733B</TD>
+      <TD>19.751</TD>
+      <TD>0.0053</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>HD 189733B</TD>
+      <TD>19.7221</TD>
+      <TD>0.0186</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -13839,6 +14000,20 @@
       <TD>2009ApJ...699..649S</TD>
      </TR>
      <TR>
+      <TD>G 207-19</TD>
+      <TD>12.4714</TD>
+      <TD>0.0025</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 207-19</TD>
+      <TD>12.4667</TD>
+      <TD>0.0055</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G  82-33</TD>
       <TD>18.931</TD>
       <TD>0.0344</TD>
@@ -14049,6 +14224,13 @@
       <TD>2004AJ....128..463R</TD>
      </TR>
      <TR>
+      <TD>WISE J032517.69-385454.1</TD>
+      <TD>16</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>G  99-49</TD>
       <TD>5.2079</TD>
       <TD>0.0008</TD>
@@ -14143,20 +14325,6 @@
       <TD>G 107-65</TD>
       <TD>16.9535</TD>
       <TD>0.0121</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 155-42</TD>
-      <TD>17.0651</TD>
-      <TD>0.0061</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 155-42</TD>
-      <TD>17.0838</TD>
-      <TD>0.0168</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -14868,20 +15036,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>G 157-77</TD>
-      <TD>7.1767</TD>
-      <TD>0.0022</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 157-77</TD>
-      <TD>7.1782</TD>
-      <TD>0.0054</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>G 130-9</TD>
       <TD>19.8428</TD>
       <TD>0.0062</TD>
@@ -15225,6 +15379,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>LP  833-42 A</TD>
+      <TD>18.4573</TD>
+      <TD>0.0162</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  833-42 A</TD>
+      <TD>18.482</TD>
+      <TD>0.0406</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G 139-39</TD>
       <TD>18.4847</TD>
       <TD>0.0062</TD>
@@ -15335,27 +15503,6 @@
       <TD>0.0254</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 173-37</TD>
-      <TD>14.32</TD>
-      <TD>0.0058</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 173-37</TD>
-      <TD>14.3142</TD>
-      <TD>0.0137</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 173-37</TD>
-      <TD>15.4</TD>
-      <TD>2.4</TD>
-      <TD/>
-      <TD>2004AJ....128..463R</TD>
      </TR>
      <TR>
       <TD>G 142-11</TD>
@@ -15596,6 +15743,34 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>G 155-42</TD>
+      <TD>17.0651</TD>
+      <TD>0.0061</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 155-42</TD>
+      <TD>17.0838</TD>
+      <TD>0.0168</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 157-77</TD>
+      <TD>7.1767</TD>
+      <TD>0.0022</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 157-77</TD>
+      <TD>7.1782</TD>
+      <TD>0.0054</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G 158-27</TD>
       <TD>4.8461</TD>
       <TD>0.0011</TD>
@@ -15804,20 +15979,6 @@
       <TD>2.4</TD>
       <TD/>
       <TD>2009ApJ...699..649S</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 4975284381907834752</TD>
-      <TD>14.95</TD>
-      <TD>0.0305</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 4975284381907834752</TD>
-      <TD>13.6108</TD>
-      <TD>0.1441</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>G 164-65</TD>
@@ -16037,11 +16198,25 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Gaia DR3 5715492411643646976</TD>
-      <TD>18.3281</TD>
-      <TD>1.0505</TD>
+      <TD>G 173-37</TD>
+      <TD>14.32</TD>
+      <TD>0.0058</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 173-37</TD>
+      <TD>14.3142</TD>
+      <TD>0.0137</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 173-37</TD>
+      <TD>15.4</TD>
+      <TD>2.4</TD>
+      <TD/>
+      <TD>2004AJ....128..463R</TD>
      </TR>
      <TR>
       <TD>G 173-39</TD>
@@ -16140,6 +16315,20 @@
       <TD>0.1765</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-39</TD>
+      <TD>18.422</TD>
+      <TD>0.007</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-39</TD>
+      <TD>18.4474</TD>
+      <TD>0.0189</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>G 179-33</TD>
@@ -16380,6 +16569,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>G 201-54</TD>
+      <TD>16.437</TD>
+      <TD>0.0056</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 201-54</TD>
+      <TD>16.4176</TD>
+      <TD>0.0127</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G 188-26</TD>
       <TD>16.832</TD>
       <TD>0.005</TD>
@@ -16604,16 +16807,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>G 192-39B</TD>
-      <TD>18.9019</TD>
-      <TD>0.0206</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 192-39B</TD>
-      <TD>18.9641</TD>
-      <TD>0.0323</TD>
+      <TD>Gaia DR2 4525372848115836288</TD>
+      <TD>18.7828</TD>
+      <TD>0.292</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -16863,20 +17059,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>G 201-54</TD>
-      <TD>16.437</TD>
-      <TD>0.0056</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 201-54</TD>
-      <TD>16.4176</TD>
-      <TD>0.0127</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>G 202-45</TD>
       <TD>7.8445</TD>
       <TD>0.0296</TD>
@@ -16982,13 +17164,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Gaia DR3 5824888595970910336</TD>
-      <TD>19.6486</TD>
-      <TD>0.2725</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>G 205-28</TD>
       <TD>13.567</TD>
       <TD>0.0032</TD>
@@ -17069,20 +17244,6 @@
       <TD>G 207-18</TD>
       <TD>19.0674</TD>
       <TD>0.0187</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 207-19</TD>
-      <TD>12.4714</TD>
-      <TD>0.0025</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 207-19</TD>
-      <TD>12.4667</TD>
-      <TD>0.0055</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -17188,13 +17349,6 @@
       <TD>G 212-5</TD>
       <TD>16.6675</TD>
       <TD>0.0102</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 5825187972369019264</TD>
-      <TD>14.6655</TD>
-      <TD>0.154</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -17542,6 +17696,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>G 247-15</TD>
+      <TD>12.0623</TD>
+      <TD>0.0029</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>G 247-15</TD>
+      <TD>12.0859</TD>
+      <TD>0.0068</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>G 234-37</TD>
       <TD>12.9976</TD>
       <TD>0.0028</TD>
@@ -17654,20 +17822,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Gaia DR3 5864005027836957952</TD>
-      <TD>15.928</TD>
-      <TD>0.0234</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 5864005027836957952</TD>
-      <TD>16.0228</TD>
-      <TD>0.0406</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>G 236-2</TD>
       <TD>11.8626</TD>
       <TD>0.0025</TD>
@@ -17734,6 +17888,13 @@
       <TD>G 238-55</TD>
       <TD>16.2523</TD>
       <TD>0.0137</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Gaia DR2 5769937474369358976</TD>
+      <TD>15.8562</TD>
+      <TD>0.2596</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -17962,65 +18123,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>G 247-15</TD>
-      <TD>12.0623</TD>
-      <TD>0.0029</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-15</TD>
-      <TD>12.0859</TD>
-      <TD>0.0068</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-22</TD>
-      <TD>19.3291</TD>
-      <TD>0.0088</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-22</TD>
-      <TD>21.9</TD>
-      <TD>1.5</TD>
-      <TD/>
-      <TD>1997PASP..109..849G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-22</TD>
-      <TD>19.3868</TD>
-      <TD>0.0228</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-23</TD>
-      <TD>19.3209</TD>
-      <TD>0.0125</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-23</TD>
-      <TD>19.4348</TD>
-      <TD>0.0266</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-39</TD>
-      <TD>18.422</TD>
-      <TD>0.007</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>G 247-39</TD>
-      <TD>18.4474</TD>
-      <TD>0.0189</TD>
+      <TD>Gaia DR2 6702242043883732864</TD>
+      <TD>7.5318</TD>
+      <TD>0.0375</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -18893,34 +18998,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>L  257-129</TD>
-      <TD>14.586</TD>
-      <TD>0.0359</TD>
-      <TD/>
-      <TD>2020AJ....160...83S</TD>
-     </TR>
-     <TR>
-      <TD>L  257-129</TD>
-      <TD>14.608</TD>
-      <TD>0.0057</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>L  257-129</TD>
-      <TD>14.5945</TD>
-      <TD>0.0239</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>L  257-129</TD>
-      <TD>4918.25</TD>
-      <TD>5</TD>
-      <TD/>
-      <TD>2017AJ....153...75K</TD>
-     </TR>
-     <TR>
       <TD>GD 279</TD>
       <TD>16.511</TD>
       <TD>0.0085</TD>
@@ -19103,20 +19180,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Gaia DR2 265201384281320448</TD>
-      <TD>19.743</TD>
-      <TD>0.0221</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 265201384281320448</TD>
-      <TD>19.6778</TD>
-      <TD>0.0506</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>Gaia DR2 3330473222213987072</TD>
       <TD>27.983</TD>
       <TD>1.8972</TD>
@@ -19138,107 +19201,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Gaia DR2 4053559111471124608</TD>
-      <TD>18.857</TD>
-      <TD>0.0215</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 4053559111471124608</TD>
-      <TD>18.8386</TD>
-      <TD>0.0427</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>Gaia DR2 4129144660321847040</TD>
       <TD>4.1038</TD>
       <TD>0.0166</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 4525372848115836288</TD>
-      <TD>18.7828</TD>
-      <TD>0.292</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 5769937474369358976</TD>
-      <TD>15.8562</TD>
-      <TD>0.2596</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 5972124644679705728</TD>
-      <TD>19.3945</TD>
-      <TD>0.0669</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 5972124644679705728</TD>
-      <TD>19.4371</TD>
-      <TD>0.1038</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 6702242043883732864</TD>
-      <TD>7.5318</TD>
-      <TD>0.0375</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 6733860940302404864</TD>
-      <TD>19.052</TD>
-      <TD>0.0223</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR2 6733860940302404864</TD>
-      <TD>19.0636</TD>
-      <TD>0.0451</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 1858619304629874816</TD>
-      <TD>17.5664</TD>
-      <TD>0.3054</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 4196294515486508288</TD>
-      <TD>16.3835</TD>
-      <TD>0.271</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 478823780455331968</TD>
-      <TD>9.942</TD>
-      <TD>0.0732</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 4975284381905517824</TD>
-      <TD>15.095</TD>
-      <TD>0.0256</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Gaia DR3 4975284381905517824</TD>
-      <TD>16.8605</TD>
-      <TD>0.1529</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -19761,18 +19726,32 @@
       <TD>2009ApJ...694.1085V</TD>
      </TR>
      <TR>
-      <TD>L  257-54</TD>
-      <TD>17.6621</TD>
-      <TD>0.0097</TD>
+      <TD>L  257-129</TD>
+      <TD>14.586</TD>
+      <TD>0.0359</TD>
+      <TD/>
+      <TD>2020AJ....160...83S</TD>
+     </TR>
+     <TR>
+      <TD>L  257-129</TD>
+      <TD>14.608</TD>
+      <TD>0.0057</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>L  257-54</TD>
-      <TD>17.6653</TD>
-      <TD>0.0313</TD>
+      <TD>L  257-129</TD>
+      <TD>14.5945</TD>
+      <TD>0.0239</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>L  257-129</TD>
+      <TD>4918.25</TD>
+      <TD>5</TD>
+      <TD/>
+      <TD>2017AJ....153...75K</TD>
      </TR>
      <TR>
       <TD>HD  17230</TD>
@@ -20377,16 +20356,16 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>LP  941-19</TD>
-      <TD>18.7503</TD>
-      <TD>0.0228</TD>
+      <TD>LEHPM 5625</TD>
+      <TD>16.2656</TD>
+      <TD>0.0087</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>LP  941-19</TD>
-      <TD>18.7857</TD>
-      <TD>0.0386</TD>
+      <TD>LEHPM 5625</TD>
+      <TD>16.2866</TD>
+      <TD>0.0218</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -24388,9 +24367,9 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>RX J2117.5-4444B</TD>
-      <TD>18.0444</TD>
-      <TD>0.0252</TD>
+      <TD>NAME StM 162A</TD>
+      <TD>15.9862</TD>
+      <TD>0.094</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
@@ -24738,11 +24717,11 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
-      <TD>Ross   52A</TD>
-      <TD>11.4284</TD>
-      <TD>0.0084</TD>
+      <TD>WISE J032547.72+083118.2</TD>
+      <TD>12</TD>
+      <TD>3</TD>
       <TD/>
-      <TD>2020yCat.1350....0G</TD>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>HD 207129</TD>
@@ -27314,6 +27293,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>L  257-54</TD>
+      <TD>17.6621</TD>
+      <TD>0.0097</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>L  257-54</TD>
+      <TD>17.6653</TD>
+      <TD>0.0313</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>L  258-126</TD>
       <TD>16.937</TD>
       <TD>0.0195</TD>
@@ -28728,6 +28721,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>LP  518-58 A</TD>
+      <TD>18.018</TD>
+      <TD>0.0215</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  518-58 A</TD>
+      <TD>18.1795</TD>
+      <TD>0.1736</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>L  645-73</TD>
       <TD>11.836</TD>
       <TD>0.0067</TD>
@@ -29267,20 +29274,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>LAWD 83</TD>
-      <TD>16.179</TD>
-      <TD>0.004</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LAWD 83</TD>
-      <TD>16.1645</TD>
-      <TD>0.0077</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>L  901-10</TD>
       <TD>19.5126</TD>
       <TD>0.0122</TD>
@@ -29494,6 +29487,20 @@
       <TD>LAWD 79</TD>
       <TD>11.5638</TD>
       <TD>0.0036</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>LAWD 83</TD>
+      <TD>16.179</TD>
+      <TD>0.004</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LAWD 83</TD>
+      <TD>16.1645</TD>
+      <TD>0.0077</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -29785,20 +29792,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>LEHPM 5625</TD>
-      <TD>16.2656</TD>
-      <TD>0.0087</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LEHPM 5625</TD>
-      <TD>16.2866</TD>
-      <TD>0.0218</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>LP   12-304</TD>
       <TD>19.2372</TD>
       <TD>0.0222</TD>
@@ -30079,20 +30072,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>LSPM J0344+0741</TD>
-      <TD>15.478</TD>
-      <TD>0.0073</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LSPM J0344+0741</TD>
-      <TD>15.5322</TD>
-      <TD>0.0234</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>LP   99-392</TD>
       <TD>19.476</TD>
       <TD>0.0073</TD>
@@ -30369,20 +30348,6 @@
       <TD>LP  229-17</TD>
       <TD>10.8868</TD>
       <TD>0.0058</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  322-628</TD>
-      <TD>14.1052</TD>
-      <TD>0.0048</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  322-628</TD>
-      <TD>14.1049</TD>
-      <TD>0.0118</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -30709,16 +30674,30 @@
       <TD>2004AJ....128..463R</TD>
      </TR>
      <TR>
-      <TD>LP  410-38</TD>
-      <TD>19.8754</TD>
-      <TD>0.0291</TD>
+      <TD>LP  521-18</TD>
+      <TD>19.4209</TD>
+      <TD>0.015</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>LP  410-38</TD>
-      <TD>19.8409</TD>
-      <TD>0.057</TD>
+      <TD>LP  521-18</TD>
+      <TD>19.5522</TD>
+      <TD>0.0573</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  322-628</TD>
+      <TD>14.1052</TD>
+      <TD>0.0048</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  322-628</TD>
+      <TD>14.1049</TD>
+      <TD>0.0118</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -30954,6 +30933,20 @@
       <TD>2008AJ....136.1290R</TD>
      </TR>
      <TR>
+      <TD>LP  734-29</TD>
+      <TD>17.5663</TD>
+      <TD>0.012</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  734-29</TD>
+      <TD>17.5916</TD>
+      <TD>0.037</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>LP  390-16</TD>
       <TD>17.844</TD>
       <TD>0.0072</TD>
@@ -30980,6 +30973,20 @@
       <TD>1.5</TD>
       <TD/>
       <TD>2009ApJ...699..649S</TD>
+     </TR>
+     <TR>
+      <TD>LP  410-38</TD>
+      <TD>19.8754</TD>
+      <TD>0.0291</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  410-38</TD>
+      <TD>19.8409</TD>
+      <TD>0.057</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>LP  411-18</TD>
@@ -31510,48 +31517,6 @@
       <TD>LP  508-20</TD>
       <TD>18.2946</TD>
       <TD>0.046</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  518-58 A</TD>
-      <TD>18.018</TD>
-      <TD>0.0215</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  518-58 A</TD>
-      <TD>18.1795</TD>
-      <TD>0.1736</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  521-18</TD>
-      <TD>19.4209</TD>
-      <TD>0.015</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  521-18</TD>
-      <TD>19.5522</TD>
-      <TD>0.0573</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  734-29</TD>
-      <TD>17.5663</TD>
-      <TD>0.012</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>LP  734-29</TD>
-      <TD>17.5916</TD>
-      <TD>0.037</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -33124,6 +33089,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>WISE J033605.05-014350.4</TD>
+      <TD>9.91</TD>
+      <TD>0.61</TD>
+      <TD/>
+      <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J033605.05-014350.4</TD>
+      <TD>17</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>LP  760-3</TD>
       <TD>10.8887</TD>
       <TD>0.0063</TD>
@@ -33796,6 +33775,20 @@
       <TD>2004AJ....128..463R</TD>
      </TR>
      <TR>
+      <TD>LP  833-42 B</TD>
+      <TD>18.4081</TD>
+      <TD>0.0198</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  833-42 B</TD>
+      <TD>18.4355</TD>
+      <TD>0.0392</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>LP  834-32</TD>
       <TD>16.779</TD>
       <TD>0.0065</TD>
@@ -34158,6 +34151,20 @@
       <TD>0.0402</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>WISE J035000.32-565830.2</TD>
+      <TD>5.92</TD>
+      <TD>0.32</TD>
+      <TD/>
+      <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J035000.32-565830.2</TD>
+      <TD>3.7</TD>
+      <TD>1.6</TD>
+      <TD/>
+      <TD>2013ApJ...762..119M</TD>
      </TR>
      <TR>
       <TD>LP  855-14</TD>
@@ -34811,6 +34818,20 @@
       <TD>2008AJ....136.1290R</TD>
      </TR>
      <TR>
+      <TD>LP  941-19</TD>
+      <TD>18.7503</TD>
+      <TD>0.0228</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LP  941-19</TD>
+      <TD>18.7857</TD>
+      <TD>0.0386</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>LP  941-90</TD>
       <TD>18.7931</TD>
       <TD>0.0085</TD>
@@ -35122,6 +35143,20 @@
       <TD>LSPM J0336+3118</TD>
       <TD>13.6863</TD>
       <TD>0.0236</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>LSPM J0344+0741</TD>
+      <TD>15.478</TD>
+      <TD>0.0073</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>LSPM J0344+0741</TD>
+      <TD>15.5322</TD>
+      <TD>0.0234</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -36148,6 +36183,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>WISE J035934.06-540154.6</TD>
+      <TD>13.27</TD>
+      <TD>1.28</TD>
+      <TD/>
+      <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J035934.06-540154.6</TD>
+      <TD>5.9</TD>
+      <TD>1.3</TD>
+      <TD/>
+      <TD>2013ApJ...762..119M</TD>
+     </TR>
+     <TR>
       <TD>LSR J0515+5911</TD>
       <TD>15.783</TD>
       <TD>0.0595</TD>
@@ -36181,13 +36230,6 @@
       <TD>1</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
-     </TR>
-     <TR>
-      <TD>NAME StM 162A</TD>
-      <TD>15.9862</TD>
-      <TD>0.094</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
       <TD>LSR J0556+1144</TD>
@@ -36421,27 +36463,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>NAME Teegarden's Star</TD>
-      <TD>3.8315</TD>
-      <TD>0.0013</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>NAME Teegarden's Star</TD>
-      <TD>3.8312</TD>
-      <TD>0.0039</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>NAME Teegarden's Star</TD>
-      <TD>3.84</TD>
-      <TD>0.04</TD>
-      <TD/>
-      <TD>2009AJ....137....1F</TD>
-     </TR>
-     <TR>
       <TD>MCC 568</TD>
       <TD>12.33</TD>
       <TD>0.44</TD>
@@ -36592,6 +36613,34 @@
       <TD>NAME Proxima Centauri</TD>
       <TD>1.3012</TD>
       <TD>0.0003</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>NAME Teegarden's Star</TD>
+      <TD>3.8315</TD>
+      <TD>0.0013</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>NAME Teegarden's Star</TD>
+      <TD>3.8312</TD>
+      <TD>0.0039</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>NAME Teegarden's Star</TD>
+      <TD>3.84</TD>
+      <TD>0.04</TD>
+      <TD/>
+      <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
+      <TD>OGLE BLG-ECL-216148</TD>
+      <TD>11.106</TD>
+      <TD>0.1849</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -37226,20 +37275,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>PM J17476-5436</TD>
-      <TD>13.5154</TD>
-      <TD>0.0082</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>PM J17476-5436</TD>
-      <TD>13.5167</TD>
-      <TD>0.0127</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>PM J11240+3808</TD>
       <TD>18.455</TD>
       <TD>0.0106</TD>
@@ -37565,6 +37600,34 @@
       <TD>PM J17323-4736</TD>
       <TD>19.6334</TD>
       <TD>0.0257</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>PM J17394-2327</TD>
+      <TD>18.6652</TD>
+      <TD>0.0102</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>PM J17394-2327</TD>
+      <TD>18.6848</TD>
+      <TD>0.0347</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>PM J17476-5436</TD>
+      <TD>13.5154</TD>
+      <TD>0.0082</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>PM J17476-5436</TD>
+      <TD>13.5167</TD>
+      <TD>0.0127</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -38129,6 +38192,13 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>RX J2117.5-4444B</TD>
+      <TD>18.0444</TD>
+      <TD>0.0252</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
       <TD>RX J2354.8+3831</TD>
       <TD>16.837</TD>
       <TD>0.0088</TD>
@@ -38290,6 +38360,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>SCR J1630-3633A</TD>
+      <TD>16.814</TD>
+      <TD>0.0101</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>SCR J1630-3633A</TD>
+      <TD>16.8425</TD>
+      <TD>0.0333</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>Ross   46</TD>
       <TD>11.9089</TD>
       <TD>0.0032</TD>
@@ -38344,6 +38428,13 @@
       <TD>0.023</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Ross   52A</TD>
+      <TD>11.4284</TD>
+      <TD>0.0084</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
       <TD>Ross   52B</TD>
@@ -38528,27 +38619,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Ross  271</TD>
-      <TD>11.7088</TD>
-      <TD>0.0029</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Ross  271</TD>
-      <TD>11.7249</TD>
-      <TD>0.006</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Ross  271</TD>
-      <TD>11.62</TD>
-      <TD>0.19</TD>
-      <TD/>
-      <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
       <TD>Ross  154</TD>
       <TD>2.9759</TD>
       <TD>0.0002</TD>
@@ -38729,6 +38799,27 @@
       <TD>2.8</TD>
       <TD/>
       <TD>2004AJ....128..463R</TD>
+     </TR>
+     <TR>
+      <TD>Ross  271</TD>
+      <TD>11.7088</TD>
+      <TD>0.0029</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Ross  271</TD>
+      <TD>11.7249</TD>
+      <TD>0.006</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Ross  271</TD>
+      <TD>11.62</TD>
+      <TD>0.19</TD>
+      <TD/>
+      <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
       <TD>Ross  298</TD>
@@ -39067,6 +39158,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>UPM J0415-4602A</TD>
+      <TD>19.242</TD>
+      <TD>0.0341</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>UPM J0415-4602A</TD>
+      <TD>19.5754</TD>
+      <TD>0.265</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>Ross  619</TD>
       <TD>6.7694</TD>
       <TD>0.0043</TD>
@@ -39298,6 +39403,20 @@
       <TD>2010MNRAS.403.1949K</TD>
      </TR>
      <TR>
+      <TD>SCR J0821-6703</TD>
+      <TD>10.6755</TD>
+      <TD>0.0022</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>SCR J0821-6703</TD>
+      <TD>10.6748</TD>
+      <TD>0.0031</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>Ross  775</TD>
       <TD>6.7798</TD>
       <TD>0.0011</TD>
@@ -39380,20 +39499,6 @@
       <TD>258.781</TD>
       <TD/>
       <TD>2017AJ....153...75K</TD>
-     </TR>
-     <TR>
-      <TD>Ross 1002</TD>
-      <TD>17.9906</TD>
-      <TD>0.0149</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Ross 1002</TD>
-      <TD>17.98</TD>
-      <TD>0.0263</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>Ross  837</TD>
@@ -39543,6 +39648,13 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>UPM J0415-4602B</TD>
+      <TD>19.036</TD>
+      <TD>0.0512</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
       <TD>Ross  972</TD>
       <TD>18.926</TD>
       <TD>0.0469</TD>
@@ -39616,6 +39728,20 @@
       <TD>Ross  992</TD>
       <TD>16.986</TD>
       <TD>0.0108</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Ross 1002</TD>
+      <TD>17.9906</TD>
+      <TD>0.0149</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Ross 1002</TD>
+      <TD>17.98</TD>
+      <TD>0.0263</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -39837,20 +39963,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>SCR J1138-7721</TD>
-      <TD>8.3792</TD>
-      <TD>0.0021</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>SCR J1138-7721</TD>
-      <TD>8.3854</TD>
-      <TD>0.005</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>SCR J0533-4257</TD>
       <TD>10.424</TD>
       <TD>0.0267</TD>
@@ -40047,20 +40159,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>SCR J0821-6703</TD>
-      <TD>10.6755</TD>
-      <TD>0.0022</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>SCR J0821-6703</TD>
-      <TD>10.6748</TD>
-      <TD>0.0031</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>SCR J0827-2526</TD>
       <TD>16.507</TD>
       <TD>0.0062</TD>
@@ -40155,6 +40253,20 @@
       <TD>SCR J1118-4721</TD>
       <TD>17.0339</TD>
       <TD>0.0103</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>SCR J1138-7721</TD>
+      <TD>8.3792</TD>
+      <TD>0.0021</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>SCR J1138-7721</TD>
+      <TD>8.3854</TD>
+      <TD>0.005</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -40365,20 +40477,6 @@
       <TD>SCR J1626-3812</TD>
       <TD>14.0024</TD>
       <TD>0.0226</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>SCR J1630-3633A</TD>
-      <TD>16.814</TD>
-      <TD>0.0101</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>SCR J1630-3633A</TD>
-      <TD>16.8425</TD>
-      <TD>0.0333</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -40682,6 +40780,20 @@
       <TD>0.4</TD>
       <TD/>
       <TD>2009AJ....137....1F</TD>
+     </TR>
+     <TR>
+      <TD>WISE J041022.71+150248.4</TD>
+      <TD>6.52</TD>
+      <TD>0.18</TD>
+      <TD/>
+      <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J041022.71+150248.4</TD>
+      <TD>4.2</TD>
+      <TD>1.2</TD>
+      <TD/>
+      <TD>2013ApJ...762..119M</TD>
      </TR>
      <TR>
       <TD>SIPS J0004-2058</TD>
@@ -41727,6 +41839,13 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>WISE J043052.92+463331.6</TD>
+      <TD>16</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>UCAC4 130-003735</TD>
       <TD>19.743</TD>
       <TD>0.0058</TD>
@@ -42166,27 +42285,6 @@
       <TD>0.0092</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>UPM J0415-4602A</TD>
-      <TD>19.242</TD>
-      <TD>0.0341</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>UPM J0415-4602A</TD>
-      <TD>19.5754</TD>
-      <TD>0.265</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>UPM J0415-4602B</TD>
-      <TD>19.036</TD>
-      <TD>0.0512</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
       <TD>UPM J0505-4756</TD>
@@ -43239,13 +43337,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>VVV BD001</TD>
-      <TD>18.3583</TD>
-      <TD>0.1068</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
       <TD>V* FK Aqr</TD>
       <TD>8.8979</TD>
       <TD>0.0043</TD>
@@ -43326,6 +43417,20 @@
       <TD>V* GQ And</TD>
       <TD>3.5614</TD>
       <TD>0.0006</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>V* V401 Dra</TD>
+      <TD>19.84</TD>
+      <TD>0.0057</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>V* V401 Dra</TD>
+      <TD>19.8488</TD>
+      <TD>0.0133</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -43561,20 +43666,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>VVV J141159.32-592045.7</TD>
-      <TD>14.401</TD>
-      <TD>0.0056</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>VVV J141159.32-592045.7</TD>
-      <TD>14.3933</TD>
-      <TD>0.0076</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>V* V1386 Ori</TD>
       <TD>15.771</TD>
       <TD>0.0067</TD>
@@ -43690,20 +43781,6 @@
       <TD>V* V376 Gem</TD>
       <TD>18.1598</TD>
       <TD>0.0139</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>V* V401 Dra</TD>
-      <TD>19.84</TD>
-      <TD>0.0057</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>V* V401 Dra</TD>
-      <TD>19.8488</TD>
-      <TD>0.0133</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -43988,6 +44065,34 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>VVV BD001</TD>
+      <TD>18.5206</TD>
+      <TD>0.1238</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>VVV BD001</TD>
+      <TD>18.3583</TD>
+      <TD>0.1068</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>VVV J141159.32-592045.7</TD>
+      <TD>14.401</TD>
+      <TD>0.0056</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>VVV J141159.32-592045.7</TD>
+      <TD>14.3933</TD>
+      <TD>0.0076</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>WG  21</TD>
       <TD>15.388</TD>
       <TD>0.0036</TD>
@@ -44030,6 +44135,27 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>WISE J000517.48+373720.5</TD>
+      <TD>7</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J003829.05+275852.1</TD>
+      <TD>12</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J004945.61+215120.0</TD>
+      <TD>7</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>WISE J005936.73+523719.0</TD>
       <TD>18.5951</TD>
       <TD>0.008</TD>
@@ -44051,64 +44177,8 @@
       <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
-      <TD>WISE J033605.05-014350.4</TD>
-      <TD>9.91</TD>
-      <TD>0.61</TD>
-      <TD/>
-      <TD>2018ApJ...867..109M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J033605.05-014350.4</TD>
+      <TD>WISE J031624.35+430709.1</TD>
       <TD>17</TD>
-      <TD>3</TD>
-      <TD/>
-      <TD>2014yCat.5144....0M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J035000.32-565830.2</TD>
-      <TD>5.92</TD>
-      <TD>0.32</TD>
-      <TD/>
-      <TD>2018ApJ...867..109M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J035000.32-565830.2</TD>
-      <TD>3.7</TD>
-      <TD>1.6</TD>
-      <TD/>
-      <TD>2013ApJ...762..119M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J035934.06-540154.6</TD>
-      <TD>13.27</TD>
-      <TD>1.28</TD>
-      <TD/>
-      <TD>2018ApJ...867..109M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J035934.06-540154.6</TD>
-      <TD>5.9</TD>
-      <TD>1.3</TD>
-      <TD/>
-      <TD>2013ApJ...762..119M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J041022.71+150248.4</TD>
-      <TD>6.52</TD>
-      <TD>0.18</TD>
-      <TD/>
-      <TD>2018ApJ...867..109M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J041022.71+150248.4</TD>
-      <TD>4.2</TD>
-      <TD>1.2</TD>
-      <TD/>
-      <TD>2013ApJ...762..119M</TD>
-     </TR>
-     <TR>
-      <TD>WISE J043052.92+463331.6</TD>
-      <TD>16</TD>
       <TD>3</TD>
       <TD/>
       <TD>2014yCat.5144....0M</TD>
@@ -44128,6 +44198,13 @@
       <TD>2013ApJ...762..119M</TD>
      </TR>
      <TR>
+      <TD>WISE J054047.00+483232.4</TD>
+      <TD>19</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>WISE J064723.23-623235.5</TD>
       <TD>11.94</TD>
       <TD>0.87</TD>
@@ -44140,6 +44217,13 @@
       <TD>0.49</TD>
       <TD/>
       <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J072312.44+340313.5</TD>
+      <TD>14</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>WISE J073444.02-715744.0</TD>
@@ -44156,8 +44240,22 @@
       <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
+      <TD>WISE J083011.97+283716.6</TD>
+      <TD>11.1</TD>
+      <TD>2</TD>
+      <TD/>
+      <TD>2020ApJ...895..145B</TD>
+     </TR>
+     <TR>
       <TD>WISE J095047.32+011733.3</TD>
       <TD>17</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J102557.72+030755.7</TD>
+      <TD>12</TD>
       <TD>3</TD>
       <TD/>
       <TD>2014yCat.5144....0M</TD>
@@ -44177,6 +44275,20 @@
       <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
+      <TD>WISE J125804.90-441232.5</TD>
+      <TD>14.45</TD>
+      <TD>1.8</TD>
+      <TD>:</TD>
+      <TD>2012A&amp;A...548A..53L</TD>
+     </TR>
+     <TR>
+      <TD>WISE J130141.62-030212.9</TD>
+      <TD>18</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
+     </TR>
+     <TR>
       <TD>WISE J140518.39+553421.3</TD>
       <TD>6.93</TD>
       <TD>0.44</TD>
@@ -44189,6 +44301,13 @@
       <TD>10.17</TD>
       <TD>:</TD>
       <TD>2012A&amp;A...548A..53L</TD>
+     </TR>
+     <TR>
+      <TD>WISE J152305.10+312537.6</TD>
+      <TD>19</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>WISE J154151.65-225024.9</TD>
@@ -44259,6 +44378,13 @@
       <TD>0.44</TD>
       <TD/>
       <TD>2018ApJ...867..109M</TD>
+     </TR>
+     <TR>
+      <TD>WISE J201920.76-114807.5</TD>
+      <TD>15</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>WISE J205628.91+145953.2</TD>
@@ -44793,13 +44919,6 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
-      <TD>Wolf 1495 B</TD>
-      <TD>17.9267</TD>
-      <TD>0.2419</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
       <TD>Wolf  346</TD>
       <TD>18.554</TD>
       <TD>0.0092</TD>
@@ -44859,6 +44978,20 @@
       <TD>Wolf  398</TD>
       <TD>12.8061</TD>
       <TD>0.0223</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1034</TD>
+      <TD>18.054</TD>
+      <TD>0.0068</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1034</TD>
+      <TD>18.0433</TD>
+      <TD>0.0308</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -44978,20 +45111,6 @@
       <TD>Wolf  457</TD>
       <TD>16.4484</TD>
       <TD>0.0538</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>Wolf  937</TD>
-      <TD>16.7121</TD>
-      <TD>0.011</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Wolf  937</TD>
-      <TD>16.7124</TD>
-      <TD>0.017</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
      </TR>
@@ -45220,6 +45339,20 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>Wolf  937</TD>
+      <TD>16.7121</TD>
+      <TD>0.011</TD>
+      <TD/>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Wolf  937</TD>
+      <TD>16.7124</TD>
+      <TD>0.017</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
       <TD>Wolf  940</TD>
       <TD>12.3858</TD>
       <TD>0.0079</TD>
@@ -45281,20 +45414,6 @@
       <TD>0.99</TD>
       <TD/>
       <TD>2010MNRAS.403.1949K</TD>
-     </TR>
-     <TR>
-      <TD>Wolf 1034</TD>
-      <TD>18.054</TD>
-      <TD>0.0068</TD>
-      <TD/>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
-      <TD>Wolf 1034</TD>
-      <TD>18.0433</TD>
-      <TD>0.0308</TD>
-      <TD/>
-      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>Wolf 1039</TD>
@@ -45421,6 +45540,13 @@
       <TD>0.0094</TD>
       <TD/>
       <TD>2018yCat.1345....0G</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1130 B</TD>
+      <TD>20</TD>
+      <TD>3</TD>
+      <TD/>
+      <TD>2014yCat.5144....0M</TD>
      </TR>
      <TR>
       <TD>Wolf 1225 A</TD>
@@ -45624,6 +45750,13 @@
       <TD>0.1594</TD>
       <TD/>
       <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>Wolf 1495 B</TD>
+      <TD>17.9267</TD>
+      <TD>0.2419</TD>
+      <TD/>
+      <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
       <TD>Wolf 1516</TD>
