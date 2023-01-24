@@ -206,7 +206,6 @@ tables may change at any time without prior warning.
             ucd="pos.distance"
             tablehead="dist"
             description="Object distance."
-            required="True"
             verbLevel="1"/>
         <column name="dist_err" type="double precision"
             ucd="stat.error;pos.distance"
