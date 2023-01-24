@@ -590,7 +590,7 @@ tables may change at any time without prior warning.
     <service id="ex" allowed="examples">
         <meta name="_example" title="Filter objects by type">
             In LIFE, we have a single table for all kinds of objects
-            (planets, stars, disks, clusters…).  They are kept in
+            (planets, stars, disks, multi-star systems).  They are kept in
             :taptable:`life.object`:
 
             .. tapquery::
@@ -602,7 +602,7 @@ tables may change at any time without prior warning.
             star).  The parent/child relationships are given in the 
             :taptable:`life.h_link` table which you can join to all other 
             tables that have an object_idref column.  For instance,
-            to find (direct) children or a star, you would run:
+            to find (direct) children of a star, you would run:
 
             .. tapquery::
                 SELECT main_id as Child_main_id, object_id as child_object_id
@@ -612,6 +612,12 @@ tables may change at any time without prior warning.
                 WHERE p.id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All parents of an object">
+            Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
+            star).  The parent/child relationships are given in the 
+            :taptable:`life.h_link` table which you can join to all other 
+            tables that have an object_idref column.  For instance,
+            to find (direct) parents of a star, you would run:
+            
             .. tapquery::
                 SELECT main_id as parent_main_id, object_id as parent_object_id
                 FROM life.h_link
@@ -620,13 +626,23 @@ tables may change at any time without prior warning.
                 WHERE c.id =  '* alf Cen A'
                 </meta>
         <meta name="_example" title="All specific measurements of an object">
+            In LIFE, we have individual tables for all kinds of parameters
+            where multiple measurements for the same object are available.  
+            They are kept in the tables starting with mes_ e.g. 
+            :taptable:`life.mes_dist`:
+            
             .. tapquery::
                 SELECT *
-                FROM life.mesDist
+                FROM life.mes_dist
                 JOIN life.ident USING(object_idref)
                 WHERE id = 'GJ    10'
                 </meta>
         <meta name="_example" title="All basic stellar data from an object name">
+            In LIFE we keep for each object the best measurements of its kind 
+            in the basic data table corresponding to the object type. For 
+            instance, to find the best measurements for the star '* alf Cen' 
+            you would run:
+            
             .. tapquery::
                 SELECT  *
                 FROM life.star_basic 
@@ -634,6 +650,11 @@ tables may change at any time without prior warning.
                 WHERE id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All basic disk data from host name">
+            In LIFE we keep for each object the best measurements of its kind 
+            in the basic data table corresponding to the object type. For 
+            instance, to find the best measurements for the disk around the 
+            star '* bet Cas' you would run:
+            
             .. tapquery::
                 SELECT main_id disk_main_id, object_id as disk_object_id, db.*
                 FROM life.h_link 
