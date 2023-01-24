@@ -54,10 +54,10 @@ tables may change at any time without prior warning.
             description="Name for the service through which the data was 
             acquired. SIMBAD: service = 
             http://simbad.u-strasbg.fr:80/simbad/sim-tap, 
-            bibcode = 2000A&AS..143....9W. ExoMercat: service =
+            bibcode = 2000A&amp;AS..143....9W. ExoMercat: service =
             http://archives.ia2.inaf.it/vo/tap/projects, 
-            bibcode = 2020A&C....3100370A. Everything else is acquired through 
-            private communication."
+            bibcode = 2020A&amp;C....3100370A. Everything else is acquired 
+            through private communication."
             required="True"
             verbLevel="1"/>       
     </table>
