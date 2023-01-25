@@ -663,6 +663,9 @@ def provider_exo(temp=True):
     exo_mesMass.rename_columns(['planet_main_id','mass','mass_url'],
                                     ['main_id','mass_val','mass_ref'])
     # solve null value issue, remove those that I introduced to make mass_err
+    # those where 999 left should better be some with relation entries
+    #remove masked rows
+    exo_mesMass.remove_rows(exo_mesMass['mass_val'].mask.nonzero()[0])
     
     grouped_mesMass=exo_mesMass.group_by('main_id')
     best_mesMass=exo_mesMass['main_id','mass_val','mass_err','mass_ref'][:0]

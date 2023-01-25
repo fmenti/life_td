@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1674142378632" name="result_1674142378632">
+  <TABLE ID="result_1674648328457" name="result_1674648328457">
    <FIELD ID="parent_main_id" arraysize="34" datatype="char" name="parent_main_id" ucd="meta.id;meta.main">
     <DESCRIPTION>
      Main identifier for an object
