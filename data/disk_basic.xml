@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1674142385029" name="result_1674142385029">
+  <TABLE ID="result_1674648335324" name="result_1674648335324">
    <FIELD ID="rad_value" datatype="double" name="rad_value"/>
    <FIELD ID="rad_err" datatype="double" name="rad_err"/>
    <FIELD ID="rad_rel" arraysize="1" datatype="unicodeChar" name="rad_rel"/>

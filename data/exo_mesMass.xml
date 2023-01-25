@@ -3,19 +3,13 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1674142367935" name="result_1674142367935">
+  <TABLE ID="result_1674648315838" name="result_1674648315838">
    <FIELD ID="main_id" arraysize="27" datatype="unicodeChar" name="main_id"/>
    <FIELD ID="mass_val" datatype="double" name="mass_val"/>
    <FIELD ID="mass_err" datatype="double" name="mass_err"/>
-   <FIELD ID="mass_ref" arraysize="64" datatype="unicodeChar" name="mass_ref"/>
+   <FIELD ID="mass_ref" arraysize="62" datatype="unicodeChar" name="mass_ref"/>
    <DATA>
     <TABLEDATA>
-     <TR>
-      <TD>*  14 Her b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
      <TR>
       <TD>*  14 Her c</TD>
       <TD>7.6789999999999985</TD>
@@ -29,58 +23,16 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>*  47 UMa b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
-     </TR>
-     <TR>
-      <TD>*  47 UMa c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
-     </TR>
-     <TR>
-      <TD>*  47 UMa d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010MNRAS.403..731G/abstract</TD>
-     </TR>
-     <TR>
       <TD>*  51 Peg b</TD>
       <TD>0.46</TD>
       <TD>0.01</TD>
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>*  54 Psc b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2019MNRAS.484.5859W/abstract</TD>
-     </TR>
-     <TR>
       <TD>*  54 Psc c</TD>
       <TD>0.09</TD>
       <TD>0.03</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>*  61 Vir c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010ApJ...708.1366V/abstract</TD>
-     </TR>
-     <TR>
-      <TD>*  61 Vir b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010ApJ...708.1366V/abstract</TD>
-     </TR>
-     <TR>
-      <TD>*  61 Vir d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010ApJ...708.1366V/abstract</TD>
      </TR>
      <TR>
       <TD>*  70 Vir b</TD>
@@ -93,54 +45,6 @@
       <TD>0.36</TD>
       <TD>0.02</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>*  83 Leo B c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>*  83 Leo B b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>*  83 Leo B b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* alf Cen A b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>* alf Cen B c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>* alf Cen B b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>2006ApJ...646..505B</TD>
-     </TR>
-     <TR>
-      <TD>* alf PsA b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>* bet Gem b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2006A&amp;A...457..335H/abstract</TD>
      </TR>
      <TR>
       <TD>* bet Pic c</TD>
@@ -167,18 +71,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>* e Eri g</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>* e Eri f</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>* e Eri b</TD>
       <TD>0.0085</TD>
       <TD>0.00094</TD>
@@ -188,12 +80,6 @@
       <TD>* e Eri c</TD>
       <TD>0.00755</TD>
       <TD>0.00126</TD>
-      <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>* e Vir b</TD>
-      <TD/>
-      <TD>999</TD>
       <TD>OEC</TD>
      </TR>
      <TR>
@@ -215,36 +101,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>* iot Hor b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* mu. Ara c b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2007A&amp;A...462..769P/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* mu. Ara c c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2007A&amp;A...462..769P/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* mu. Ara c d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2007A&amp;A...462..769P/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* mu. Ara c e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2007A&amp;A...462..769P/abstract</TD>
-     </TR>
-     <TR>
       <TD>* nu.02 Lup b</TD>
       <TD>0.01454</TD>
       <TD>0.0013800000000000002</TD>
@@ -255,18 +111,6 @@
       <TD>0.03552</TD>
       <TD>0.00217</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2020AJ....160..129K/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* nu.02 Lup d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2020AJ....160..129K/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* omi02 Eri b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018MNRAS.480.2411M/abstract</TD>
      </TR>
      <TR>
       <TD>* pi. Men c</TD>
@@ -281,64 +125,16 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>* q01 Eri b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...551A..90M/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* rho CrB b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2016ApJ...830...46F/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* rho CrB c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2016ApJ...830...46F/abstract</TD>
-     </TR>
-     <TR>
       <TD>* rho01 Cnc b</TD>
       <TD>0.84</TD>
       <TD>0.031</TD>
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>* rho01 Cnc d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...619A...1B/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* rho01 Cnc c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...619A...1B/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* rho01 Cnc f</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...619A...1B/abstract</TD>
-     </TR>
-     <TR>
       <TD>* rho01 Cnc e</TD>
       <TD>0.0251</TD>
       <TD>0.001</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>* tau Cet e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....154..135F/abstract</TD>
-     </TR>
-     <TR>
-      <TD>* tau Cet f</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....154..135F/abstract</TD>
      </TR>
      <TR>
       <TD>* tau Cet c</TD>
@@ -359,22 +155,10 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>* tau Cet h</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....154..135F/abstract</TD>
-     </TR>
-     <TR>
       <TD>* tau Cet i</TD>
       <TD>5.06</TD>
       <TD>1</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>* tau Cet g</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....154..135F/abstract</TD>
      </TR>
      <TR>
       <TD>* tet Cyg b</TD>
@@ -395,46 +179,10 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>2MASS J03480772-6022270 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J11101001+0116130 g</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>2MASS J12195156+3128497 i</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>2MASSW J1047539+212423 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>BD+05  1668 c</TD>
       <TD>0.00371</TD>
       <TD>0.0005</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>BD+05  1668 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>nan</TD>
-     </TR>
-     <TR>
-      <TD>BD+05  1668 d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>nan</TD>
      </TR>
      <TR>
       <TD>BD+05  1668 b</TD>
@@ -459,18 +207,6 @@
       <TD>0.02089</TD>
       <TD>0.0017</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>BD+20  2465 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>BD+25  3173 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010PASP..122..149J/abstract</TD>
      </TR>
      <TR>
       <TD>BD+25  3173 c</TD>
@@ -515,12 +251,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>BD-02  2198 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>BD-05  5715 c</TD>
       <TD>0.944</TD>
       <TD>0.07</TD>
@@ -557,34 +287,10 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2014Sci...345..440R/abstract</TD>
-     </TR>
-     <TR>
       <TD>BD-07  4003 b</TD>
       <TD>0.049702</TD>
       <TD>0.000944</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>BD-12  4523 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017A&amp;A...602A..88A/abstract</TD>
-     </TR>
-     <TR>
-      <TD>BD-12  4523 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017A&amp;A...602A..88A/abstract</TD>
-     </TR>
-     <TR>
-      <TD>BD-12  4523 d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017A&amp;A...602A..88A/abstract</TD>
      </TR>
      <TR>
       <TD>BD-15  6290 f</TD>
@@ -647,18 +353,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>CD-24 12677 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>CD-24 12677 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>CD-31  9113 b</TD>
       <TD>0.01901</TD>
       <TD>0.00188</TD>
@@ -675,36 +369,6 @@
       <TD>0.01643</TD>
       <TD>0.0029</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>CD-44 11909 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2014MNRAS.441.1545T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>CD-44 11909 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2014MNRAS.441.1545T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>CD-46 11540 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2007A&amp;A...474..293B/abstract</TD>
-     </TR>
-     <TR>
-      <TD>CD-48 12818 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>CD-48 12818 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
      </TR>
      <TR>
       <TD>CD-54   269 b</TD>
@@ -743,12 +407,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>G 122-49 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2021arXiv210202233M/abstract</TD>
-     </TR>
-     <TR>
       <TD>G 139-21 b</TD>
       <TD>0.0197</TD>
       <TD>0.0027</TD>
@@ -771,12 +429,6 @@
       <TD>0.02832</TD>
       <TD>0.00566</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>G 234-45 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
      </TR>
      <TR>
       <TD>G 234-45 b</TD>
@@ -827,12 +479,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>HD  13445 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
       <TD>HD  21749 c</TD>
       <TD>0.01164</TD>
       <TD>999</TD>
@@ -845,118 +491,16 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>HD  33793 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>HD  33793 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2014MNRAS.443L..89A/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  38858 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...549A..48T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...549A..48T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 f</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...549A..48T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...549A..48T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  40307 g</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...549A..48T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  69830 d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2006Natur.441..305L/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  69830 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2006Natur.441..305L/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  69830 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2006Natur.441..305L/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  79211 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>HD  85512 b</TD>
       <TD>0.0113953</TD>
       <TD>0.00139251</TD>
       <TD>2006ApJ...646..505B</TD>
      </TR>
      <TR>
-      <TD>HD  87883 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD  95735 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2020A&amp;A...643A.112S/abstract</TD>
-     </TR>
-     <TR>
       <TD>HD 104304 b</TD>
       <TD>83</TD>
       <TD>999</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>HD 113538 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2015A&amp;A...576A..48M/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 113538 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2015A&amp;A...576A..48M/abstract</TD>
      </TR>
      <TR>
       <TD>HD 122303 b</TD>
@@ -975,24 +519,6 @@
       <TD>3.2</TD>
       <TD>0.08</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>HD 147379 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...618A.103H/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 154088 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>HD 154345 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
      </TR>
      <TR>
       <TD>HD 176029 b</TD>
@@ -1019,46 +545,10 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>HD 189567 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>HD 190007 b</TD>
       <TD>0.05179</TD>
       <TD>0.005220000000000001</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>HD 190360 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 190360 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2009ApJ...693.1084W/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 192263 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 192310 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..58P/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 192310 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..58P/abstract</TD>
      </TR>
      <TR>
       <TD>HD 204961 c</TD>
@@ -1115,12 +605,6 @@
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
      </TR>
      <TR>
-      <TD>HD 219134 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>HD 219134 d</TD>
       <TD>0.05088</TD>
       <TD>0.00201</TD>
@@ -1133,18 +617,6 @@
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
      </TR>
      <TR>
-      <TD>HD 219134 h</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2015ApJ...814...12V/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 219134 g</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2015ApJ...814...12V/abstract</TD>
-     </TR>
-     <TR>
       <TD>HD 238090 b</TD>
       <TD>0.02168</TD>
       <TD>0.00299</TD>
@@ -1155,18 +627,6 @@
       <TD>0.01259</TD>
       <TD>0.00126</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>HD 285968 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2009A&amp;A...493..645F/abstract</TD>
-     </TR>
-     <TR>
-      <TD>HD 285968 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
      </TR>
      <TR>
       <TD>HD 304043 b</TD>
@@ -1185,42 +645,6 @@
       <TD>0.00761</TD>
       <TD>0.00107</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019A&amp;A...629A.111C/abstract</TD>
-     </TR>
-     <TR>
-      <TD>L   98-59 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>L  229-91 e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>L  229-91 f</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>L  229-91 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...556A.110B/abstract</TD>
-     </TR>
-     <TR>
-      <TD>L  229-91 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...556A.110B/abstract</TD>
-     </TR>
-     <TR>
-      <TD>L  229-91 d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2013A%26A...556A.110B/abstract</TD>
      </TR>
      <TR>
       <TD>L  320-124 b</TD>
@@ -1325,12 +749,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>LP  804-27 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010PASP..122..156A/abstract</TD>
-     </TR>
-     <TR>
       <TD>LSPM J0746+2000 b</TD>
       <TD>30</TD>
       <TD>999</TD>
@@ -1343,22 +761,10 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>NAME Barnard's star b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>NAME Proxima Centauri b</TD>
       <TD>0.003691</TD>
       <TD>0.000271</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>NAME Proxima Centauri d</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
      </TR>
      <TR>
       <TD>NAME Proxima Centauri c</TD>
@@ -1371,24 +777,6 @@
       <TD>62</TD>
       <TD>0.11</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>NAME Teegarden's Star b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2019A&amp;A...627A..49Z/abstract</TD>
-     </TR>
-     <TR>
-      <TD>NAME Teegarden's Star c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2019A&amp;A...627A..49Z/abstract</TD>
-     </TR>
-     <TR>
-      <TD>Ross  128 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...613A..25B/abstract</TD>
      </TR>
      <TR>
       <TD>Ross  905 b</TD>
@@ -1407,18 +795,6 @@
       <TD>0.0009</TD>
       <TD>0.0002</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>Ross 1003 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...609A.117T/abstract</TD>
-     </TR>
-     <TR>
-      <TD>Ross 1003 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...609A.117T/abstract</TD>
      </TR>
      <TR>
       <TD>Ross 1020 b</TD>
@@ -1469,12 +845,6 @@
       <TD>2018A%26A...613A..68G</TD>
      </TR>
      <TR>
-      <TD>TRAPPIST-1 i</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>TRAPPIST-1 d</TD>
       <TD>0.000934</TD>
       <TD>0.00011</TD>
@@ -1523,12 +893,6 @@
       <TD>OEC</TD>
      </TR>
      <TR>
-      <TD>V* YY Gem b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>V* YZ Cet b</TD>
       <TD>0.00236</TD>
       <TD>0.00041</TD>
@@ -1545,12 +909,6 @@
       <TD>0.0030800000000000003</TD>
       <TD>0.00044</TD>
       <TD>OEC</TD>
-     </TR>
-     <TR>
-      <TD>V* YZ Cet e</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
      </TR>
      <TR>
       <TD>VB 10 b</TD>
@@ -1577,18 +935,6 @@
       <TD>EU</TD>
      </TR>
      <TR>
-      <TD>Wolf  359 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>Wolf  359 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
       <TD>Wolf  433 b</TD>
       <TD>0.04153</TD>
       <TD>0.00535</TD>
@@ -1611,18 +957,6 @@
       <TD>29</TD>
       <TD>12</TD>
       <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>Wolf 1539 c</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>EU</TD>
-     </TR>
-     <TR>
-      <TD>Wolf 1539 b</TD>
-      <TD/>
-      <TD>999</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2010ApJ...721.1467H/abstract</TD>
      </TR>
     </TABLEDATA>
    </DATA>
