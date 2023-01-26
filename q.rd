@@ -169,7 +169,7 @@ tables may change at any time without prior warning.
         <column name="coo_qual" type="text" 
             ucd="meta.code.qual;pos.eq"
             tablehead="coo_qual" 
-            description="Coordinate quality"
+            description="Coordinate quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="coo_source_idref" type="integer"
             ucd="meta.ref"
@@ -192,7 +192,7 @@ tables may change at any time without prior warning.
         <column name="plx_qual" type="text" 
             ucd="meta.code.qual;pos.parallax"
             tablehead="plx_qual" 
-            description="Parallax quality"
+            description="Parallax quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="plx_source_idref" type="integer"
             ucd="meta.ref"
@@ -215,7 +215,7 @@ tables may change at any time without prior warning.
         <column name="dist_qual" type="text" 
             ucd="meta.code.qual;pos.distance"
             tablehead="dist_qual" 
-            description="Distance quality"
+            description="Distance quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
@@ -274,7 +274,7 @@ tables may change at any time without prior warning.
         <column name="mass_qual" type="text" 
             ucd="meta.code.qual;phys.mass"
             tablehead="mass_qual" 
-            description="Mass quality"
+            description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
             ucd="phys.mass;arith.ratio"
@@ -336,7 +336,7 @@ tables may change at any time without prior warning.
         <column name="rad_qual" type="text" 
             ucd="meta.code.qual;phys.size.radius"
             tablehead="rad_qual" 
-            description="Radius quality"
+            description="Radius quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="rad_rel" type="text" 
             ucd="phys.size.radius;arith.ratio"
@@ -494,7 +494,7 @@ tables may change at any time without prior warning.
         <column name="dist_qual" type="text" 
             ucd="meta.code.qual;pos.distance"
             tablehead="dist_qual" 
-            description="Distance quality"
+            description="Distance quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
@@ -546,7 +546,7 @@ tables may change at any time without prior warning.
         <column name="mass_qual" type="text" 
             ucd="meta.code.qual;phys.mass"
             tablehead="mass_qual" 
-            description="Mass quality"
+            description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="mass_rel" type="text" 
             ucd="phys.mass;arith.ratio"
