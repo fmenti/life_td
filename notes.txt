@@ -1,0 +1,9 @@
+select star_ob.main_id as star_name,
+  planet_ob.main_id as planet_name,
+  coo_ra, coo_dec, dist_value
+  mass_val, mass_err, mass_qual
+from life.star_basic as s
+join life.h_link as slink on (parent_object_idref=s.object_idref)
+join life.planet_basic as p on (child_object_idref=p.object_idref)
+join life.object as star_ob on (s.object_idref=star_ob.object_id)
+join life.object as planet_ob on (p.object_idref=planet_ob.object_id)
