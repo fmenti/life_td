@@ -218,7 +218,9 @@ tables may change at any time without prior warning.
             ucd="meta.code.qual;pos.distance"
             tablehead="dist_qual" 
             description="Distance quality (A:best, E:worst)"
-            verbLevel="1"/>
+            verbLevel="1">
+              <values nullLiteral="N"/>
+        </column>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="dist_source_idref"

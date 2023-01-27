@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1674825771472" name="result_1674825771472">
+  <TABLE ID="result_1674838017550" name="result_1674838017550">
    <FIELD ID="dist_value" datatype="double" name="dist_value" ucd="pos.distance">
     <DESCRIPTION>
      Distance value
