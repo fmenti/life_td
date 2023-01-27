@@ -392,9 +392,6 @@ def provider_simbad():
     
     #-------------------creating output table sim_mesDist---------------------
     sim_mesDist=query(TAP_service,upload_query[2],[stars[:].copy()])
-    # print('TBD: improve null values. current simbad distance null value:',
-    #    sim_mesDist['dist_value'].fill_value, 
-    #   'would prefer something that makes more sense like nan')
     sim_mesDist=fetch_main_id(sim_mesDist)
     sim_mesDist['dist_err']=np.maximum(sim_mesDist['plus_err'],
                                        -sim_mesDist['minus_err'])
