@@ -423,6 +423,8 @@ def provider_simbad():
     #--------------------creating helper table sim_stars-----------------------
     #add best para from multiple measurements tables
     stars=ap.table.join(stars,best_paras,keys='main_id',join_type='left')
+    #change null value of plx_qual from '' to 'N'
+    stars['plx_qual'][np.where(stars['plx_qual']=='')]='N'
     
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']

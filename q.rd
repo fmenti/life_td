@@ -193,7 +193,9 @@ tables may change at any time without prior warning.
             ucd="meta.code.qual;pos.parallax"
             tablehead="plx_qual" 
             description="Parallax quality (A:best, E:worst)"
-            verbLevel="1"/>
+            verbLevel="1">
+              <values nullLiteral="N"/>
+        </column>
         <column name="plx_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="plx_source_id"
