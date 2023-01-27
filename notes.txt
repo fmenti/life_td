@@ -1,3 +1,4 @@
+SCS view:
 select star_ob.main_id as star_name,
   planet_ob.main_id as planet_name,
   coo_ra, coo_dec, dist_value
@@ -7,3 +8,10 @@ join life.h_link as slink on (parent_object_idref=s.object_idref)
 join life.planet_basic as p on (child_object_idref=p.object_idref)
 join life.object as star_ob on (s.object_idref=star_ob.object_id)
 join life.object as planet_ob on (p.object_idref=planet_ob.object_id)
+
+missing reliable measurements query:
+SELECT TOP 10 star_ob.main_id as star_name, plx_value, plx_err, 
+plx_qual, plx_source_idref
+FROM life.star_basic as s
+JOIN life.object as star_ob on (s.object_idref=star_ob.object_id)
+WHERE plx_value is Null or plx_qual in ('D','E') or plx_qual is Null

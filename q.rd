@@ -662,6 +662,21 @@ tables may change at any time without prior warning.
                 JOIN life.object on object_id=child_object_idref
                 WHERE p.id = '* bet Cas' and type='di'
                 </meta>
+        <meta name="_example" title="Missing reliable measurements">
+            In LIFE we keep information about the quality of a measurement. 
+            This can serve as motivation for future observations to fill in 
+            knowledge gaps. For instance, to find where reliable measurements 
+            for the parallax are missing you would run:
+            
+            .. tapquery::                
+                SELECT star_ob.main_id as star_name, plx_value, plx_err, 
+                plx_qual, plx_source_idref
+                FROM life.star_basic as s
+                JOIN life.object as star_ob on 
+                (s.object_idref=star_ob.object_id)
+                WHERE plx_value is Null or plx_qual in ('D','E') or 
+                plx_qual is Null
+                </meta>
         <nullCore/>
     </service>
 
