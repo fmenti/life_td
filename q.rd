@@ -138,12 +138,12 @@ tables may change at any time without prior warning.
             ucd="pos.eq.ra;meta.main" unit="deg"
             tablehead="RA (ICRS)"
             description="Right Ascension"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=7"/>
         <column name="coo_dec" type="double precision"
             ucd="pos.eq.dec;meta.main" unit="deg"
             tablehead="Dec (ICRS)"
             description="Declination"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=7"/>
         <column name="coo_err_angle" type="smallint"
             ucd="pos.posAng;pos.errorEllipse;pos.eq" unit="deg"
             tablehead="coo_err_angle"
@@ -206,10 +206,10 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
         <column name="dist_value" type="double precision"
-            ucd="pos.distance"
-            tablehead="dist"
+            ucd="pos.distance" unit="pc"
+            tablehead="Dist"
             description="Object distance."
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=2"/>
         <column name="dist_err" type="double precision"
             ucd="stat.error;pos.distance"
             tablehead="dist_err"
@@ -268,14 +268,14 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
             ucd="phys.mass" unit="'jupiterMass'"
-            tablehead="mass_val"
+            tablehead="Planet Mass"
             description="Mass"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=3"/>
         <column name="mass_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="mass_err"
+            tablehead="Err. Mass"
             description="Mass error"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=3"/>
         <column name="mass_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="mass_qual"
@@ -539,14 +539,14 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
             ucd="phys.mass" unit="'jupiterMass'"
-            tablehead="mass_val"
+            tablehead="Mass"
             description="Mass"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=3"/>
         <column name="mass_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="mass_err"
+            tablehead="Err. Mass"
             description="Mass error"
-            verbLevel="1"/>
+            verbLevel="1" displayHint="sf=3"/>
         <column name="mass_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="mass_qual"
@@ -578,6 +578,55 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
+    <table id="scs_summary" onDisk="True">
+        <meta name="description">A view containing the most
+        basic data for simple consumption by the cone search service.
+        </meta>
+        <LOOP>
+            <csvItems>
+                src, name
+                object.main_id, star_name
+                object.main_id, planet_name
+                star_basic.coo_ra, ra
+                star_basic.coo_dec, dec
+                star_basic.dist_value, dist
+                planet_basic.mass_val, planet_mass
+                planet_basic.mass_err, planet_mass_error
+            </csvItems>
+            <events>
+                <column original="\src" name="\name" verbLevel="5"/>
+            </events>
+        </LOOP>
+        <column original="star_name"
+            tablehead="Host Star"
+            description="Name of the planet's host star"/>
+        <column original="planet_name"
+            tablehead="Planet"
+            description="Name of the planet"
+            ucd="meta.id;meta.main"/>
+        <viewStatement>
+            CREATE VIEW \qName AS (SELECT \colNames FROM (
+            select distinct
+                star_ob.main_id as star_name,
+                planet_ob.main_id as planet_name,
+                coo_ra as ra,
+                coo_dec as dec,
+                dist_value as dist,
+                mass_val as planet_mass,
+                mass_err as planet_mass_error
+            from life.star_basic as s
+                join life.h_link as slink on (parent_object_idref=s.object_idref)
+                join life.planet_basic as p on (child_object_idref=p.object_idref)
+                join life.object as star_ob on (s.object_idref=star_ob.object_id)
+                join life.object as planet_ob on (p.object_idref=planet_ob.object_id))q)
+
+        </viewStatement>
+    </table>
+
+    <data id="make_cone_view">
+        <make table="scs_summary"/>
+    </data>
+
     <service id="cone" allowed="form,scs.xml">
         <meta name="shortName">lifetd cone</meta>
         <meta>
@@ -587,11 +636,12 @@ tables may change at any time without prior warning.
         </meta>
         <publish render="form" sets="ivo_managed, local"/>
         <publish render="scs.xml" sets="ivo_managed"/>
-        <scsCore queriedTable="star_basic">
+        <scsCore queriedTable="scs_summary">
         </scsCore>
     </service>
 
     <service id="ex" allowed="examples">
+        <meta name="title">LIFE TAP examples</meta>
         <meta name="_example" title="Filter objects by type">
             In LIFE, we have a single table for all kinds of objects
             (planets, stars, disks, multi-star systems).  They are kept in
@@ -632,7 +682,7 @@ tables may change at any time without prior warning.
         <meta name="_example" title="All specific measurements of an object">
             In LIFE, we have individual tables for all kinds of parameters
             where multiple measurements for the same object are available.
-            They are kept in the tables starting with mes_ e.g.
+            They are kept in the tables starting with ``mes_`` e.g.
             :taptable:`life.mes_dist`:
 
             .. tapquery::
