@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1674837995050" name="result_1674837995050">
+  <TABLE ID="result_1675166826217" name="result_1675166826217">
    <FIELD ID="main_id" arraysize="30" datatype="char" name="main_id" ucd="meta.id;meta.main">
     <DESCRIPTION>
      Main identifier for an object
@@ -12798,11 +12798,11 @@
      <TR>
       <TD>CD-42  1943</TD>
       <TD>81.65011278291668</TD>
-      <TD>-42.33819329277778</TD>
-      <TD>90</TD>
-      <TD>79</TD>
-      <TD>74</TD>
-      <TD>B</TD>
+      <TD>-42.33819329277779</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD>C</TD>
       <TD>2000A&amp;A...355L..27H</TD>
       <TD>50.334</TD>
       <TD>0.0464</TD>
@@ -36703,10 +36703,10 @@
       <TD>LP  331-57</TD>
       <TD>255.97016989208333</TD>
       <TD>32.19605707833333</TD>
-      <TD>90</TD>
-      <TD>127</TD>
-      <TD>112</TD>
-      <TD>B</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD>C</TD>
       <TD>2000A&amp;A...355L..27H</TD>
       <TD/>
       <TD/>
@@ -43219,10 +43219,10 @@
       <TD>NAME BD-21 1074BC</TD>
       <TD>76.70615862958333</TD>
       <TD>-21.58437083333333</TD>
-      <TD>90</TD>
-      <TD>99</TD>
-      <TD>100</TD>
-      <TD>B</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD>C</TD>
       <TD>2000A&amp;A...355L..27H</TD>
       <TD>50.53</TD>
       <TD>1.62</TD>
@@ -56323,10 +56323,10 @@
       <TD>Wolf 1495</TD>
       <TD>207.25421584875</TD>
       <TD>2.7913067899999997</TD>
-      <TD>90</TD>
-      <TD>101</TD>
-      <TD>124</TD>
-      <TD>B</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD>C</TD>
       <TD>2000A&amp;A...355L..27H</TD>
       <TD>58.4</TD>
       <TD>6.5</TD>

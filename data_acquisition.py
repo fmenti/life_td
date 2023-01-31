@@ -654,22 +654,42 @@ def provider_exo(temp=True):
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
 
     #-------------------exo_mesMass---------------------
-    exomercat['mass_max'].fill_value=999
-    exomercat['mass_min'].fill_value=-999
-    exomercat['mass_max']=exomercat['mass_max'].filled()
-    exomercat['mass_min']=exomercat['mass_min'].filled()
-    exomercat['mass_err']=np.maximum(exomercat['mass_max'],
-    				     -exomercat['mass_min'])
-    exo_mesMass=exomercat['planet_main_id','mass','mass_err','mass_url']
+    #initialize columns exomercat['mass_rel'] and exomercat['mass_err']
+    exomercat['mass_err']=ap.table.Column(dtype=object,length=len(exomercat))
+    exomercat['mass_rel']=ap.table.Column(dtype=object,length=len(exomercat))
+    #transforming mass errors from upper (mass_max) and lower (mass_min) error 
+    # into instead error (mass_error) as well as relation (mass_rel)
+    for i in range(len(exomercat)):
+        if type(exomercat['mass_max'][i])==np.ma.core.MaskedConstant or \
+                  exomercat['mass_max'][i]==np.inf:
+            if type(exomercat['mass_min'][i])==np.ma.core.MaskedConstant or \
+                  exomercat['mass_min'][i]==np.inf:
+                exomercat['mass_rel'][i]=None
+                exomercat['mass_err'][i]=None
+            else:
+                exomercat['mass_rel'][i]='<'
+                exomercat['mass_err'][i]=exomercat['mass_min'][i]
+        else:
+            if type(exomercat['mass_min'][i])==np.ma.core.MaskedConstant or \
+                  exomercat['mass_min'][i]==np.inf:
+                exomercat['mass_rel'][i]='>'
+                exomercat['mass_err'][i]=exomercat['mass_max'][i]
+            else:
+                exomercat['mass_rel'][i]='='
+                exomercat['mass_err'][i]=max(exomercat['mass_max'][i],
+                                        exomercat['mass_min'][i])
+    exo_mesMass=exomercat['planet_main_id','mass','mass_err','mass_url',
+                            'mass_rel']
     exo_mesMass.rename_columns(['planet_main_id','mass','mass_url'],
                                     ['main_id','mass_val','mass_ref'])
-    # solve null value issue, remove those that I introduced to make mass_err
-    # those where 999 left should better be some with relation entries
     #remove masked rows
     exo_mesMass.remove_rows(exo_mesMass['mass_val'].mask.nonzero()[0])
     
     grouped_mesMass=exo_mesMass.group_by('main_id')
-    best_mesMass=exo_mesMass['main_id','mass_val','mass_err','mass_ref'][:0]
+    #initialize best_mesMass as a table that hase same columns as exo_mesMass 
+    # but no rows
+    best_mesMass=exo_mesMass['main_id','mass_val','mass_err','mass_rel',
+                            'mass_ref'][:0]
     for i in range(len(grouped_mesMass.groups.keys)):
         #sort by quality
         row=grouped_mesMass.groups[i][np.where(
@@ -678,7 +698,11 @@ def provider_exo(temp=True):
         #take first and add to best_paras
         #which error to take when there are multiples...
         best_mesMass.add_row([row['main_id'],row['mass_val'],
-                              row['mass_err'],row['mass_ref']])
+                              row['mass_err'],row['mass_rel'],row['mass_ref']])
+    # changing from string to float, if I do it earlier it raises an error. 
+    # change in future
+    exo_mesMass['mass_err']=exo_mesMass['mass_err'].astype(float)
+    best_mesMass['mass_err']=best_mesMass['mass_err'].astype(float)
     # vstack other multiple measurements tables (currently none) 
     best_paras=best_mesMass
     
