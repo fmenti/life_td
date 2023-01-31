@@ -25,9 +25,9 @@ tables may change at any time without prior warning.
     <meta name="subject">astrometry</meta>
 
     <meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
-    <meta name="instrument">LIFE</meta> 
+    <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
-    <meta name="type">Archive</meta>  
+    <meta name="type">Archive</meta>
 
     <table id="source" onDisk="True" adql="True">
         <meta name="title">Source Table</meta>
@@ -47,29 +47,30 @@ tables may change at any time without prior warning.
             ucd="meta.ref"
             tablehead="ref"
             description="Reference, bibcode if possible."
-            verbLevel="1"/> 
+            verbLevel="1"/>
         <column name="provider_name" type="text"
             ucd="meta.bib.author"
             tablehead="provider_name"
-            description="Name for the service through which the data was 
-            acquired. SIMBAD: service = 
-            http://simbad.u-strasbg.fr:80/simbad/sim-tap, 
+            description="Name for the service through which the data was
+            acquired. SIMBAD: service =
+            http://simbad.u-strasbg.fr:80/simbad/sim-tap,
             bibcode = 2000A&amp;AS..143....9W. ExoMercat: service =
-            http://archives.ia2.inaf.it/vo/tap/projects, 
-            bibcode = 2020A&amp;C....3100370A. Everything else is acquired 
+            http://archives.ia2.inaf.it/vo/tap/projects,
+            bibcode = 2020A&amp;C....3100370A. Everything else is acquired
             through private communication."
             required="True"
-            verbLevel="1"/>       
+            verbLevel="1"/>
     </table>
-    
+
     <data id="import_source_table">
         <sources>data/sources.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="source">  
+        <make table="source">
             <rowmaker idmaps="*">
+                <map key="ref" nullExpr="'nan'"/>
             </rowmaker>
-        </make>  
+        </make>
     </data>
 
     <table id="object" onDisk="True" adql="True">
@@ -82,14 +83,14 @@ tables may change at any time without prior warning.
         <column name="object_id" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_id"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="type" type="text"
             ucd="src.class"
             tablehead="type"
-            description="Object type (sy=multi-object system, st=star, 
+            description="Object type (sy=multi-object system, st=star,
             pl=planet and di=disk)."
             required="True"
             verbLevel="1"/>
@@ -105,17 +106,17 @@ tables may change at any time without prior warning.
             description="All identifiers of the object separated by '|'."
             required="True"
             verbLevel="1"/>
-    </table> 
-    
+    </table>
+
     <data id="import_object_table">
         <sources>data/objects.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="object"> 
-             <rowmaker idmaps="*"/>  
-        </make>                       
-    </data>     
-               
+        <make table="object">
+             <rowmaker idmaps="*"/>
+        </make>
+    </data>
+
     <table id="star_basic" onDisk="True" adql="True" mixin="//scs#q3cindex">
         <meta name="title">Basic stellar parameters</meta>
         <meta name="description">
@@ -125,56 +126,56 @@ tables may change at any time without prior warning.
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
-  
+
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="coo_ra" type="double precision"
-            ucd="pos.eq.ra;meta.main" unit="deg" 
-            tablehead="RA (ICRS)" 
-            description="Right Ascension" 
+            ucd="pos.eq.ra;meta.main" unit="deg"
+            tablehead="RA (ICRS)"
+            description="Right Ascension"
             verbLevel="1"/>
-        <column name="coo_dec" type="double precision" 
+        <column name="coo_dec" type="double precision"
             ucd="pos.eq.dec;meta.main" unit="deg"
-            tablehead="Dec (ICRS)" 
+            tablehead="Dec (ICRS)"
             description="Declination"
             verbLevel="1"/>
-        <column name="coo_err_angle" type="smallint" 
+        <column name="coo_err_angle" type="smallint"
             ucd="pos.posAng;pos.errorEllipse;pos.eq" unit="deg"
-            tablehead="coo_err_angle" 
+            tablehead="coo_err_angle"
             description="Coordinate error angle"
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="coo_err_maj" type="real" 
-            ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.eq" 
+        <column name="coo_err_maj" type="real"
+            ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.eq"
             unit="mas"
-            tablehead="coo_err_maj" 
+            tablehead="coo_err_maj"
             description="Coordinate error major axis"
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="coo_err_min" type="real" 
-            ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.eq" 
+        <column name="coo_err_min" type="real"
+            ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.eq"
             unit="mas"
-            tablehead="coo_err_min" 
+            tablehead="coo_err_min"
             description="Coordinate error minor axis"
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="coo_qual" type="text" 
+        <column name="coo_qual" type="text"
             ucd="meta.code.qual;pos.eq"
-            tablehead="coo_qual" 
+            tablehead="coo_qual"
             description="Coordinate quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="coo_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="coord_source_id"
-            description="Source identifier corresponding 
+            description="Source identifier corresponding
             to the position (coo) parameters."
             verbLevel="1">
               <values nullLiteral="-1"/>
@@ -189,9 +190,9 @@ tables may change at any time without prior warning.
             tablehead="plx_err"
             description="Parallax uncertainty."
             verbLevel="1"/>
-        <column name="plx_qual" type="text" 
+        <column name="plx_qual" type="text"
             ucd="meta.code.qual;pos.parallax"
-            tablehead="plx_qual" 
+            tablehead="plx_qual"
             description="Parallax quality (A:best, E:worst)"
             verbLevel="1">
               <values nullLiteral="N"/>
@@ -199,7 +200,7 @@ tables may change at any time without prior warning.
         <column name="plx_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="plx_source_id"
-            description="Source identifier corresponding 
+            description="Source identifier corresponding
             to the parallax parameters."
             verbLevel="1">
               <values nullLiteral="-1"/>
@@ -214,9 +215,9 @@ tables may change at any time without prior warning.
             tablehead="dist_err"
             description="Object distance error."
             verbLevel="1"/>
-        <column name="dist_qual" type="text" 
+        <column name="dist_qual" type="text"
             ucd="meta.code.qual;pos.distance"
-            tablehead="dist_qual" 
+            tablehead="dist_qual"
             description="Distance quality (A:best, E:worst)"
             verbLevel="1">
               <values nullLiteral="N"/>
@@ -224,13 +225,13 @@ tables may change at any time without prior warning.
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="dist_source_idref"
-            description="Identifier of the source of the 
+            description="Identifier of the source of the
                 distance parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
     </table>
-    
+
     <data id="import_star_basic_table">
         <sources>data/star_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
@@ -244,46 +245,46 @@ tables may change at any time without prior warning.
                  src="plx_source_idref"
                  nullExpr="0" />
             </rowmaker>
-        </make>                               
-    </data>    
-    
+        </make>
+    </data>
+
     <table id="planet_basic" onDisk="True" adql="True">
         <meta name="title">Basic planetary parameters</meta>
         <meta name="description">
         A list of all basic planetary parameters.
-        
+
         \betawarning
         </meta>
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
-            dest="object_id" /> 
+            dest="object_id" />
 
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
-            ucd="phys.mass" unit="'jupiterMass'" 
-            tablehead="mass_val" 
-            description="Mass" 
+            ucd="phys.mass" unit="'jupiterMass'"
+            tablehead="mass_val"
+            description="Mass"
             verbLevel="1"/>
         <column name="mass_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="mass_err"
             description="Mass error"
             verbLevel="1"/>
-        <column name="mass_qual" type="text" 
+        <column name="mass_qual" type="text"
             ucd="meta.code.qual;phys.mass"
-            tablehead="mass_qual" 
+            tablehead="mass_qual"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_rel" type="text" 
+        <column name="mass_rel" type="text"
             ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel" 
-            description="Mass relation defining upper / lower limit or exact 
+            tablehead="mass_rel"
+            description="Mass relation defining upper / lower limit or exact
             measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
@@ -295,57 +296,56 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
     </table>
-    
-    <data id="import_plant_basic_table">
+
+    <data id="import_planet_basic">
         <sources>data/planet_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
         <make table="planet_basic">
             <rowmaker idmaps="*">
-                <map dest="mass_source_idref"
-                 src="mass_source_idref"
-                 nullExpr="0" />
+                <map key="mass_source_idref" nullExpr="0" />
+                <map key="mass_rel" nullExpr="'None'"/>
             </rowmaker>
-        </make>                           
-    </data>    
+        </make>
+    </data>
 
     <table id="disk_basic" onDisk="True" adql="True">
         <meta name="title">Basic disk parameters</meta>
         <meta name="description">
         A list of all basic disk parameters.
-        
+
         \betawarning
         </meta>
         <primary>object_idref</primary>
         <foreignKey source="object_idref" inTable="object"
-            dest="object_id" /> 
-        
+            dest="object_id" />
+
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="rad_value" type="double precision"
             ucd="phys.size.radius"  unit="AU"
-            tablehead="radius" 
-            description="Black body radius." 
+            tablehead="radius"
+            description="Black body radius."
             verbLevel="1"/>
         <column name="rad_err" type="double precision"
             ucd="stat.error;phys.size.radius" unit="AU"
             tablehead="radius_error"
             description="Radius error"
             verbLevel="1"/>
-        <column name="rad_qual" type="text" 
+        <column name="rad_qual" type="text"
             ucd="meta.code.qual;phys.size.radius"
-            tablehead="rad_qual" 
+            tablehead="rad_qual"
             description="Radius quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="rad_rel" type="text" 
+        <column name="rad_rel" type="text"
             ucd="phys.size.radius;arith.ratio"
-            tablehead="rad_rel" 
-            description="Radius relation defining upper / lower limit or exact 
+            tablehead="rad_rel"
+            description="Radius relation defining upper / lower limit or exact
             measurement through '&lt;' ,'>', and '='."
             verbLevel="1"/>
         <column name="rad_source_idref" type="integer"
@@ -357,7 +357,7 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
     </table>
-    
+
     <data id="import_disk_basic_table">
         <sources>data/disk_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
@@ -368,10 +368,10 @@ tables may change at any time without prior warning.
                     parseWithNull(@rad_value,float,"None")
                 </map>
             </rowmaker>
-        </make>                                 
-    </data>    
+        </make>
+    </data>
 
-    
+
     <table id="h_link" onDisk="True" adql="True">
         <meta name="title">Object relation table</meta>
         <meta name="description">
@@ -386,14 +386,14 @@ tables may change at any time without prior warning.
         <column name="parent_object_idref" type="integer"
             ucd="meta.id.parent;meta.main"
             tablehead="parent"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="child_object_idref" type="integer"
             ucd="meta.id"
             tablehead="child"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
@@ -403,41 +403,41 @@ tables may change at any time without prior warning.
             description="Membership probability."
             verbLevel="1">
               <values nullLiteral="-1"/>
-        </column>      
+        </column>
         <column name="h_link_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="h_link_source_idref"
-            description="Identifier of the source of the 
+            description="Identifier of the source of the
                 relationship parameters."
             required="True"
-            verbLevel="1"/>    
-    </table> 
-       
+            verbLevel="1"/>
+    </table>
+
     <data id="import_h_link_table">
         <sources>data/h_link.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="h_link">  
+        <make table="h_link">
              <rowmaker idmaps="*">
                  <map dest="membership"
                  src="membership"
                  nullExpr="-1" />
              </rowmaker>
-        </make>                       
+        </make>
     </data>
-         
+
     <table id="ident" onDisk="True" adql="True">
         <meta name="title">Object identifiers table</meta>
         <meta name="description">
         A list of the object identifiers.
-        
+
         \betawarning
         </meta>
         <primary>object_idref,id,id_source_idref</primary>
         <column name="object_idref" type="integer"
             ucd="meta.id"
             tablehead="object_id"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
@@ -450,21 +450,21 @@ tables may change at any time without prior warning.
         <column name="id_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="id_source_idref"
-            description="Identifier of the source of the 
+            description="Identifier of the source of the
                 identifier parameter."
             required="True"
-            verbLevel="1"/>    
-    </table> 
-       
+            verbLevel="1"/>
+    </table>
+
     <data id="import_ident_table">
         <sources>data/ident.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="ident">  
+        <make table="ident">
              <rowmaker idmaps="*">
              </rowmaker>
-        </make>                       
-    </data>        
+        </make>
+    </data>
 
     <table id="mes_dist" onDisk="True" adql="True">
         <meta name="title">Distance measurement table</meta>
@@ -476,11 +476,11 @@ tables may change at any time without prior warning.
         <primary>object_idref,dist_value,dist_err,
             dist_source_idref
         </primary>
-        
+
         <column name="object_idref" type="integer"
             ucd="meta.id"
             tablehead="object_id"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
@@ -495,30 +495,30 @@ tables may change at any time without prior warning.
             tablehead="dist_err"
             description="Distance error."
             verbLevel="1"/>
-        <column name="dist_qual" type="text" 
+        <column name="dist_qual" type="text"
             ucd="meta.code.qual;pos.distance"
-            tablehead="dist_qual" 
+            tablehead="dist_qual"
             description="Distance quality (A:best, E:worst)"
             verbLevel="1"/>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mes_dist_source_idref"
-            description="Identifier of the source of the 
+            description="Identifier of the source of the
                 distance parameter."
             required="True"
-            verbLevel="1"/>    
-    </table> 
-       
+            verbLevel="1"/>
+    </table>
+
     <data id="import_mes_dist_table">
         <sources>data/mesDist.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="mes_dist">  
+        <make table="mes_dist">
              <rowmaker idmaps="*">
              </rowmaker>
-        </make>                       
-    </data>                      
-  
+        </make>
+    </data>
+
     <table id="mes_mass" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
@@ -528,34 +528,34 @@ tables may change at any time without prior warning.
         </meta>
         <primary>object_idref,mass_val,mass_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
-            dest="object_id" /> 
-            
+            dest="object_id" />
+
         <column name="object_idref" type="integer"
             ucd="meta.id;meta.main"
             tablehead="object_idref"
-            description="Object key (unstable, use only for joining to the 
+            description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
-            ucd="phys.mass" unit="'jupiterMass'" 
-            tablehead="mass_val" 
-            description="Mass" 
+            ucd="phys.mass" unit="'jupiterMass'"
+            tablehead="mass_val"
+            description="Mass"
             verbLevel="1"/>
         <column name="mass_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="mass_err"
             description="Mass error"
             verbLevel="1"/>
-        <column name="mass_qual" type="text" 
+        <column name="mass_qual" type="text"
             ucd="meta.code.qual;phys.mass"
-            tablehead="mass_qual" 
+            tablehead="mass_qual"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_rel" type="text" 
+        <column name="mass_rel" type="text"
             ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel" 
-            description="Mass relation defining upper / lower limit or exact 
+            tablehead="mass_rel"
+            description="Mass relation defining upper / lower limit or exact
             measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_source_idref" type="integer"
@@ -565,18 +565,19 @@ tables may change at any time without prior warning.
              parameter."
             required="True"
             verbLevel="1"/>
-    </table> 
-       
+    </table>
+
     <data id="import_mes_mass_table">
         <sources>data/mesMass.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-           <make table="mes_mass">  
+           <make table="mes_mass">
              <rowmaker idmaps="*">
+                 <map key="mass_rel" nullExpr="'None'"/>
              </rowmaker>
-        </make>                       
-    </data>                      
- 
+        </make>
+    </data>
+
     <service id="cone" allowed="form,scs.xml">
         <meta name="shortName">lifetd cone</meta>
         <meta>
@@ -588,8 +589,8 @@ tables may change at any time without prior warning.
         <publish render="scs.xml" sets="ivo_managed"/>
         <scsCore queriedTable="star_basic">
         </scsCore>
-    </service> 
- 
+    </service>
+
     <service id="ex" allowed="examples">
         <meta name="_example" title="Filter objects by type">
             In LIFE, we have a single table for all kinds of objects
@@ -602,25 +603,25 @@ tables may change at any time without prior warning.
         </meta>
         <meta name="_example" title="All children of an object">
             Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
-            star).  The parent/child relationships are given in the 
-            :taptable:`life.h_link` table which you can join to all other 
+            star).  The parent/child relationships are given in the
+            :taptable:`life.h_link` table which you can join to all other
             tables that have an object_idref column.  For instance,
             to find (direct) children of a star, you would run:
 
             .. tapquery::
                 SELECT main_id as Child_main_id, object_id as child_object_id
-                FROM life.h_link 
+                FROM life.h_link
                 JOIN life.ident as p on p.object_idref=parent_object_idref
                 JOIN life.object on object_id=child_object_idref
                 WHERE p.id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All parents of an object">
             Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
-            star).  The parent/child relationships are given in the 
-            :taptable:`life.h_link` table which you can join to all other 
+            star).  The parent/child relationships are given in the
+            :taptable:`life.h_link` table which you can join to all other
             tables that have an object_idref column.  For instance,
             to find (direct) parents of a star, you would run:
-            
+
             .. tapquery::
                 SELECT main_id as parent_main_id, object_id as parent_object_id
                 FROM life.h_link
@@ -630,10 +631,10 @@ tables may change at any time without prior warning.
                 </meta>
         <meta name="_example" title="All specific measurements of an object">
             In LIFE, we have individual tables for all kinds of parameters
-            where multiple measurements for the same object are available.  
-            They are kept in the tables starting with mes_ e.g. 
+            where multiple measurements for the same object are available.
+            They are kept in the tables starting with mes_ e.g.
             :taptable:`life.mes_dist`:
-            
+
             .. tapquery::
                 SELECT *
                 FROM life.mes_dist
@@ -641,44 +642,44 @@ tables may change at any time without prior warning.
                 WHERE id = 'GJ    10'
                 </meta>
         <meta name="_example" title="All basic stellar data from an object name">
-            In LIFE we keep for each object the best measurements of its kind 
-            in the basic data table corresponding to the object type. For 
-            instance, to find the best measurements for the star '* alf Cen' 
+            In LIFE we keep for each object the best measurements of its kind
+            in the basic data table corresponding to the object type. For
+            instance, to find the best measurements for the star '* alf Cen'
             you would run:
-            
+
             .. tapquery::
                 SELECT  *
-                FROM life.star_basic 
+                FROM life.star_basic
                 JOIN life.ident USING(object_idref)
                 WHERE id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All basic disk data from host name">
-            In LIFE we keep for each object the best measurements of its kind 
-            in the basic data table corresponding to the object type. For 
-            instance, to find the best measurements for the disk around the 
+            In LIFE we keep for each object the best measurements of its kind
+            in the basic data table corresponding to the object type. For
+            instance, to find the best measurements for the disk around the
             star '* bet Cas' you would run:
-            
+
             .. tapquery::
                 SELECT main_id disk_main_id, object_id as disk_object_id, db.*
-                FROM life.h_link 
+                FROM life.h_link
                 JOIN life.disk_basic as db on db.object_idref=child_object_idref
                 JOIN life.ident as p on p.object_idref=parent_object_idref
                 JOIN life.object on object_id=child_object_idref
                 WHERE p.id = '* bet Cas' and type='di'
                 </meta>
         <meta name="_example" title="Missing reliable measurements">
-            In LIFE we keep information about the quality of a measurement. 
-            This can serve as motivation for future observations to fill in 
-            knowledge gaps. For instance, to find where reliable measurements 
+            In LIFE we keep information about the quality of a measurement.
+            This can serve as motivation for future observations to fill in
+            knowledge gaps. For instance, to find where reliable measurements
             for the parallax are missing you would run:
-            
-            .. tapquery::                
-                SELECT star_ob.main_id as star_name, plx_value, plx_err, 
+
+            .. tapquery::
+                SELECT star_ob.main_id as star_name, plx_value, plx_err,
                 plx_qual, plx_source_idref
                 FROM life.star_basic as s
-                JOIN life.object as star_ob on 
+                JOIN life.object as star_ob on
                 (s.object_idref=star_ob.object_id)
-                WHERE plx_value is Null or plx_qual in ('D','E') or 
+                WHERE plx_value is Null or plx_qual in ('D','E') or
                 plx_qual is Null
                 </meta>
         <nullCore/>
@@ -701,7 +702,7 @@ tables may change at any time without prior warning.
 
         <regTest title="LIFE tables appear to be in place.">
             <url parSet="TAP" QUERY="
-SELECT * FROM 
+SELECT * FROM
   life.planet_basic AS p
   JOIN life.object ON (p.object_idref=object_id)
   JOIN life.h_link ON (child_object_idref=object_id)
@@ -715,7 +716,7 @@ WHERE
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
                 self.assertEqual(set(r["h_link_source_idref"]
-                        for r in rows), 
+                        for r in rows),
                     {1, 201})
             </code>
         </regTest>
