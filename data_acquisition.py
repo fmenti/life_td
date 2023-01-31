@@ -786,7 +786,7 @@ def building(sim,gk,exo):
             ids2=cat[column_ids2][i].split('|')
             if ids2==['']:
                 cat['ids'][i]=cat[column_ids1][i]
-            if ids1==['']:
+            elif ids1==['']:
                 cat['ids'][i]=cat[column_ids2][i]
             else:
                 ids=ids1+ids2#should be list
@@ -797,6 +797,7 @@ def building(sim,gk,exo):
                 #joining list into object with elements separated by |
                 ids="|".join(ids)
                 cat['ids'][i]=ids
+            cat['ids'][i]=cat['ids'][i].strip('|')
         return cat
     #removed vstack with init to not have object_id as is empty anyways
     #cat[1]=ap.table.vstack([init[1],sim[1]]) 
