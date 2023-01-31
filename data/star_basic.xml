@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675166844119" name="result_1675166844119">
+  <TABLE ID="result_1675168064633" name="result_1675168064633">
    <FIELD ID="coo_ra" datatype="double" name="coo_ra" ucd="pos.eq.ra;meta.main" unit="deg">
     <DESCRIPTION>
      Right ascension

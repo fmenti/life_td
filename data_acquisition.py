@@ -396,6 +396,9 @@ def provider_simbad():
     sim_mesDist['dist_err']=np.maximum(sim_mesDist['plus_err'],
                                        -sim_mesDist['minus_err'])
     sim_mesDist.remove_rows(sim_mesDist['dist_err'].mask.nonzero()[0])
+    #change provider given quality null values all to same: 'N'
+    sim_mesDist['dist_qual'][np.where(sim_mesDist['dist_qual']=='')]='N'
+    sim_mesDist['dist_qual'][np.where(sim_mesDist['dist_qual']==':')]='N' 
     #group by oid
     grouped_mesDist=sim_mesDist.group_by('main_id')
     best_mesDist=sim_mesDist['main_id','dist_value','plus_err',
