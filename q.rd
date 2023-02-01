@@ -62,7 +62,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_source_table">
+    <data id="import_source">
         <sources>data/sources.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -108,7 +108,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_object_table">
+    <data id="import_object">
         <sources>data/objects.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -232,7 +232,7 @@ tables may change at any time without prior warning.
         </column>
     </table>
 
-    <data id="import_star_basic_table">
+    <data id="import_star_basic">
         <sources>data/star_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -297,7 +297,7 @@ tables may change at any time without prior warning.
         </column>
     </table>
 
-    <data id="import_planet_basic">
+    <data id="import_planet">
         <sources>data/planet_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -358,7 +358,7 @@ tables may change at any time without prior warning.
         </column>
     </table>
 
-    <data id="import_disk_basic_table">
+    <data id="import_disk_basic">
         <sources>data/disk_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -413,7 +413,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_h_link_table">
+    <data id="import_h_link">
         <sources>data/h_link.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -456,7 +456,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_ident_table">
+    <data id="import_ident">
         <sources>data/ident.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -509,7 +509,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_mes_dist_table">
+    <data id="import_mes_dist">
         <sources>data/mesDist.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -539,12 +539,12 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
         <column name="mass_val" type="double precision"
             ucd="phys.mass" unit="'jupiterMass'"
-            tablehead="Mass"
+            tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="Err. Mass"
+            tablehead="Err. Pl. Mass"
             description="Mass error"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_qual" type="text"
@@ -567,7 +567,7 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_mes_mass_table">
+    <data id="import_mes_mass">
         <sources>data/mesMass.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
