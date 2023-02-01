@@ -54,7 +54,7 @@
 			These are services and registry records for the registry interface
 			of this service.
 
-			Even if together with defaultmeta, this will just work, keep 
+			Even if together with defaultmeta, this will just work, keep
 			these elements in your etc/userconfig.rd.
 
 			The metaString macros in here generally point into defaultmeta.
@@ -95,7 +95,7 @@
 			<meta name="shortName">\\metaString{authority.shortName} RG</meta>
 			<meta name="content.type">Archive</meta>
 			<meta name="rights">public</meta>
-			<meta name="harvest.description">The harvesting interface for 
+			<meta name="harvest.description">The harvesting interface for
 				the publishing registry of the \getConfig{web}{sitename}</meta>
 			<meta name="maxRecords">10000</meta>
 			<meta name="managedAuthority">\getConfig{ivoa}{authority}</meta>
@@ -116,7 +116,7 @@
 
 			.. tapquery::
 				
-				SELECT * FROM tap_schema.columns 
+				SELECT * FROM tap_schema.columns
 				  WHERE description LIKE '%em.IR.8-15um%'
 		</meta>  -->
 		<meta name="_example" title="Filter objects by type">
@@ -127,7 +127,7 @@
 		<meta name="_example" title="All children of an object">
 			.. tapquery::
 				SELECT main_id as Child_main_id, object_id as child_object_id
-				FROM life.h_link 
+				FROM life.h_link
 				JOIN life.ident as p on p.object_idref=parent_object_idref
 				JOIN life.object on object_id=child_object_idref
 				WHERE p.id = '* alf Cen'
@@ -150,14 +150,14 @@
 		<meta name="_example" title="All basic stellar data from an object name">
 			.. tapquery::
 				SELECT  *
-				FROM life.star_basic 
+				FROM life.star_basic
 				JOIN life.ident USING(object_idref)
 				WHERE id = '* alf Cen'
                 </meta>
 		<meta name="_example" title="All basic disk data from host name">
 			.. tapquery::
 				SELECT main_id disk_main_id, object_id as disk_object_id, db.*
-				FROM life.h_link 
+				FROM life.h_link
 				JOIN life.disk_basic as db on db.object_idref=child_object_idref
 				JOIN life.ident as p on p.object_idref=parent_object_idref
 				JOIN life.object on object_id=child_object_idref
@@ -168,7 +168,7 @@
 
 	
 	<NXSTREAM id="tapdescription">
-		<meta name="description">The \\getConfig{web}{sitename}'s TAP end point.  
+		<meta name="description">The \\getConfig{web}{sitename}'s TAP end point.
 			The Table Access Protocol (TAP) lets you execute queries against our
 			database tables, inspect various metadata, and upload your own
 			data.  It is thus the VO's premier way to access public data
@@ -182,15 +182,15 @@
 		<!-- put any items you want to appear in the //siap2#sitewide
 		service definition (in particular, metadata) here; it'd be nice if
 		you changed the creationDate, at least, as that might aid
-		in debugging. 
+		in debugging.
 		
-		You should also add 
+		You should also add
 		testQuery.pos.ra, testQuery.pos.dec,
 		testQuery.size.ra, testQuery.size.dec meta item to  describe a field
 		that is guaranteed to return at least one result.
 		-->
 		<meta name="description">
-			The \\getConfig{web}{sitename}'s sitewide SIAP version 2 service 
+			The \\getConfig{web}{sitename}'s sitewide SIAP version 2 service
 			publishes all the images published through the site.  For more
 			advanced queries including uploads, all this data is also available
 			through ObsTAP.

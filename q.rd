@@ -578,6 +578,16 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
+    <data id="tables" auto="False">
+        <LOOP listItems="source object star_basic planet_basic disk_basic
+            h_link ident mes_dist mes_mass">
+            <events>
+                <make table="\item"/>
+            </events>
+        </LOOP>
+        <publish sets="ivo_managed,local"/>
+    </data>
+
     <table id="scs_summary" onDisk="True">
         <meta name="description">A view containing the most
         basic data for simple consumption by the cone search service.
@@ -634,9 +644,10 @@ tables may change at any time without prior warning.
             testQuery.dec: 37.47
             testQuery.sr: 0.01
         </meta>
-        <publish render="form" sets="ivo_managed, local"/>
-        <publish render="scs.xml" sets="ivo_managed"/>
         <scsCore queriedTable="scs_summary">
+            <FEED source="//scs#coreDescs"/>
+            <condDesc buildFrom="planet_name"/>
+            <condDesc buildFrom="planet_mass"/>
         </scsCore>
     </service>
 
@@ -741,12 +752,10 @@ tables may change at any time without prior warning.
         release comes around. -->
 
         <regTest title="LIFE form service appears to work.">
-        <url RA="312.27" DEC="37.47" SR="0.01">cone/scs.xml</url>
+        <url parSet="form" hscs_pos="14 Her" hscs_sr="1">cone/form</url>
         <code>
-            row = self.getFirstVOTableRow()
-            self.assertEqual(row["coo_source_idref"], 214)
-            self.assertEqual(row["coo_qual"], 'A')
-            self.assertAlmostEqual(row["coo_ra"], 312.2779151636)
+            self.assertHasStrings("HD 145675c",
+                "17.90", "7.679")
         </code>
         </regTest>
 
@@ -765,9 +774,9 @@ WHERE
                 self.assertEqual(len(rows), 2)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
-                self.assertEqual(set(r["h_link_source_idref"]
-                        for r in rows),
-                    {1, 201})
+                ids = set("|".join(r["ids"] for r in rows).split("|"))
+                self.assertEqual(ids, {'*  14 Her b', '14 Her b',
+                    'HD 145675b', 'GJ   614 b'})
             </code>
         </regTest>
     </regSuite>
