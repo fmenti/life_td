@@ -1,10 +1,10 @@
 """
 Authors Note
-This code was written by Franziska Menti in 2022. 
+This code was written by Franziska Menti in 2022.
 It creates the tables for the prototype of the LIFE target database.
 For more information on LIFE please visit www.life-space-mission.com.
-Beta warning: As a prototype this code will change. In particular 
-the addition of more providers, parameters as well as a possible 
+Beta warning: As a prototype this code will change. In particular
+the addition of more providers, parameters as well as a possible
 overhaul of the planet data is planned.
 The document is structured as follows:
 - Authors note
@@ -23,10 +23,10 @@ import astropy as ap #votables
 def save(cats,paths):
     """
     This functions saves the tables given as python list in the cats parameter.
-    The saving location is 'data/{path}.xml' where path is given in the paths 
+    The saving location is 'data/{path}.xml' where path is given in the paths
     parameter.
     :param cats: Python list of astropy table to be saved.
-    :param paths: Python list of paths to where to save the tables given in 
+    :param paths: Python list of paths to where to save the tables given in
     	cats.
     """
     #go through all the elements in both lists
@@ -44,15 +44,15 @@ def save(cats,paths):
 
 def stringtoobject(cat,number=100):
     """
-    This function changes from string to object format. 
-    The later has the advantace of allowing strings of varying length. 
+    This function changes from string to object format.
+    The later has the advantace of allowing strings of varying length.
     Without it strings can get truncated.
     :param cat: Astropy table.
-    :param number: Length of longest string type element in the table. 
+    :param number: Length of longest string type element in the table.
         Default is 100.
     :return cat: Astropy table.
     """
-    #defining string types as calling them string does not work and instead 
+    #defining string types as calling them string does not work and instead
     #the type name <U3 is needed for a string of length 3
     stringtypes=[np.dtype(f'<U{j}') for j in range(1,number)]
     #for each column header
@@ -65,7 +65,7 @@ def stringtoobject(cat,number=100):
 
 def load(paths):
     """
-    This function loads the tables saved in XML format at saving locations 
+    This function loads the tables saved in XML format at saving locations
     specified in paths.
     :param paths: Python list of saving locations.
     :return cats: Python list of loaded astropy tables.
@@ -85,55 +85,55 @@ def load(paths):
 #-------------------initialization function------------------------------------
 def initialize_database_tables():
     """
-    This function initializes the database tables with column name and data 
+    This function initializes the database tables with column name and data
     type specified but no actual data in them.
-    :return list_of_tables: List of astropy tables in the order sources, 
-                objects, ident (identifiers), h_link (relation between 
+    :return list_of_tables: List of astropy tables in the order sources,
+                objects, ident (identifiers), h_link (relation between
                 objects),star_basic,planet_basic, disk_basic,
-                mesDist (distance measurements) and 
-                mesMass (mass measurements). 
+                mesDist (distance measurements) and
+                mesMass (mass measurements).
     """
-    #explanation of abbreviations: id stands for identifier, idref for 
-    # reference identifier and parameter_source_idref for the identifier in the  
+    #explanation of abbreviations: id stands for identifier, idref for
+    # reference identifier and parameter_source_idref for the identifier in the
     # source table corresponding to the mentioned parameter
-    
+
     list_of_tables=[]
-    
+
     sources=ap.table.Table(
         #reference,...
         names=['ref','provider_name','provider_url','provider_bibcode',
                'source_id'],
         dtype=[object,object,object,object,int])
     list_of_tables.append(sources)
-    
+
     objects=ap.table.Table(
         #object id, type of object, all identifiers, main id
         names=['object_id','type','ids','main_id'],
         dtype=[int,object,object,object])
     list_of_tables.append(objects)
-    
+
     #identifier table
     ident=ap.table.Table(
         #object idref, id, source idref for the id parameter, id reference
         names=['object_idref','id','id_source_idref','id_ref'],
         dtype=[int,object,int,object])
     list_of_tables.append(ident)
-    
+
     #hierarchical link table (which means relation between objects)
     h_link=ap.table.Table(
-        #child object idref (e.g. planet X), 
+        #child object idref (e.g. planet X),
         #parent object idref (e.g. host star of planet X)
-        #source idref of h_link parameter, h_link reference, 
+        #source idref of h_link parameter, h_link reference,
         #membership probability
         names=['child_object_idref','parent_object_idref',
                'h_link_source_idref','h_link_ref','membership'],
         dtype=[int,int,int,object,int])
     list_of_tables.append(h_link)
-    
+
     star_basic=ap.table.Table(
-        #object idref, RA coordinate, DEC coordinate, 
+        #object idref, RA coordinate, DEC coordinate,
         #coordinate error ellypse angle, major axis and minor axis,
-        #coordinate quality, source idref of coordinate parameter, 
+        #coordinate quality, source idref of coordinate parameter,
         #coordinate reference, parallax value, parallax error, parallax quality
         #source idref of parallax parameter ... same for distance parameter
         names=['object_idref','coo_ra','coo_dec','coo_err_angle',
@@ -151,7 +151,7 @@ def initialize_database_tables():
                float,float,object,int,
                object])
     list_of_tables.append(star_basic)
-    
+
     planet_basic=ap.table.Table(
         #object idref, mass value, mass error, mass realtion (min, max, equal),
         #mass quality, source idref of mass parameter, mass reference
@@ -159,28 +159,28 @@ def initialize_database_tables():
                'mass_source_idref','mass_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(planet_basic)
-    
+
     disk_basic=ap.table.Table(
-        #object idref, black body radius value, bbr error, 
+        #object idref, black body radius value, bbr error,
         #bbr relation (min, max, equal), bbr quality,...
         names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
                'rad_source_iderf','rad_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(disk_basic)
-    
+
     mesDist=ap.table.Table(
         names=['object_idref','dist_value','dist_err','dist_qual',
                'dist_source_idref','dist_ref'],
         dtype=[int,float,float,object,
                int,object])
     list_of_tables.append(mesDist)
-    
+
     mesMass=ap.table.Table(
         names=['object_idref','mass_val','mass_err','mass_rel','mass_qual',
                'mass_source_idref','mass_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(mesMass)
-    
+
     #save all tables
     save(list_of_tables,
          ['empty_sources','empty_objects','empty_ident','empty_h_link',
@@ -191,9 +191,9 @@ def initialize_database_tables():
 #------------------------------provider helper functions-----------------------
 def query(link,query,catalogs=[]):
     """
-    Performs a query via TAP on the service given in the link parameter. 
-    If a list of tables is given in the catalogs parameter, 
-    those are uploaded to the service. 
+    Performs a query via TAP on the service given in the link parameter.
+    If a list of tables is given in the catalogs parameter,
+    those are uploaded to the service.
     :param link: Service access URL.
     :param query: Query to be asked of the external database service in ADQL.
     :param catalogs: List of astropy tables to be uploaded to the service.
@@ -209,21 +209,21 @@ def query(link,query,catalogs=[]):
         tables={}
         for i in range(len(catalogs)):
             tables.update({f"t{i+1}":catalogs[i]})
-        result = service.run_async(query,uploads=tables,timeout=None, 
+        result = service.run_async(query,uploads=tables,timeout=None,
                                    maxrec=160000)
     cat=result.to_table()
     return cat
 
-def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()): 
+def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     """
-    This function creates or updates the source table out of the given 
+    This function creates or updates the source table out of the given
     references. The entries are unique and the columns consist out of the
     reference, provider_name, provider_url and provider_bibcode.
     :param cat: Astropy table on which the references should be gathered.
     :param ref_columns: Header of the columns containing reference information.
     :param provider: List containing name, url and bibcode of provider.
     :param old_sources: Previously created reference table.
-    :return sources: Astropy table containing references and provider 
+    :return sources: Astropy table containing references and provider
         information.
     """
     cat_sources=ap.table.Table() #table initialization
@@ -237,7 +237,7 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
         else:
             cat_reflist.extend(cat[ref_columns[k]])
     #add list of collected references to the table and call the column ref
-    cat_sources['ref']=cat_reflist 
+    cat_sources['ref']=cat_reflist
     cat_sources=ap.table.unique(cat_sources)#keeps only unique values
     #attaches service information
     cat_sources['provider_name']=[provider[0]]*len(cat_sources)
@@ -253,12 +253,12 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     Joins main_id from simbad to the column colname. Returns the whole
     table cat but without any rows where no simbad main_id was found.
     :param cat: Astropy table.
-    :param colname: Column header of the identifiers that should be searched 
+    :param colname: Column header of the identifiers that should be searched
         in SIMBAD.
-    :param name: Column header for the SIMBAD main identifiers, default is 
+    :param name: Column header for the SIMBAD main identifiers, default is
         main_id.
     :param oid: Specifies wether colname is a SIMBAD oid or normal identifier.
-    :return cat: Astropy table with all identifiers that could be found 
+    :return cat: Astropy table with all identifiers that could be found
         in SIMBAD and column contining ther main identifier.
     """
     #improvement idea to be performed at one point
@@ -283,10 +283,10 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
 #-----------------------------provider data ingestion--------------------------
 def provider_simbad():
     """
-    This function obtains the SIMBAD data and arranges it in a way 
+    This function obtains the SIMBAD data and arranges it in a way
     easy to ingest into the database.
-    :return simbad_list_of_tables: List of astropy tables containing 
-        reference data, object data, identifier data, object to object 
+    :return simbad_list_of_tables: List of astropy tables containing
+        reference data, object data, identifier data, object to object
         relation data, basic stellar data and distance measurement data.
     """
     #---------------define provider--------------------------------------------
@@ -295,10 +295,10 @@ def provider_simbad():
     provider_bibcode='2000A&AS..143....9W'
     #---------------define queries---------------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
-        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid, 
+        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
         b.coo_bibcode AS coo_ref, b.coo_qual,
         b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
-        h_link.membership, h_link.parent AS parent_oid, 
+        h_link.membership, h_link.parent AS parent_oid,
         h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids
         """#which parameters to query from simbad and what alias to give them
     adql_query=[
@@ -310,9 +310,9 @@ def provider_simbad():
         WHERE b.plx_value >=50."""]
     #creating one table out of parameters from multiple ones and
     #keeping only objects with parallax bigger than 50mas
-    
+
     upload_query=[
-        #query for systems without parallax data but 
+        #query for systems without parallax data but
         #children (in TAP_UPLOAD.t1 table) with parallax bigger than 50mas
         select+"""
         FROM basic AS b
@@ -321,7 +321,7 @@ def provider_simbad():
                 LEFT JOIN h_link ON b.oid=h_link.child
                     JOIN TAP_UPLOAD.t1 ON b.oid=t1.parent_oid
         WHERE (b.plx_value IS NULL) AND (otype='**..')""",
-        #query for planets without parallax data but 
+        #query for planets without parallax data but
         #host star (in TAP_UPLOAD.t1 table) with parallax bigger than 50mas
         select+"""
         FROM basic AS b
@@ -337,7 +337,7 @@ def provider_simbad():
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid""",
         #query all identifiers for objects in TAP_UPLOAD.t1 table
         """SELECT id, t1.*
-        FROM ident 
+        FROM ident
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""]
     #define header name of columns containing references data
     ref_columns=[['coo_ref','plx_ref'],['h_link_ref'],['dist_ref'],['id_ref']]
@@ -378,18 +378,18 @@ def provider_simbad():
     #removing any objects that are neither planet, star or system in type
     if to_remove_list!=[]:
         simbad.remove_rows(to_remove_list)
-    
+
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
     #removing double objects (in there due to multiple parents)
     stars=ap.table.Table(ap.table.unique(temp_stars,keys='main_id'),copy=True)
-    
+
     #-----------------creating output table sim_ident--------------------------
     sim_ident=query(TAP_service,upload_query[3],
                     [simbad['oid','main_id'][:].copy()])
     sim_ident['id_ref']=[provider_bibcode for j in range(len(sim_ident))]
-    sim_ident.remove_column('oid')        
-    
+    sim_ident.remove_column('oid')
+
     #-------------------creating output table sim_mesDist---------------------
     sim_mesDist=query(TAP_service,upload_query[2],[stars[:].copy()])
     sim_mesDist=fetch_main_id(sim_mesDist)
@@ -398,7 +398,7 @@ def provider_simbad():
     sim_mesDist.remove_rows(sim_mesDist['dist_err'].mask.nonzero()[0])
     #change provider given quality null values all to same: 'N'
     sim_mesDist['dist_qual'][np.where(sim_mesDist['dist_qual']=='')]='N'
-    sim_mesDist['dist_qual'][np.where(sim_mesDist['dist_qual']==':')]='N' 
+    sim_mesDist['dist_qual'][np.where(sim_mesDist['dist_qual']==':')]='N'
     #group by oid
     grouped_mesDist=sim_mesDist.group_by('main_id')
     best_mesDist=sim_mesDist['main_id','dist_value','plus_err',
@@ -411,15 +411,15 @@ def provider_simbad():
                     ==np.max(grouped_mesDist['dist_prec'].groups[i]))][0]
         #take first and add to best_paras
         #which error to take when there are multiples...
-        best_mesDist.add_row([row['main_id'],row['dist_value'], 
-                              row['dist_err'],row['dist_qual'], 
+        best_mesDist.add_row([row['main_id'],row['dist_value'],
+                              row['dist_err'],row['dist_qual'],
                               row['dist_ref']])
     #join with other multimes thingis
     best_paras=best_mesDist
     # TBD when more multi measurement tables are implemented: vstack them here
     sim_mesDist=sim_mesDist['main_id','dist_value','dist_err',
                             'dist_qual','dist_ref']
-    
+
     #--------------------creating helper table sim_stars-----------------------
     #add best para from multiple measurements tables
     stars=ap.table.join(stars,best_paras,keys='main_id',join_type='left')
@@ -427,14 +427,14 @@ def provider_simbad():
     stars['plx_qual'][np.where(stars['plx_qual']=='')]='N'
     stars['dist_qual'][np.where(stars['dist_qual']=='')]='N'
     stars['dist_qual'][np.where(stars['dist_qual']==':')]='N'
-    
+
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
-    # if you want to exclude objects with lower membership probability 
+    # if you want to exclude objects with lower membership probability
     # use this line instead:
     # sim_h_link=simbad['main_id','parent_oid','h_link_ref',
     #                   'membership'][np.where(simbad['membership']>50)]
-    # consequence is that you loose objects with no membership value given (~) 
+    # consequence is that you loose objects with no membership value given (~)
     # e.g. alf cen system
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
@@ -469,9 +469,9 @@ def provider_simbad():
 
 def provider_gk():
     """
-    This function obtains the disk data and arranges it in a way 
+    This function obtains the disk data and arranges it in a way
     easy to ingest into the database.
-    :return gk_list_of_tables: List of astropy tables containing 
+    :return gk_list_of_tables: List of astropy tables containing
         reference data, object data, identifier data, object to object
         relation data and basic disk data.
     """
@@ -491,9 +491,9 @@ def provider_gk():
     gk_disks['plx_value']=gk_disks['plx_value'].astype(float)
     #sorting out everything with plx_value <50mas (corresponding to >20pc)
     gk_disks=gk_disks[np.where(gk_disks['plx_value']>50.)]
-    #adds the column for object type 
+    #adds the column for object type
     gk_disks['type']=['di' for j in range(len(gk_disks))]
-    gk_disks['disks_ref']=['Grant Kennedy' 
+    gk_disks['disks_ref']=['Grant Kennedy'
                         for j in range(len(gk_disks))]
     #making sure identifiers are unique
     ind=gk_disks.group_by('id').groups.indices
@@ -519,7 +519,7 @@ def provider_gk():
     gk_objects.rename_column('id','main_id')
     #--------------creating output table gk_ident -----------------------------
     gk_ident=gk_disks['ids','id','disks_ref']
-    # would prefer to use id instad of ids paremeter but this raises an error 
+    # would prefer to use id instad of ids paremeter but this raises an error
     # so I use ids which has the same content as id
     gk_ident.rename_columns(['ids','disks_ref'],['main_id','id_ref'])
     #--------------creating output table gk_sources ---------------------------
@@ -547,12 +547,12 @@ def provider_gk():
 
 def provider_exo(temp=True):
     """
-    This function obtains the exomercat data and arranges it in a way easy to 
+    This function obtains the exomercat data and arranges it in a way easy to
     ingest into the database. Currently the exomercat server is not online.
-    A temporary method to ingest old exomercat data was implemented and can be 
+    A temporary method to ingest old exomercat data was implemented and can be
     accessed by setting temp=True as argument.
-    :return exo_list_of_tables: List of astropy table containing 
-        reference data, object data, identifier data, object to object 
+    :return exo_list_of_tables: List of astropy table containing
+        reference data, object data, identifier data, object to object
         relation data, basic planetary data and mass measurement data.
     """
     #---------------define provider--------------------------------------------
@@ -571,11 +571,11 @@ def provider_exo(temp=True):
         exomercat=query(TAP_service,adql_query)
     #----------------putting object main identifiers together-------------------
 
-    # initializing column   
-    exomercat['planet_main_id']=ap.table.Column(dtype=object, 
+    # initializing column
+    exomercat['planet_main_id']=ap.table.Column(dtype=object,
                                                 length=len(exomercat))
     exomercat['host_main_id']=exomercat['main_id']
-    
+
     for i in range(len(exomercat)):
         # if there is a main id use that
         if type(exomercat['main_id'][i])!=np.ma.core.MaskedConstant:
@@ -595,40 +595,40 @@ def provider_exo(temp=True):
     # Unfortunately exomercat does not provide distance measurements so we
     # relie on matching it to simbad for enforcing the database cutoff of 20 pc.
     # The downside is, that the match does not work so well due to different
-    # identifier notation which means we loose some objects. That is, however, 
-    # preferrable to having to do the work of checking the literature. 
+    # identifier notation which means we loose some objects. That is, however,
+    # preferrable to having to do the work of checking the literature.
     # A compromise is to keep the list of objects I lost for later improvement.
-    
+
     def sort_out_20pc(cat,colname):
         """
-        This Function sorts out objects not within 20pc. The value comes from 
+        This Function sorts out objects not within 20pc. The value comes from
         the LIFE database distance cut.
         :param cat: Input table to be matched against sim_objects table.
         :param colname: Name of the column to use for the match.
         :return cat: Table like cat without any objects not found in sim_objects
         """
         [sim_objects]=load(['sim_objects'])
-        sim_objects.rename_column('main_id','temp') 
+        sim_objects.rename_column('main_id','temp')
         cat=ap.table.join(cat,sim_objects['temp','ids'],
                           keys_left=colname,keys_right='temp')
         cat.remove_columns(['temp','ids'])
         return cat
-    
+
     exo=exomercat
     exomercat=sort_out_20pc(exomercat,'host_main_id')
 
-    # removing whitespace in front of main_id and name. 
-    # done after sort_out_20pc function to prevent missing values error 
+    # removing whitespace in front of main_id and name.
+    # done after sort_out_20pc function to prevent missing values error
     for i in range(len(exomercat)):
         exomercat['planet_main_id'][i]=exomercat['planet_main_id'][i].strip()
         exomercat['main_id'][i]=exomercat['main_id'][i].strip()
         exomercat['name'][i]=exomercat['name'][i].strip()
-    
+
     #show which elements from exomercat were not found in sim_objects
     exo['name']=exo['name'].astype(object)
     removed_objects=ap.table.setdiff(exo,exomercat,keys=['name'])
     save([removed_objects],['exomercat_removed_objects'])
-    
+
     #-------------exo_ident---------------
     exo_ident=exomercat['planet_main_id','name']
     exo_ident.rename_columns(['planet_main_id','name'],['main_id','id'])
@@ -637,11 +637,11 @@ def provider_exo(temp=True):
             exo_ident.add_row([exomercat['planet_main_id'][i],
                                exomercat['planet_main_id'][i]])
     exo_ident['id_ref']=[provider_bibcode for j in range(len(exo_ident))]
-    # TBD: I have a wrong double object 
+    # TBD: I have a wrong double object
     # print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
     # in exo_ident because there are different amount of white spaces between
-    # catalog and number. 
-    
+    # catalog and number.
+
     #-------------exo_objects---------------
     # tbd at one point: I think I want to add hosts to object
     exo_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
@@ -660,7 +660,7 @@ def provider_exo(temp=True):
     #initialize columns exomercat['mass_rel'] and exomercat['mass_err']
     exomercat['mass_err']=ap.table.Column(dtype=object,length=len(exomercat))
     exomercat['mass_rel']=ap.table.Column(dtype=object,length=len(exomercat))
-    #transforming mass errors from upper (mass_max) and lower (mass_min) error 
+    #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_rel)
     for i in range(len(exomercat)):
         if type(exomercat['mass_max'][i])==np.ma.core.MaskedConstant or \
@@ -687,9 +687,9 @@ def provider_exo(temp=True):
                                     ['main_id','mass_val','mass_ref'])
     #remove masked rows
     exo_mesMass.remove_rows(exo_mesMass['mass_val'].mask.nonzero()[0])
-    
+
     grouped_mesMass=exo_mesMass.group_by('main_id')
-    #initialize best_mesMass as a table that hase same columns as exo_mesMass 
+    #initialize best_mesMass as a table that hase same columns as exo_mesMass
     # but no rows
     best_mesMass=exo_mesMass['main_id','mass_val','mass_err','mass_rel',
                             'mass_ref'][:0]
@@ -702,13 +702,13 @@ def provider_exo(temp=True):
         #which error to take when there are multiples...
         best_mesMass.add_row([row['main_id'],row['mass_val'],
                               row['mass_err'],row['mass_rel'],row['mass_ref']])
-    # changing from string to float, if I do it earlier it raises an error. 
+    # changing from string to float, if I do it earlier it raises an error.
     # change in future
     exo_mesMass['mass_err']=exo_mesMass['mass_err'].astype(float)
     best_mesMass['mass_err']=best_mesMass['mass_err'].astype(float)
-    # vstack other multiple measurements tables (currently none) 
+    # vstack other multiple measurements tables (currently none)
     best_paras=best_mesMass
-    
+
     #-------------exo_h_link---------------
     exo_h_link=exomercat['planet_main_id', 'host_main_id']
     exo_h_link.rename_columns(['planet_main_id','host_main_id'],
@@ -717,15 +717,15 @@ def provider_exo(temp=True):
 
     #-------------exo_planet_basic
     exo_planet_basic=best_mesMass
-    
+
     #-------------exo_sources---------------
     ref_columns=[['mass_url'],['h_link_ref'],['id_ref']]
     exo_sources=ap.table.Table()
     tables=[exomercat, exo_h_link,exo_ident]
     for cat,ref in zip(tables,ref_columns):
         exo_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],exo_sources) 
-        
+                                           provider_bibcode],exo_sources)
+
     exo_list_of_tables=[exo_sources,exo_objects,exo_ident,
                         exo_h_link,exo_planet_basic,exo_mesMass]
     save(exo_list_of_tables,['exo_sources','exo_objects','exo_ident',
@@ -740,38 +740,38 @@ def building(sim,gk,exo):
     :param sim: List of astropy table containing simbad data.
     :param gk: List of astropy table containing grant kennedy data.
     :param exo: List of astropy table containing exomercat data.
-    :return cat: List of astropy table containing 
-        reference data, object data, identifier data, object to object 
+    :return cat: List of astropy table containing
+        reference data, object data, identifier data, object to object
         relation data, basic stellar data, basic planetary data, basic disk
         data, distance measurement data and mass measurement data.
     """
     #creates empty tables as needed for final database ingestion
     init=initialize_database_tables()
-    
+
     #initializes 8 table objects
     #corresponding to 'sources','objects','ident','h_link','star_basic',
     #                 'planet_basic','disk_basic','mesDist', 'mesMass'
     cat=[ap.table.Table() for i in range(9)]
-    
-    #for the sources and objects stacks tables from different providers 
+
+    #for the sources and objects stacks tables from different providers
     # keeping only unique values then create identifiers for those tables
-    
+
     cat[0]=ap.table.vstack([init[0],sim[0]])
     cat[0]=ap.table.vstack([cat[0],gk[0]])
     cat[0]=ap.table.vstack([cat[0],exo[0]])
     if len(cat[0])>0:
         cat[0]=ap.table.unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
-    
+
     def idsjoin(cat,column_ids1,column_ids2):
         """
-        This function merges the identifiers from two different columns 
+        This function merges the identifiers from two different columns
         into one.
         :param cat: Astropy table containing two identifer columns.
-        :param column_ids1: column name for the first identifier column 
-        :param column_ids2: column name for the second identifier column 
+        :param column_ids1: column name for the first identifier column
+        :param column_ids2: column name for the second identifier column
         :return cat: Astropy table like input cat but with only one identifier
-            column containing the unique identifiers of both of the 
+            column containing the unique identifiers of both of the
             previous identifier columns.
         """
         #initializing column
@@ -800,18 +800,18 @@ def building(sim,gk,exo):
             cat['ids'][i]=cat['ids'][i].strip('|')
         return cat
     #removed vstack with init to not have object_id as is empty anyways
-    #cat[1]=ap.table.vstack([init[1],sim[1]]) 
+    #cat[1]=ap.table.vstack([init[1],sim[1]])
     cat[1]=sim[1]
     cat[1]=ap.table.join(cat[1],gk[1],keys='main_id',join_type='outer')
 
-    # could not solve the warning message about type merging in type part but 
+    # could not solve the warning message about type merging in type part but
     # the results seem to be okay
 
     def objectmerging(cat):
         """
-        This function merges the data from the same physical object obtained 
-        from different providers into one entry. 
-        :param cat: Astropy table containing multiple entries for the same 
+        This function merges the data from the same physical object obtained
+        from different providers into one entry.
+        :param cat: Astropy table containing multiple entries for the same
             physical objects due to data from different providers.
         :return cat: Astropy table with unique object entries.
         """
@@ -834,12 +834,12 @@ def building(sim,gk,exo):
     cat[1]=objectmerging(cat[1])
     #assigning object_id
     cat[1]['object_id']=[j+1 for j in range(len(cat[1]))]
-    
-    # At one point I would like to be able to merge objects with main_id 
+
+    # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
     def match(cat,sources,paras,provider):
         """
-        This function joins the source identifiers to the in paras specified 
+        This function joins the source identifiers to the in paras specified
         parameters of cat.
         :param cat: Astropy table with empty para_source_id columns.
         :param sources: Astropy table containing reference data.
@@ -860,12 +860,12 @@ def building(sim,gk,exo):
                                 sources['provider_name']==provider)],
                                 keys_left=para+'_ref',keys_right='ref',
                                 join_type='left')
-                #renaming column to specify to which parameter the source_id 
+                #renaming column to specify to which parameter the source_id
                 # correspond
                 cat.rename_column('source_id',f'{para}_source_idref')
                 #deleting double column containing reference information
                 cat.remove_columns('ref')
-                #in case the para_value entry is masked this if environment 
+                #in case the para_value entry is masked this if environment
                 # will put the source_id entry to null
                 if para+'_value' in cat.colnames:
                     if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
@@ -874,19 +874,19 @@ def building(sim,gk,exo):
         return cat
     paras=[['id'],['h_link'],['coo','plx','dist'],
            ['mass'],['rad'],['dist'],['mass']]
-    
+
     for i in range(2,9):
         #replacing ref with source_idref columns
         #getting source_idref to each ref
         sim[i]=match(sim[i],cat[0],paras[i-2],'SIMBAD')
         gk[i]=match(gk[i],cat[0],paras[i-2],'priv. comm.')
-        exo[i]=match(exo[i],cat[0],paras[i-2],'Exo-MerCat') 
+        exo[i]=match(exo[i],cat[0],paras[i-2],'Exo-MerCat')
         #joining data from different providers
         #I do this to get those columns that are empty in the data
         cat[i]=ap.table.vstack([init[i],sim[i]])
         cat[i]=ap.table.vstack([cat[i],gk[i]])
         cat[i]=ap.table.vstack([cat[i],exo[i]])
-        
+
         #if resulting catalog not empty
         if len(cat[i])>0:
             #only keeping unique entries
@@ -896,17 +896,17 @@ def building(sim,gk,exo):
 
             if i==3:#--------------------h_link--------------------------
                 #expanding from child_main_id to object_idref
-                #first remove the child_object_idref we got from empty 
+                #first remove the child_object_idref we got from empty
                 # initialization. Would prefer a more elegant way to do this
                 cat[i].remove_column('child_object_idref')
                 cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                                      keys='main_id',join_type='left')
                 cat[i].rename_columns(['object_id','main_id'],
                                       ['child_object_idref','child_main_id'])
-                
+
                 #expanding from parent_main_id to parent_object_idref
                 cat[i].remove_column('parent_object_idref')
-                #kick out any h_link rows where parent_main_id not in 
+                #kick out any h_link rows where parent_main_id not in
                 # objects (e.g. clusters)
                 cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                    keys_left='parent_main_id',keys_right='main_id')
@@ -916,18 +916,18 @@ def building(sim,gk,exo):
                 #null values
                 cat[i]['membership'].fill_value=-1
                 cat[i]['membership']=cat[i]['membership'].filled()
-            
+
             #for all the other tables add object_idref
             else:
                 #first remove the object_idref we got from empty initialization
-                #though I would prefer a more elegant way to do this 
+                #though I would prefer a more elegant way to do this
                 cat[i].remove_column('object_idref')
                 cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                                      join_type='left')
                 cat[i].rename_column('object_id','object_idref')
             if i==4:#--------------------star_basic--------------------------
                 #choosing all objects with type star or system
-                #I am just adding main_id because I have not found out how 
+                #I am just adding main_id because I have not found out how
                 # to do join with just one column table
                 stars=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='st')]
@@ -949,7 +949,7 @@ def building(sim,gk,exo):
                 cat[i].remove_column('temp')
         else:
             print('error: empty table')
-            
+
     save(cat,['sources','objects','ident','h_link','star_basic',
               'planet_basic','disk_basic','mesDist','mesMass'])
     return cat

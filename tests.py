@@ -4,7 +4,7 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 
 #code snippet not running outside of environment of data_acquisition.py
-def sanitytest(cat,colname):  
+def sanitytest(cat,colname):
     arr=cat[colname]
     plt.figure
     plt.xlabel(f'{colname}')
