@@ -24,6 +24,8 @@ tables may change at any time without prior warning.
     <meta name="subject">circumstellar-disks</meta>
     <meta name="subject">astrometry</meta>
 
+    <meta name="doi">10.21938/ke_e6lzO_jjX_vzvVIcwZA</meta>
+
     <meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
     <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
@@ -592,6 +594,7 @@ tables may change at any time without prior warning.
         <meta name="description">A view containing the most
         basic data for simple consumption by the cone search service.
         </meta>
+
         <LOOP>
             <csvItems>
                 src, name
@@ -644,6 +647,9 @@ tables may change at any time without prior warning.
             testQuery.dec: 37.47
             testQuery.sr: 0.01
         </meta>
+        <publish render="scs.xml" sets="ivo_managed"/>
+        <publish render="form" sets="ivo_managed,local"/>
+
         <scsCore queriedTable="scs_summary">
             <FEED source="//scs#coreDescs"/>
             <condDesc buildFrom="planet_name"/>
