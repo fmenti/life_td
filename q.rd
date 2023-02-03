@@ -240,8 +240,8 @@ tables may change at any time without prior warning.
             <rowmaker idmaps="*">
                 <map key="coo_source_idref" nullExpr="0" />
                 <map key="plx_source_idref" nullExpr="0" />
-                <map key="plx_qual" nullExpr="N" />
-                <map key="dist_qual" nullExpr="N" />
+                <map key="plx_qual" nullExpr="'N'" />
+                <map key="dist_qual" nullExpr="'N'" />
             </rowmaker>
         </make>
     </data>
@@ -512,8 +512,9 @@ tables may change at any time without prior warning.
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
         <make table="mes_dist">
-             <rowmaker idmaps="*">
-             </rowmaker>
+            <rowmaker idmaps="*">
+                <map key="dist_qual" nullExpr="'N'" />
+            </rowmaker>
         </make>
     </data>
 
