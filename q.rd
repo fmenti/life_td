@@ -197,7 +197,6 @@ tables may change at any time without prior warning.
             tablehead="plx_qual"
             description="Parallax quality (A:best, E:worst)"
             verbLevel="1">
-              <values nullLiteral="N"/>
         </column>
         <column name="plx_source_idref" type="integer"
             ucd="meta.ref"
@@ -222,7 +221,6 @@ tables may change at any time without prior warning.
             tablehead="dist_qual"
             description="Distance quality (A:best, E:worst)"
             verbLevel="1">
-              <values nullLiteral="N"/>
         </column>
         <column name="dist_source_idref" type="integer"
             ucd="meta.ref"
@@ -240,12 +238,10 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="star_basic">
             <rowmaker idmaps="*">
-                <map dest="coo_source_idref"
-                 src="coo_source_idref"
-                 nullExpr="0" />
-                <map dest="plx_source_idref"
-                 src="plx_source_idref"
-                 nullExpr="0" />
+                <map key="coo_source_idref" nullExpr="0" />
+                <map key="plx_source_idref" nullExpr="0" />
+                <map key="plx_qual" nullExpr="N" />
+                <map key="dist_qual" nullExpr="N" />
             </rowmaker>
         </make>
     </data>
