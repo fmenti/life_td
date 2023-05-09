@@ -3,19 +3,19 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675177478509" name="result_1675177478509">
+  <TABLE ID="result_1683633189111" name="result_1683633189111">
    <FIELD ID="main_id" arraysize="27" datatype="unicodeChar" name="main_id"/>
    <FIELD ID="parent_main_id" arraysize="25" datatype="unicodeChar" name="parent_main_id"/>
    <FIELD ID="h_link_ref" arraysize="19" datatype="unicodeChar" name="h_link_ref"/>
    <DATA>
     <TABLEDATA>
      <TR>
-      <TD>*  14 Her b</TD>
+      <TD>*  14 Her c</TD>
       <TD>*  14 Her</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>*  14 Her c</TD>
+      <TD>*  14 Her b</TD>
       <TD>*  14 Her</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -25,17 +25,17 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>*  47 UMa d</TD>
+      <TD>*  47 UMa</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>*  47 UMa b</TD>
       <TD>*  47 UMa</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
       <TD>*  47 UMa c</TD>
-      <TD>*  47 UMa</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>*  47 UMa d</TD>
       <TD>*  47 UMa</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -55,6 +55,11 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>*  61 Vir d</TD>
+      <TD>*  61 Vir</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>*  61 Vir c</TD>
       <TD>*  61 Vir</TD>
       <TD>2020A&amp;C....3100370A</TD>
@@ -65,32 +70,27 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>*  61 Vir d</TD>
-      <TD>*  61 Vir</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>*  70 Vir b</TD>
       <TD>*  70 Vir</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>*  83 Leo B c</TD>
-      <TD>*  83 Leo B</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>*  83 Leo B c</TD>
-      <TD>*  83 Leo B</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>*  83 Leo B b</TD>
       <TD>*  83 Leo B</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
       <TD>*  83 Leo B b</TD>
+      <TD>*  83 Leo B</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>*  83 Leo B c</TD>
+      <TD>*  83 Leo B</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>*  83 Leo B c</TD>
       <TD>*  83 Leo B</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -120,13 +120,23 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>* bet Pic b</TD>
+      <TD>* bet Pic</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>* bet Pic c</TD>
       <TD>* bet Pic</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* bet Pic b</TD>
-      <TD>* bet Pic</TD>
+      <TD>* e Eri c</TD>
+      <TD>* e Eri</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri e</TD>
+      <TD>* e Eri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
@@ -135,7 +145,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* e Eri e</TD>
+      <TD>* e Eri b</TD>
       <TD>* e Eri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -150,27 +160,17 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* e Eri b</TD>
-      <TD>* e Eri</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>* e Eri c</TD>
-      <TD>* e Eri</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>* e Vir b</TD>
       <TD>* e Vir</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* eps Eri c</TD>
+      <TD>* eps Eri b</TD>
       <TD>* eps Eri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* eps Eri b</TD>
+      <TD>* eps Eri c</TD>
       <TD>* eps Eri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -185,22 +185,22 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* mu. Ara c b</TD>
-      <TD>* mu. Ara c</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>* mu. Ara c c</TD>
-      <TD>* mu. Ara c</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>* mu. Ara c d</TD>
       <TD>* mu. Ara c</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>* mu. Ara c b</TD>
+      <TD>* mu. Ara c</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>* mu. Ara c e</TD>
+      <TD>* mu. Ara c</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>* mu. Ara c c</TD>
       <TD>* mu. Ara c</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -225,12 +225,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* pi. Men c</TD>
+      <TD>* pi. Men b</TD>
       <TD>* pi. Men</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* pi. Men b</TD>
+      <TD>* pi. Men c</TD>
       <TD>* pi. Men</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -250,17 +250,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* rho01 Cnc b</TD>
-      <TD>* rho01 Cnc</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>* rho01 Cnc d</TD>
-      <TD>* rho01 Cnc</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>* rho01 Cnc c</TD>
       <TD>* rho01 Cnc</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -270,27 +260,22 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>* rho01 Cnc b</TD>
+      <TD>* rho01 Cnc</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>* rho01 Cnc e</TD>
       <TD>* rho01 Cnc</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* tau Cet e</TD>
-      <TD>* tau Cet</TD>
+      <TD>* rho01 Cnc c</TD>
+      <TD>* rho01 Cnc</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
       <TD>* tau Cet f</TD>
-      <TD>* tau Cet</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>* tau Cet c</TD>
-      <TD>* tau Cet</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>* tau Cet b</TD>
       <TD>* tau Cet</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -300,7 +285,17 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* tau Cet h</TD>
+      <TD>* tau Cet g</TD>
+      <TD>* tau Cet</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet b</TD>
+      <TD>* tau Cet</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet c</TD>
       <TD>* tau Cet</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -310,7 +305,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>* tau Cet g</TD>
+      <TD>* tau Cet h</TD>
+      <TD>* tau Cet</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>* tau Cet e</TD>
       <TD>* tau Cet</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -350,7 +350,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+05  1668 c</TD>
+      <TD>BD+05  1668 d</TD>
       <TD>BD+05  1668</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -360,7 +360,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+05  1668 d</TD>
+      <TD>BD+05  1668 c</TD>
       <TD>BD+05  1668</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -370,12 +370,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+11  3149 b</TD>
+      <TD>BD+11  3149 c</TD>
       <TD>BD+11  3149</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+11  3149 c</TD>
+      <TD>BD+11  3149 b</TD>
       <TD>BD+11  3149</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -385,17 +385,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+20  2465 b</TD>
-      <TD>BD+20  2465</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>BD+25  3173 b</TD>
+      <TD>BD+25  3173 c</TD>
       <TD>BD+25  3173</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+25  3173 c</TD>
+      <TD>BD+25  3173 b</TD>
       <TD>BD+25  3173</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -420,12 +415,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+68   946 c</TD>
+      <TD>BD+68   946 b</TD>
       <TD>BD+68   946</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD+68   946 b</TD>
+      <TD>BD+68   946 c</TD>
       <TD>BD+68   946</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -445,7 +440,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 d</TD>
+      <TD>BD-07  4003 g</TD>
+      <TD>BD-07  4003</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003 e</TD>
       <TD>BD-07  4003</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -460,17 +460,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 g</TD>
-      <TD>BD-07  4003</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>BD-07  4003 e</TD>
-      <TD>BD-07  4003</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>BD-07  4003 b</TD>
+      <TD>BD-07  4003</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003 d</TD>
       <TD>BD-07  4003</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -490,17 +485,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD-15  6290 f</TD>
-      <TD>BD-15  6290</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 e</TD>
-      <TD>BD-15  6290</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 d</TD>
+      <TD>BD-15  6290 b</TD>
       <TD>BD-15  6290</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -510,12 +495,22 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>BD-15  6290 b</TD>
+      <TD>BD-15  6290 d</TD>
       <TD>BD-15  6290</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
       <TD>BD-15  6290 g</TD>
+      <TD>BD-15  6290</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290 f</TD>
+      <TD>BD-15  6290</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290 e</TD>
       <TD>BD-15  6290</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -565,12 +560,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>CD-44 11909 b</TD>
+      <TD>CD-44 11909 c</TD>
       <TD>CD-44 11909</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>CD-44 11909 c</TD>
+      <TD>CD-44 11909 b</TD>
       <TD>CD-44 11909</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -660,12 +655,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>G 268-38 b</TD>
+      <TD>G 268-38 c</TD>
       <TD>G 268-38</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>G 268-38 c</TD>
+      <TD>G 268-38 b</TD>
       <TD>G 268-38</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -675,12 +670,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>HD   7924 b</TD>
+      <TD>HD   7924 c</TD>
       <TD>HD   7924</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>HD   7924 c</TD>
+      <TD>HD   7924 b</TD>
       <TD>HD   7924</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1000,12 +995,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  229-91 f</TD>
+      <TD>L  229-91 b</TD>
       <TD>L  229-91</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  229-91 b</TD>
+      <TD>L  229-91 f</TD>
       <TD>L  229-91</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1020,18 +1015,13 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  320-124 b</TD>
-      <TD>L  320-124</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>L  320-124 c</TD>
       <TD>L  320-124</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  372-58 b</TD>
-      <TD>L  372-58</TD>
+      <TD>L  320-124 b</TD>
+      <TD>L  320-124</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
@@ -1045,8 +1035,18 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
+      <TD>L  372-58 b</TD>
+      <TD>L  372-58</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
       <TD>L  440-30 b</TD>
       <TD>L  440-30</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>L  675-81 c</TD>
+      <TD>L  675-81</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
@@ -1055,8 +1055,8 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  675-81 c</TD>
-      <TD>L  675-81</TD>
+      <TD>L  678-39 c</TD>
+      <TD>L  678-39</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
@@ -1070,12 +1070,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  678-39 c</TD>
-      <TD>L  678-39</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>L  736-30 b</TD>
+      <TD>L  736-30 c</TD>
       <TD>L  736-30</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1085,7 +1080,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>L  736-30 c</TD>
+      <TD>L  736-30 b</TD>
       <TD>L  736-30</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1095,12 +1090,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>LP  656-38 b</TD>
+      <TD>LP  656-38 c</TD>
       <TD>LP  656-38</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>LP  656-38 c</TD>
+      <TD>LP  656-38 b</TD>
       <TD>LP  656-38</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1125,7 +1120,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>NAME Proxima Centauri b</TD>
+      <TD>NAME Proxima Centauri c</TD>
       <TD>NAME Proxima Centauri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1135,7 +1130,7 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>NAME Proxima Centauri c</TD>
+      <TD>NAME Proxima Centauri b</TD>
       <TD>NAME Proxima Centauri</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1145,12 +1140,12 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>NAME Teegarden's Star b</TD>
+      <TD>NAME Teegarden's Star c</TD>
       <TD>NAME Teegarden's Star</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>NAME Teegarden's Star c</TD>
+      <TD>NAME Teegarden's Star b</TD>
       <TD>NAME Teegarden's Star</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
@@ -1275,22 +1270,22 @@
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
-      <TD>V* YZ Cet b</TD>
-      <TD>V* YZ Cet</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
-      <TD>V* YZ Cet d</TD>
-      <TD>V* YZ Cet</TD>
-      <TD>2020A&amp;C....3100370A</TD>
-     </TR>
-     <TR>
       <TD>V* YZ Cet c</TD>
       <TD>V* YZ Cet</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>
      <TR>
       <TD>V* YZ Cet e</TD>
+      <TD>V* YZ Cet</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>V* YZ Cet b</TD>
+      <TD>V* YZ Cet</TD>
+      <TD>2020A&amp;C....3100370A</TD>
+     </TR>
+     <TR>
+      <TD>V* YZ Cet d</TD>
       <TD>V* YZ Cet</TD>
       <TD>2020A&amp;C....3100370A</TD>
      </TR>

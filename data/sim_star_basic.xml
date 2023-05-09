@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675177478509" name="result_1675177478509">
+  <TABLE ID="result_1683633189111" name="result_1683633189111">
    <FIELD ID="main_id" arraysize="30" datatype="char" name="main_id" ucd="meta.id;meta.main">
     <DESCRIPTION>
      Main identifier for an object
@@ -377,26 +377,8 @@
      </TR>
      <TR>
       <TD>*  26 Dra</TD>
-      <TD>263.7483068058069</TD>
-      <TD>61.8745557123813</TD>
-      <TD>90</TD>
-      <TD>4.042898</TD>
-      <TD>3.169385</TD>
-      <TD>A</TD>
-      <TD>2007A&amp;A...474..653V</TD>
-      <TD>70.47</TD>
-      <TD>0.37</TD>
-      <TD>A</TD>
-      <TD>2007A&amp;A...474..653V</TD>
-      <TD>13.9569</TD>
-      <TD>0.0749</TD>
-      <TD>N</TD>
-      <TD>2018yCat.1345....0G</TD>
-     </TR>
-     <TR>
-      <TD>*  26 Dra A</TD>
-      <TD>263.74843642673125</TD>
-      <TD>61.8745116216536</TD>
+      <TD>263.748436425715</TD>
+      <TD>61.87451162280444</TD>
       <TD>90</TD>
       <TD>0.1742</TD>
       <TD>0.1754</TD>
@@ -9790,24 +9772,6 @@
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>BD+20  2465</TD>
-      <TD>154.90117007551083</TD>
-      <TD>19.87000290182528</TD>
-      <TD>90</TD>
-      <TD>0.024</TD>
-      <TD>0.0243</TD>
-      <TD>A</TD>
-      <TD>2020yCat.1350....0G</TD>
-      <TD>201.4064</TD>
-      <TD>0.0296</TD>
-      <TD>A</TD>
-      <TD>2020yCat.1350....0G</TD>
-      <TD>4.965</TD>
-      <TD>0.0007</TD>
-      <TD>N</TD>
-      <TD>2020yCat.1350....0G</TD>
-     </TR>
-     <TR>
       <TD>BD+21  1764</TD>
       <TD>122.05494099344833</TD>
       <TD>21.105069152108335</TD>
@@ -16008,10 +15972,10 @@
       <TD>100</TD>
       <TD>B</TD>
       <TD>2012yCat.1322....0Z</TD>
-      <TD>87.6</TD>
-      <TD>8.5</TD>
-      <TD>D</TD>
-      <TD>2018AJ....155..176F</TD>
+      <TD>85.68</TD>
+      <TD>1.71</TD>
+      <TD>C</TD>
+      <TD>2020AJ....160..215V</TD>
       <TD/>
       <TD/>
       <TD/>
@@ -23182,6 +23146,24 @@
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
+      <TD>GALEX J115052.3+683115</TD>
+      <TD>177.71805392769</TD>
+      <TD>68.5211031491</TD>
+      <TD>90</TD>
+      <TD>0.0174</TD>
+      <TD>0.0198</TD>
+      <TD>A</TD>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>58.513</TD>
+      <TD>0.0218</TD>
+      <TD>A</TD>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>21.24</TD>
+      <TD>0.45</TD>
+      <TD>N</TD>
+      <TD>2017MNRAS.469.2102A</TD>
+     </TR>
+     <TR>
       <TD>GAT 1367</TD>
       <TD>2.8825836652983323</TD>
       <TD>59.14441223740833</TD>
@@ -24386,6 +24368,24 @@
       <TD>0.0166</TD>
       <TD>N</TD>
       <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
+      <TD>HD  16160B</TD>
+      <TD>39.01941666666667</TD>
+      <TD>6.887444444444443</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD>D</TD>
+      <TD/>
+      <TD>130.01</TD>
+      <TD>4.94</TD>
+      <TD>C</TD>
+      <TD>2020AJ....160..215V</TD>
+      <TD/>
+      <TD/>
+      <TD/>
+      <TD/>
      </TR>
      <TR>
       <TD>HD  16909</TD>
@@ -34260,10 +34260,10 @@
       <TD>100</TD>
       <TD>B</TD>
       <TD>2012yCat.1322....0Z</TD>
-      <TD/>
-      <TD/>
-      <TD>N</TD>
-      <TD/>
+      <TD>77.25</TD>
+      <TD>0.93</TD>
+      <TD>C</TD>
+      <TD>2020AJ....160..215V</TD>
       <TD/>
       <TD/>
       <TD/>
@@ -44296,24 +44296,6 @@
       <TD>2020yCat.1350....0G</TD>
      </TR>
      <TR>
-      <TD>PM J11508+6831</TD>
-      <TD>177.71805392769</TD>
-      <TD>68.5211031491</TD>
-      <TD>90</TD>
-      <TD>0.0174</TD>
-      <TD>0.0198</TD>
-      <TD>A</TD>
-      <TD>2020yCat.1350....0G</TD>
-      <TD>58.513</TD>
-      <TD>0.0218</TD>
-      <TD>A</TD>
-      <TD>2020yCat.1350....0G</TD>
-      <TD>21.24</TD>
-      <TD>0.45</TD>
-      <TD>N</TD>
-      <TD>2017MNRAS.469.2102A</TD>
-     </TR>
-     <TR>
       <TD>PM J12552-5928</TD>
       <TD>193.80059190667413</TD>
       <TD>-59.471419774119724</TD>
@@ -51334,6 +51316,24 @@
       <TD>2018yCat.1345....0G</TD>
      </TR>
      <TR>
+      <TD>V* AD Leo</TD>
+      <TD>154.90117007551083</TD>
+      <TD>19.87000290182528</TD>
+      <TD>90</TD>
+      <TD>0.024</TD>
+      <TD>0.0243</TD>
+      <TD>A</TD>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>201.4064</TD>
+      <TD>0.0296</TD>
+      <TD>A</TD>
+      <TD>2020yCat.1350....0G</TD>
+      <TD>4.965</TD>
+      <TD>0.0007</TD>
+      <TD>N</TD>
+      <TD>2020yCat.1350....0G</TD>
+     </TR>
+     <TR>
       <TD>V* AK Lep</TD>
       <TD>86.11056968146708</TD>
       <TD>-22.421837361250283</TD>
@@ -51648,10 +51648,10 @@
       <TD>19</TD>
       <TD>B</TD>
       <TD>2012yCat.1322....0Z</TD>
-      <TD>78.1</TD>
-      <TD>5.7</TD>
-      <TD>D</TD>
-      <TD>2002AJ....123.2806R</TD>
+      <TD>62.46</TD>
+      <TD>2.5</TD>
+      <TD>C</TD>
+      <TD>2020AJ....160..215V</TD>
       <TD/>
       <TD/>
       <TD/>
@@ -53459,13 +53459,13 @@
      </TR>
      <TR>
       <TD>WISE J083011.97+283716.6</TD>
-      <TD>127.55083333333334</TD>
-      <TD>28.627194444444445</TD>
+      <TD>127.54987999999999</TD>
+      <TD>28.621298000000003</TD>
       <TD/>
       <TD/>
       <TD/>
       <TD>D</TD>
-      <TD>2020ApJ...895..145B</TD>
+      <TD>2012yCat.2311....0C</TD>
       <TD>90.6</TD>
       <TD>13.7</TD>
       <TD>E</TD>

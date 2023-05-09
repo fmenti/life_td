@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675177490191" name="result_1675177490191">
+  <TABLE ID="result_1683633201649" name="result_1683633201649">
    <FIELD ID="parent_main_id" arraysize="34" datatype="char" name="parent_main_id" ucd="meta.id;meta.main">
     <DESCRIPTION>
      Main identifier for an object
@@ -1126,6 +1126,12 @@
       <TD>-1</TD>
      </TR>
      <TR>
+      <TD>Cl Melotte   22</TD>
+      <TD>LP  357-56</TD>
+      <TD>2020ApJ...903...55P</TD>
+      <TD>100</TD>
+     </TR>
+     <TR>
       <TD>NAME Carina-near Moving Group</TD>
       <TD>Ross  689</TD>
       <TD>2018ApJ...862..138G</TD>
@@ -1316,6 +1322,12 @@
       <TD>Wolf 1495 B</TD>
       <TD>2001AJ....122.3466M</TD>
       <TD>-1</TD>
+     </TR>
+     <TR>
+      <TD>NAME Hyades Moving Group</TD>
+      <TD>G 128-3</TD>
+      <TD>2021A&amp;A...647A.137J</TD>
+      <TD>100</TD>
      </TR>
      <TR>
       <TD>NAME Hyades Moving Group</TD>
@@ -4312,12 +4324,6 @@
       <TD>-1</TD>
      </TR>
      <TR>
-      <TD>*  26 Dra</TD>
-      <TD>*  26 Dra A</TD>
-      <TD>2001AJ....122.3466M</TD>
-      <TD>-1</TD>
-     </TR>
-     <TR>
       <TD>NAME Castor Moving Group</TD>
       <TD>* alf Lyr</TD>
       <TD>2003A&amp;A...400..297R</TD>
@@ -5771,7 +5777,7 @@
      </TR>
      <TR>
       <TD>NAME Castor Moving Group</TD>
-      <TD>BD+20  2465</TD>
+      <TD>V* AD Leo</TD>
       <TD>2014A&amp;A...567A..52K</TD>
       <TD>75</TD>
      </TR>

@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675177496376" name="result_1675177496376">
+  <TABLE ID="result_1683633209917" name="result_1683633209917">
    <FIELD ID="mass_val" datatype="double" name="mass_val"/>
    <FIELD ID="mass_err" datatype="double" name="mass_err"/>
    <FIELD ID="mass_rel" arraysize="4" datatype="unicodeChar" name="mass_rel"/>
@@ -23,7 +23,7 @@
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>*  14 Her c</TD>
       <TD>11</TD>
@@ -33,7 +33,7 @@
       <TD>6.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>*  15 Sge b</TD>
       <TD>14</TD>
@@ -43,1560 +43,1560 @@
       <TD>0.06</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>*  51 Peg b</TD>
-      <TD>37</TD>
+      <TD>36</TD>
      </TR>
      <TR>
       <TD>0.09</TD>
       <TD>0.03</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>*  54 Psc c</TD>
-      <TD>42</TD>
+      <TD>41</TD>
      </TR>
      <TR>
       <TD>7.4</TD>
       <TD>0.02</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>*  70 Vir b</TD>
-      <TD>57</TD>
+      <TD>56</TD>
      </TR>
      <TR>
       <TD>0.36</TD>
       <TD>0.02</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>*  83 Leo B c</TD>
-      <TD>62</TD>
+      <TD>61</TD>
      </TR>
      <TR>
       <TD>11</TD>
       <TD>2</TD>
       <TD>=</TD>
       <TD/>
-      <TD>174</TD>
+      <TD>173</TD>
       <TD>2018arXiv180806257S</TD>
       <TD>* bet Pic b</TD>
-      <TD>118</TD>
+      <TD>117</TD>
      </TR>
      <TR>
       <TD>8.3</TD>
       <TD>1</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* bet Pic c</TD>
-      <TD>119</TD>
+      <TD>118</TD>
      </TR>
      <TR>
       <TD>0.0085</TD>
       <TD>0.00094</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* e Eri b</TD>
-      <TD>138</TD>
+      <TD>137</TD>
      </TR>
      <TR>
       <TD>0.00755</TD>
       <TD>0.00126</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* e Eri c</TD>
-      <TD>139</TD>
+      <TD>138</TD>
      </TR>
      <TR>
       <TD>0.0151</TD>
       <TD>0.00189</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* e Eri d</TD>
-      <TD>140</TD>
+      <TD>139</TD>
      </TR>
      <TR>
       <TD>0.01501</TD>
       <TD>0.00302</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* e Eri e</TD>
-      <TD>141</TD>
+      <TD>140</TD>
      </TR>
      <TR>
       <TD>0.77</TD>
       <TD>0.2</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* eps Eri b</TD>
-      <TD>147</TD>
+      <TD>146</TD>
      </TR>
      <TR>
       <TD>0.1</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* eps Eri c</TD>
-      <TD>148</TD>
+      <TD>147</TD>
      </TR>
      <TR>
       <TD>9.4</TD>
       <TD>1.1</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* gam Cep b</TD>
-      <TD>170</TD>
+      <TD>169</TD>
      </TR>
      <TR>
       <TD>0.01454</TD>
       <TD>0.0014199999999999998</TD>
       <TD>=</TD>
       <TD/>
-      <TD>278</TD>
+      <TD>281</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2020AJ....160..129K/abstract</TD>
       <TD>* nu.02 Lup b</TD>
-      <TD>230</TD>
+      <TD>229</TD>
      </TR>
      <TR>
       <TD>0.03552</TD>
       <TD>0.0023</TD>
       <TD>=</TD>
       <TD/>
-      <TD>278</TD>
+      <TD>281</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2020AJ....160..129K/abstract</TD>
       <TD>* nu.02 Lup c</TD>
-      <TD>231</TD>
+      <TD>230</TD>
      </TR>
      <TR>
       <TD>13.01</TD>
       <TD>1</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* pi. Men b</TD>
-      <TD>244</TD>
+      <TD>243</TD>
      </TR>
      <TR>
       <TD>0.01517</TD>
       <TD>0.00267</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* pi. Men c</TD>
-      <TD>245</TD>
+      <TD>244</TD>
      </TR>
      <TR>
       <TD>0.84</TD>
       <TD>0.23</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* rho01 Cnc b</TD>
-      <TD>263</TD>
+      <TD>262</TD>
      </TR>
      <TR>
       <TD>0.0251</TD>
       <TD>0.001</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>* rho01 Cnc e</TD>
-      <TD>266</TD>
+      <TD>265</TD>
      </TR>
      <TR>
       <TD>0.0063</TD>
       <TD>0.0025</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* tau Cet b</TD>
-      <TD>273</TD>
+      <TD>272</TD>
      </TR>
      <TR>
       <TD>0.0098</TD>
       <TD>0.0044</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* tau Cet c</TD>
-      <TD>274</TD>
+      <TD>273</TD>
      </TR>
      <TR>
       <TD>0.011</TD>
       <TD>0.005</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* tau Cet d</TD>
-      <TD>275</TD>
+      <TD>274</TD>
      </TR>
      <TR>
       <TD>5.06</TD>
       <TD>1.7</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* tau Cet i</TD>
-      <TD>280</TD>
+      <TD>279</TD>
      </TR>
      <TR>
       <TD>2.29</TD>
       <TD>0.4</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>* tet Cyg b</TD>
-      <TD>290</TD>
+      <TD>289</TD>
      </TR>
      <TR>
       <TD>25</TD>
       <TD>4.6</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>2MASS J00452143+1634446 g</TD>
-      <TD>334</TD>
+      <TD>333</TD>
      </TR>
      <TR>
       <TD>20</TD>
       <TD>7</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>2MASS J00470038+6803543 h</TD>
-      <TD>337</TD>
+      <TD>336</TD>
      </TR>
      <TR>
       <TD>0.00909</TD>
       <TD>0.00085</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+05  1668 b</TD>
-      <TD>594</TD>
+      <TD>593</TD>
      </TR>
      <TR>
       <TD>0.00371</TD>
       <TD>0.0005</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+05  1668 c</TD>
-      <TD>595</TD>
+      <TD>594</TD>
      </TR>
      <TR>
       <TD>0.00777</TD>
       <TD>0.00085</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+11  3149 b</TD>
-      <TD>612</TD>
+      <TD>611</TD>
      </TR>
      <TR>
       <TD>0.0197</TD>
       <TD>0.00249</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+11  3149 c</TD>
-      <TD>613</TD>
+      <TD>612</TD>
      </TR>
      <TR>
       <TD>0.02089</TD>
       <TD>0.0017</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+18  3421 b</TD>
-      <TD>626</TD>
+      <TD>625</TD>
      </TR>
      <TR>
       <TD>0.03</TD>
       <TD>0.008</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+25  3173 c</TD>
-      <TD>648</TD>
+      <TD>645</TD>
      </TR>
      <TR>
       <TD>0.06186000000000001</TD>
       <TD>0.00761</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+47   612 b</TD>
-      <TD>684</TD>
+      <TD>681</TD>
      </TR>
      <TR>
       <TD>0.04097</TD>
       <TD>0.00639</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+48  1829 b</TD>
-      <TD>690</TD>
+      <TD>687</TD>
      </TR>
      <TR>
       <TD>0.01771</TD>
       <TD>0.00214</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+61   195 b</TD>
-      <TD>699</TD>
+      <TD>696</TD>
      </TR>
      <TR>
       <TD>0.07205</TD>
       <TD>0.00881</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+63   869 b</TD>
-      <TD>704</TD>
+      <TD>701</TD>
      </TR>
      <TR>
       <TD>0.05412</TD>
       <TD>0.00315</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+68   946 b</TD>
-      <TD>711</TD>
+      <TD>708</TD>
      </TR>
      <TR>
       <TD>0.05034</TD>
       <TD>0.0129</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD+68   946 c</TD>
-      <TD>712</TD>
+      <TD>709</TD>
      </TR>
      <TR>
       <TD>0.911</TD>
       <TD>0.036000000000000004</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-05  5715 b</TD>
-      <TD>725</TD>
+      <TD>722</TD>
      </TR>
      <TR>
       <TD>0.944</TD>
       <TD>0.07</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-05  5715 c</TD>
-      <TD>726</TD>
+      <TD>723</TD>
      </TR>
      <TR>
       <TD>0.049702</TD>
       <TD>0.000944</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-07  4003 b</TD>
-      <TD>734</TD>
+      <TD>731</TD>
      </TR>
      <TR>
       <TD>0.017301</TD>
       <TD>0.000944</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-07  4003 c</TD>
-      <TD>735</TD>
+      <TD>732</TD>
      </TR>
      <TR>
       <TD>0.019</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-07  4003 d</TD>
-      <TD>736</TD>
+      <TD>733</TD>
      </TR>
      <TR>
       <TD>0.023</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-07  4003 f</TD>
-      <TD>738</TD>
+      <TD>735</TD>
      </TR>
      <TR>
       <TD>0.01</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-07  4003 g</TD>
-      <TD>739</TD>
+      <TD>736</TD>
      </TR>
      <TR>
       <TD>2.3941</TD>
       <TD>0.003</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 b</TD>
-      <TD>765</TD>
+      <TD>762</TD>
      </TR>
      <TR>
       <TD>0.7598</TD>
       <TD>0.0022</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 c</TD>
-      <TD>766</TD>
+      <TD>763</TD>
      </TR>
      <TR>
       <TD>0.021741</TD>
       <TD>0.00085</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 d</TD>
-      <TD>767</TD>
+      <TD>764</TD>
      </TR>
      <TR>
       <TD>0.04855</TD>
       <TD>0.00406</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 e</TD>
-      <TD>768</TD>
+      <TD>765</TD>
      </TR>
      <TR>
       <TD>0.025</TD>
       <TD>0.001</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 f</TD>
-      <TD>769</TD>
+      <TD>766</TD>
      </TR>
      <TR>
       <TD>0.118</TD>
       <TD>0.002</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>BD-15  6290 g</TD>
-      <TD>770</TD>
+      <TD>767</TD>
      </TR>
      <TR>
       <TD>0.02712</TD>
       <TD>0.00579</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-18  3106 b</TD>
-      <TD>783</TD>
+      <TD>780</TD>
      </TR>
      <TR>
       <TD>0.03914</TD>
       <TD>0.006640000000000001</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>BD-18  3106 c</TD>
-      <TD>784</TD>
+      <TD>781</TD>
      </TR>
      <TR>
       <TD>0.02549</TD>
       <TD>0.00535</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-24  6144 b</TD>
-      <TD>800</TD>
+      <TD>797</TD>
      </TR>
      <TR>
       <TD>0.15228</TD>
       <TD>0.02328</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-24  6144 c</TD>
-      <TD>801</TD>
+      <TD>798</TD>
      </TR>
      <TR>
       <TD>0.01901</TD>
       <TD>0.00188</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-31  9113 b</TD>
-      <TD>827</TD>
+      <TD>824</TD>
      </TR>
      <TR>
       <TD>0.10201</TD>
       <TD>0.01991</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-31  9113 c</TD>
-      <TD>828</TD>
+      <TD>825</TD>
      </TR>
      <TR>
       <TD>0.01643</TD>
       <TD>0.0029</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-31  9113 d</TD>
-      <TD>829</TD>
+      <TD>826</TD>
      </TR>
      <TR>
       <TD>0.0258</TD>
       <TD>0.00535</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>CD-54   269 b</TD>
-      <TD>914</TD>
+      <TD>911</TD>
      </TR>
      <TR>
       <TD>12.5</TD>
       <TD>7.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>CFBDS J003402-005206 e</TD>
-      <TD>933</TD>
+      <TD>930</TD>
      </TR>
      <TR>
       <TD>22.5</TD>
       <TD>17.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>CFBDS J005910-011401 9</TD>
-      <TD>935</TD>
+      <TD>932</TD>
      </TR>
      <TR>
       <TD>53</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>DENIS J063001.4-184014 )</TD>
-      <TD>948</TD>
+      <TD>945</TD>
      </TR>
      <TR>
       <TD>58</TD>
       <TD>3</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>DENIS J063001.4-184014 a</TD>
-      <TD>949</TD>
+      <TD>946</TD>
      </TR>
      <TR>
       <TD>0.0079</TD>
       <TD>0.0016</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>G 122-49 c</TD>
-      <TD>1171</TD>
+      <TD>1168</TD>
      </TR>
      <TR>
       <TD>0.0197</TD>
       <TD>0.0027</TD>
       <TD>=</TD>
       <TD/>
-      <TD>256</TD>
+      <TD>259</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2013A&amp;A...549A..10H/abstract</TD>
       <TD>G 139-21 b</TD>
-      <TD>1211</TD>
+      <TD>1208</TD>
      </TR>
      <TR>
       <TD>0.008870000000000001</TD>
       <TD>0.0016</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>G 202-48 b</TD>
-      <TD>1331</TD>
+      <TD>1328</TD>
      </TR>
      <TR>
       <TD>29</TD>
       <TD>8</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>G 204-39 b</TD>
-      <TD>1336</TD>
+      <TD>1333</TD>
      </TR>
      <TR>
       <TD>0.02832</TD>
       <TD>0.00566</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>G 226-66 b</TD>
-      <TD>1373</TD>
+      <TD>1370</TD>
      </TR>
      <TR>
       <TD>0.46299999999999997</TD>
       <TD>0.023</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>G 234-45 b</TD>
-      <TD>1382</TD>
+      <TD>1379</TD>
      </TR>
      <TR>
       <TD>0.00733</TD>
       <TD>0.0006</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>G 245-61 b</TD>
-      <TD>1412</TD>
+      <TD>1409</TD>
      </TR>
      <TR>
       <TD>0.02196</TD>
       <TD>0.0028</TD>
       <TD>=</TD>
       <TD/>
-      <TD>275</TD>
+      <TD>278</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157...32M/abstract</TD>
       <TD>G 268-38 b</TD>
-      <TD>1456</TD>
+      <TD>1453</TD>
      </TR>
      <TR>
       <TD>0.00569</TD>
       <TD>0.00123</TD>
       <TD>=</TD>
       <TD/>
-      <TD>275</TD>
+      <TD>278</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157...32M/abstract</TD>
       <TD>G 268-38 c</TD>
-      <TD>1457</TD>
+      <TD>1454</TD>
      </TR>
      <TR>
       <TD>66.6</TD>
       <TD>3.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD   4747 b</TD>
-      <TD>1543</TD>
+      <TD>1541</TD>
      </TR>
      <TR>
       <TD>0.029</TD>
       <TD>0.0016</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD   7924 b</TD>
-      <TD>1550</TD>
+      <TD>1548</TD>
      </TR>
      <TR>
       <TD>0.0247</TD>
       <TD>0.0023</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD   7924 c</TD>
-      <TD>1551</TD>
+      <TD>1549</TD>
      </TR>
      <TR>
       <TD>0.0203</TD>
       <TD>0.0025</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD   7924 d</TD>
-      <TD>1552</TD>
+      <TD>1550</TD>
      </TR>
      <TR>
       <TD>0.0714</TD>
       <TD>0.0069</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD  21749 b</TD>
-      <TD>1582</TD>
+      <TD>1581</TD>
      </TR>
      <TR>
       <TD>0.01164</TD>
       <TD>0</TD>
       <TD>&lt;</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD  21749 c</TD>
-      <TD>1583</TD>
+      <TD>1582</TD>
      </TR>
      <TR>
       <TD>0.0113953</TD>
       <TD>0.00139251</TD>
       <TD>=</TD>
       <TD/>
-      <TD>37</TD>
+      <TD>36</TD>
       <TD>2006ApJ...646..505B</TD>
       <TD>HD  85512 b</TD>
-      <TD>1709</TD>
+      <TD>1708</TD>
      </TR>
      <TR>
       <TD>83</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD 104304 b</TD>
-      <TD>1740</TD>
+      <TD>1739</TD>
      </TR>
      <TR>
       <TD>0.0169</TD>
       <TD>0.0022</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 122303 b</TD>
-      <TD>1787</TD>
+      <TD>1786</TD>
      </TR>
      <TR>
       <TD>1.83</TD>
       <TD>0.18</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 128311 b</TD>
-      <TD>1798</TD>
+      <TD>1797</TD>
      </TR>
      <TR>
       <TD>3.2</TD>
       <TD>0.08</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 128311 c</TD>
-      <TD>1799</TD>
+      <TD>1798</TD>
      </TR>
      <TR>
       <TD>0.00931</TD>
       <TD>0.0016</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 176029 b</TD>
-      <TD>1897</TD>
+      <TD>1896</TD>
      </TR>
      <TR>
       <TD>1.5</TD>
       <TD>0.3</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD 176051 b</TD>
-      <TD>1899</TD>
+      <TD>1898</TD>
      </TR>
      <TR>
       <TD>0.04751</TD>
       <TD>0.02014</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 177565 b</TD>
-      <TD>1904</TD>
+      <TD>1903</TD>
      </TR>
      <TR>
       <TD>37.9</TD>
       <TD>1.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>HD 182488 b</TD>
-      <TD>1910</TD>
+      <TD>1909</TD>
      </TR>
      <TR>
       <TD>0.05179</TD>
       <TD>0.005220000000000001</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 190007 b</TD>
-      <TD>1927</TD>
+      <TD>1926</TD>
      </TR>
      <TR>
       <TD>0.688908</TD>
       <TD>0.160431</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 204961 b</TD>
-      <TD>1973</TD>
+      <TD>1972</TD>
      </TR>
      <TR>
       <TD>0.015729</TD>
       <TD>0.009752</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 204961 c</TD>
-      <TD>1974</TD>
+      <TD>1973</TD>
      </TR>
      <TR>
       <TD>0.0409</TD>
       <TD>0.00787</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 211970 b</TD>
-      <TD>1984</TD>
+      <TD>1983</TD>
      </TR>
      <TR>
       <TD>0.03228</TD>
       <TD>0.0031100000000000004</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 216520 b</TD>
-      <TD>1991</TD>
+      <TD>1990</TD>
      </TR>
      <TR>
       <TD>0.0297</TD>
       <TD>0.00513</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 216520 c</TD>
-      <TD>1992</TD>
+      <TD>1991</TD>
      </TR>
      <TR>
       <TD>0.01321</TD>
       <TD>0.00189</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 217987 b</TD>
-      <TD>2000</TD>
+      <TD>1999</TD>
      </TR>
      <TR>
       <TD>0.02391</TD>
       <TD>0.00378</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 217987 c</TD>
-      <TD>2001</TD>
+      <TD>2000</TD>
      </TR>
      <TR>
       <TD>0.01491</TD>
       <TD>0.0006</TD>
       <TD>=</TD>
       <TD/>
-      <TD>266</TD>
+      <TD>269</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
       <TD>HD 219134 b</TD>
-      <TD>2007</TD>
+      <TD>2006</TD>
      </TR>
      <TR>
       <TD>0.01372</TD>
       <TD>0.0006900000000000001</TD>
       <TD>=</TD>
       <TD/>
-      <TD>266</TD>
+      <TD>269</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
       <TD>HD 219134 c</TD>
-      <TD>2008</TD>
+      <TD>2007</TD>
      </TR>
      <TR>
       <TD>0.05088</TD>
       <TD>0.00201</TD>
       <TD>=</TD>
       <TD/>
-      <TD>266</TD>
+      <TD>269</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
       <TD>HD 219134 d</TD>
-      <TD>2009</TD>
+      <TD>2008</TD>
      </TR>
      <TR>
       <TD>0.02297</TD>
       <TD>0.00126</TD>
       <TD>=</TD>
       <TD/>
-      <TD>266</TD>
+      <TD>269</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2017NatAs...1E..56G/abstract</TD>
       <TD>HD 219134 f</TD>
-      <TD>2011</TD>
+      <TD>2010</TD>
      </TR>
      <TR>
       <TD>0.02168</TD>
       <TD>0.00299</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 238090 b</TD>
-      <TD>2045</TD>
+      <TD>2044</TD>
      </TR>
      <TR>
       <TD>0.01259</TD>
       <TD>0.00126</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 265866 b</TD>
-      <TD>2051</TD>
+      <TD>2050</TD>
      </TR>
      <TR>
       <TD>0.03483</TD>
       <TD>0.00352</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>HD 304043 b</TD>
-      <TD>2065</TD>
+      <TD>2064</TD>
      </TR>
      <TR>
       <TD>0.00761</TD>
       <TD>0.0011</TD>
       <TD>=</TD>
       <TD/>
-      <TD>274</TD>
+      <TD>277</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019A&amp;A...629A.111C/abstract</TD>
       <TD>L   98-59 c</TD>
-      <TD>2119</TD>
+      <TD>2118</TD>
      </TR>
      <TR>
       <TD>0.00727</TD>
       <TD>0.00145</TD>
       <TD>=</TD>
       <TD/>
-      <TD>274</TD>
+      <TD>277</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019A&amp;A...629A.111C/abstract</TD>
       <TD>L   98-59 d</TD>
-      <TD>2120</TD>
+      <TD>2119</TD>
      </TR>
      <TR>
       <TD>0.005220000000000001</TD>
       <TD>0.00072</TD>
       <TD>=</TD>
       <TD/>
-      <TD>270</TD>
+      <TD>273</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...618A.142B/abstract</TD>
       <TD>L  320-124 b</TD>
-      <TD>2194</TD>
+      <TD>2193</TD>
      </TR>
      <TR>
       <TD>0.00831</TD>
       <TD>0.0013800000000000002</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  320-124 c</TD>
-      <TD>2195</TD>
+      <TD>2194</TD>
      </TR>
      <TR>
       <TD>0.0043100000000000005</TD>
       <TD>0.0005</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  372-58 b</TD>
-      <TD>2214</TD>
+      <TD>2213</TD>
      </TR>
      <TR>
       <TD>0.00547</TD>
       <TD>0.00072</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  372-58 c</TD>
-      <TD>2215</TD>
+      <TD>2214</TD>
      </TR>
      <TR>
       <TD>0.0051600000000000005</TD>
       <TD>0.0007599999999999999</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  372-58 d</TD>
-      <TD>2216</TD>
+      <TD>2215</TD>
      </TR>
      <TR>
       <TD>26.85</TD>
       <TD>85.15</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>L  440-30 b</TD>
-      <TD>2233</TD>
+      <TD>2232</TD>
      </TR>
      <TR>
       <TD>1.75282</TD>
       <TD>0.057579999999999985</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  675-81 b</TD>
-      <TD>2277</TD>
+      <TD>2276</TD>
      </TR>
      <TR>
       <TD>1.64396</TD>
       <TD>0.0601</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  675-81 c</TD>
-      <TD>2278</TD>
+      <TD>2277</TD>
      </TR>
      <TR>
       <TD>0.006566</TD>
       <TD>0.00101</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>L  678-39 b</TD>
-      <TD>2280</TD>
+      <TD>2279</TD>
      </TR>
      <TR>
       <TD>0.0107</TD>
       <TD>0.00145</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  678-39 c</TD>
-      <TD>2281</TD>
+      <TD>2280</TD>
      </TR>
      <TR>
       <TD>0.01919</TD>
       <TD>0.00315</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  678-39 d</TD>
-      <TD>2282</TD>
+      <TD>2281</TD>
      </TR>
      <TR>
       <TD>0.02042</TD>
       <TD>0.00214</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  736-30 b</TD>
-      <TD>2289</TD>
+      <TD>2288</TD>
      </TR>
      <TR>
       <TD>0.02014</TD>
       <TD>0.0129</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  736-30 c</TD>
-      <TD>2290</TD>
+      <TD>2289</TD>
      </TR>
      <TR>
       <TD>0.02379</TD>
       <TD>0.00337</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  736-30 d</TD>
-      <TD>2291</TD>
+      <TD>2290</TD>
      </TR>
      <TR>
       <TD>0.02328</TD>
       <TD>0.00157</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>L  788-37 b</TD>
-      <TD>2306</TD>
+      <TD>2305</TD>
      </TR>
      <TR>
       <TD>0.00636</TD>
       <TD>0.00082</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>LP  656-38 b</TD>
-      <TD>2504</TD>
+      <TD>2503</TD>
      </TR>
      <TR>
       <TD>0.00727</TD>
       <TD>0.0016</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>LP  656-38 c</TD>
-      <TD>2505</TD>
+      <TD>2504</TD>
      </TR>
      <TR>
       <TD>30</TD>
       <TD>NaN</TD>
       <TD>None</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>LSPM J0746+2000 b</TD>
-      <TD>2709</TD>
+      <TD>2708</TD>
      </TR>
      <TR>
       <TD>0.04185</TD>
       <TD>0.00346</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>LSPM J2116+0234 b</TD>
-      <TD>2744</TD>
+      <TD>2743</TD>
      </TR>
      <TR>
       <TD>0.003691</TD>
       <TD>0.000271</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>NAME Proxima Centauri b</TD>
-      <TD>2832</TD>
+      <TD>2831</TD>
      </TR>
      <TR>
       <TD>0.022024</TD>
       <TD>0.003146</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>NAME Proxima Centauri c</TD>
-      <TD>2833</TD>
+      <TD>2832</TD>
      </TR>
      <TR>
       <TD>62</TD>
       <TD>0.11</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>NAME Scholz's star g</TD>
-      <TD>2837</TD>
+      <TD>2836</TD>
      </TR>
      <TR>
       <TD>0.0726979</TD>
       <TD>0.00318297</TD>
       <TD>=</TD>
       <TD/>
-      <TD>37</TD>
+      <TD>36</TD>
       <TD>2006ApJ...646..505B</TD>
       <TD>Ross  905 b</TD>
-      <TD>3053</TD>
+      <TD>3051</TD>
      </TR>
      <TR>
       <TD>0.0009</TD>
       <TD>0.0002</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>Ross  905 c</TD>
-      <TD>3054</TD>
+      <TD>3052</TD>
      </TR>
      <TR>
       <TD>0.00085</TD>
       <TD>0.0002</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>Ross  905 d</TD>
-      <TD>3055</TD>
+      <TD>3053</TD>
      </TR>
      <TR>
       <TD>0.02517</TD>
       <TD>0.00157</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>Ross 1020 b</TD>
-      <TD>3076</TD>
+      <TD>3074</TD>
      </TR>
      <TR>
       <TD>12.7</TD>
       <TD>1</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>SIMP J013656.5+093347.3 d</TD>
-      <TD>3150</TD>
+      <TD>3148</TD>
      </TR>
      <TR>
       <TD>0.0032</TD>
       <TD>0.000485</TD>
       <TD>=</TD>
       <TD/>
-      <TD>156</TD>
+      <TD>155</TD>
       <TD>2018A%26A...613A..68G</TD>
       <TD>TRAPPIST-1 b</TD>
-      <TD>3199</TD>
+      <TD>3197</TD>
      </TR>
      <TR>
       <TD>0.003637</TD>
       <TD>0.000447</TD>
       <TD>=</TD>
       <TD/>
-      <TD>156</TD>
+      <TD>155</TD>
       <TD>2018A%26A...613A..68G</TD>
       <TD>TRAPPIST-1 c</TD>
-      <TD>3200</TD>
+      <TD>3198</TD>
      </TR>
      <TR>
       <TD>0.000934</TD>
       <TD>0.000122</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>TRAPPIST-1 d</TD>
-      <TD>3201</TD>
+      <TD>3199</TD>
      </TR>
      <TR>
       <TD>0.002429</TD>
       <TD>0.00024900000000000004</TD>
       <TD>=</TD>
       <TD/>
-      <TD>156</TD>
+      <TD>155</TD>
       <TD>2018A%26A...613A..68G</TD>
       <TD>TRAPPIST-1 e</TD>
-      <TD>3202</TD>
+      <TD>3200</TD>
      </TR>
      <TR>
       <TD>0.002938</TD>
       <TD>0.0002517</TD>
       <TD>=</TD>
       <TD/>
-      <TD>156</TD>
+      <TD>155</TD>
       <TD>2018A%26A...613A..68G</TD>
       <TD>TRAPPIST-1 f</TD>
-      <TD>3203</TD>
+      <TD>3201</TD>
      </TR>
      <TR>
       <TD>0.003612</TD>
       <TD>0.000308</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>TRAPPIST-1 g</TD>
-      <TD>3204</TD>
+      <TD>3202</TD>
      </TR>
      <TR>
       <TD>0.00104144</TD>
       <TD>0.000176</TD>
       <TD>=</TD>
       <TD/>
-      <TD>156</TD>
+      <TD>155</TD>
       <TD>2018A%26A...613A..68G</TD>
       <TD>TRAPPIST-1 h</TD>
-      <TD>3205</TD>
+      <TD>3203</TD>
      </TR>
      <TR>
       <TD>0.38</TD>
       <TD>0.24</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>TVLM 513-46 b</TD>
-      <TD>3216</TD>
+      <TD>3214</TD>
      </TR>
      <TR>
       <TD>12.5</TD>
       <TD>7.5</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>ULAS J133553.45+113005.2 f</TD>
-      <TD>3278</TD>
+      <TD>3276</TD>
      </TR>
      <TR>
       <TD>0.01244</TD>
       <TD>0.00136</TD>
       <TD>&gt;</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>V* CD Cet b</TD>
-      <TD>3337</TD>
+      <TD>3336</TD>
      </TR>
      <TR>
       <TD>22</TD>
       <TD>9</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* HN Peg b</TD>
-      <TD>3366</TD>
+      <TD>3365</TD>
      </TR>
      <TR>
       <TD>1.2</TD>
       <TD>0.7</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>V* TW PsA b</TD>
-      <TD>3375</TD>
+      <TD>3374</TD>
      </TR>
      <TR>
       <TD>0.09722</TD>
       <TD>0.02014</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* TZ Ari b</TD>
-      <TD>3377</TD>
+      <TD>3376</TD>
      </TR>
      <TR>
       <TD>0.22528</TD>
       <TD>0.03241</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* TZ Ari c</TD>
-      <TD>3378</TD>
+      <TD>3377</TD>
      </TR>
      <TR>
       <TD>0.00236</TD>
       <TD>0.00041</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* YZ Cet b</TD>
-      <TD>3398</TD>
+      <TD>3397</TD>
      </TR>
      <TR>
       <TD>0.0030800000000000003</TD>
       <TD>0.00044</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* YZ Cet c</TD>
-      <TD>3399</TD>
+      <TD>3398</TD>
      </TR>
      <TR>
       <TD>0.00359</TD>
       <TD>0.00053</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>V* YZ Cet d</TD>
-      <TD>3400</TD>
+      <TD>3399</TD>
      </TR>
      <TR>
       <TD>6.4</TD>
       <TD>3.1</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>VB 10 b</TD>
-      <TD>3406</TD>
+      <TD>3405</TD>
      </TR>
      <TR>
       <TD>26</TD>
       <TD>12</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>WISE J111838.70+312537.9 f</TD>
-      <TD>3464</TD>
+      <TD>3463</TD>
      </TR>
      <TR>
       <TD>10.25</TD>
       <TD>9.75</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>WISE J182831.08+265037.7 0</TD>
-      <TD>3492</TD>
+      <TD>3491</TD>
      </TR>
      <TR>
       <TD>6</TD>
       <TD>4</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>WISEA J085510.74-071442.5 e</TD>
-      <TD>3509</TD>
+      <TD>3508</TD>
      </TR>
      <TR>
       <TD>0.04153</TD>
       <TD>0.00535</TD>
       <TD>=</TD>
       <TD/>
-      <TD>240</TD>
+      <TD>243</TD>
       <TD>OEC</TD>
       <TD>Wolf  433 b</TD>
-      <TD>3575</TD>
+      <TD>3574</TD>
      </TR>
      <TR>
       <TD>0.008870000000000001</TD>
       <TD>0.00038</TD>
       <TD>=</TD>
       <TD/>
-      <TD>280</TD>
+      <TD>283</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2021arXiv210304950T/abstract</TD>
       <TD>Wolf  437 b</TD>
-      <TD>3577</TD>
+      <TD>3576</TD>
      </TR>
      <TR>
       <TD>26</TD>
       <TD>6</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>Wolf  940 b</TD>
-      <TD>3596</TD>
+      <TD>3595</TD>
      </TR>
      <TR>
       <TD>29</TD>
       <TD>12</TD>
       <TD>=</TD>
       <TD/>
-      <TD>238</TD>
+      <TD>241</TD>
       <TD>EU</TD>
       <TD>Wolf 1130 B e</TD>
-      <TD>3610</TD>
+      <TD>3609</TD>
      </TR>
     </TABLEDATA>
    </DATA>

@@ -13,6 +13,24 @@
    <FIELD ID="coo_qual" arraysize="1" datatype="unicodeChar" name="coo_qual"/>
    <FIELD ID="coo_source_idref" datatype="long" name="coo_source_idref"/>
    <FIELD ID="coo_ref" arraysize="1" datatype="unicodeChar" name="coo_ref"/>
+   <FIELD ID="coo_gal_l" datatype="double" name="coo_gal_l"/>
+   <FIELD ID="coo_gal_b" datatype="double" name="coo_gal_b"/>
+   <FIELD ID="coo_gal_err_angle" datatype="double" name="coo_gal_err_angle"/>
+   <FIELD ID="coo_gal_err_maj" datatype="double" name="coo_gal_err_maj"/>
+   <FIELD ID="coo_gal_err_min" datatype="double" name="coo_gal_err_min"/>
+   <FIELD ID="coo_gal_qual" arraysize="1" datatype="unicodeChar" name="coo_gal_qual"/>
+   <FIELD ID="coo_gal_source_idref" datatype="long" name="coo_gal_source_idref"/>
+   <FIELD ID="coo_gal_ref" arraysize="1" datatype="unicodeChar" name="coo_gal_ref"/>
+   <FIELD ID="mag_i_value" datatype="double" name="mag_i_value"/>
+   <FIELD ID="mag_i_err" datatype="double" name="mag_i_err"/>
+   <FIELD ID="mag_i_qual" arraysize="1" datatype="unicodeChar" name="mag_i_qual"/>
+   <FIELD ID="mag_i_source_idref" datatype="long" name="mag_i_source_idref"/>
+   <FIELD ID="mag_i_ref" arraysize="1" datatype="unicodeChar" name="mag_i_ref"/>
+   <FIELD ID="mag_j_value" datatype="double" name="mag_j_value"/>
+   <FIELD ID="mag_j_err" datatype="double" name="mag_j_err"/>
+   <FIELD ID="mag_j_qual" arraysize="1" datatype="unicodeChar" name="mag_j_qual"/>
+   <FIELD ID="mag_j_source_idref" datatype="long" name="mag_j_source_idref"/>
+   <FIELD ID="mag_j_ref" arraysize="1" datatype="unicodeChar" name="mag_j_ref"/>
    <FIELD ID="plx_value" datatype="double" name="plx_value"/>
    <FIELD ID="plx_err" datatype="double" name="plx_err"/>
    <FIELD ID="plx_qual" arraysize="1" datatype="unicodeChar" name="plx_qual"/>
@@ -23,6 +41,34 @@
    <FIELD ID="dist_qual" arraysize="1" datatype="unicodeChar" name="dist_qual"/>
    <FIELD ID="dist_source_idref" datatype="long" name="dist_source_idref"/>
    <FIELD ID="dist_ref" arraysize="1" datatype="unicodeChar" name="dist_ref"/>
+   <FIELD ID="sptype_value" arraysize="1" datatype="unicodeChar" name="sptype_value"/>
+   <FIELD ID="sptype_err" datatype="double" name="sptype_err"/>
+   <FIELD ID="sptype_qual" arraysize="1" datatype="unicodeChar" name="sptype_qual"/>
+   <FIELD ID="sptype_source_idref" datatype="long" name="sptype_source_idref"/>
+   <FIELD ID="sptype_ref" arraysize="1" datatype="unicodeChar" name="sptype_ref"/>
+   <FIELD ID="teff_value" datatype="double" name="teff_value"/>
+   <FIELD ID="teff_err" datatype="double" name="teff_err"/>
+   <FIELD ID="teff_qual" arraysize="1" datatype="unicodeChar" name="teff_qual"/>
+   <FIELD ID="teff_source_idref" datatype="long" name="teff_source_idref"/>
+   <FIELD ID="teff_ref" arraysize="1" datatype="unicodeChar" name="teff_ref"/>
+   <FIELD ID="rad_value" datatype="double" name="rad_value"/>
+   <FIELD ID="rad_err" datatype="double" name="rad_err"/>
+   <FIELD ID="rad_qual" arraysize="1" datatype="unicodeChar" name="rad_qual"/>
+   <FIELD ID="rad_source_idref" datatype="long" name="rad_source_idref"/>
+   <FIELD ID="rad_ref" arraysize="1" datatype="unicodeChar" name="rad_ref"/>
+   <FIELD ID="mass_value" datatype="double" name="mass_value"/>
+   <FIELD ID="mass_err" datatype="double" name="mass_err"/>
+   <FIELD ID="mass_qual" arraysize="1" datatype="unicodeChar" name="mass_qual"/>
+   <FIELD ID="mass_source_idref" datatype="long" name="mass_source_idref"/>
+   <FIELD ID="mass_ref" arraysize="1" datatype="unicodeChar" name="mass_ref"/>
+   <FIELD ID="binary_flag" datatype="bit" name="binary_flag"/>
+   <FIELD ID="binary_source_idref" datatype="long" name="binary_source_idref"/>
+   <FIELD ID="binary_ref" arraysize="1" datatype="unicodeChar" name="binary_ref"/>
+   <FIELD ID="sep_phys_value" datatype="double" name="sep_phys_value"/>
+   <FIELD ID="sep_phys_err" datatype="double" name="sep_phys_err"/>
+   <FIELD ID="sep_phys_qual" arraysize="1" datatype="unicodeChar" name="sep_phys_qual"/>
+   <FIELD ID="sep_phys_source_idref" datatype="long" name="sep_phys_source_idref"/>
+   <FIELD ID="sep_phys_ref" arraysize="1" datatype="unicodeChar" name="sep_phys_ref"/>
   </TABLE>
  </RESOURCE>
 </VOTABLE>

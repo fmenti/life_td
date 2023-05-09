@@ -3,7 +3,7 @@
      http://www.astropy.org/ -->
 <VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.4.xsd">
  <RESOURCE type="results">
-  <TABLE ID="result_1675177478509" name="result_1675177478509">
+  <TABLE ID="result_1683633189111" name="result_1683633189111">
    <FIELD ID="main_id" arraysize="27" datatype="unicodeChar" name="main_id"/>
    <FIELD ID="mass_val" datatype="double" name="mass_val"/>
    <FIELD ID="mass_err" datatype="double" name="mass_err"/>
@@ -54,13 +54,6 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* bet Pic c</TD>
-      <TD>8.3</TD>
-      <TD>1</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
       <TD>* bet Pic b</TD>
       <TD>11</TD>
       <TD>2</TD>
@@ -68,9 +61,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* e Eri d</TD>
-      <TD>0.0151</TD>
-      <TD>0.00189</TD>
+      <TD>* bet Pic c</TD>
+      <TD>8.3</TD>
+      <TD>1</TD>
+      <TD>EU</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>* e Eri c</TD>
+      <TD>0.00755</TD>
+      <TD>0.00126</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -82,6 +82,13 @@
       <TD>=</TD>
      </TR>
      <TR>
+      <TD>* e Eri d</TD>
+      <TD>0.0151</TD>
+      <TD>0.00189</TD>
+      <TD>OEC</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
       <TD>* e Eri b</TD>
       <TD>0.0085</TD>
       <TD>0.00094</TD>
@@ -89,10 +96,10 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* e Eri c</TD>
-      <TD>0.00755</TD>
-      <TD>0.00126</TD>
-      <TD>OEC</TD>
+      <TD>* eps Eri b</TD>
+      <TD>0.77</TD>
+      <TD>0.2</TD>
+      <TD>EU</TD>
       <TD>=</TD>
      </TR>
      <TR>
@@ -101,13 +108,6 @@
       <TD>NaN</TD>
       <TD>EU</TD>
       <TD>None</TD>
-     </TR>
-     <TR>
-      <TD>* eps Eri b</TD>
-      <TD>0.77</TD>
-      <TD>0.2</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
      </TR>
      <TR>
       <TD>* gam Cep b</TD>
@@ -131,16 +131,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* pi. Men c</TD>
-      <TD>0.01517</TD>
-      <TD>0.00267</TD>
+      <TD>* pi. Men b</TD>
+      <TD>13.01</TD>
+      <TD>1</TD>
       <TD>EU</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* pi. Men b</TD>
-      <TD>13.01</TD>
-      <TD>1</TD>
+      <TD>* pi. Men c</TD>
+      <TD>0.01517</TD>
+      <TD>0.00267</TD>
       <TD>EU</TD>
       <TD>=</TD>
      </TR>
@@ -159,9 +159,9 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* tau Cet c</TD>
-      <TD>0.0098</TD>
-      <TD>0.0044</TD>
+      <TD>* tau Cet d</TD>
+      <TD>0.011</TD>
+      <TD>0.005</TD>
       <TD>EU</TD>
       <TD>=</TD>
      </TR>
@@ -173,9 +173,9 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>* tau Cet d</TD>
-      <TD>0.011</TD>
-      <TD>0.005</TD>
+      <TD>* tau Cet c</TD>
+      <TD>0.0098</TD>
+      <TD>0.0044</TD>
       <TD>EU</TD>
       <TD>=</TD>
      </TR>
@@ -222,16 +222,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD+11  3149 b</TD>
-      <TD>0.00777</TD>
-      <TD>0.00085</TD>
+      <TD>BD+11  3149 c</TD>
+      <TD>0.0197</TD>
+      <TD>0.00249</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD+11  3149 c</TD>
-      <TD>0.0197</TD>
-      <TD>0.00249</TD>
+      <TD>BD+11  3149 b</TD>
+      <TD>0.00777</TD>
+      <TD>0.00085</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -278,16 +278,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD+68   946 c</TD>
-      <TD>0.05034</TD>
-      <TD>0.0129</TD>
+      <TD>BD+68   946 b</TD>
+      <TD>0.05412</TD>
+      <TD>0.00315</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD+68   946 b</TD>
-      <TD>0.05412</TD>
-      <TD>0.00315</TD>
+      <TD>BD+68   946 c</TD>
+      <TD>0.05034</TD>
+      <TD>0.0129</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -306,8 +306,8 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 d</TD>
-      <TD>0.019</TD>
+      <TD>BD-07  4003 g</TD>
+      <TD>0.01</TD>
       <TD>NaN</TD>
       <TD>EU</TD>
       <TD>None</TD>
@@ -327,17 +327,45 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 g</TD>
-      <TD>0.01</TD>
+      <TD>BD-07  4003 b</TD>
+      <TD>0.049702</TD>
+      <TD>0.000944</TD>
+      <TD>OEC</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>BD-07  4003 d</TD>
+      <TD>0.019</TD>
       <TD>NaN</TD>
       <TD>EU</TD>
       <TD>None</TD>
      </TR>
      <TR>
-      <TD>BD-07  4003 b</TD>
-      <TD>0.049702</TD>
-      <TD>0.000944</TD>
-      <TD>OEC</TD>
+      <TD>BD-15  6290 b</TD>
+      <TD>2.3941</TD>
+      <TD>0.003</TD>
+      <TD>EU</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290 c</TD>
+      <TD>0.7598</TD>
+      <TD>0.0022</TD>
+      <TD>EU</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290 d</TD>
+      <TD>0.021741</TD>
+      <TD>0.00085</TD>
+      <TD>EU</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>BD-15  6290 g</TD>
+      <TD>0.118</TD>
+      <TD>0.002</TD>
+      <TD>EU</TD>
       <TD>=</TD>
      </TR>
      <TR>
@@ -351,34 +379,6 @@
       <TD>BD-15  6290 e</TD>
       <TD>0.04855</TD>
       <TD>0.00406</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 d</TD>
-      <TD>0.021741</TD>
-      <TD>0.00085</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 c</TD>
-      <TD>0.7598</TD>
-      <TD>0.0022</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 b</TD>
-      <TD>2.3941</TD>
-      <TD>0.003</TD>
-      <TD>EU</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>BD-15  6290 g</TD>
-      <TD>0.118</TD>
-      <TD>0.002</TD>
       <TD>EU</TD>
       <TD>=</TD>
      </TR>
@@ -516,16 +516,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>G 268-38 b</TD>
-      <TD>0.02196</TD>
-      <TD>0.0028</TD>
+      <TD>G 268-38 c</TD>
+      <TD>0.00569</TD>
+      <TD>0.00123</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157...32M/abstract</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>G 268-38 c</TD>
-      <TD>0.00569</TD>
-      <TD>0.00123</TD>
+      <TD>G 268-38 b</TD>
+      <TD>0.02196</TD>
+      <TD>0.0028</TD>
       <TD>https://ui.adsabs.harvard.edu/abs/2019AJ....157...32M/abstract</TD>
       <TD>=</TD>
      </TR>
@@ -537,16 +537,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>HD   7924 b</TD>
-      <TD>0.029</TD>
-      <TD>0.0016</TD>
+      <TD>HD   7924 c</TD>
+      <TD>0.0247</TD>
+      <TD>0.0023</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>HD   7924 c</TD>
-      <TD>0.0247</TD>
-      <TD>0.0023</TD>
+      <TD>HD   7924 b</TD>
+      <TD>0.029</TD>
+      <TD>0.0016</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -754,13 +754,6 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>L  320-124 b</TD>
-      <TD>0.005220000000000001</TD>
-      <TD>0.00072</TD>
-      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...618A.142B/abstract</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
       <TD>L  320-124 c</TD>
       <TD>0.00831</TD>
       <TD>0.0013800000000000002</TD>
@@ -768,10 +761,10 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>L  372-58 b</TD>
-      <TD>0.0043100000000000005</TD>
-      <TD>0.0005</TD>
-      <TD>OEC</TD>
+      <TD>L  320-124 b</TD>
+      <TD>0.005220000000000001</TD>
+      <TD>0.00072</TD>
+      <TD>https://ui.adsabs.harvard.edu/abs/2018A&amp;A...618A.142B/abstract</TD>
       <TD>=</TD>
      </TR>
      <TR>
@@ -789,10 +782,24 @@
       <TD>=</TD>
      </TR>
      <TR>
+      <TD>L  372-58 b</TD>
+      <TD>0.0043100000000000005</TD>
+      <TD>0.0005</TD>
+      <TD>OEC</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
       <TD>L  440-30 b</TD>
       <TD>26.85</TD>
       <TD>85.15</TD>
       <TD>EU</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
+      <TD>L  675-81 c</TD>
+      <TD>1.64396</TD>
+      <TD>0.0601</TD>
+      <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
@@ -803,9 +810,9 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>L  675-81 c</TD>
-      <TD>1.64396</TD>
-      <TD>0.0601</TD>
+      <TD>L  678-39 c</TD>
+      <TD>0.0107</TD>
+      <TD>0.00145</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -824,16 +831,9 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>L  678-39 c</TD>
-      <TD>0.0107</TD>
-      <TD>0.00145</TD>
-      <TD>OEC</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>L  736-30 b</TD>
-      <TD>0.02042</TD>
-      <TD>0.00214</TD>
+      <TD>L  736-30 c</TD>
+      <TD>0.02014</TD>
+      <TD>0.0129</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -845,9 +845,9 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>L  736-30 c</TD>
-      <TD>0.02014</TD>
-      <TD>0.0129</TD>
+      <TD>L  736-30 b</TD>
+      <TD>0.02042</TD>
+      <TD>0.00214</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -859,16 +859,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>LP  656-38 b</TD>
-      <TD>0.00636</TD>
-      <TD>0.00082</TD>
+      <TD>LP  656-38 c</TD>
+      <TD>0.00727</TD>
+      <TD>0.0016</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>LP  656-38 c</TD>
-      <TD>0.00727</TD>
-      <TD>0.0016</TD>
+      <TD>LP  656-38 b</TD>
+      <TD>0.00636</TD>
+      <TD>0.00082</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -887,16 +887,16 @@
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>NAME Proxima Centauri b</TD>
-      <TD>0.003691</TD>
-      <TD>0.000271</TD>
+      <TD>NAME Proxima Centauri c</TD>
+      <TD>0.022024</TD>
+      <TD>0.003146</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
      <TR>
-      <TD>NAME Proxima Centauri c</TD>
-      <TD>0.022024</TD>
-      <TD>0.003146</TD>
+      <TD>NAME Proxima Centauri b</TD>
+      <TD>0.003691</TD>
+      <TD>0.000271</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>
@@ -1041,6 +1041,13 @@
       <TD>=</TD>
      </TR>
      <TR>
+      <TD>V* YZ Cet c</TD>
+      <TD>0.0030800000000000003</TD>
+      <TD>0.00044</TD>
+      <TD>OEC</TD>
+      <TD>=</TD>
+     </TR>
+     <TR>
       <TD>V* YZ Cet b</TD>
       <TD>0.00236</TD>
       <TD>0.00041</TD>
@@ -1051,13 +1058,6 @@
       <TD>V* YZ Cet d</TD>
       <TD>0.00359</TD>
       <TD>0.00053</TD>
-      <TD>OEC</TD>
-      <TD>=</TD>
-     </TR>
-     <TR>
-      <TD>V* YZ Cet c</TD>
-      <TD>0.0030800000000000003</TD>
-      <TD>0.00044</TD>
       <TD>OEC</TD>
       <TD>=</TD>
      </TR>

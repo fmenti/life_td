@@ -139,17 +139,53 @@ def initialize_database_tables():
         names=['object_idref','coo_ra','coo_dec','coo_err_angle',
                'coo_err_maj','coo_err_min','coo_qual',
                'coo_source_idref','coo_ref',
+               'coo_gal_l','coo_gal_b','coo_gal_err_angle',
+               'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
+               'coo_gal_source_idref','coo_gal_ref',
+               'mag_i_value','mag_i_err','mag_i_qual','mag_i_source_idref',
+               'mag_i_ref',
+               'mag_j_value','mag_j_err','mag_j_qual','mag_j_source_idref',
+               'mag_j_ref',
                'plx_value','plx_err','plx_qual','plx_source_idref',
                'plx_ref',
                'dist_value','dist_err','dist_qual','dist_source_idref',
-               'dist_ref'],
-        dtype=[int,float,float,float,
+               'dist_ref',
+               'sptype_value','sptype_err','sptype_qual','sptype_source_idref',
+               'sptype_ref',
+               'teff_value','teff_err','teff_qual','teff_source_idref',
+               'teff_ref',
+               'rad_value','rad_err','rad_qual','rad_source_idref',
+               'rad_ref',
+               'mass_value','mass_err','mass_qual','mass_source_idref',
+               'mass_ref',
+               'binary_flag','binary_source_idref','binary_ref',
+               'sep_phys_value','sep_phys_err','sep_phys_qual',
+               'sep_phys_source_idref','sep_phys_ref'],
+        dtype=[int,float,float,float,#coo
                float,float,object,
                int,object,
-               float,float,object,int,
+               float,float,float,#coo_gal
+               float,float,object,
+               int,object,
+               float,float,object,int,#mag_i
                object,
-               float,float,object,int,
-               object])
+               float,float,object,int,#mag_j
+               object,
+               float,float,object,int,#plx
+               object,
+               float,float,object,int,#dist
+               object,
+               object,float,object,int,#sptype
+               object,
+               float,float,object,int,#teff
+               object,
+               float,float,object,int,#rad
+               object,
+               float,float,object,int,#mass
+               object,
+               bool,int,object,#binary
+               float,float,object,#sep_phys
+               int,object])
     list_of_tables.append(star_basic)
 
     planet_basic=ap.table.Table(
