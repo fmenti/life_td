@@ -182,6 +182,10 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+        <!-- <column name="coo_gal_l" type="double precision"
+            ucd="pos.galactic.lat" unit="deg"
+            tablehead="coo_gal_l"
+            description="Galactical longitude."/> -->
         <column name="plx_value" type="double precision"
             ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
@@ -239,6 +243,7 @@ tables may change at any time without prior warning.
         <make table="star_basic">
             <rowmaker idmaps="*">
                 <map key="coo_source_idref" nullExpr="0" />
+                <!-- <map key="coo_gal_l" nullExpr="-1" /> -->
                 <map key="plx_source_idref" nullExpr="0" />
                 <map key="plx_qual" nullExpr="'N'" />
                 <map key="dist_qual" nullExpr="'N'" />
