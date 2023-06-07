@@ -396,6 +396,7 @@ def provider_simbad():
     ref_columns=[['coo_ref','plx_ref','mag_i_ref','mag_j_ref'],['h_link_ref'],
                  ['dist_ref'],['id_ref']]
     #------------------querrying-----------------------------------------------
+    print(f'Creating {provider_name} tables ...')
     #perform query for objects with parallax >50mas
     simbad=query(TAP_service,adql_query[0])
     #querries parent and children objects with no parallax value
@@ -548,6 +549,7 @@ def provider_gk():
     provider_name='priv. comm.'
     TAP_service='None'
     provider_bibcode='None'
+    print(f'Creating {provider_name} tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=ap.io.votable.parse_single_table(
         "data/Grant_absil_2013_.xml").to_table()
@@ -632,6 +634,7 @@ def provider_exo(temp=True):
     adql_query="""SELECT *
                   FROM exomercat.exomercat"""
     #---------------obtain data------------------------------------------------
+    print(f'Creating {provider_name} tables ...')
     if temp:
         exomercat=ap.io.ascii.read("data/exomercat_Sep2.csv")
         exomercat=stringtoobject(exomercat,3000)
@@ -812,6 +815,7 @@ def provider_life():
     TAP_service="None"
     provider_name='adapted data'
     provider_bibcode='None'#'2022A&A...664A..21Q'
+    print(f'Creating {provider_name} tables ...')
     # galactic coordinates
     [life_star_basic]=load(['sim_star_basic'])
     ircs_coord=ap.coordinates.SkyCoord(\
@@ -884,6 +888,7 @@ def provider_gaia(temp=True):
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
     WHERE parallax >= 50 
     """
+    print(f'Creating {provider_name} tables ...')
     if temp:
         gaia=ap.io.ascii.read("data/gaia26mai23.csv")
         gaia=stringtoobject(gaia,3000)
