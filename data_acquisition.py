@@ -63,7 +63,7 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
-def load(paths):
+def load(paths,stringtoobjects=True):
     """
     This function loads the tables saved in XML format at saving locations
     specified in paths.
@@ -78,8 +78,9 @@ def load(paths):
         to_append=ap.io.votable.parse_single_table(f'data/{path}.xml')
         cats.append(to_append.to_table())
     #go through all the tables in the cats list
-    for cat in cats:
-        cat=stringtoobject(cat,3000)
+    if stringtoobjects:
+        for cat in cats:
+            cat=stringtoobject(cat,3000)
     return cats
 
 def nullvalues(cat,colname,nullvalue,verbose=False):
@@ -162,8 +163,8 @@ def initialize_database_tables():
                'sptype_ref',
                'teff_st_value','teff_st_err','teff_st_qual','teff_st_source_idref',
                'teff_st_ref',
-               'rad_value','rad_err','rad_qual','rad_source_idref',
-               'rad_ref',
+               'radius_st_value','radius_st_err','radius_st_qual','radius_st_source_idref',
+               'radius_st_ref',
                'mass_st_value','mass_st_err','mass_st_qual','mass_st_source_idref',
                'mass_st_ref',
                'binary_flag','binary_source_idref','binary_ref',
@@ -230,12 +231,25 @@ def initialize_database_tables():
                'teff_st_source_idref','teff_st_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(mes_teff_st)
+    
+    mes_radius_st=ap.table.Table(
+        names=['object_idref','radius_st_value','radius_st_err','radius_st_rel','radius_st_qual',
+               'radius_st_source_idref','radius_st_ref'],
+        dtype=[int,float,float,object,object,int,object])
+    list_of_tables.append(mes_radius_st)
+    
+    mes_mass_st=ap.table.Table(
+        names=['object_idref','mass_st_value','mass_st_err','mass_st_rel','mass_st_qual',
+               'mass_st_source_idref','mass_st_ref'],
+        dtype=[int,float,float,object,object,int,object])
+    list_of_tables.append(mes_mass_st)
 
     #save all tables
     save(list_of_tables,
          ['empty_sources','empty_objects','empty_ident','empty_h_link',
          'empty_star_basic','empty_planet_basic','empty_disk_basic',
-         'empty_mes_dist','empty_mes_mass_pl','empty_mes_teff_st'])
+         'empty_mes_dist','empty_mes_mass_pl','empty_mes_teff_st',
+         'empty_mes_radius_st','empty_mes_mass_st'])
     return list_of_tables
 
 #------------------------------provider helper functions-----------------------
@@ -500,6 +514,8 @@ def provider_simbad():
     #                   'membership'][np.where(simbad['membership']>50)]
     # consequence is that you loose objects with no membership value given (~)
     # e.g. alf cen system
+    sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
+    sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
     #null values
@@ -816,7 +832,8 @@ def provider_life():
     provider_name='adapted data'
     provider_bibcode='None'#'2022A&A...664A..21Q'
     print(f'Creating {provider_name} tables ...')
-    # galactic coordinates
+    #---------------------star_basic----------------
+    #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])
     ircs_coord=ap.coordinates.SkyCoord(\
             ra=life_star_basic['coo_ra'],dec=life_star_basic['coo_dec'],frame='icrs')
@@ -841,28 +858,155 @@ def provider_life():
                                     mask=[True for j in range(len(life_star_basic))])
     life_star_basic['coo_gal_ref'][np.where(life_star_basic['coo_gal_l']!=0)]='LIFE' 
     life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
-    #issue: if I now have star_basic from two providers that will change building function drastically.
-    #       though I should be able to use code as for sure I merged other things before e.g. h_link
-    #removing columns that are not changed from simbad except main_id
-    #life_star_basic.remove_columns(['coo_ra','coo_dec','coo_err_angle',
-     #                    'coo_err_maj','coo_err_min','coo_qual','coo_ref',
-      #                   'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
-       #                  'plx_value','plx_err','plx_qual','plx_ref',
-        #                 'dist_value','dist_err','dist_qual','dist_ref'])
     life_star_basic=life_star_basic['main_id','coo_gal_l','coo_gal_b','coo_gal_err_angle',
                                    'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
                                    'coo_gal_ref']
+    #-----------measurement tables -----------------
+    #applying model from E. E. Mamajek on SIMBAD spectral type
     
-    #sources table
+    def replace_value(cat,column,value,replace_by):
+        cat[column][np.where(cat[column]==value)]= \
+                [replace_by for i in range(
+            len(cat[column][np.where(cat[column]==value)]))]
+        return cat
+             
+    def realspectype(cat):
+        """
+        Removes rows of cat where elements in column named 'sim_sptype' are
+        either '', 'nan' or start with an other letter than the main sequence
+        spectral type classification.
+        :param cat: astropy table containing 'sim_sptype' column
+        :return cat: astropy table, param cat with undesired rows removed
+        """
+        index=[]
+        for j in range(len(cat['sptype_value'])):
+            if cat['sptype_value'][j] in ['','nan']:
+                index.append(j)
+            elif cat['sptype_value'][j][0] not in ['O','B','A','F','G','K','M']:
+                index.append(j)
+        cat.remove_rows(index)
+        return cat
+
+    def model_param():
+        """
+        Loads the table of Eric E. Mamajek containing stellar parameters 
+        modeled from spectral types. Cleans up the columns for spectral 
+        type, effective temperature radius and mass.
+        :return votable: astropy table of the 4 parameters as columns
+        """
+        EEM_table=ap.io.ascii.read("data/updatedEEM_dwarf_UBVIJHK_colors_Teff.csv")['SpT','Teff','R_Rsun','Msun']
+        EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
+        EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
+        EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
+        EEM_table=replace_value(EEM_table,'Mass',' ....','nan')
+        EEM_table['Teff'].unit=ap.units.K
+        EEM_table['Radius'].unit=ap.units.R_sun
+        EEM_table['Mass'].unit=ap.units.M_sun       
+        ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
+                              f'data/model_param.xml')#saving votable
+        return EEM_table
+
+    def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
+                     rstring='mod_R',mstring='mod_M'):
+        """
+        Matches the spectral types with the ones in Mamajek's table and 
+        includes the modeled effective Temperature,
+        stellar radius and stellar mass into the catalog.
+        :param cat: astropy table containing spectral type information
+        :param sptypestring: string of column name where the spectral 
+            type information is located
+        :param teffstring: string of column name for the stellar effective 
+            temperature column
+        :param rstring: string of column name for the stellar radius column
+        :param mstring: string of column name for the stellar mass column
+        :return cat: the astropy table cat with added new columns for 
+            effective temperature, radius and mass filled with model values
+        """
+        #initiating columns with right units
+    
+        arr=np.zeros(len(cat))
+        cat[teffstring]=arr*np.nan*ap.units.K
+        cat[teffstring]=ap.table.MaskedColumn(mask=np.full(len(cat),True), \
+                                             length=len(cat),unit=ap.units.K)
+        cat[rstring]=arr*np.nan*ap.units.R_sun
+        cat[mstring]=arr*np.nan*ap.units.M_sun
+        #go through all spectral types in cat
+        for j in range(len(cat[sptypestring])): 
+            # for all the entries that are not empty
+            if cat[sptypestring][j]!='':
+                #go through the model spectral types of Mamajek 
+                for i in range(len(model_param['SpT'])): 
+                    #match first two letters
+                    if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
+                            cat[teffstring][j]=model_param['Teff'][i]
+                            cat[rstring][j]=model_param['Radius'][i]
+                            cat[mstring][j]=model_param['Mass'][i]
+                #as the model does not cover all spectral types on .5 accuracy, check those separately
+                if cat[sptypestring][j][2:4]=='.5':
+                    for i in range(len(model_param['SpT'])):
+                        # match first four letters
+                        if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
+                            cat[teffstring][j]=model_param['Teff'][i]
+                            cat[rstring][j]=model_param['Radius'][i]
+                            cat[mstring][j]=model_param['Mass'][i]                                      
+        return cat
+
+    def spec(cat):
+        """
+        Runs the spectral type related functions realspectype and match_sptype. 
+        It also removes all empty columns of the effective temperature, removes 
+        rows that are not main sequence, removes rows with binary subtype and 
+        non unique simbad name.
+        :param cat: astropy table containing columns named 
+            'sim_sptype','sim_name' and 'sim_otypes'
+        :return cat: Catalog of mainsequence stars with unique 
+            simbad names, no binary subtypes and modeled parameters.
+        """    
+        cat=realspectype(cat)
+        #model_param=ap.io.votable.parse_single_table(\
+            #f"catalogs/model_param.xml").to_table()
+        mp=model_param()#create model table as votable
+        cat=match_sptype(cat,mp,sptypestring='sptype_value')
+        cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
+        cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
+        cat=ap.table.unique(cat, keys='main_id')
+        return cat
+
+    [sim_objects]=load(['sim_objects'],stringtoobjects=False)
+    stars=sim_objects[np.where(sim_objects['type']=='st')]
+    cat=ap.table.join(stars,sim_star_basic)
+    cat=spec(cat['main_id','sptype_value'])
+    #if I take only st objects from sim_star_basic I don't loose objects during realspectype
+    life_mes_teff_st=cat['main_id','mod_Teff']
+    life_mes_teff_st.rename_column('mod_Teff','teff_st_value')
+    life_mes_teff_st['teff_st_qual']=['C' for i in range(len(life_mes_teff_st))]
+    life_mes_teff_st['teff_st_ref']=['LIFE' for i in range(len(life_mes_teff_st))]
+    
+    life_mes_radius_st=cat['main_id','mod_R']
+    life_mes_radius_st.rename_column('mod_R','radius_st_value')
+    life_mes_radius_st['radius_st_qual']=['C' for i in range(len(life_mes_radius_st))]
+    life_mes_radius_st['radius_st_ref']=['LIFE' for i in range(len(life_mes_radius_st))]
+    
+    life_mes_mass_st=cat['main_id','mod_M']
+    life_mes_mass_st.rename_column('mod_M','mass_st_value')
+    life_mes_mass_st['mass_st_qual']=['C' for i in range(len(life_mes_mass_st))]
+    life_mes_mass_st['mass_st_ref']=['LIFE' for i in range(len(life_mes_mass_st))]
+    
+#ok so next step is to implement this into life provider and create tables mes_teff_st, mes_rad_st, mes_mass_st
+#step after that one is to merge in building function different mes tables and get best para from it
+    
+    #-----------------sources table----------------------
     life_sources=ap.table.Table()
-    tables=[life_star_basic]
-    ref_columns=[['coo_gal_ref']]
+    tables=[life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
+    ref_columns=[['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
     for cat,ref in zip(tables,ref_columns):
         life_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],life_sources)
     
-    life_list_of_tables=[life_sources,life_star_basic]
-    save(life_list_of_tables,['life_star_cat'])
+    life_list_of_tables=[life_sources,life_star_basic,life_mes_teff_st,
+                         life_mes_radius_st,life_mes_mass_st]
+    save(life_list_of_tables,['life_sources','life_star_basic','life_mes_teff_st',
+                         'life_mes_radius_st','life_mes_mass_st'])
     return life_list_of_tables
 
 def provider_gaia(temp=True):
@@ -897,7 +1041,7 @@ def provider_gaia(temp=True):
         gaia=query(TAP_service,adql_query) 
         
     gaia.rename_columns(['mass_flame','radius_flame'],
-                        ['mass_st_value','radius_value'])
+                        ['mass_st_value','radius_st_value'])
     gaia['gaia_id']=['Gaia DR3 '+str(gaia['source_id'][j]) for j in range(len(gaia))]
     gaia['ref']=['2022arXiv220800211G' for j in range(len(gaia))]#dr3 paper
     
@@ -942,19 +1086,6 @@ def provider_gaia(temp=True):
         gaia_objects.add_row([grouped_gaia_ident['main_id'][ind[i]],ids])
     #gaia_objects['type']=['None' for j in range(len(gaia_objects))]
 
-    #------------------gaia_star_basic---------------
-    gaia_star_basic=gaia['main_id','mass_st_value','radius_value','ref']
-    
-    gaia_star_basic['mass_st_ref']=[gaia_star_basic['ref'][j] + ' FLAME'
-                                   for j in range(len(gaia_star_basic))]
-    gaia_star_basic['radius_ref']=[gaia_star_basic['ref'][j] + ' FLAME'
-                                   for j in range(len(gaia_star_basic))]
-    #issue, need to mask ref if value is masked
-    #could give also radius_gspphot though flame is best para
-    
-    gaia_star_basic.remove_column('ref')
-    #temperature needs multimes table and might need to assign it depending on object type
-    #for that I need source to distinguish sy with st
     
     #gaia_mes_teff
     gaia_mes_teff_st=gaia['main_id','teff_gspphot']
@@ -973,24 +1104,43 @@ def provider_gaia(temp=True):
     
     gaia_mes_teff_st=ap.table.vstack([gaia_mes_teff_st,temp])
     gaia_mes_teff_st['teff_st_qual']=['B' for j in range(len(gaia_mes_teff_st))]
+    gaia_mes_teff_st=gaia_mes_teff_st['main_id','teff_st_value',
+                                      'teff_st_qual','teff_st_ref']
     
+    #------------------gaia_mes_radius---------------
+    gaia_mes_radius_st=gaia['main_id','radius_st_value','ref']
+    gaia_mes_radius_st.remove_rows(gaia_mes_radius_st['radius_st_value'].mask.nonzero()[0])
+    gaia_mes_radius_st['radius_st_qual']=['B' for j in range(len(gaia_mes_radius_st))]
+    gaia_mes_radius_st['radius_st_ref']=[gaia_mes_radius_st['ref'][j] + ' FLAME'
+                                   for j in range(len(gaia_mes_radius_st))]
+    gaia_mes_radius_st.remove_column('ref')
+    
+    #------------------gaia_mes_mass---------------
+    gaia_mes_mass_st=gaia['main_id','mass_st_value','ref']
+    gaia_mes_mass_st.remove_rows(gaia_mes_mass_st['mass_st_value'].mask.nonzero()[0])
+    gaia_mes_mass_st['mass_st_qual']=['B' for j in range(len(gaia_mes_mass_st))]
+    gaia_mes_mass_st['mass_st_ref']=[gaia_mes_mass_st['ref'][j] + ' FLAME'
+                                   for j in range(len(gaia_mes_mass_st))]
+    gaia_mes_mass_st.remove_column('ref')
     
     #sources table
     gaia_sources=ap.table.Table()
-    tables=[gaia_ident,gaia_star_basic,gaia_mes_teff_st]
-    ref_columns=[['id_ref'],['mass_st_ref'],['teff_st_ref']]
+    tables=[gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st]
+    ref_columns=[['id_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
     for cat,ref in zip(tables,ref_columns):
         gaia_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],gaia_sources)
         
     gaia_list_of_tables=[gaia_sources,gaia_objects,gaia_ident,
-                         gaia_star_basic,gaia_mes_teff_st]
+                         gaia_mes_teff_st,
+                        gaia_mes_radius_st,gaia_mes_mass_st]
     save(gaia_list_of_tables,['gaia_sources','gaia_objects','gaia_ident',
-                              'gaia_star_basic','gaia_mes_teff_st'])
+                              'gaia_mes_teff_st',
+                             'gaia_mes_radius_st','gaia_mes_mass_st'])
     return gaia_list_of_tables
 
 #------------------------provider combining-----------------
-def building(providers):
+def building(providers,column_names):
     """
     This function builds from the input parameters the tables
     for the LIFE database.
@@ -1006,10 +1156,6 @@ def building(providers):
     init=initialize_database_tables()
     n_tables=len(init)
 
-    #initializes table objects
-    column_names=['sources','objects','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_dist','mes_mass_pl',
-              'mes_teff_st']
     cat=[ap.table.Table() for i in range(n_tables)]
 
     #for the sources and objects joins tables from different providers
@@ -1141,7 +1287,8 @@ def building(providers):
                             cat[f'{para}_source_idref'][i]=0
         return cat
     paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
-           ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st']]
+           ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
+          ['radius_st'],['mass_st']]
     
     prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia']
     
@@ -1249,18 +1396,30 @@ def building(providers):
                                      join_type='outer')
                 cat[i].remove_column('temp')
             if i==9:##-------mes_teff_st
-                #merging of catalogs
                 teff_st_best_para=best_para('teff_st',cat[i])
                 cat[4].remove_columns(['teff_st_value','teff_st_err',
                                        'teff_st_qual','teff_st_source_idref',
                                        'teff_st_ref'])
                 cat[4]=ap.table.join(cat[4],teff_st_best_para)
+            if i==10:##-------mes_radius_st
+                radius_st_best_para=best_para('radius_st',cat[i])
+                cat[4].remove_columns(['radius_st_value','radius_st_err',
+                                       'radius_st_qual','radius_st_source_idref',
+                                       'radius_st_ref'])
+                cat[4]=ap.table.join(cat[4],radius_st_best_para)
+            if i==11:##-------mes_mass_st
+                mass_st_best_para=best_para('mass_st',cat[i])
+                cat[4].remove_columns(['mass_st_value','mass_st_err',
+                                       'mass_st_qual','mass_st_source_idref',
+                                       'mass_st_ref'])
+                cat[4]=ap.table.join(cat[4],mass_st_best_para)
                              
         else:
             print('error: empty table')
 
     save(cat,column_names)
     return cat
+
 ###############################################################################
 #-------------------------Main code--------------------------------------------
 ###############################################################################
@@ -1268,8 +1427,10 @@ def building(providers):
 #------------------------initialize empty database tables----------------------
 initialized_tables=initialize_database_tables()
 
-save(initialized_tables,['sources','objects','ident','h_link','star_basic',
-                         'planet_basic','disk_basic','mes_dist','mes_mass_pl','mes_teff_st'])
+column_names=['sources','objects','ident','h_link','star_basic',
+              'planet_basic','disk_basic','mes_dist','mes_mass_pl',
+              'mes_teff_st','mes_radius_st','mes_mass_st']
+save(initialized_tables,column_names)
 
 #------------------------obtain data from external sources---------------------
 sim_sources,sim_objects,sim_ident,sim_h_link \
@@ -1280,18 +1441,22 @@ gk_sources,gk_objects, gk_ident, gk_h_link,gk_disk_basic=provider_gk()
 exo_sources,exo_objects,exo_ident,exo_h_link \
             ,exo_planet_basic,exo_mes_mass_pl=provider_exo()
 
-life_sources,life_star_basic=provider_life()
+life_sources,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st=provider_life()
 
-gaia_sources,gaia_objects,gaia_ident,gaia_star_basic,gaia_mes_teff_st=provider_gaia()
+gaia_sources,gaia_objects,gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st=provider_gaia()
 
 #------------------------construct the database tables-------------------------
 empty=ap.table.Table()
-sim=[sim_sources,sim_objects,sim_ident,sim_h_link,sim_star_basic,
-     empty[:],empty[:],sim_mes_dist,empty[:],empty[:]]
-gk=[gk_sources,gk_objects, gk_ident, gk_h_link,empty[:],empty[:],gk_disk_basic,empty[:],empty[:],empty[:]]
-exo=[exo_sources,exo_objects, exo_ident, exo_h_link,empty[:],exo_planet_basic,empty[:],empty[:],exo_mes_mass_pl,empty[:]]
-life=[life_sources,empty[:],empty[:],empty[:],life_star_basic,empty[:],empty[:],empty[:],empty[:],empty[:]]
-gaia=[gaia_sources,gaia_objects,gaia_ident,empty[:],gaia_star_basic,empty[:],empty[:],empty[:],empty[:],gaia_mes_teff_st]
+sim=[sim_sources,sim_objects,sim_ident,sim_h_link,sim_star_basic,empty[:],empty[:],
+     sim_mes_dist,empty[:],empty[:],empty[:],empty[:]]
+gk=[gk_sources,gk_objects, gk_ident, gk_h_link,empty[:],empty[:],gk_disk_basic,
+    empty[:],empty[:],empty[:],empty[:],empty[:]]
+exo=[exo_sources,exo_objects, exo_ident, exo_h_link,empty[:],exo_planet_basic,empty[:],
+     empty[:],exo_mes_mass_pl,empty[:],empty[:],empty[:]]
+life=[life_sources,empty[:],empty[:],empty[:],life_star_basic,empty[:],empty[:],
+      empty[:],empty[:],empty[:],empty[:],empty[:]]
+gaia=[gaia_sources,gaia_objects,gaia_ident,empty[:],empty[:],empty[:],empty[:],
+      empty[:],empty[:],gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st]
 
-sources,objects,ident,h_link,star_basic,planet_basic \
-            ,disk_basic,mes_dist,mes_mass_pl,mes_teff_st=building([sim,gk,exo,life,gaia])
+sources,objects,ident,h_link,star_basic,planet_basic,disk_basic,mes_dist, \
+            mes_mass_pl,mes_teff_st,mes_radius_st,mes_mass_st=building([sim,gk,exo,life,gaia],column_names)
