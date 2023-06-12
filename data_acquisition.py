@@ -19,6 +19,8 @@ import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 
+#distance cut
+distance_cut_in_pc=25.
 #-------------------global helper functions------------------------------------
 def save(cats,paths):
     """
@@ -252,6 +254,11 @@ def initialize_database_tables():
          'empty_mes_radius_st','empty_mes_mass_st'])
     return list_of_tables
 
+#transforming from pc distance cut into parallax in mas cut
+plx_in_mas_cut=1000./distance_cut_in_pc
+#making cut a bit bigger for correct treatment of objects on boundary
+plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
+
 #------------------------------provider helper functions-----------------------
 def query(link,query,catalogs=[]):
     """
@@ -377,12 +384,13 @@ def provider_simbad():
     
     """
     #JOIN allfluxes AS f ON b.oid=f.oidref
+    
     adql_query=[
         select+
         tables+
-        """WHERE b.plx_value >=50."""]
+        'WHERE b.plx_value >='+str(plx_cut)]
     #creating one table out of parameters from multiple ones and
-    #keeping only objects with parallax bigger than 50mas
+    #keeping only objects with parallax bigger than ... mas
 
     upload_query=[
         #query for systems without parallax data but
@@ -576,8 +584,8 @@ def provider_gk():
     #converting masked plx_value into -99
     gk_disks['plx_value'].fill_value=-99
     gk_disks['plx_value']=gk_disks['plx_value'].astype(float)
-    #sorting out everything with plx_value <50mas (corresponding to >20pc)
-    gk_disks=gk_disks[np.where(gk_disks['plx_value']>50.)]
+    #sorting out everything with plx_value too big
+    gk_disks=gk_disks[np.where(gk_disks['plx_value']>plx_in_mas_cut)]
     #adds the column for object type
     gk_disks['type']=['di' for j in range(len(gk_disks))]
     gk_disks['disks_ref']=['Grant Kennedy'
@@ -1030,8 +1038,8 @@ def provider_gaia(temp=True):
         p.teff_gspphot, p.teff_gspspec 
     FROM gaiadr3.gaia_source as s
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
-    WHERE parallax >= 50 
-    """
+    WHERE parallax >="""+str(plx_in_mas_cut)
+    
     print(f'Creating {provider_name} tables ...')
     if temp:
         gaia=ap.io.ascii.read("data/gaia26mai23.csv")
@@ -1455,6 +1463,7 @@ exo=[exo_sources,exo_objects, exo_ident, exo_h_link,empty[:],exo_planet_basic,em
      empty[:],exo_mes_mass_pl,empty[:],empty[:],empty[:]]
 life=[life_sources,empty[:],empty[:],empty[:],life_star_basic,empty[:],empty[:],
       empty[:],empty[:],empty[:],empty[:],empty[:]]
+
 gaia=[gaia_sources,gaia_objects,gaia_ident,empty[:],empty[:],empty[:],empty[:],
       empty[:],empty[:],gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st]
 
