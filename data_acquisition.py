@@ -20,7 +20,7 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 
 #distance cut
-distance_cut_in_pc=25.
+distance_cut_in_pc=25#25.
 #-------------------global helper functions------------------------------------
 def save(cats,paths):
     """
@@ -92,6 +92,18 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
     elif verbose:
         print(colname,'is no masked column')
     return cat
+
+def not_implemented_yet(cats):
+    paras=['binary_flag','binary_source_idref','binary_ref',
+               'sep_phys_value','sep_phys_err','sep_phys_qual',
+               'sep_phys_source_idref','sep_phys_ref']
+    nvalues=['',0,'',
+               0,0,'N',
+                0,'']
+    for cat in cats:
+        for para,nvalue in zip(paras,nvalues):
+            cat=nullvalues(cat,para,nvalue)
+    return cats
 
 #-------------------initialization function------------------------------------
 def initialize_database_tables():
@@ -194,7 +206,7 @@ def initialize_database_tables():
                object,
                float,float,object,int,#mass
                object,
-               bool,int,object,#binary
+               str,int,object,#binary
                float,float,object,#sep_phys
                int,object])
     list_of_tables.append(star_basic)
@@ -1042,8 +1054,9 @@ def provider_gaia(temp=True):
     
     print(f'Creating {provider_name} tables ...')
     if temp:
-        gaia=ap.io.ascii.read("data/gaia26mai23.csv")
-        gaia=stringtoobject(gaia,3000)
+        service = vo.dal.TAPService(TAP_service)
+        result=service.run_sync(adql_query.format(**locals()), maxrec=160000)
+        gaia=result.to_table()
 
     else:
         gaia=query(TAP_service,adql_query) 
@@ -1395,6 +1408,7 @@ def building(providers,column_names):
                 cat[i]=ap.table.join(cat[i],temp,join_type='outer',
                                      keys='object_idref')
                 cat[i].remove_column('temp')
+                cat[i]=not_implemented_yet([cat[i]])[0]
             if i==5:#--------------------planet_basic--------------------------
                 temp=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='pl')]
