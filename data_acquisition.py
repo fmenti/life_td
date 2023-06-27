@@ -94,11 +94,9 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
     return cat
 
 def not_implemented_yet(cats):
-    paras=['binary_flag','binary_source_idref','binary_ref',
-               'sep_phys_value','sep_phys_err','sep_phys_qual',
+    paras=['sep_phys_value','sep_phys_err','sep_phys_qual',
                'sep_phys_source_idref','sep_phys_ref']
-    nvalues=['',0,'',
-               0,0,'N',
+    nvalues=[0,0,'N',
                 0,'']
     for cat in cats:
         for para,nvalue in zip(paras,nvalues):
@@ -214,7 +212,7 @@ def initialize_database_tables():
     planet_basic=ap.table.Table(
         #object idref, mass value, mass error, mass realtion (min, max, equal),
         #mass quality, source idref of mass parameter, mass reference
-        names=['object_idref','mass_pl_val','mass_pl_err','mass_pl_rel','mass_pl_qual',
+        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel','mass_pl_qual',
                'mass_pl_source_idref','mass_pl_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(planet_basic)
@@ -427,7 +425,7 @@ def provider_simbad():
         FROM ident
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""]
     #define header name of columns containing references data
-    ref_columns=[['coo_ref','plx_ref','mag_i_ref','mag_j_ref'],['h_link_ref'],
+    ref_columns=[['coo_ref','plx_ref','mag_i_ref','mag_j_ref','binary_ref'],['h_link_ref'],
                  ['dist_ref'],['id_ref']]
     #------------------querrying-----------------------------------------------
     print(f'Creating {provider_name} tables ...')
@@ -442,7 +440,7 @@ def provider_simbad():
     #----------------------sorting object types--------------------------------
     #sorting from object type into star, system and planet type
     simbad['type']=['None' for i in range(len(simbad))]
-    simbad['multiple']=[False for i in range(len(simbad))]
+    simbad['binary_flag']=['False' for i in range(len(simbad))]
     to_remove_list=[]
     for i in range(len(simbad)):
         #planets
@@ -453,7 +451,7 @@ def provider_simbad():
             #system containing multiple stars
             if "**" in simbad['otypes'][i]:
                 simbad['type'][i]='sy'
-                simbad['multiple'][i]=True
+                simbad['binary_flag'][i]='True'
             #individual stars
             else:
                 simbad['type'][i]='st'
@@ -525,6 +523,7 @@ def provider_simbad():
                                     mask=[True for j in range(len(stars))])
     stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=provider_bibcode
     stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=provider_bibcode
+    stars['binary_ref']=[provider_bibcode for j in range(len(stars))]
     
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
@@ -541,6 +540,14 @@ def provider_simbad():
     #null values
     sim_h_link['membership'].fill_value=-1
     sim_h_link['membership']=sim_h_link['membership'].filled()
+    
+    # binary_flag 'True' for all stars with parents
+    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'
+    #could do this via two for loops but maybe easier way? maybe join. 
+    for i_star in range(len(stars['main_id'])):
+        for i_child in range(len(sim_h_link['main_id'])):
+            if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
+                stars['binary_flag'][i_star]=='True'
     #-----------------creating output table sim_planets------------------------
     temp_sim_planets=simbad['main_id','ids',
                             'type'][np.where(simbad['type']=='pl')]
@@ -563,7 +570,8 @@ def provider_simbad():
                          'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
                          'sptype_value','sptype_qual','sptype_ref',
                          'plx_value','plx_err','plx_qual','plx_ref',
-                         'dist_value','dist_err','dist_qual','dist_ref']
+                         'dist_value','dist_err','dist_qual','dist_ref',
+                        'binary_flag','binary_ref']
     sim_star_basic['sptype_value']=sim_star_basic['sptype_value'].astype(str)
     sim_star_basic['sptype_qual']=sim_star_basic['sptype_qual'].astype(str)
     sim_star_basic['sptype_ref']=sim_star_basic['sptype_ref'].astype(str)
@@ -1012,8 +1020,9 @@ def provider_life():
     life_mes_mass_st['mass_st_qual']=['C' for i in range(len(life_mes_mass_st))]
     life_mes_mass_st['mass_st_ref']=['LIFE' for i in range(len(life_mes_mass_st))]
     
-#ok so next step is to implement this into life provider and create tables mes_teff_st, mes_rad_st, mes_mass_st
-#step after that one is to merge in building function different mes tables and get best para from it
+    #specifying stars cocerning multiplicity
+    #main sequence simbad object type: MS*, MS? -> luminocity class
+    #Interacting binaries and close CPM systems: **, **?
     
     #-----------------sources table----------------------
     life_sources=ap.table.Table()
@@ -1307,16 +1316,16 @@ def building(providers,column_names):
                         for i in cat[para+'_value'].mask.nonzero()[0]:
                             cat[f'{para}_source_idref'][i]=0
         return cat
-    paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
+    paras=[['id'],['h_link'],['coo','plx','dist','coo_gal','binary'],
            ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st']]
     
     prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia']
     
-    for i in range(2,n_tables):
+    for i in range(2,n_tables): # for the tables star_basic,...,mes_mass_st
         print(f'Building {column_names[i]} table ...')
         
-        for j in range(len(providers)):
+        for j in range(len(providers)):#for the different providers
             if len(providers[j][i])>0:
                 #replacing ref with source_idref columns
                 #getting source_idref to each ref
@@ -1363,7 +1372,7 @@ def building(providers,column_names):
                 #I have quite some for loops here, will be slow
                 #this function is ready for testing
 
-            if i==3:#--------------------h_link--------------------------
+            if column_names[i]=='h_link':
                 #expanding from child_main_id to object_idref
                 #first remove the child_object_idref we got from empty
                 # initialization. Would prefer a more elegant way to do this
@@ -1394,10 +1403,12 @@ def building(providers,column_names):
                 cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                                      join_type='left')
                 cat[i].rename_column('object_id','object_idref')
-            if i==4:#--------------------star_basic--------------------------
+            if column_names[i]=='star_basic':
                 #choosing all objects with type star or system
-                #I am just adding main_id because I have not found out how
-                # to do join with just one column table
+                #this I use to join the object_id parameter from objects table to star_basic
+                #what about gaia stuff where I don't know this? there I also don't have star_basic info
+                #Note: main_id was only added because I have not found out how
+                # to do join with just one column of a table
                 stars=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='st')]
                 systems=cat[1]['object_id','main_id'][np.where(
@@ -1409,7 +1420,7 @@ def building(providers,column_names):
                                      keys='object_idref')
                 cat[i].remove_column('temp')
                 cat[i]=not_implemented_yet([cat[i]])[0]
-            if i==5:#--------------------planet_basic--------------------------
+            if column_names[i]=='planet_basic':
                 temp=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='pl')]
                 temp.rename_columns(['object_id','main_id'],
@@ -1417,24 +1428,24 @@ def building(providers,column_names):
                 cat[i]=ap.table.join(cat[i],temp,keys='object_idref',
                                      join_type='outer')
                 cat[i].remove_column('temp')
-            if i==9:##-------mes_teff_st
+            if column_names[i]=='mes_teff_st':
                 teff_st_best_para=best_para('teff_st',cat[i])
                 cat[4].remove_columns(['teff_st_value','teff_st_err',
                                        'teff_st_qual','teff_st_source_idref',
                                        'teff_st_ref'])
-                cat[4]=ap.table.join(cat[4],teff_st_best_para)
-            if i==10:##-------mes_radius_st
+                cat[4]=ap.table.join(cat[4],teff_st_best_para,join_type='left')
+            if column_names[i]=='mes_radius_st':
                 radius_st_best_para=best_para('radius_st',cat[i])
                 cat[4].remove_columns(['radius_st_value','radius_st_err',
                                        'radius_st_qual','radius_st_source_idref',
                                        'radius_st_ref'])
-                cat[4]=ap.table.join(cat[4],radius_st_best_para)
-            if i==11:##-------mes_mass_st
+                cat[4]=ap.table.join(cat[4],radius_st_best_para,join_type='left')
+            if column_names[i]=='mes_mass_st':
                 mass_st_best_para=best_para('mass_st',cat[i])
                 cat[4].remove_columns(['mass_st_value','mass_st_err',
                                        'mass_st_qual','mass_st_source_idref',
                                        'mass_st_ref'])
-                cat[4]=ap.table.join(cat[4],mass_st_best_para)
+                cat[4]=ap.table.join(cat[4],mass_st_best_para,join_type='left')
                              
         else:
             print('error: empty table')
