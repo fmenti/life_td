@@ -20,7 +20,7 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 
 #distance cut
-distance_cut_in_pc=25#25.
+distance_cut_in_pc=5#25.
 #-------------------global helper functions------------------------------------
 def save(cats,paths):
     """
@@ -179,7 +179,7 @@ def initialize_database_tables():
                'radius_st_ref',
                'mass_st_value','mass_st_err','mass_st_qual','mass_st_source_idref',
                'mass_st_ref',
-               'binary_flag','binary_source_idref','binary_ref',
+               'binary_flag','binary_qual','binary_source_idref','binary_ref',
                'sep_phys_value','sep_phys_err','sep_phys_qual',
                'sep_phys_source_idref','sep_phys_ref'],
         dtype=[int,float,float,float,#coo
@@ -204,7 +204,7 @@ def initialize_database_tables():
                object,
                float,float,object,int,#mass
                object,
-               str,int,object,#binary
+               str,object,int,object,#binary
                float,float,object,#sep_phys
                int,object])
     list_of_tables.append(star_basic)
@@ -255,13 +255,22 @@ def initialize_database_tables():
                'mass_st_source_idref','mass_st_ref'],
         dtype=[int,float,float,object,object,int,object])
     list_of_tables.append(mes_mass_st)
+    
+    mes_binary=ap.table.Table(
+        names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref',
+               'sep_phys_value','sep_phys_err','sep_phys_qual',
+               'sep_phys_source_idref','sep_phys_ref'],
+        dtype=[int,str,object,int,object,#binary
+               float,float,object,#sep_phys
+               int,object])
+    list_of_tables.append(mes_binary)
 
     #save all tables
     save(list_of_tables,
          ['empty_sources','empty_objects','empty_ident','empty_h_link',
          'empty_star_basic','empty_planet_basic','empty_disk_basic',
          'empty_mes_dist','empty_mes_mass_pl','empty_mes_teff_st',
-         'empty_mes_radius_st','empty_mes_mass_st'])
+         'empty_mes_radius_st','empty_mes_mass_st','mes_binary'])
     return list_of_tables
 
 #transforming from pc distance cut into parallax in mas cut
@@ -524,6 +533,7 @@ def provider_simbad():
     stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=provider_bibcode
     stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=provider_bibcode
     stars['binary_ref']=[provider_bibcode for j in range(len(stars))]
+    stars['binary_qual']=['C' for j in range(len(stars))]
     
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
@@ -570,15 +580,18 @@ def provider_simbad():
                          'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
                          'sptype_value','sptype_qual','sptype_ref',
                          'plx_value','plx_err','plx_qual','plx_ref',
-                         'dist_value','dist_err','dist_qual','dist_ref',
-                        'binary_flag','binary_ref']
+                         'dist_value','dist_err','dist_qual','dist_ref']
+    #-----------creating mes_binary table------------
+    mes_binary=stars['main_id','binary_flag','binary_qual','binary_ref']
+    #-------------changing type from object to string for later join functions
     sim_star_basic['sptype_value']=sim_star_basic['sptype_value'].astype(str)
     sim_star_basic['sptype_qual']=sim_star_basic['sptype_qual'].astype(str)
     sim_star_basic['sptype_ref']=sim_star_basic['sptype_ref'].astype(str)
     
-    simbad_list_of_tables.extend([sim_star_basic,sim_mes_dist])
+    simbad_list_of_tables.extend([sim_star_basic,sim_mes_dist,mes_binary])
     save(simbad_list_of_tables,['sim_sources','sim_objects','sim_ident',
-                                'sim_h_link','sim_star_basic','sim_mes_dist'])
+                                'sim_h_link','sim_star_basic',
+                                'sim_mes_dist','mes_binary'])
     return simbad_list_of_tables
 
 def provider_gk():
@@ -1056,10 +1069,11 @@ def provider_gaia(temp=True):
     #query
     adql_query="""
     SELECT s.source_id ,p.mass_flame, p.radius_flame,
-        p.teff_gspphot, p.teff_gspspec 
+        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type 
     FROM gaiadr3.gaia_source as s
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
-    WHERE parallax >="""+str(plx_in_mas_cut)
+            LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
+    WHERE s.parallax >="""+str(plx_in_mas_cut)
     
     print(f'Creating {provider_name} tables ...')
     if temp:
@@ -1114,8 +1128,20 @@ def provider_gaia(temp=True):
             ids.append(grouped_gaia_ident['id'][j])
         ids="|".join(ids)
         gaia_objects.add_row([grouped_gaia_ident['main_id'][ind[i]],ids])
-    #gaia_objects['type']=['None' for j in range(len(gaia_objects))]
+    gaia_objects['type']=['None' for j in range(len(gaia_objects))]
+    gaia_objects['main_id']=gaia_objects['main_id'].astype(str)
+    gaia_objects=ap.table.join(gaia_objects,gaia['main_id','nss_solution_type'],join_type='left')
+    gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]='sy'
+    gaia_objects.remove_column('nss_solution_type')
+    #there might be issue in building merging now
 
+    #gaia_mes_binary
+    gaia_mes_binary=gaia_objects['main_id','type'][np.where(gaia_objects['type']=='sy')]
+    gaia_mes_binary.rename_column('type','binary_flag')
+    gaia_mes_binary['binary_flag']=['True' for j in range(len(gaia_mes_binary))]
+    gaia_mes_binary['binary_ref']=['2016A&A...595A...1G' for j in range(len(gaia_mes_binary))]
+    gaia_mes_binary['binary_qual']=['B' for j in range(len(gaia_mes_binary))]
+    #there might be issue in building merging now
     
     #gaia_mes_teff
     gaia_mes_teff_st=gaia['main_id','teff_gspphot']
@@ -1155,18 +1181,20 @@ def provider_gaia(temp=True):
     
     #sources table
     gaia_sources=ap.table.Table()
-    tables=[gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st]
-    ref_columns=[['id_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
+    tables=[gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,
+            gaia_mes_mass_st,gaia_mes_binary]
+    ref_columns=[['id_ref'],['teff_st_ref'],['radius_st_ref'],
+                 ['mass_st_ref'],['binary_ref']]
     for cat,ref in zip(tables,ref_columns):
         gaia_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],gaia_sources)
         
-    gaia_list_of_tables=[gaia_sources,gaia_objects,gaia_ident,
-                         gaia_mes_teff_st,
-                        gaia_mes_radius_st,gaia_mes_mass_st]
+    gaia_list_of_tables=[gaia_sources,gaia_objects,gaia_ident
+                         ,gaia_mes_teff_st,gaia_mes_radius_st,
+                         gaia_mes_mass_st,gaia_mes_binary]
     save(gaia_list_of_tables,['gaia_sources','gaia_objects','gaia_ident',
-                              'gaia_mes_teff_st',
-                             'gaia_mes_radius_st','gaia_mes_mass_st'])
+                              'gaia_mes_teff_st','gaia_mes_radius_st',
+                              'gaia_mes_mass_st','gaia_mes_binary'])
     return gaia_list_of_tables
 
 #------------------------provider combining-----------------
@@ -1259,7 +1287,7 @@ def building(providers,column_names):
             cat['type_1']=cat['type_1'].astype(object)
             cat['type_2']=cat['type_2'].astype(object)
             for i in range(len(cat)):
-                if type(cat['type_2'][i])==np.ma.core.MaskedConstant:
+                if type(cat['type_2'][i])==np.ma.core.MaskedConstant or cat['type_2'][i]=='None':
                     cat['type'][i]=cat['type_1'][i]
                 else:
                     cat['type'][i]=cat['type_2'][i]
@@ -1316,9 +1344,9 @@ def building(providers,column_names):
                         for i in cat[para+'_value'].mask.nonzero()[0]:
                             cat[f'{para}_source_idref'][i]=0
         return cat
-    paras=[['id'],['h_link'],['coo','plx','dist','coo_gal','binary'],
+    paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
            ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
-          ['radius_st'],['mass_st']]
+          ['radius_st'],['mass_st'],['binary']]
     
     prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia']
     
@@ -1412,7 +1440,7 @@ def building(providers,column_names):
                 stars=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='st')]
                 systems=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='sys')]
+                                cat[1]['type']=='sy')]
                 temp=ap.table.vstack([stars,systems])
                 temp.rename_columns(['object_id','main_id'],
                                     ['object_idref','temp'])
@@ -1428,6 +1456,7 @@ def building(providers,column_names):
                 cat[i]=ap.table.join(cat[i],temp,keys='object_idref',
                                      join_type='outer')
                 cat[i].remove_column('temp')
+                cat[i]=nullvalues(cat[i],'mass_pl_qual','N')
             if column_names[i]=='mes_teff_st':
                 teff_st_best_para=best_para('teff_st',cat[i])
                 cat[4].remove_columns(['teff_st_value','teff_st_err',
@@ -1446,7 +1475,12 @@ def building(providers,column_names):
                                        'mass_st_qual','mass_st_source_idref',
                                        'mass_st_ref'])
                 cat[4]=ap.table.join(cat[4],mass_st_best_para,join_type='left')
-                             
+            if column_names[i]=='mes_binary':
+                binary_best_para=best_para('binary',cat[i])
+                cat[4].remove_columns(['binary_flag',
+                                       'binary_qual','binary_source_idref',
+                                       'binary_ref'])
+                cat[4]=ap.table.join(cat[4],binary_best_para,join_type='left')               
         else:
             print('error: empty table')
 
@@ -1460,14 +1494,14 @@ def building(providers,column_names):
 #------------------------initialize empty database tables----------------------
 initialized_tables=initialize_database_tables()
 
-column_names=['sources','objects','ident','h_link','star_basic',
+table_names=['sources','objects','ident','h_link','star_basic',
               'planet_basic','disk_basic','mes_dist','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st']
+              'mes_teff_st','mes_radius_st','mes_mass_st','gaia_mes_binary']
 save(initialized_tables,column_names)
 
 #------------------------obtain data from external sources---------------------
 sim_sources,sim_objects,sim_ident,sim_h_link \
-            ,sim_star_basic,sim_mes_dist=provider_simbad()
+            ,sim_star_basic,sim_mes_dist,sim_mes_binary=provider_simbad()
 
 gk_sources,gk_objects, gk_ident, gk_h_link,gk_disk_basic=provider_gk()
 
@@ -1476,21 +1510,22 @@ exo_sources,exo_objects,exo_ident,exo_h_link \
 
 life_sources,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st=provider_life()
 
-gaia_sources,gaia_objects,gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st=provider_gaia()
+gaia_sources,gaia_objects,gaia_ident,gaia_mes_teff_st \
+        ,gaia_mes_radius_st,gaia_mes_mass_st,gaia_mes_binary=provider_gaia()
 
 #------------------------construct the database tables-------------------------
 empty=ap.table.Table()
 sim=[sim_sources,sim_objects,sim_ident,sim_h_link,sim_star_basic,empty[:],empty[:],
-     sim_mes_dist,empty[:],empty[:],empty[:],empty[:]]
+     sim_mes_dist,empty[:],empty[:],empty[:],empty[:],sim_mes_binary]
 gk=[gk_sources,gk_objects, gk_ident, gk_h_link,empty[:],empty[:],gk_disk_basic,
-    empty[:],empty[:],empty[:],empty[:],empty[:]]
+    empty[:],empty[:],empty[:],empty[:],empty[:],empty[:]]
 exo=[exo_sources,exo_objects, exo_ident, exo_h_link,empty[:],exo_planet_basic,empty[:],
-     empty[:],exo_mes_mass_pl,empty[:],empty[:],empty[:]]
+     empty[:],exo_mes_mass_pl,empty[:],empty[:],empty[:],empty[:]]
 life=[life_sources,empty[:],empty[:],empty[:],life_star_basic,empty[:],empty[:],
-      empty[:],empty[:],empty[:],empty[:],empty[:]]
+      empty[:],empty[:],empty[:],empty[:],empty[:],empty[:]]
 
 gaia=[gaia_sources,gaia_objects,gaia_ident,empty[:],empty[:],empty[:],empty[:],
-      empty[:],empty[:],gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st]
+      empty[:],empty[:],gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st,gaia_mes_binary]
 
 sources,objects,ident,h_link,star_basic,planet_basic,disk_basic,mes_dist, \
-            mes_mass_pl,mes_teff_st,mes_radius_st,mes_mass_st=building([sim,gk,exo,life,gaia],column_names)
+            mes_mass_pl,mes_teff_st,mes_radius_st,mes_mass_st,mes_binary=building([sim,gk,exo,life,gaia],table_names)
