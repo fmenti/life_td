@@ -371,7 +371,7 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     return cat
 
 #-----------------------------provider data ingestion--------------------------
-def provider_simbad():
+def provider_simbad(table_names,sim_list_of_tables):
     """
     This function obtains the SIMBAD data and arranges it in a way
     easy to ingest into the database.
@@ -573,7 +573,6 @@ def provider_simbad():
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],sim_sources)
-    simbad_list_of_tables=[sim_sources,sim_objects, sim_ident, sim_h_link]
     #------------------------creating output table sim_star_basic--------------
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
@@ -582,19 +581,25 @@ def provider_simbad():
                          'plx_value','plx_err','plx_qual','plx_ref',
                          'dist_value','dist_err','dist_qual','dist_ref']
     #-----------creating mes_binary table------------
-    mes_binary=stars['main_id','binary_flag','binary_qual','binary_ref']
+    sim_mes_binary=stars['main_id','binary_flag','binary_qual','binary_ref']
     #-------------changing type from object to string for later join functions
     sim_star_basic['sptype_value']=sim_star_basic['sptype_value'].astype(str)
     sim_star_basic['sptype_qual']=sim_star_basic['sptype_qual'].astype(str)
     sim_star_basic['sptype_ref']=sim_star_basic['sptype_ref'].astype(str)
     
-    simbad_list_of_tables.extend([sim_star_basic,sim_mes_dist,mes_binary])
-    save(simbad_list_of_tables,['sim_sources','sim_objects','sim_ident',
-                                'sim_h_link','sim_star_basic',
-                                'sim_mes_dist','mes_binary'])
-    return simbad_list_of_tables
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': sim_list_of_tables[i]=sim_sources
+        if table_names[i]=='objects': sim_list_of_tables[i]=sim_objects
+        if table_names[i]=='ident': sim_list_of_tables[i]=sim_ident
+        if table_names[i]=='h_link': sim_list_of_tables[i]=sim_h_link
+        if table_names[i]=='star_basic': sim_list_of_tables[i]=sim_star_basic
+        if table_names[i]=='mes_dist': sim_list_of_tables[i]=sim_mes_dist
+        if table_names[i]=='mes_binary': sim_list_of_tables[i]=sim_mes_binary
+        save([sim_list_of_tables[i]],'sim_'+table_names[i])
+        
+    return sim_list_of_tables
 
-def provider_gk():
+def provider_gk(table_names,gk_list_of_tables):
     """
     This function obtains the disk data and arranges it in a way
     easy to ingest into the database.
@@ -653,7 +658,6 @@ def provider_gk():
     #--------------creating output table gk_sources ---------------------------
     gk_sources=sources_table(gk_disks,['disks_ref'],[provider_name,TAP_service,
                                            provider_bibcode])
-    gk_list_of_tables=[gk_sources,gk_objects,gk_ident,gk_h_link]
     #--------------creating output table gk_disk_basic-------------------------
     gk_disk_basic=gk_disks['id','rdisk_bb','e_rdisk_bb','disks_ref']
     #converting from string to float
@@ -668,12 +672,17 @@ def provider_gk():
         gk_disk_basic[column]=gk_disk_basic[column].astype(float)
     gk_disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
                                  ['main_id','rad_value','rad_err','rad_ref'])
-    gk_list_of_tables.append(gk_disk_basic)
-    save(gk_list_of_tables,
-         ['gk_sources','gk_objects', 'gk_ident', 'gk_h_link','gk_disk_basic'])
+    
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': gk_list_of_tables[i]=gk_sources
+        if table_names[i]=='objects': gk_list_of_tables[i]=gk_objects
+        if table_names[i]=='ident': gk_list_of_tables[i]=gk_ident
+        if table_names[i]=='h_link': gk_list_of_tables[i]=gk_h_link
+        if table_names[i]=='disk_basic': gk_list_of_tables[i]=gk_disk_basic
+        save([gk_list_of_tables[i]],'gk_'+table_names[i])
     return gk_list_of_tables
 
-def provider_exo(temp=True):
+def provider_exo(table_names,exo_list_of_tables,temp=True):
     """
     This function obtains the exomercat data and arranges it in a way easy to
     ingest into the database. Currently the exomercat server is not online.
@@ -854,14 +863,17 @@ def provider_exo(temp=True):
     for cat,ref in zip(tables,ref_columns):
         exo_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],exo_sources)
-
-    exo_list_of_tables=[exo_sources,exo_objects,exo_ident,
-                        exo_h_link,exo_planet_basic,exo_mes_mass_pl]
-    save(exo_list_of_tables,['exo_sources','exo_objects','exo_ident',
-                         'exo_h_link','exo_planet_basic','exo_mes_mass_pl'])
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': exo_list_of_tables[i]=exo_sources
+        if table_names[i]=='objects': exo_list_of_tables[i]=exo_objects
+        if table_names[i]=='ident': exo_list_of_tables[i]=exo_ident
+        if table_names[i]=='h_link': exo_list_of_tables[i]=exo_h_link
+        if table_names[i]=='planet_basic': exo_list_of_tables[i]=exo_planet_basic
+        if table_names[i]=='mes_mass_pl': exo_list_of_tables[i]=exo_mes_mass_pl
+        save([exo_list_of_tables[i]],'exo_'+table_names[i])
     return exo_list_of_tables
 
-def provider_life():
+def provider_life(table_names,life_list_of_tables):
     """
     This function loads the SIMBAD data obtained by the function provider_simbad
     and manipulates it.
@@ -901,7 +913,7 @@ def provider_life():
     life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
     life_star_basic=life_star_basic['main_id','coo_gal_l','coo_gal_b','coo_gal_err_angle',
                                    'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
-                                   'coo_gal_ref']
+                                   'coo_gal_ref','sptype_value']
     #-----------measurement tables -----------------
     #applying model from E. E. Mamajek on SIMBAD spectral type
     
@@ -1015,7 +1027,7 @@ def provider_life():
 
     [sim_objects]=load(['sim_objects'],stringtoobjects=False)
     stars=sim_objects[np.where(sim_objects['type']=='st')]
-    cat=ap.table.join(stars,sim_star_basic)
+    cat=ap.table.join(stars,life_star_basic)
     cat=spec(cat['main_id','sptype_value'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
     life_mes_teff_st=cat['main_id','mod_Teff']
@@ -1045,13 +1057,16 @@ def provider_life():
         life_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],life_sources)
     
-    life_list_of_tables=[life_sources,life_star_basic,life_mes_teff_st,
-                         life_mes_radius_st,life_mes_mass_st]
-    save(life_list_of_tables,['life_sources','life_star_basic','life_mes_teff_st',
-                         'life_mes_radius_st','life_mes_mass_st'])
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': life_list_of_tables[i]=life_sources
+        if table_names[i]=='star_basic': life_list_of_tables[i]=life_star_basic
+        if table_names[i]=='mes_teff_st': life_list_of_tables[i]=life_mes_teff_st
+        if table_names[i]=='mes_radius_st': life_list_of_tables[i]=life_mes_radius_st
+        if table_names[i]=='mes_mass_st': life_list_of_tables[i]=life_mes_mass_st
+        save([life_list_of_tables[i]],'life_'+table_names[i])
     return life_list_of_tables
 
-def provider_gaia(temp=True):
+def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     """
     This function obtains the gaia data and arranges it in a way
     easy to ingest into the database. Currently there is a provlem 
@@ -1188,13 +1203,15 @@ def provider_gaia(temp=True):
     for cat,ref in zip(tables,ref_columns):
         gaia_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],gaia_sources)
-        
-    gaia_list_of_tables=[gaia_sources,gaia_objects,gaia_ident
-                         ,gaia_mes_teff_st,gaia_mes_radius_st,
-                         gaia_mes_mass_st,gaia_mes_binary]
-    save(gaia_list_of_tables,['gaia_sources','gaia_objects','gaia_ident',
-                              'gaia_mes_teff_st','gaia_mes_radius_st',
-                              'gaia_mes_mass_st','gaia_mes_binary'])
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': gaia_list_of_tables[i]=gaia_sources
+        if table_names[i]=='objects': gaia_list_of_tables[i]=gaia_objects
+        if table_names[i]=='ident': gaia_list_of_tables[i]=gaia_ident
+        if table_names[i]=='mes_teff_st': gaia_list_of_tables[i]=gaia_mes_teff_st
+        if table_names[i]=='mes_radius_st': gaia_list_of_tables[i]=gaia_mes_radius_st
+        if table_names[i]=='mes_mass_st': gaia_list_of_tables[i]=gaia_mes_mass_st
+        if table_names[i]=='mes_binary': gaia_list_of_tables[i]=gaia_mes_binary
+        save([gaia_list_of_tables[i]],'gaia_'+table_names[i])
     return gaia_list_of_tables
 
 #------------------------provider combining-----------------
@@ -1220,12 +1237,12 @@ def building(providers,column_names):
     
     print(f'Building {column_names[0]} table ...')
     for j in range(len(providers)):
-            if len(cat[0])>0:
-                #joining data from different providers
-                if len(providers[j][0])>0:
-                    cat[0]=ap.table.join(cat[0],providers[j][0],join_type='outer')
-            else:
-                cat[0]=providers[j][0]
+        if len(cat[0])>0:
+            #joining data from different providers
+            if len(providers[j][0])>0:
+                cat[0]=ap.table.join(cat[0],providers[j][0],join_type='outer')
+        else:
+            cat[0]=providers[j][0]
         
     #I do this to get those columns that are empty in the data
     cat[0]=ap.table.vstack([cat[0],init[0]])
@@ -1373,7 +1390,7 @@ def building(providers,column_names):
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
             
-            def best_para(para,mes_table):
+            def best_para(para,mes_table,binary=False):
                 """
                 This function creates a table containing only the highest
                 quality measurement for each object.
@@ -1381,8 +1398,12 @@ def building(providers,column_names):
                 :param mes_table: Astropy table containing only columns
                     'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
                 """
-                mes_table=mes_table['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
-                best_para=mes_table['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref'][:0].copy()
+                if binary:
+                    columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
+                else:
+                    columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
+                mes_table=mes_table[columns[0:]]
+                best_para=mes_table[columns[0:]][:0].copy()
                 #group mes_table by object (=main_id)
                 grouped_mes_table=mes_table.group_by('main_id')
                 #take highest quality
@@ -1476,7 +1497,7 @@ def building(providers,column_names):
                                        'mass_st_ref'])
                 cat[4]=ap.table.join(cat[4],mass_st_best_para,join_type='left')
             if column_names[i]=='mes_binary':
-                binary_best_para=best_para('binary',cat[i])
+                binary_best_para=best_para('binary',cat[i],True)
                 cat[4].remove_columns(['binary_flag',
                                        'binary_qual','binary_source_idref',
                                        'binary_ref'])
@@ -1496,36 +1517,17 @@ initialized_tables=initialize_database_tables()
 
 table_names=['sources','objects','ident','h_link','star_basic',
               'planet_basic','disk_basic','mes_dist','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','gaia_mes_binary']
-save(initialized_tables,column_names)
+              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary']
+save(initialized_tables,table_names)
 
 #------------------------obtain data from external sources---------------------
-sim_sources,sim_objects,sim_ident,sim_h_link \
-            ,sim_star_basic,sim_mes_dist,sim_mes_binary=provider_simbad()
+empty_provider=[ap.table.Table() for i in range(len(table_names))]
 
-gk_sources,gk_objects, gk_ident, gk_h_link,gk_disk_basic=provider_gk()
+sim=provider_simbad(table_names,empty_provider[:])
+gk=provider_gk(table_names,empty_provider[:])
+exo=provider_exo(table_names,empty_provider[:])
+life=provider_life(table_names,empty_provider[:])
+gaia=provider_gaia(table_names,empty_provider[:])
 
-exo_sources,exo_objects,exo_ident,exo_h_link \
-            ,exo_planet_basic,exo_mes_mass_pl=provider_exo()
-
-life_sources,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st=provider_life()
-
-gaia_sources,gaia_objects,gaia_ident,gaia_mes_teff_st \
-        ,gaia_mes_radius_st,gaia_mes_mass_st,gaia_mes_binary=provider_gaia()
-
-#------------------------construct the database tables-------------------------
-empty=ap.table.Table()
-sim=[sim_sources,sim_objects,sim_ident,sim_h_link,sim_star_basic,empty[:],empty[:],
-     sim_mes_dist,empty[:],empty[:],empty[:],empty[:],sim_mes_binary]
-gk=[gk_sources,gk_objects, gk_ident, gk_h_link,empty[:],empty[:],gk_disk_basic,
-    empty[:],empty[:],empty[:],empty[:],empty[:],empty[:]]
-exo=[exo_sources,exo_objects, exo_ident, exo_h_link,empty[:],exo_planet_basic,empty[:],
-     empty[:],exo_mes_mass_pl,empty[:],empty[:],empty[:],empty[:]]
-life=[life_sources,empty[:],empty[:],empty[:],life_star_basic,empty[:],empty[:],
-      empty[:],empty[:],empty[:],empty[:],empty[:],empty[:]]
-
-gaia=[gaia_sources,gaia_objects,gaia_ident,empty[:],empty[:],empty[:],empty[:],
-      empty[:],empty[:],gaia_mes_teff_st,gaia_mes_radius_st,gaia_mes_mass_st,gaia_mes_binary]
-
-sources,objects,ident,h_link,star_basic,planet_basic,disk_basic,mes_dist, \
-            mes_mass_pl,mes_teff_st,mes_radius_st,mes_mass_st,mes_binary=building([sim,gk,exo,life,gaia],table_names)
+#------------------------combine data from external sources-------------------
+database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:]],table_names)
