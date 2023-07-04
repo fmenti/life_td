@@ -1214,6 +1214,72 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
         save([gaia_list_of_tables[i]],'gaia_'+table_names[i])
     return gaia_list_of_tables
 
+def provider_orb6(table_names,orb6_list_of_tables):
+    TAP_service="http://tapvizier.cds.unistra.fr/TAPVizieR/tap"
+    provider_name='ORB6'
+    provider_bibcode='https://crf.usno.navy.mil/wds-orb6/'
+    #query
+    adql_query="""
+    SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS
+    FROM "J/MNRAS/517/2925/tablea3" 
+    WHERE "plx1-DR3" >="""+str(plx_in_mas_cut)
+    
+    print(f'Creating {provider_name} tables ...')
+    orb6=query(TAP_service,adql_query)
+    orb6['gaia_id']=['Gaia DR3 '+str(orb6['gaia_id'][j]) for j in range(len(orb6))]
+    orb6=fetch_main_id(orb6,colname='gaia_id',name='main_id',oid=False)
+    orb6['ref']=['ORB6' for j in range(len(orb6))]
+    orb6['ref']=orb6['ref'].astype(object)
+    
+    #------------ident-------------------
+    orb6_ident=orb6['main_id','Name','ref']
+    orb6_ident.rename_columns(['Name','ref'],['id','id_ref'])
+    #add main_id main_id sim_ref for completeness
+    sim_main_id=orb6_ident.copy()
+    sim_main_id['id_ref']='2000A&AS..143....9W'
+    #this is wrong, provider needs to be simbad or life not orb6 for simbad main_id
+    #though I do have same issue with gaia stuff
+    
+    sim_main_id['id']=sim_main_id['main_id']
+    orb6_ident=ap.table.vstack([orb6_ident,sim_main_id])
+    orb6_ident=ap.table.unique(orb6_ident)
+    #------------objects---------------------
+    orb6_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
+    grouped_orb6_ident=orb6_ident.group_by('main_id')
+    ind=grouped_orb6_ident.groups.indices
+    for i in range(len(ind)-1):
+    # -1 is needed because else ind[i+1] is out of bonds
+        ids=[]
+        for j in range(ind[i],ind[i+1]):
+            ids.append(grouped_orb6_ident['id'][j])
+        ids="|".join(ids)
+        orb6_objects.add_row([grouped_orb6_ident['main_id'][ind[i]],ids])
+    orb6_objects['type']=['sy' for j in range(len(orb6_objects))]
+        
+    #---------------mes_binary-------------------------------------
+    orb6_mes_binary=orb6['main_id','Axis','e_Axis','ref']
+    orb6_mes_binary.rename_columns(['Axis','e_Axis','ref'],
+                                   ['sep_phys','sep_phys_err','sep_phys_ref'])
+    orb6_mes_binary['binary_flag']=['True' for j in range(len(orb6_mes_binary))]
+    orb6_mes_binary['binary_ref']=orb6['ref']
+    orb6_mes_binary['binary_qual']=['C' for j in range(len(orb6_mes_binary))]
+    #---------------sources---------------------------------------
+    orb6_sources=ap.table.Table()
+    tables=[orb6_ident,orb6_mes_binary]
+    ref_columns=[['id_ref'],['binary_ref','sep_phys_ref']]
+    for cat,ref in zip(tables,ref_columns):
+        orb6_sources=sources_table(cat,ref,[provider_name,TAP_service,
+                                           provider_bibcode],orb6_sources)
+    
+    for i in range(len(table_names)):
+        if table_names[i]=='sources': orb6_list_of_tables[i]=orb6_sources
+        if table_names[i]=='objects': orb6_list_of_tables[i]=orb6_objects
+        if table_names[i]=='ident': orb6_list_of_tables[i]=orb6_ident
+        if table_names[i]=='mes_binary': orb6_list_of_tables[i]=orb6_mes_binary
+        save([orb6_list_of_tables[i]],'orb6_'+table_names[i])
+    return orb6_list_of_tables
+
+
 #------------------------provider combining-----------------
 def building(providers,column_names):
     """
@@ -1365,7 +1431,7 @@ def building(providers,column_names):
            ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary']]
     
-    prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia']
+    prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia','ORB6']
     
     for i in range(2,n_tables): # for the tables star_basic,...,mes_mass_st
         print(f'Building {column_names[i]} table ...')
@@ -1528,6 +1594,8 @@ gk=provider_gk(table_names,empty_provider[:])
 exo=provider_exo(table_names,empty_provider[:])
 life=provider_life(table_names,empty_provider[:])
 gaia=provider_gaia(table_names,empty_provider[:])
+orb6=provider_orb6(table_names,empty_provider[:])
+#what if simbad says object is star but orb6 that it is system?
 
 #------------------------combine data from external sources-------------------
-database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:]],table_names)
+database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:],orb6[:]],table_names)
