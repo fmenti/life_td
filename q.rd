@@ -26,7 +26,8 @@ tables may change at any time without prior warning.
 
     <meta name="doi">10.21938/ke_e6lzO_jjX_vzvVIcwZA</meta>
 
-    <meta name="creator">Menti, F.; Quanz, S.; LIFE Collaboration</meta>
+    <meta name="creator">Menti, F.; Quanz, S.; Alei E.; Demleitner M.; 
+    Kennedz G.; Schmitt U.; LIFE Collaboration</meta>
     <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
     <meta name="type">Archive</meta>
@@ -71,6 +72,7 @@ tables may change at any time without prior warning.
         <make table="source">
             <rowmaker idmaps="*">
                 <map key="ref" nullExpr="'nan'"/>
+                <map key="source_id" nullExpr="0"/>
             </rowmaker>
         </make>
     </data>
@@ -94,7 +96,6 @@ tables may change at any time without prior warning.
             tablehead="type"
             description="Object type (sy=multi-object system, st=star,
             pl=planet and di=disk)."
-            required="True"
             verbLevel="1"/>
         <column name="main_id" type="text"
             ucd="meta.id"
@@ -176,16 +177,52 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
         <column name="coo_source_idref" type="integer"
             ucd="meta.ref"
-            tablehead="coord_source_id"
+            tablehead="coo_source_id"
             description="Source identifier corresponding
             to the position (coo) parameters."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <!-- <column name="coo_gal_l" type="double precision"
-            ucd="pos.galactic.lat" unit="deg"
+        <column name="coo_gal_l" type="double precision"
+            ucd="pos.galactic.lon" unit="deg"
             tablehead="coo_gal_l"
-            description="Galactical longitude."/> -->
+            description="Galactical longitude."/>
+        <column name="coo_gal_b" type="double precision"
+            ucd="pos.galactic.lat" unit="deg"
+            tablehead="coo_gal_b"
+            description="Galactical latitude."/>
+        <column name="coo_gal_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="coo_gal_source_id"
+            description="Source identifier corresponding
+            to the position (coo_gal) parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="mag_i_value" type="double precision"
+            ucd="phot.mag;em.opt.I" unit=""
+            tablehead="mag_i_value"
+            description="Magnitude in I filter."/>
+        <column name="mag_i_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="mag_i_source_id"
+            description="Source identifier corresponding
+            to the Magnitude in I filter parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="mag_j_value" type="double precision"
+            ucd="phot.mag;em.IR.J" unit=""
+            tablehead="mag_j_value"
+            description="Magnitude in J filter."/>
+        <column name="mag_j_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="mag_j_source_id"
+            description="Source identifier corresponding
+            to the Magnitude in J filter parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="plx_value" type="double precision"
             ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
@@ -216,7 +253,7 @@ tables may change at any time without prior warning.
             description="Object distance."
             verbLevel="1" displayHint="sf=2"/>
         <column name="dist_err" type="double precision"
-            ucd="stat.error;pos.distance"
+            ucd="stat.error;pos.distance" unit="pc"
             tablehead="dist_err"
             description="Object distance error."
             verbLevel="1"/>
@@ -234,6 +271,145 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+        <column name="sptype_string" type="text"
+            ucd="src.spType" 
+            tablehead="sptype"
+            description="Object spectral type MK."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="sptype_err" type="double precision"
+            ucd="stat.error;src.spType"
+            tablehead="sptype_err"
+            description="Object spectral type MK error."
+            verbLevel="1"/>
+        <column name="sptype_qual" type="text"
+            ucd="meta.code.qual;src.spType"
+            tablehead="sptype_qual"
+            description="Spectral type MK quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="sptype_source_idref" type="integer"
+            ucd="meta.ref;src.spType"
+            tablehead="sptype_source_idref"
+            description="Identifier of the source of the
+                spectral type MK parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="teff_st_value" type="double precision"
+            ucd="phys.temperature.effective" unit="K"
+            tablehead="teff_st"
+            description="Object effective temperature."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="teff_st_err" type="double precision"
+            ucd="stat.error;phys.temperature.effective" unit="K"
+            tablehead="teff_st_err"
+            description="Object effective temperature error."
+            verbLevel="1"/>
+        <column name="teff_st_qual" type="text"
+            ucd="meta.code.qual;phys.temperature.effective"
+            tablehead="teff_st_qual"
+            description="Effective temperature quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="teff_st_source_idref" type="integer"
+            ucd="meta.ref;phys.temperature.effective"
+            tablehead="teff_st_source_idref"
+            description="Identifier of the source of the
+                effective temperature parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="radius_st_value" type="double precision"
+            ucd="phys.size.radius" unit="solRad"
+            tablehead="radius_st"
+            description="Object radius."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="radius_st_err" type="double precision"
+            ucd="stat.error;phys.size.radius" unit="solRad"
+            tablehead="radius_st_err"
+            description="Object radius error."
+            verbLevel="1"/>
+        <column name="radius_st_qual" type="text"
+            ucd="meta.code.qual;phys.size.radius"
+            tablehead="radius_st_qual"
+            description="Radius quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="radius_st_source_idref" type="integer"
+            ucd="meta.ref;phys.size.radius"
+            tablehead="radius_st_source_idref"
+            description="Identifier of the source of the
+                radius parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="mass_st_value" type="double precision"
+            ucd="phys.mass" unit="solMass"
+            tablehead="mass_st"
+            description="Object mass."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="mass_st_err" type="double precision"
+            ucd="stat.error;phys.mass" unit="solMass"
+            tablehead="mass_st_err"
+            description="Object mass error."
+            verbLevel="1"/>
+        <column name="mass_st_qual" type="text"
+            ucd="meta.code.qual;phys.mass"
+            tablehead="mass_st_qual"
+            description="Mass quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="mass_st_source_idref" type="integer"
+            ucd="meta.ref;phys.mass"
+            tablehead="mass_st_source_idref"
+            description="Identifier of the source of the
+                mass parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="binary_flag" type="text"
+            ucd="meta.code.multip" 
+            tablehead="binary_flag"
+            description="Binary flag."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="binary_qual" type="text"
+            ucd="meta.code.qual"
+            tablehead="binary_qual"
+            description="Binary quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="binary_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="binary_source_idref"
+            description="Identifier of the source of the
+                binary_flag parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="sep_phys_value" type="double precision"
+            ucd="pos.angDistance" unit="arcsec"
+            tablehead="Phys. separation"
+            description="Phys. separation of binary."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="sep_phys_err" type="double precision"
+            ucd="stat.error;pos.angDistance" unit="arcsec"
+            tablehead="sep_phys_err"
+            description="Object phys. separation error."
+            verbLevel="1"/>
+        <column name="sep_phys_qual" type="text"
+            ucd="meta.code.qual;pos.angDistance"
+            tablehead="sep_phys_qual"
+            description="Phys. separation quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="sep_phys_source_idref" type="integer"
+            ucd="meta.ref;pos.angDistance"
+            tablehead="sep_phys_source_idref"
+            description="Identifier of the source of the
+                sep_phys parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
     </table>
 
     <data id="import_star_basic">
@@ -242,11 +418,55 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="star_basic">
             <rowmaker idmaps="*">
-                <map key="coo_source_idref" nullExpr="0" />
-                <!-- <map key="coo_gal_l" nullExpr="-1" /> -->
-                <map key="plx_source_idref" nullExpr="0" />
+                <map key="coo_ra" nullExpr="1e+20" />
+                <map key="coo_dec" nullExpr="1e+20" />
+                <map key="coo_err_angle" nullExpr="1e+20" />
+                <map key="coo_err_maj" nullExpr="1e+20" />
+                <map key="coo_err_min" nullExpr="1e+20" />
+                <map key="coo_qual" nullExpr="'N'" />
+                <map key="coo_source_idref" nullExpr="999999" />
+                <map key="coo_gal_l" nullExpr="1e+20" />
+                <map key="coo_gal_b" nullExpr="1e+20" />
+                <!-- <map key="coo_gal_err_angle" nullExpr="1e+20" />
+                <map key="coo_gal_err_maj" nullExpr="1e+20" />
+                <map key="coo_gal_err_min" nullExpr="1e+20" />
+                <map key="coo_gal_qual" nullExpr="'N'" /> -->
+                <map key="coo_gal_source_idref" nullExpr="999999" />
+                <map key="plx_value" nullExpr="1e+20" />
+                <map key="plx_err" nullExpr="1e+20" />
                 <map key="plx_qual" nullExpr="'N'" />
+                <map key="plx_source_idref" nullExpr="999999" />
+                <map key="mag_i_value" nullExpr="1e+20" />
+                <map key="mag_i_source_idref" nullExpr="999999" />
+                <map key="mag_j_value" nullExpr="1e+20" />
+                <map key="mag_j_source_idref" nullExpr="999999" />
+                <map key="dist_value" nullExpr="1e+20" />
+                <map key="dist_err" nullExpr="1e+20" />
                 <map key="dist_qual" nullExpr="'N'" />
+                <map key="dist_source_idref" nullExpr="999999" />
+                <map key="sptype_string" nullExpr="'None'" />
+                <map key="sptype_err" nullExpr="1e+20" />
+                <map key="sptype_qual" nullExpr="'N'" />
+                <map key="sptype_source_idref" nullExpr="999999" />
+                <map key="teff_st_value" nullExpr="1e+20" />
+                <map key="teff_st_err" nullExpr="1e+20" />
+                <map key="teff_st_qual" nullExpr="'N'" />
+                <map key="teff_st_source_idref" nullExpr="999999" />
+                <map key="radius_st_value" nullExpr="1e+20" />
+                <map key="radius_st_err" nullExpr="1e+20" />
+                <map key="radius_st_qual" nullExpr="'N'" />
+                <map key="radius_st_source_idref" nullExpr="999999" />
+                <map key="mass_st_value" nullExpr="1e+20" />
+                <map key="mass_st_err" nullExpr="1e+20" />
+                <map key="mass_st_qual" nullExpr="'N'" />
+                <map key="mass_st_source_idref" nullExpr="999999" />
+                <map key="binary_flag" nullExpr="'None'" />
+                <map key="binary_qual" nullExpr="'N'" />
+                <map key="binary_source_idref" nullExpr="999999" />
+                <map key="sep_phys_value" nullExpr="1e+20" />
+                <map key="sep_phys_err" nullExpr="1e+20" />
+                <map key="sep_phys_qual" nullExpr="'N'" />
+                <map key="sep_phys_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
     </data>
@@ -269,30 +489,30 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="mass_val" type="double precision"
+        <column name="mass_pl_value" type="double precision"
             ucd="phys.mass" unit="'jupiterMass'"
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_err" type="double precision"
+        <column name="mass_pl_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="Err. Mass"
             description="Mass error"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_qual" type="text"
+        <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
-            tablehead="mass_qual"
+            tablehead="Quality Mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_rel" type="text"
+        <column name="mass_pl_rel" type="text"
             ucd="phys.mass;arith.ratio"
             tablehead="mass_rel"
             description="Mass relation defining upper / lower limit or exact
             measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
-        <column name="mass_source_idref" type="integer"
+        <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
-            tablehead="mass_source_idref"
+            tablehead="mass_pl_source_idref"
             description="Identifier of the source of the mass
              parameter."
             verbLevel="1">
@@ -306,8 +526,11 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="planet_basic">
             <rowmaker idmaps="*">
-                <map key="mass_source_idref" nullExpr="0" />
-                <map key="mass_rel" nullExpr="'None'"/>
+                <map key="mass_pl_value" nullExpr="1e+20" />
+                <map key="mass_pl_err" nullExpr="1e+20" />
+                <map key="mass_pl_qual" nullExpr="'N'" />
+                <map key="mass_pl_source_idref" nullExpr="999999" />
+                <map key="mass_pl_rel" nullExpr="'None'"/>
             </rowmaker>
         </make>
     </data>
@@ -422,9 +645,10 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="h_link">
              <rowmaker idmaps="*">
-                 <map dest="membership"
-                 src="membership"
-                 nullExpr="-1" />
+                 <map key="parent_object_idref" nullExpr="999999"/>
+                 <map key="child_object_idref" nullExpr="999999"/>
+                 <map key="membership" nullExpr="999999"/>
+                 <map key="h_link_source_idref" nullExpr="999999"/>
              </rowmaker>
         </make>
     </data>
@@ -469,7 +693,7 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
-    <table id="mes_dist" onDisk="True" adql="True">
+    <table id="mes_dist_st" onDisk="True" adql="True">
         <meta name="title">Distance measurement table</meta>
         <meta name="description">
         A list of the stellar distance measurements.
@@ -512,25 +736,25 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_mes_dist">
-        <sources>data/mesDist.xml</sources>
+    <data id="import_mes_dist_st">
+        <sources>data/mes_dist_st.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-        <make table="mes_dist">
+        <make table="mes_dist_st">
             <rowmaker idmaps="*">
                 <map key="dist_qual" nullExpr="'N'" />
             </rowmaker>
         </make>
     </data>
 
-    <table id="mes_mass" onDisk="True" adql="True">
+    <table id="mes_mass_pl" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
         A list of the planetary mass measurements.
 
         \betawarning
         </meta>
-        <primary>object_idref,mass_val,mass_source_idref</primary>
+        <primary>object_idref,mass_pl_value,mass_pl_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -541,28 +765,28 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="mass_val" type="double precision"
+        <column name="mass_pl_value" type="double precision"
             ucd="phys.mass" unit="'jupiterMass'"
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_err" type="double precision"
+        <column name="mass_pl_err" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
             tablehead="Err. Pl. Mass"
             description="Mass error"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_qual" type="text"
+        <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
-            tablehead="mass_qual"
+            tablehead="Quality mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_rel" type="text"
+        <column name="mass_pl_rel" type="text"
             ucd="phys.mass;arith.ratio"
             tablehead="mass_rel"
             description="Mass relation defining upper / lower limit or exact
             measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
-        <column name="mass_source_idref" type="integer"
+        <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mass_source_idref"
             description="Identifier of the source of the mass
@@ -571,20 +795,274 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_mes_mass">
-        <sources>data/mesMass.xml</sources>
+    <data id="import_mes_mass_pl">
+        <sources>data/mes_mass_pl.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-           <make table="mes_mass">
+           <make table="mes_mass_pl">
              <rowmaker idmaps="*">
-                 <map key="mass_rel" nullExpr="'None'"/>
+                 <map key="mass_pl_rel" nullExpr="'None'"/>
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_teff_st" onDisk="True" adql="True">
+        <meta name="title">Effective temperature measurement table</meta>
+        <meta name="description">
+        A list of the stellar effective temperature measurements.
+
+        \betawarning
+        </meta>
+        <primary>object_idref,teff_st_value,teff_st_source_idref</primary>
+        <foreignKey source="object_idref" inTable="object"
+            dest="object_id" />
+
+        <column name="object_idref" type="integer"
+            ucd="meta.id;meta.main"
+            tablehead="object_idref"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>
+        <column name="teff_st_value" type="double precision"
+            ucd="phys.temperature.effective" unit="K"
+            tablehead="teff_st"
+            description="Object effective temperature."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="teff_st_err" type="double precision"
+            ucd="stat.error;phys.temperature.effective" unit="K"
+            tablehead="teff_st_err"
+            description="Object effective temperature error."
+            verbLevel="1"/>
+        <column name="teff_st_qual" type="text"
+            ucd="meta.code.qual;phys.temperature.effective"
+            tablehead="teff_st_qual"
+            description="Effective temperature quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="teff_st_source_idref" type="integer"
+            ucd="meta.ref;phys.temperature.effective"
+            tablehead="teff_st_source_idref"
+            description="Identifier of the source of the
+                effective temperature parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+    </table>
+
+    <data id="import_mes_teff_st">
+        <sources>data/mes_teff_st.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_teff_st">
+             <rowmaker idmaps="*">
+                 <map key="teff_st_value" nullExpr="1e+20" />
+                 <map key="teff_st_err" nullExpr="1e+20" />
+                 <map key="teff_st_qual" nullExpr="'N'" />
+                 <map key="teff_st_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_radius_st" onDisk="True" adql="True">
+        <meta name="title">Radius measurement table</meta>
+        <meta name="description">
+        A list of the stellar radius measurements.
+
+        \betawarning
+        </meta>
+        <primary>object_idref,radius_st_value,radius_st_source_idref</primary>
+        <foreignKey source="object_idref" inTable="object"
+            dest="object_id" />
+
+        <column name="object_idref" type="integer"
+            ucd="meta.id;meta.main"
+            tablehead="object_idref"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>
+        <column name="radius_st_value" type="double precision"
+            ucd="phys.size.radius" unit="solRad"
+            tablehead="radius_st"
+            description="Object radius."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="radius_st_err" type="double precision"
+            ucd="stat.error;phys.size.radius" unit="solRad"
+            tablehead="radius_st_err"
+            description="Object radius error."
+            verbLevel="1"/>
+        <column name="radius_st_qual" type="text"
+            ucd="meta.code.qual;phys.size.radius"
+            tablehead="radius_st_qual"
+            description="Radius quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="radius_st_source_idref" type="integer"
+            ucd="meta.ref;phys.size.radius"
+            tablehead="radius_st_source_idref"
+            description="Identifier of the source of the
+                radius parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+    </table>
+
+    <data id="import_mes_radius_st">
+        <sources>data/mes_radius_st.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_radius_st">
+             <rowmaker idmaps="*">
+                 <map key="radius_st_value" nullExpr="1e+20" />
+                 <map key="radius_st_err" nullExpr="1e+20" />
+                 <map key="radius_st_qual" nullExpr="'N'" />
+                 <map key="radius_st_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_mass_st" onDisk="True" adql="True">
+        <meta name="title">Mass measurement table</meta>
+        <meta name="description">
+        A list of the stellar mass measurements.
+
+        \betawarning
+        </meta>
+        <primary>object_idref,mass_st_value,mass_st_source_idref</primary>
+        <foreignKey source="object_idref" inTable="object"
+            dest="object_id" />
+
+        <column name="object_idref" type="integer"
+            ucd="meta.id;meta.main"
+            tablehead="object_idref"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>   
+        <column name="mass_st_value" type="double precision"
+            ucd="phys.mass" unit="solMass"
+            tablehead="mass_st"
+            description="Object mass."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="mass_st_err" type="double precision"
+            ucd="stat.error;phys.mass" unit="solMass"
+            tablehead="mass_st_err"
+            description="Object mass error."
+            verbLevel="1"/>
+        <column name="mass_st_qual" type="text"
+            ucd="meta.code.qual;phys.mass"
+            tablehead="mass_st_qual"
+            description="Mass quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="mass_st_source_idref" type="integer"
+            ucd="meta.ref;phys.mass"
+            tablehead="mass_st_source_idref"
+            description="Identifier of the source of the
+                mass parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>     
+    </table>
+
+    <data id="import_mes_mass_st">
+        <sources>data/mes_mass_st.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_mass_st">
+             <rowmaker idmaps="*">
+                 <map key="mass_st_value" nullExpr="1e+20" />
+                 <map key="mass_st_err" nullExpr="1e+20" />
+                 <map key="mass_st_qual" nullExpr="'N'" />
+                 <map key="mass_st_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_binary" onDisk="True" adql="True">
+        <meta name="title">Mass measurement table</meta>
+        <meta name="description">
+        A list of the stellar mass measurements.
+
+        \betawarning
+        </meta>
+        <primary>object_idref,binary_flag,binary_source_idref</primary>
+        <foreignKey source="object_idref" inTable="object"
+            dest="object_id" />
+
+        <column name="object_idref" type="integer"
+            ucd="meta.id;meta.main"
+            tablehead="object_idref"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>   
+        <column name="binary_flag" type="text"
+            ucd="meta.code.multip" 
+            tablehead="binary_flag"
+            description="Binary flag."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="binary_qual" type="text"
+            ucd="meta.code.qual"
+            tablehead="binary_qual"
+            description="Binary quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="binary_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="binary_source_idref"
+            description="Identifier of the source of the
+                binary_flag parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="sep_phys_value" type="double precision"
+            ucd="pos.angDistance" unit="arcsec"
+            tablehead="Phys. separation"
+            description="Phys. separation of binary."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="sep_phys_err" type="double precision"
+            ucd="stat.error;pos.angDistance" unit="arcsec"
+            tablehead="sep_phys_err"
+            description="Object phys. separation error."
+            verbLevel="1"/>
+        <column name="sep_phys_qual" type="text"
+            ucd="meta.code.qual;pos.angDistance"
+            tablehead="sep_phys_qual"
+            description="Phys. separation quality (A:best, E:worst)"
+            verbLevel="1">
+        </column>
+        <column name="sep_phys_source_idref" type="integer"
+            ucd="meta.ref;pos.angDistance"
+            tablehead="sep_phys_source_idref"
+            description="Identifier of the source of the
+                sep_phys parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+    </table>
+
+    <data id="import_mes_binary">
+        <sources>data/mes_binary.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_binary">
+             <rowmaker idmaps="*">
+                 <map key="binary_flag" nullExpr="'None'" />
+                 <map key="binary_qual" nullExpr="'N'" />
+                 <map key="binary_source_idref" nullExpr="999999" />
+                 <map key="sep_phys_value" nullExpr="1e+20" />
+                 <map key="sep_phys_err" nullExpr="1e+20" />
+                 <map key="sep_phys_qual" nullExpr="'N'" />
+                 <map key="sep_phys_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
     </data>
 
     <data id="tables" auto="False">
         <LOOP listItems="source object star_basic planet_basic disk_basic
-            h_link ident mes_dist mes_mass">
+            h_link ident mes_dist_st mes_mass_pl">
             <events>
                 <make table="\item"/>
             </events>
@@ -605,8 +1083,8 @@ tables may change at any time without prior warning.
                 star_basic.coo_ra, ra
                 star_basic.coo_dec, dec
                 star_basic.dist_value, dist
-                planet_basic.mass_val, planet_mass
-                planet_basic.mass_err, planet_mass_error
+                planet_basic.mass_pl_value, planet_mass
+                planet_basic.mass_pl_err, planet_mass_error
             </csvItems>
             <events>
                 <column original="\src" name="\name" verbLevel="5"/>
@@ -627,8 +1105,8 @@ tables may change at any time without prior warning.
                 coo_ra as ra,
                 coo_dec as dec,
                 dist_value as dist,
-                mass_val as planet_mass,
-                mass_err as planet_mass_error
+                mass_pl_value as planet_mass,
+                mass_pl_err as planet_mass_error
             from life.star_basic as s
                 join life.h_link as slink on (parent_object_idref=s.object_idref)
                 join life.planet_basic as p on (child_object_idref=p.object_idref)
@@ -702,11 +1180,11 @@ tables may change at any time without prior warning.
             In LIFE, we have individual tables for all kinds of parameters
             where multiple measurements for the same object are available.
             They are kept in the tables starting with ``mes_`` e.g.
-            :taptable:`life.mes_dist`:
+            :taptable:`life.mes_dist_st`:
 
             .. tapquery::
                 SELECT *
-                FROM life.mes_dist
+                FROM life.mes_dist_st
                 JOIN life.ident USING(object_idref)
                 WHERE id = 'GJ    10'
                 </meta>
