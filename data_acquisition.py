@@ -91,7 +91,7 @@ def initialize_database_tables(table_names,list_of_tables):
     :return list_of_tables: List of astropy tables in the order sources,
                 objects, ident (identifiers), h_link (relation between
                 objects),star_basic,planet_basic, disk_basic,
-                mes_dist (distance measurements) and
+                mes_dist_st (distance measurements) and
                 mes_mass_st (mass measurements).
     """
     #explanation of abbreviations: id stands for identifier, idref for
@@ -197,7 +197,7 @@ def initialize_database_tables(table_names,list_of_tables):
                'rad_source_iderf','rad_ref'],
         dtype=[int,float,float,object,object,int,object])
 
-    mes_dist=ap.table.Table(
+    mes_dist_st=ap.table.Table(
         names=['object_idref','dist_value','dist_err','dist_qual',
                'dist_source_idref','dist_ref'],
         dtype=[int,float,float,object,
@@ -239,7 +239,7 @@ def initialize_database_tables(table_names,list_of_tables):
         if table_names[i]=='star_basic': list_of_tables[i]=star_basic
         if table_names[i]=='planet_basic': list_of_tables[i]=planet_basic
         if table_names[i]=='disk_basic': list_of_tables[i]=disk_basic
-        if table_names[i]=='mes_dist': list_of_tables[i]=mes_dist
+        if table_names[i]=='mes_dist_st': list_of_tables[i]=mes_dist_st
         if table_names[i]=='mes_mass_pl': list_of_tables[i]=mes_mass_pl
         if table_names[i]=='mes_teff_st': list_of_tables[i]=mes_teff_st
         if table_names[i]=='mes_radius_st': list_of_tables[i]=mes_radius_st
@@ -464,36 +464,36 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_ident['id_ref']=[provider_bibcode for j in range(len(sim_ident))]
     sim_ident.remove_column('oid')
 
-    #-------------------creating output table sim_mes_dist---------------------
-    sim_mes_dist=query(TAP_service,upload_query[2],[stars[:].copy()])
-    sim_mes_dist=fetch_main_id(sim_mes_dist)
-    sim_mes_dist['dist_err']=np.maximum(sim_mes_dist['plus_err'],
-                                       -sim_mes_dist['minus_err'])
-    sim_mes_dist.remove_rows(sim_mes_dist['dist_err'].mask.nonzero()[0])
+    #-------------------creating output table sim_mes_dist_st---------------------
+    sim_mes_dist_st=query(TAP_service,upload_query[2],[stars[:].copy()])
+    sim_mes_dist_st=fetch_main_id(sim_mes_dist_st)
+    sim_mes_dist_st['dist_err']=np.maximum(sim_mes_dist_st['plus_err'],
+                                       -sim_mes_dist_st['minus_err'])
+    sim_mes_dist_st.remove_rows(sim_mes_dist_st['dist_err'].mask.nonzero()[0])
     #change provider given quality null values all to same: 'N'
-    sim_mes_dist['dist_qual'][np.where(sim_mes_dist['dist_qual']=='')]= \
-                            sim_mes_dist['dist_qual'].fill_value
-    sim_mes_dist['dist_qual'][np.where(sim_mes_dist['dist_qual']==':')]= \
-                            sim_mes_dist['dist_qual'].fill_value
+    sim_mes_dist_st['dist_qual'][np.where(sim_mes_dist_st['dist_qual']=='')]= \
+                            sim_mes_dist_st['dist_qual'].fill_value
+    sim_mes_dist_st['dist_qual'][np.where(sim_mes_dist_st['dist_qual']==':')]= \
+                            sim_mes_dist_st['dist_qual'].fill_value
     #group by oid
-    grouped_mes_dist=sim_mes_dist.group_by('main_id')
-    best_mes_dist=sim_mes_dist['main_id','dist_value','plus_err',
+    grouped_mes_dist_st=sim_mes_dist_st.group_by('main_id')
+    best_mes_dist_st=sim_mes_dist_st['main_id','dist_value','plus_err',
                              'dist_qual','dist_ref'][:0]
-    best_mes_dist.rename_column('plus_err','dist_err')
-    for i in range(len(grouped_mes_dist.groups.keys)):
+    best_mes_dist_st.rename_column('plus_err','dist_err')
+    for i in range(len(grouped_mes_dist_st.groups.keys)):
         #sort by quality
-        row=grouped_mes_dist.groups[i][np.where(
-                    grouped_mes_dist['dist_prec'].groups[i]
-                    ==np.max(grouped_mes_dist['dist_prec'].groups[i]))][0]
+        row=grouped_mes_dist_st.groups[i][np.where(
+                    grouped_mes_dist_st['dist_prec'].groups[i]
+                    ==np.max(grouped_mes_dist_st['dist_prec'].groups[i]))][0]
         #take first and add to best_paras
         #which error to take when there are multiples...
-        best_mes_dist.add_row([row['main_id'],row['dist_value'],
+        best_mes_dist_st.add_row([row['main_id'],row['dist_value'],
                               row['dist_err'],row['dist_qual'],
                               row['dist_ref']])
     #join with other multimes thingis
-    best_paras=best_mes_dist
+    best_paras=best_mes_dist_st
     # TBD when more multi measurement tables are implemented: vstack them here
-    sim_mes_dist=sim_mes_dist['main_id','dist_value','dist_err',
+    sim_mes_dist_st=sim_mes_dist_st['main_id','dist_value','dist_err',
                             'dist_qual','dist_ref']
 
     #--------------------creating helper table sim_stars-----------------------
@@ -551,7 +551,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_objects['ids']=sim_objects['ids'].astype(object)
     #--------------creating output table sim_sources --------------------------
     sim_sources=ap.table.Table()
-    tables=[stars, sim_h_link, sim_mes_dist,sim_ident]
+    tables=[stars, sim_h_link, sim_mes_dist_st,sim_ident]
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],sim_sources)
@@ -575,7 +575,7 @@ def provider_simbad(table_names,sim_list_of_tables):
         if table_names[i]=='ident': sim_list_of_tables[i]=sim_ident
         if table_names[i]=='h_link': sim_list_of_tables[i]=sim_h_link
         if table_names[i]=='star_basic': sim_list_of_tables[i]=sim_star_basic
-        if table_names[i]=='mes_dist': sim_list_of_tables[i]=sim_mes_dist
+        if table_names[i]=='mes_dist_st': sim_list_of_tables[i]=sim_mes_dist_st
         if table_names[i]=='mes_binary': sim_list_of_tables[i]=sim_mes_binary
         save([sim_list_of_tables[i]],['sim_'+table_names[i]])
         
@@ -1573,7 +1573,7 @@ def building(providers,table_names,list_of_tables):
 
 #------------------------initialize empty database tables----------------------
 table_names=['sources','objects','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_dist','mes_mass_pl',
+              'planet_basic','disk_basic','mes_dist_st','mes_mass_pl',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary']
 
 #distance cut
