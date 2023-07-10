@@ -224,10 +224,14 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,object,int,object])
     
     mes_binary=ap.table.Table(
-        names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref',
+        names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref'],
+        dtype=[int,str,object,int,object])
+    
+    mes_sep_phys=ap.table.Table(
+        names=['object_idref',
                'sep_phys_value','sep_phys_err','sep_phys_qual',
                'sep_phys_source_idref','sep_phys_ref'],
-        dtype=[int,str,object,int,object,#binary
+        dtype=[int,
                float,float,object,#sep_phys
                int,object])
 
@@ -245,6 +249,7 @@ def initialize_database_tables(table_names,list_of_tables):
         if table_names[i]=='mes_radius_st': list_of_tables[i]=mes_radius_st
         if table_names[i]=='mes_mass_st': list_of_tables[i]=mes_mass_st
         if table_names[i]=='mes_binary': list_of_tables[i]=mes_binary
+        if table_names[i]=='mes_sep_phys': list_of_tables[i]=mes_sep_phys
         save([list_of_tables[i]],['empty_'+table_names[i]])
     return list_of_tables
 
@@ -1249,10 +1254,16 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_mes_binary['binary_ref']=orb6['ref']
     orb6_mes_binary['binary_qual']=['C' for j in range(len(orb6_mes_binary))]
     orb6_mes_binary['sep_phys_qual']=['C' for j in range(len(orb6_mes_binary))]
+    orb6_mes_sep_phys=orb6_mes_binary['main_id','sep_phys_value','sep_phys_err',
+                                      'sep_phys_qual','sep_phys_ref']
+    orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
+    orb6_mes_binary.remove_columns(['sep_phys_value','sep_phys_err',
+                                      'sep_phys_qual','sep_phys_ref'])
+    orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
     #---------------sources---------------------------------------
     orb6_sources=ap.table.Table()
-    tables=[orb6_ident,orb6_mes_binary]
-    ref_columns=[['id_ref'],['binary_ref','sep_phys_ref']]
+    tables=[orb6_ident,orb6_mes_binary,orb6_mes_sep_phys]
+    ref_columns=[['id_ref'],['binary_ref'],['sep_phys_ref']]
     for cat,ref in zip(tables,ref_columns):
         orb6_sources=sources_table(cat,ref,[provider_name,TAP_service,
                                            provider_bibcode],orb6_sources)
@@ -1262,6 +1273,7 @@ def provider_orb6(table_names,orb6_list_of_tables):
         if table_names[i]=='objects': orb6_list_of_tables[i]=orb6_objects
         if table_names[i]=='ident': orb6_list_of_tables[i]=orb6_ident
         if table_names[i]=='mes_binary': orb6_list_of_tables[i]=orb6_mes_binary
+        if table_names[i]=='mes_sep_phys': orb6_list_of_tables[i]=orb6_mes_sep_phys
         save([orb6_list_of_tables[i]],['orb6_'+table_names[i]])
     return orb6_list_of_tables
 
@@ -1415,7 +1427,7 @@ def building(providers,table_names,list_of_tables):
         return cat
     paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
            ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
-          ['radius_st'],['mass_st'],['binary']]
+          ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
     prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia','ORB6']
     
@@ -1521,7 +1533,6 @@ def building(providers,table_names,list_of_tables):
                 cat[i]=ap.table.join(cat[i],temp,join_type='outer',
                                      keys='object_idref')
                 cat[i].remove_column('temp')
-                cat[i]=not_implemented_yet([cat[i]])[0]
             if table_names[i]=='planet_basic':
                 temp=cat[1]['object_id','main_id'][np.where(
                                 cat[1]['type']=='pl')]
@@ -1554,6 +1565,7 @@ def building(providers,table_names,list_of_tables):
                                        'binary_qual','binary_source_idref',
                                        'binary_ref'])
                 cat[4]=ap.table.join(cat[4],binary_best_para,join_type='left')
+            if table_names[i]=='mes_sep_phys':
                 sep_phys_best_para=best_para('sep_phys',cat[i])
                 cat[4].remove_columns(['sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_source_idref',
@@ -1562,7 +1574,7 @@ def building(providers,table_names,list_of_tables):
                 cat[4]=cat[4].filled()
             cat[i]=cat[i].filled()
         else:
-            print('error: empty table')
+            print('error: empty table',i,table_names[i])
 
     save(cat,table_names)
     return cat
@@ -1574,10 +1586,10 @@ def building(providers,table_names,list_of_tables):
 #------------------------initialize empty database tables----------------------
 table_names=['sources','objects','ident','h_link','star_basic',
               'planet_basic','disk_basic','mes_dist_st','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary']
+              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=25#25.
+distance_cut_in_pc=5#25.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
