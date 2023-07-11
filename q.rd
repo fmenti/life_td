@@ -119,6 +119,46 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*"/>
         </make>
     </data>
+    
+    <table id="provider" onDisk="True" adql="True">
+        <meta name="title">Provider Table</meta>
+        <meta name="description">
+        A list of all the providers for the parameters in the other
+        tables.
+
+        \betawarning</meta>
+        <primary>provider_name</primary>
+        <column name="provider_name" type="text"
+            ucd="meta.bib.author"
+            tablehead="provider_name"
+            description="Name for the service through which the data was
+            acquired."
+            required="True"
+            verbLevel="1"/>
+        <column name="provider_url" type="text"
+            ucd="meta.ref.url"
+            tablehead="provider_url"
+            description="Service through which the data was
+            acquired."
+            verbLevel="1"/>
+        <column name="provider_bibcode" type="text"
+            ucd="meta.ref"
+            tablehead="provider_bibcode"
+            description="Reference, bibcode if possible."
+            verbLevel="1"/>
+    </table>
+
+    <data id="import_provider">
+        <sources>data/provider.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+        <make table="provider">
+            <rowmaker idmaps="*">
+                <map key="provider_url" nullExpr="'None'"/>
+                <map key="provider_bibcode" nullExpr="'None'"/>
+            </rowmaker>
+        </make>
+    </data>
 
     <table id="star_basic" onDisk="True" adql="True" mixin="//scs#q3cindex">
         <meta name="title">Basic stellar parameters</meta>
@@ -647,7 +687,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="parent_object_idref" nullExpr="999999"/>
                  <map key="child_object_idref" nullExpr="999999"/>
-                 <map key="membership" nullExpr="999999"/>
+                 <map key="membership" nullExpr="999999,16959"/>
                  <map key="h_link_source_idref" nullExpr="999999"/>
              </rowmaker>
         </make>
@@ -981,9 +1021,9 @@ tables may change at any time without prior warning.
     </data>
     
     <table id="mes_binary" onDisk="True" adql="True">
-        <meta name="title">Mass measurement table</meta>
+        <meta name="title">Multiplicitz measurement table</meta>
         <meta name="description">
-        A list of the stellar mass measurements.
+        A list of the stellar multiplicitz measurements.
 
         \betawarning
         </meta>
@@ -1017,6 +1057,39 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+    </table>
+
+    <data id="import_mes_binary">
+        <sources>data/mes_binary.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_binary">
+             <rowmaker idmaps="*">
+                 <map key="binary_flag" nullExpr="'None'" />
+                 <map key="binary_qual" nullExpr="'N'" />
+                 <map key="binary_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_sep_phys" onDisk="True" adql="True">
+        <meta name="title">Phys. separation measurement table</meta>
+        <meta name="description">
+        A list of the stellar phys. separation measurements.
+
+        \betawarning
+        </meta>
+        <primary>object_idref,sep_phys_value,sep_phys_source_idref</primary>
+        <foreignKey source="object_idref" inTable="object"
+            dest="object_id" />
+
+        <column name="object_idref" type="integer"
+            ucd="meta.id;meta.main"
+            tablehead="object_idref"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>   
         <column name="sep_phys_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
             tablehead="Phys. separation"
@@ -1043,23 +1116,6 @@ tables may change at any time without prior warning.
         </column>
     </table>
 
-    <data id="import_mes_binary">
-        <sources>data/mes_binary.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
-        <voTableGrammar/>
-           <make table="mes_binary">
-             <rowmaker idmaps="*">
-                 <map key="binary_flag" nullExpr="'None'" />
-                 <map key="binary_qual" nullExpr="'N'" />
-                 <map key="binary_source_idref" nullExpr="999999" />
-                 <map key="sep_phys_value" nullExpr="1e+20" />
-                 <map key="sep_phys_err" nullExpr="1e+20" />
-                 <map key="sep_phys_qual" nullExpr="'N'" />
-                 <map key="sep_phys_source_idref" nullExpr="999999" />
-             </rowmaker>
-        </make>
-    </data>
-
     <data id="tables" auto="False">
         <LOOP listItems="source object star_basic planet_basic disk_basic
             h_link ident mes_dist_st mes_mass_pl">
@@ -1069,6 +1125,21 @@ tables may change at any time without prior warning.
         </LOOP>
         <publish sets="ivo_managed,local"/>
     </data>
+    
+    <data id="import_mes_sep_phys">
+        <sources>data/mes_sep_phys.xml</sources>
+        <!-- Data acquired using the skript data_acquisition.py. -->
+        <voTableGrammar/>
+           <make table="mes_sep_phys">
+             <rowmaker idmaps="*">
+                 <map key="sep_phys_value" nullExpr="1e+20" />
+                 <map key="sep_phys_err" nullExpr="1e+20" />
+                 <map key="sep_phys_qual" nullExpr="'N'" />
+                 <map key="sep_phys_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
 
     <table id="scs_summary" onDisk="True">
         <meta name="description">A view containing the most
