@@ -101,14 +101,19 @@ def initialize_database_tables(table_names,list_of_tables):
     
     sources=ap.table.Table(
         #reference,...
-        names=['ref','provider_name','provider_url','provider_bibcode',
+        names=['ref','provider_name',
                'source_id'],
-        dtype=[object,object,object,object,int])
+        dtype=[object,object,int])
 
     objects=ap.table.Table(
         #object id, type of object, all identifiers, main id
         names=['object_id','type','ids','main_id'],
         dtype=[int,object,object,object])
+    
+    provider=ap.table.Table(
+        #reference,...
+        names=['provider_name','provider_url','provider_bibcode'],
+        dtype=[object,object,object])
 
     #identifier table
     ident=ap.table.Table(
@@ -237,6 +242,7 @@ def initialize_database_tables(table_names,list_of_tables):
 
     for i in range(len(table_names)):
         if table_names[i]=='sources': list_of_tables[i]=sources
+        if table_names[i]=='provider': list_of_tables[i]=provider
         if table_names[i]=='objects': list_of_tables[i]=objects
         if table_names[i]=='ident': list_of_tables[i]=ident
         if table_names[i]=='h_link': list_of_tables[i]=h_link
@@ -305,9 +311,7 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     cat_sources['ref']=cat_reflist
     cat_sources=ap.table.unique(cat_sources)#keeps only unique values
     #attaches service information
-    cat_sources['provider_name']=[provider[0]]*len(cat_sources)
-    cat_sources['provider_url']=[provider[1]]*len(cat_sources)
-    cat_sources['provider_bibcode']=[provider[2]]*len(cat_sources)
+    cat_sources['provider_name']=[provider for j in range(len(cat_sources))]
     #combine old and new sources into one table
     sources=ap.table.vstack([old_sources,cat_sources])
     sources=ap.table.unique(sources) #remove double entries
@@ -363,9 +367,10 @@ def provider_simbad(table_names,sim_list_of_tables):
         relation data, basic stellar data and distance measurement data.
     """
     #---------------define provider--------------------------------------------
-    TAP_service="http://simbad.u-strasbg.fr:80/simbad/sim-tap"
-    provider_name='SIMBAD'
-    provider_bibcode='2000A&AS..143....9W'
+    sim_provider=ap.table.Table()
+    sim_provider['provider_name']=['SIMBAD']
+    sim_provider['provider_url']=["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
+    sim_provider['provider_bibcode']=['2000A&AS..143....9W']
     #---------------define queries---------------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
         b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
@@ -416,16 +421,13 @@ def provider_simbad(table_names,sim_list_of_tables):
         """SELECT id, t1.*
         FROM ident
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""]
-    #define header name of columns containing references data
-    ref_columns=[['coo_ref','plx_ref','mag_i_ref','mag_j_ref','binary_ref'],['h_link_ref'],
-                 ['dist_ref'],['id_ref']]
     #------------------querrying-----------------------------------------------
-    print(f'Creating {provider_name} tables ...')
+    print('Creating ',sim_provider['provider_name'][0],' tables ...')
     #perform query for objects with parallax >50mas
-    simbad=query(TAP_service,adql_query[0])
+    simbad=query(sim_provider['provider_url'][0],adql_query[0])
     #querries parent and children objects with no parallax value
-    parents_without_plx=query(TAP_service,upload_query[0],[simbad])
-    children_without_plx=query(TAP_service,upload_query[1],[simbad])
+    parents_without_plx=query(sim_provider['provider_url'][0],upload_query[0],[simbad])
+    children_without_plx=query(sim_provider['provider_url'][0],upload_query[1],[simbad])
     #adding of no_parallax objects to rest of simbad query objects
     simbad=ap.table.vstack([simbad,parents_without_plx])
     simbad=ap.table.vstack([simbad,children_without_plx])
@@ -464,13 +466,13 @@ def provider_simbad(table_names,sim_list_of_tables):
     stars=ap.table.Table(ap.table.unique(temp_stars,keys='main_id'),copy=True)
 
     #-----------------creating output table sim_ident--------------------------
-    sim_ident=query(TAP_service,upload_query[3],
+    sim_ident=query(sim_provider['provider_url'][0],upload_query[3],
                     [simbad['oid','main_id'][:].copy()])
-    sim_ident['id_ref']=[provider_bibcode for j in range(len(sim_ident))]
+    sim_ident['id_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(sim_ident))]
     sim_ident.remove_column('oid')
 
     #-------------------creating output table sim_mes_dist_st---------------------
-    sim_mes_dist_st=query(TAP_service,upload_query[2],[stars[:].copy()])
+    sim_mes_dist_st=query(sim_provider['provider_url'][0],upload_query[2],[stars[:].copy()])
     sim_mes_dist_st=fetch_main_id(sim_mes_dist_st)
     sim_mes_dist_st['dist_err']=np.maximum(sim_mes_dist_st['plus_err'],
                                        -sim_mes_dist_st['minus_err'])
@@ -517,9 +519,9 @@ def provider_simbad(table_names,sim_list_of_tables):
                                     mask=[True for j in range(len(stars))])
     stars['mag_j_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
                                     mask=[True for j in range(len(stars))])
-    stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=provider_bibcode
-    stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=provider_bibcode
-    stars['binary_ref']=[provider_bibcode for j in range(len(stars))]
+    stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=sim_provider['provider_bibcode'][0]
+    stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=sim_provider['provider_bibcode'][0]
+    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
     
     #--------------creating output table sim_h_link ---------------------------
@@ -534,10 +536,9 @@ def provider_simbad(table_names,sim_list_of_tables):
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
-    #null values, needed because
-    #sim_h_link['membership'].fill_value=-1
-    sim_h_link['membership']=sim_h_link['membership'].filled()
-    
+    #for a reason I don't understand the below does not work and instead I get 16959 filled in
+    sim_h_link=nullvalues(sim_h_link,'membership',999999)
+
     # binary_flag 'True' for all stars with parents
     # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'
     #could do this via two for loops but maybe easier way? maybe join. 
@@ -556,10 +557,12 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_objects['ids']=sim_objects['ids'].astype(object)
     #--------------creating output table sim_sources --------------------------
     sim_sources=ap.table.Table()
-    tables=[stars, sim_h_link, sim_mes_dist_st,sim_ident]
+    tables=[sim_provider,stars, sim_h_link, sim_mes_dist_st,sim_ident]
+    #define header name of columns containing references data
+    ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref','mag_j_ref','binary_ref'],['h_link_ref'],
+                 ['dist_ref'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
-        sim_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],sim_sources)
+        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
     #------------------------creating output table sim_star_basic--------------
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
@@ -576,6 +579,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': sim_list_of_tables[i]=sim_sources
+        if table_names[i]=='provider': sim_list_of_tables[i]=sim_provider
         if table_names[i]=='objects': sim_list_of_tables[i]=sim_objects
         if table_names[i]=='ident': sim_list_of_tables[i]=sim_ident
         if table_names[i]=='h_link': sim_list_of_tables[i]=sim_h_link
@@ -595,10 +599,12 @@ def provider_gk(table_names,gk_list_of_tables):
         relation data and basic disk data.
     """
     #---------------define provider--------------------------------------------
-    provider_name='priv. comm.'
-    TAP_service='None'
-    provider_bibcode='None'
-    print(f'Creating {provider_name} tables ...')
+    gk_provider=ap.table.Table()
+    gk_provider['provider_name']=['priv. comm.']
+    gk_provider['provider_url']=['None']
+    gk_provider['provider_bibcode']=['None']
+    
+    print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=ap.io.votable.parse_single_table(
         "data/Grant_absil_2013_.xml").to_table()
@@ -642,8 +648,12 @@ def provider_gk(table_names,gk_list_of_tables):
     # so I use ids which has the same content as id
     gk_ident.rename_columns(['ids','disks_ref'],['main_id','id_ref'])
     #--------------creating output table gk_sources ---------------------------
-    gk_sources=sources_table(gk_disks,['disks_ref'],[provider_name,TAP_service,
-                                           provider_bibcode])
+    gk_sources=ap.table.Table()
+    tables=[gk_provider,gk_disks]
+    #define header name of columns containing references data
+    ref_columns=[['provider_bibcode'],['disks_ref']]
+    for cat,ref in zip(tables,ref_columns):
+        gk_sources=sources_table(cat,ref,gk_provider['provider_name'][0],gk_sources)
     #--------------creating output table gk_disk_basic-------------------------
     gk_disk_basic=gk_disks['id','rdisk_bb','e_rdisk_bb','disks_ref']
     #converting from string to float
@@ -662,6 +672,7 @@ def provider_gk(table_names,gk_list_of_tables):
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': gk_list_of_tables[i]=gk_sources
+        if table_names[i]=='provider': gk_list_of_tables[i]=gk_provider
         if table_names[i]=='objects': gk_list_of_tables[i]=gk_objects
         if table_names[i]=='ident': gk_list_of_tables[i]=gk_ident
         if table_names[i]=='h_link': gk_list_of_tables[i]=gk_h_link
@@ -680,21 +691,23 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         relation data, basic planetary data and mass measurement data.
     """
     #---------------define provider--------------------------------------------
-    TAP_service="http://archives.ia2.inaf.it/vo/tap/projects"
-    provider_name='Exo-MerCat'
-    provider_bibcode='2020A&C....3100370A'
+    exo_provider=ap.table.Table()
+    exo_provider['provider_name']=['Exo-MerCat']
+    exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
+    exo_provider['provider_bibcode']=['2020A&C....3100370A']
+    
+    print('Creating ',exo_provider['provider_name'][0],' tables ...')
     #---------------define query-----------------------------------------------
     adql_query="""SELECT *
                   FROM exomercat.exomercat"""
     #---------------obtain data------------------------------------------------
-    print(f'Creating {provider_name} tables ...')
     if temp:
         #exomercat=ap.io.ascii.read("data/exomercat_Sep2.csv")
         exomercat=ap.io.ascii.read("data/exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
 
     else:
-        exomercat=query(TAP_service,adql_query)
+        exomercat=query(exo_provider['provider_url'][0],adql_query)
     #----------------putting object main identifiers together-------------------
 
     # initializing column
@@ -762,7 +775,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         if exomercat['planet_main_id'][i]!=exomercat['name'][i]:
             exo_ident.add_row([exomercat['planet_main_id'][i],
                                exomercat['planet_main_id'][i]])
-    exo_ident['id_ref']=[provider_bibcode for j in range(len(exo_ident))]
+    exo_ident['id_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_ident))]
     # TBD: I have a wrong double object
     # print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
     # in exo_ident because there are different amount of white spaces between
@@ -841,20 +854,21 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     exo_h_link=exomercat['planet_main_id', 'host_main_id']
     exo_h_link.rename_columns(['planet_main_id','host_main_id'],
                               ['main_id','parent_main_id'])
-    exo_h_link['h_link_ref']=[provider_bibcode for j in range(len(exo_h_link))]
+    exo_h_link['h_link_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_h_link))]
 
     #-------------exo_planet_basic
     exo_planet_basic=best_mes_mass_pl
 
     #-------------exo_sources---------------
-    ref_columns=[['h_link_ref'],['id_ref'],['mass_pl_ref']]
+    ref_columns=[['provider_bibcode'],['h_link_ref'],['id_ref'],['mass_pl_ref']]
     exo_sources=ap.table.Table()
-    tables=[exo_h_link,exo_ident,exo_mes_mass_pl]
+    tables=[exo_provider,exo_h_link,exo_ident,exo_mes_mass_pl]
     for cat,ref in zip(tables,ref_columns):
-        exo_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],exo_sources)
+        exo_sources=sources_table(cat,ref,exo_provider['provider_name'][0],exo_sources)
+        
     for i in range(len(table_names)):
         if table_names[i]=='sources': exo_list_of_tables[i]=exo_sources
+        if table_names[i]=='provider': exo_list_of_tables[i]=exo_provider 
         if table_names[i]=='objects': exo_list_of_tables[i]=exo_objects
         if table_names[i]=='ident': exo_list_of_tables[i]=exo_ident
         if table_names[i]=='h_link': exo_list_of_tables[i]=exo_h_link
@@ -871,10 +885,12 @@ def provider_life(table_names,life_list_of_tables):
         reference data and basic stellar data.
     """
     #---------------define provider--------------------------------------------
-    TAP_service="None"
-    provider_name='adapted data'
-    provider_bibcode='None'#'2022A&A...664A..21Q'
-    print(f'Creating {provider_name} tables ...')
+    life_provider=ap.table.Table()
+    life_provider['provider_name']=['adapted data']
+    life_provider['provider_url']=['www.life-space-mission.com']
+    life_provider['provider_bibcode']=['2022A&A...664A..21Q']
+    
+    print('Creating ',life_provider['provider_name'][0],' tables ...')
     #---------------------star_basic----------------
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])
@@ -1041,14 +1057,14 @@ def provider_life(table_names,life_list_of_tables):
     
     #-----------------sources table----------------------
     life_sources=ap.table.Table()
-    tables=[life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
-    ref_columns=[['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
+    tables=[life_provider,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
+    ref_columns=[['provider_bibcode'],['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
     for cat,ref in zip(tables,ref_columns):
-        life_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],life_sources)
+        life_sources=sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': life_list_of_tables[i]=life_sources
+        if table_names[i]=='provider': life_list_of_tables[i]=life_provider
         if table_names[i]=='star_basic': life_list_of_tables[i]=life_star_basic
         if table_names[i]=='mes_teff_st': life_list_of_tables[i]=life_mes_teff_st
         if table_names[i]=='mes_radius_st': life_list_of_tables[i]=life_mes_radius_st
@@ -1068,9 +1084,13 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
         basic stellar data.
     """
     #---------------define provider--------------------------------------------
-    TAP_service="https://gea.esac.esa.int/tap-server/tap" #might not be all of gaia
-    provider_name='Gaia'
-    provider_bibcode='2016A&A...595A...1G'
+    gaia_provider=ap.table.Table()
+    gaia_provider['provider_name']=['Gaia']
+    gaia_provider['provider_url']=["https://gea.esac.esa.int/tap-server/tap"]
+    gaia_provider['provider_bibcode']=['2016A&A...595A...1G']
+    
+    print('Creating ',gaia_provider['provider_name'][0],' tables ...')
+    
     #query
     adql_query="""
     SELECT s.source_id ,p.mass_flame, p.radius_flame,
@@ -1080,14 +1100,13 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
     WHERE s.parallax >="""+str(plx_in_mas_cut)
     
-    print(f'Creating {provider_name} tables ...')
     if temp:
-        service = vo.dal.TAPService(TAP_service)
+        service = vo.dal.TAPService(gaia_provider['provider_url'][0])
         result=service.run_sync(adql_query.format(**locals()), maxrec=160000)
         gaia=result.to_table()
 
     else:
-        gaia=query(TAP_service,adql_query) 
+        gaia=query(gaia_provider['provider_url'][0],adql_query) 
         
     gaia.rename_columns(['mass_flame','radius_flame'],
                         ['mass_st_value','radius_st_value'])
@@ -1118,6 +1137,7 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     for col in gaia_ident.colnames:
         gaia_ident[col]=gaia_ident[col].astype(str)
     gaia_ident=ap.table.vstack([gaia_ident,gaia_only_id])
+    #add main_id to gaia table
     gaia=ap.table.join(gaia_ident['main_id','id'],gaia,
                        keys_left='id', keys_right='gaia_id')
     gaia.remove_column('id')
@@ -1186,15 +1206,16 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     
     #sources table
     gaia_sources=ap.table.Table()
-    tables=[gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,
+    tables=[gaia_provider,gaia_ident,gaia_mes_teff_st,gaia_mes_radius_st,
             gaia_mes_mass_st,gaia_mes_binary]
-    ref_columns=[['id_ref'],['teff_st_ref'],['radius_st_ref'],
+    ref_columns=[['provider_bibcode'],['id_ref'],['teff_st_ref'],['radius_st_ref'],
                  ['mass_st_ref'],['binary_ref']]
     for cat,ref in zip(tables,ref_columns):
-        gaia_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],gaia_sources)
+        gaia_sources=sources_table(cat,ref,gaia_provider['provider_name'][0],gaia_sources)
+    
     for i in range(len(table_names)):
         if table_names[i]=='sources': gaia_list_of_tables[i]=gaia_sources
+        if table_names[i]=='provider': gaia_list_of_tables[i]=gaia_provider
         if table_names[i]=='objects': gaia_list_of_tables[i]=gaia_objects
         if table_names[i]=='ident': gaia_list_of_tables[i]=gaia_ident
         if table_names[i]=='mes_teff_st': gaia_list_of_tables[i]=gaia_mes_teff_st
@@ -1205,17 +1226,21 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     return gaia_list_of_tables
 
 def provider_orb6(table_names,orb6_list_of_tables):
-    TAP_service="http://tapvizier.cds.unistra.fr/TAPVizieR/tap"
-    provider_name='ORB6'
-    provider_bibcode='https://crf.usno.navy.mil/wds-orb6/'
+    
+    orb6_provider=ap.table.Table()
+    orb6_provider['provider_name']=['ORB6']
+    orb6_provider['provider_url']=["http://tapvizier.cds.unistra.fr/TAPVizieR/tap"]
+    orb6_provider['provider_bibcode']=['https://crf.usno.navy.mil/wds-orb6/']
+    
+    print('Creating ',orb6_provider['provider_name'][0],' tables ...')
+    
     #query
     adql_query="""
     SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS
     FROM "J/MNRAS/517/2925/tablea3" 
     WHERE "plx1-DR3" >="""+str(plx_in_mas_cut)
     
-    print(f'Creating {provider_name} tables ...')
-    orb6=query(TAP_service,adql_query)
+    orb6=query(orb6_provider['provider_url'][0],adql_query)
     orb6['gaia_id']=['Gaia DR3 '+str(orb6['gaia_id'][j]) for j in range(len(orb6))]
     orb6=fetch_main_id(orb6,colname='gaia_id',name='main_id',oid=False)
     orb6['ref']=['ORB6' for j in range(len(orb6))]
@@ -1262,14 +1287,14 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
     #---------------sources---------------------------------------
     orb6_sources=ap.table.Table()
-    tables=[orb6_ident,orb6_mes_binary,orb6_mes_sep_phys]
-    ref_columns=[['id_ref'],['binary_ref'],['sep_phys_ref']]
+    tables=[orb6_provider,orb6_ident,orb6_mes_binary,orb6_mes_sep_phys]
+    ref_columns=[['provider_bibcode'],['id_ref'],['binary_ref'],['sep_phys_ref']]
     for cat,ref in zip(tables,ref_columns):
-        orb6_sources=sources_table(cat,ref,[provider_name,TAP_service,
-                                           provider_bibcode],orb6_sources)
+        orb6_sources=sources_table(cat,ref,orb6_provider['provider_name'][0],orb6_sources)
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': orb6_list_of_tables[i]=orb6_sources
+        if table_names[i]=='provider': orb6_list_of_tables[i]=orb6_provider
         if table_names[i]=='objects': orb6_list_of_tables[i]=orb6_objects
         if table_names[i]=='ident': orb6_list_of_tables[i]=orb6_ident
         if table_names[i]=='mes_binary': orb6_list_of_tables[i]=orb6_mes_binary
@@ -1376,6 +1401,7 @@ def building(providers,table_names,list_of_tables):
         return cat
     
     print(f'Building {table_names[1]} table ...')
+    
     for j in range(len(providers)):
             if len(cat[1])>0:
                 #joining data from different providers
@@ -1425,20 +1451,34 @@ def building(providers,table_names,list_of_tables):
                         for i in cat[para+'_value'].mask.nonzero()[0]:
                             cat[f'{para}_source_idref'][i]=0
         return cat
+    
+    print(f'Building {table_names[2]} table ...')
+    
     paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
            ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
-    prov_ref=['SIMBAD','priv. comm.','Exo-MerCat','adapted data','Gaia','ORB6']
+    #merging the different provider tables
+    for j in range(len(providers)):
+        if len(cat[2])>0:
+            #joining data from different providers
+            if len(providers[j][2])>0:
+                cat[2]=ap.table.join(cat[2],providers[j][2],join_type='outer')
+        else:
+            cat[2]=providers[j][2]
+    #I do this to get those columns that are empty in the data
+    cat[2]=ap.table.vstack([cat[2],init[2]])
+       
     
-    for i in range(2,n_tables): # for the tables star_basic,...,mes_mass_st
+    for i in range(3,n_tables): # for the tables star_basic,...,mes_mass_st
         print(f'Building {table_names[i]} table ...')
         
         for j in range(len(providers)):#for the different providers
             if len(providers[j][i])>0:
                 #replacing ref with source_idref columns
                 #getting source_idref to each ref
-                providers[j][i]=match(providers[j][i],cat[0],paras[i-2],prov_ref[j])
+                #issue is that order providers and provider_name not the same
+                providers[j][i]=match(providers[j][i],cat[0],paras[i-3],providers[j][2]['provider_name'][0])
             if len(cat[i])>0:
                 #joining data from different providers
                 if len(providers[j][i])>0:
@@ -1543,35 +1583,35 @@ def building(providers,table_names,list_of_tables):
                 cat[i]=nullvalues(cat[i],'mass_pl_qual','N')
             if table_names[i]=='mes_teff_st':
                 teff_st_best_para=best_para('teff_st',cat[i])
-                cat[4].remove_columns(['teff_st_value','teff_st_err',
+                cat[5].remove_columns(['teff_st_value','teff_st_err',
                                        'teff_st_qual','teff_st_source_idref',
                                        'teff_st_ref'])
-                cat[4]=ap.table.join(cat[4],teff_st_best_para,join_type='left')
+                cat[5]=ap.table.join(cat[5],teff_st_best_para,join_type='left')
             if table_names[i]=='mes_radius_st':
                 radius_st_best_para=best_para('radius_st',cat[i])
-                cat[4].remove_columns(['radius_st_value','radius_st_err',
+                cat[5].remove_columns(['radius_st_value','radius_st_err',
                                        'radius_st_qual','radius_st_source_idref',
                                        'radius_st_ref'])
-                cat[4]=ap.table.join(cat[4],radius_st_best_para,join_type='left')
+                cat[5]=ap.table.join(cat[5],radius_st_best_para,join_type='left')
             if table_names[i]=='mes_mass_st':
                 mass_st_best_para=best_para('mass_st',cat[i])
-                cat[4].remove_columns(['mass_st_value','mass_st_err',
+                cat[5].remove_columns(['mass_st_value','mass_st_err',
                                        'mass_st_qual','mass_st_source_idref',
                                        'mass_st_ref'])
-                cat[4]=ap.table.join(cat[4],mass_st_best_para,join_type='left')
+                cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
             if table_names[i]=='mes_binary':
                 binary_best_para=best_para('binary',cat[i],True)
-                cat[4].remove_columns(['binary_flag',
+                cat[5].remove_columns(['binary_flag',
                                        'binary_qual','binary_source_idref',
                                        'binary_ref'])
-                cat[4]=ap.table.join(cat[4],binary_best_para,join_type='left')
+                cat[5]=ap.table.join(cat[5],binary_best_para,join_type='left')
             if table_names[i]=='mes_sep_phys':
                 sep_phys_best_para=best_para('sep_phys',cat[i])
-                cat[4].remove_columns(['sep_phys_value','sep_phys_err',
+                cat[5].remove_columns(['sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_source_idref',
                                       'sep_phys_ref'])
-                cat[4]=ap.table.join(cat[4],sep_phys_best_para,join_type='left')
-                cat[4]=cat[4].filled()
+                cat[5]=ap.table.join(cat[5],sep_phys_best_para,join_type='left')
+                cat[5]=cat[5].filled()
             cat[i]=cat[i].filled()
         else:
             print('error: empty table',i,table_names[i])
@@ -1584,12 +1624,12 @@ def building(providers,table_names,list_of_tables):
 ###############################################################################
 
 #------------------------initialize empty database tables----------------------
-table_names=['sources','objects','ident','h_link','star_basic',
+table_names=['sources','objects','provider','ident','h_link','star_basic',
               'planet_basic','disk_basic','mes_dist_st','mes_mass_pl',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=5#25.
+distance_cut_in_pc=25#25.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
@@ -1600,10 +1640,15 @@ plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
 empty_provider=[ap.table.Table() for i in range(len(table_names))]
 
 sim=provider_simbad(table_names,empty_provider[:])
+
 gk=provider_gk(table_names,empty_provider[:])
+
 exo=provider_exo(table_names,empty_provider[:])
+
 life=provider_life(table_names,empty_provider[:])
+
 gaia=provider_gaia(table_names,empty_provider[:])
+
 orb6=provider_orb6(table_names,empty_provider[:])
 
 #------------------------combine data from external sources-------------------
