@@ -570,7 +570,7 @@ tables may change at any time without prior warning.
                 <map key="mass_pl_err" nullExpr="1e+20" />
                 <map key="mass_pl_qual" nullExpr="'N'" />
                 <map key="mass_pl_source_idref" nullExpr="999999" />
-                <map key="mass_pl_rel" nullExpr="'None'"/>
+                <map key="mass_pl_rel" nullExpr="'N'"/>
             </rowmaker>
         </make>
     </data>
@@ -663,7 +663,7 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="membership" type="smallint"
+        <column name="membership" type="integer"
             ucd="meta.record"
             tablehead="membership"
             description="Membership probability."
@@ -687,7 +687,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="parent_object_idref" nullExpr="999999"/>
                  <map key="child_object_idref" nullExpr="999999"/>
-                 <map key="membership" nullExpr="999999,16959"/>
+                 <map key="membership" nullExpr="999999"/>
                  <map key="h_link_source_idref" nullExpr="999999"/>
              </rowmaker>
         </make>
@@ -782,7 +782,7 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="mes_dist_st">
             <rowmaker idmaps="*">
-                <map key="dist_qual" nullExpr="'N'" />
+                <map key="dist_qual" nullExpr="'?'" />
             </rowmaker>
         </make>
     </data>
@@ -841,7 +841,8 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
-                 <map key="mass_pl_rel" nullExpr="'None'"/>
+                 <map key="mass_pl_rel" nullExpr="'N'"/>
+                 <map key="mass_pl_qual" nullExpr="'N'" />
              </rowmaker>
         </make>
     </data>
