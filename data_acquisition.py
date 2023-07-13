@@ -184,7 +184,7 @@ def initialize_database_tables(table_names,list_of_tables):
                object,
                float,float,object,int,#mass
                object,
-               str,object,int,object,#binary
+               object,object,int,object,#binary
                float,float,object,#sep_phys
                int,object])
     
@@ -214,23 +214,23 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,object,int,object])
     
     mes_teff_st=ap.table.Table(
-        names=['object_idref','teff_st_value','teff_st_err','teff_st_rel','teff_st_qual',
+        names=['object_idref','teff_st_value','teff_st_err','teff_st_qual',
                'teff_st_source_idref','teff_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_radius_st=ap.table.Table(
-        names=['object_idref','radius_st_value','radius_st_err','radius_st_rel','radius_st_qual',
+        names=['object_idref','radius_st_value','radius_st_err','radius_st_qual',
                'radius_st_source_idref','radius_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_mass_st=ap.table.Table(
-        names=['object_idref','mass_st_value','mass_st_err','mass_st_rel','mass_st_qual',
+        names=['object_idref','mass_st_value','mass_st_err','mass_st_qual',
                'mass_st_source_idref','mass_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_binary=ap.table.Table(
         names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref'],
-        dtype=[int,str,object,int,object])
+        dtype=[int,object,object,int,object])
     
     mes_sep_phys=ap.table.Table(
         names=['object_idref',
@@ -1266,20 +1266,20 @@ def building(providers,table_names,list_of_tables):
     """
     This function builds from the input parameters the tables
     for the LIFE database.
-    :param sim: List of astropy table containing simbad data.
-    :param gk: List of astropy table containing grant kennedy data.
-    :param exo: List of astropy table containing exomercat data.
-    :return cat: List of astropy table containing
-        reference data, object data, identifier data, object to object
-        relation data, basic stellar data, basic planetary data, basic disk
-        data, distance measurement data and mass measurement data.
+    :param providers: List of astropy tables containing simbad, 
+        grant kennedy, exomercat, gaia and orb6 data.
+    :param table_names: List of strings corresponding to the names of the 
+        astropy tables contained in providers and the return list.
+    :param list_of_tables: List of empty astropy tables to be filled
+        in and returned.
+    :return list_of_tables: List of astropy table containing data 
+        combined from the different providers.
     """
     #creates empty tables as needed for final database ingestion
     init=initialize_database_tables(table_names,list_of_tables)
     n_tables=len(init)
 
     cat=[ap.table.Table() for i in range(n_tables)]
-
     #for the sources and objects joins tables from different providers
     
     print(f'Building {table_names[0]} table ...')
@@ -1464,7 +1464,7 @@ def building(providers,table_names,list_of_tables):
                 if para=='binary':
                     columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
                 elif para=='mass_pl':
-                    columns=['main_id',para+'_value',para+'_ref',para+'_err',para+'_qual',para+'_source_idref']
+                    columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
                 else:
                     columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
                 mes_table=mes_table[columns[0:]]
@@ -1576,7 +1576,15 @@ def building(providers,table_names,list_of_tables):
         else:
             print('error: empty table',i,table_names[i])
     cat[5]=cat[5].filled()
-
+    
+    #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
+    tables=[cat[5],cat[6],cat[9],cat[10],cat[11]]
+    columns=[['dist_st_qual','sep_phys_qual','teff_st_qual','radius_st_qual'],['mass_pl_qual'],['mass_pl_qual'],
+            ['teff_st_qual'],['radius_st_qual']]
+    for i in range(len(tables)):
+        for col in columns[i]:
+            tables[i][col][np.where(tables[i][col]=='N')]='?'
+    
     save(cat,table_names)
     return cat
 
