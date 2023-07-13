@@ -149,8 +149,8 @@ def initialize_database_tables(table_names,list_of_tables):
                'mag_j_ref',
                'plx_value','plx_err','plx_qual','plx_source_idref',
                'plx_ref',
-               'dist_value','dist_err','dist_qual','dist_source_idref',
-               'dist_ref',
+               'dist_st_value','dist_st_err','dist_st_qual','dist_st_source_idref',
+               'dist_st_ref',
                'sptype_string','sptype_err','sptype_qual','sptype_source_idref',
                'sptype_ref',
                'teff_st_value','teff_st_err','teff_st_qual','teff_st_source_idref',
@@ -184,7 +184,7 @@ def initialize_database_tables(table_names,list_of_tables):
                object,
                float,float,object,int,#mass
                object,
-               str,object,int,object,#binary
+               object,object,int,object,#binary
                float,float,object,#sep_phys
                int,object])
     
@@ -203,8 +203,8 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,object,int,object])
 
     mes_dist_st=ap.table.Table(
-        names=['object_idref','dist_value','dist_err','dist_qual',
-               'dist_source_idref','dist_ref'],
+        names=['object_idref','dist_st_value','dist_st_err','dist_st_qual',
+               'dist_st_source_idref','dist_st_ref'],
         dtype=[int,float,float,object,
                int,object])
 
@@ -214,23 +214,23 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,object,int,object])
     
     mes_teff_st=ap.table.Table(
-        names=['object_idref','teff_st_value','teff_st_err','teff_st_rel','teff_st_qual',
+        names=['object_idref','teff_st_value','teff_st_err','teff_st_qual',
                'teff_st_source_idref','teff_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_radius_st=ap.table.Table(
-        names=['object_idref','radius_st_value','radius_st_err','radius_st_rel','radius_st_qual',
+        names=['object_idref','radius_st_value','radius_st_err','radius_st_qual',
                'radius_st_source_idref','radius_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_mass_st=ap.table.Table(
-        names=['object_idref','mass_st_value','mass_st_err','mass_st_rel','mass_st_qual',
+        names=['object_idref','mass_st_value','mass_st_err','mass_st_qual',
                'mass_st_source_idref','mass_st_ref'],
-        dtype=[int,float,float,object,object,int,object])
+        dtype=[int,float,float,object,int,object])
     
     mes_binary=ap.table.Table(
         names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref'],
-        dtype=[int,str,object,int,object])
+        dtype=[int,object,object,int,object])
     
     mes_sep_phys=ap.table.Table(
         names=['object_idref',
@@ -413,8 +413,8 @@ def provider_simbad(table_names,sim_list_of_tables):
         """JOIN TAP_UPLOAD.t1 ON b.oid=t1.oid
         WHERE (b.plx_value IS NULL) AND (otype='Pl..')""",
         #query all distance measurements for objects in TAP_UPLOAD.t1 table
-        """SELECT oid, dist AS dist_value, plus_err, qual AS dist_qual,
-        bibcode AS dist_ref,minus_err,dist_prec
+        """SELECT oid, dist AS dist_st_value, plus_err, qual AS dist_st_qual,
+        bibcode AS dist_st_ref,minus_err,dist_prec AS dist_st_prec
         FROM mesDistance
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid""",
         #query all identifiers for objects in TAP_UPLOAD.t1 table
@@ -473,47 +473,24 @@ def provider_simbad(table_names,sim_list_of_tables):
 
     #-------------------creating output table sim_mes_dist_st---------------------
     sim_mes_dist_st=query(sim_provider['provider_url'][0],upload_query[2],[stars[:].copy()])
+    #change use oid to add main_id column
     sim_mes_dist_st=fetch_main_id(sim_mes_dist_st)
-    sim_mes_dist_st['dist_err']=np.maximum(sim_mes_dist_st['plus_err'],
+    #convert from two errors into one -> might be better in future to have in 
+    #mes tables three errors (min, max and normal) then for the basic tables only take normal error
+    sim_mes_dist_st['dist_st_err']=np.maximum(sim_mes_dist_st['plus_err'],
                                        -sim_mes_dist_st['minus_err'])
-    sim_mes_dist_st.remove_rows(sim_mes_dist_st['dist_err'].mask.nonzero()[0])
-    #change provider given quality null values all to same: 'N'
-    sim_mes_dist_st['dist_qual'][np.where(sim_mes_dist_st['dist_qual']=='')]= \
-                            sim_mes_dist_st['dist_qual'].fill_value
-    sim_mes_dist_st['dist_qual'][np.where(sim_mes_dist_st['dist_qual']==':')]= \
-                            sim_mes_dist_st['dist_qual'].fill_value
-    #group by oid
-    grouped_mes_dist_st=sim_mes_dist_st.group_by('main_id')
-    best_mes_dist_st=sim_mes_dist_st['main_id','dist_value','plus_err',
-                             'dist_qual','dist_ref'][:0]
-    best_mes_dist_st.rename_column('plus_err','dist_err')
-    for i in range(len(grouped_mes_dist_st.groups.keys)):
-        #sort by quality
-        row=grouped_mes_dist_st.groups[i][np.where(
-                    grouped_mes_dist_st['dist_prec'].groups[i]
-                    ==np.max(grouped_mes_dist_st['dist_prec'].groups[i]))][0]
-        #take first and add to best_paras
-        #which error to take when there are multiples...
-        best_mes_dist_st.add_row([row['main_id'],row['dist_value'],
-                              row['dist_err'],row['dist_qual'],
-                              row['dist_ref']])
-    #join with other multimes thingis
-    best_paras=best_mes_dist_st
-    # TBD when more multi measurement tables are implemented: vstack them here
-    sim_mes_dist_st=sim_mes_dist_st['main_id','dist_value','dist_err',
-                            'dist_qual','dist_ref']
-
+    #change provider given quality null values all to same
+    sim_mes_dist_st['dist_st_qual'][np.where(sim_mes_dist_st['dist_st_qual']=='')]= \
+                            sim_mes_dist_st['dist_st_qual'].fill_value
+    sim_mes_dist_st['dist_st_qual'][np.where(sim_mes_dist_st['dist_st_qual']==':')]= \
+                            sim_mes_dist_st['dist_st_qual'].fill_value
+    sim_mes_dist_st=sim_mes_dist_st['main_id','dist_st_value','dist_st_err',
+                                    'dist_st_qual','dist_st_ref']
     #--------------------creating helper table sim_stars-----------------------
-    #add best para from multiple measurements tables
-    stars=ap.table.join(stars,best_paras,keys='main_id',join_type='left')
-    #change null value of plx_qual from '' to 'N'
+    #change null value of plx_qual
+    stars['plx_qual']=stars['plx_qual'].astype(object)
     stars['plx_qual'][np.where(stars['plx_qual']=='')]= \
                             stars['plx_qual'].fill_value
-    stars['dist_qual'][np.where(stars['dist_qual']=='')]= \
-                            stars['dist_qual'].fill_value
-    stars['dist_qual'][np.where(stars['dist_qual']==':')]= \
-                            stars['dist_qual'].fill_value
-    
     #first need to initiate those columns
     stars['mag_i_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
                                     mask=[True for j in range(len(stars))])
@@ -536,7 +513,8 @@ def provider_simbad(table_names,sim_list_of_tables):
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
-    #for a reason I don't understand the below does not work and instead I get 16959 filled in
+    #typeconversion needed as smallint fill value != int null value
+    sim_h_link['membership']=sim_h_link['membership'].astype(int)
     sim_h_link=nullvalues(sim_h_link,'membership',999999)
 
     # binary_flag 'True' for all stars with parents
@@ -560,7 +538,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     tables=[sim_provider,stars, sim_h_link, sim_mes_dist_st,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref','mag_j_ref','binary_ref'],['h_link_ref'],
-                 ['dist_ref'],['id_ref']]
+                 ['dist_st_ref'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
     #------------------------creating output table sim_star_basic--------------
@@ -568,8 +546,7 @@ def provider_simbad(table_names,sim_list_of_tables):
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
                          'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
                          'sptype_string','sptype_qual','sptype_ref',
-                         'plx_value','plx_err','plx_qual','plx_ref',
-                         'dist_value','dist_err','dist_qual','dist_ref']
+                         'plx_value','plx_err','plx_qual','plx_ref']
     #-----------creating mes_binary table------------
     sim_mes_binary=stars['main_id','binary_flag','binary_qual','binary_ref']
     #-------------changing type from object to string for later join functions
@@ -600,9 +577,9 @@ def provider_gk(table_names,gk_list_of_tables):
     """
     #---------------define provider--------------------------------------------
     gk_provider=ap.table.Table()
-    gk_provider['provider_name']=['priv. comm.']
-    gk_provider['provider_url']=['None']
-    gk_provider['provider_bibcode']=['None']
+    gk_provider['provider_name']=['Grant Kennedy Disks']
+    gk_provider['provider_url']=['http://drgmk.com/sdb/']
+    gk_provider['provider_bibcode']=['priv. comm.']
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
@@ -669,6 +646,7 @@ def provider_gk(table_names,gk_list_of_tables):
         gk_disk_basic[column]=gk_disk_basic[column].astype(float)
     gk_disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
                                  ['main_id','rad_value','rad_err','rad_ref'])
+    gk_disk_basic=gk_disk_basic[np.where(gk_disk_basic['rad_value']!='nan')]
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': gk_list_of_tables[i]=gk_sources
@@ -797,8 +775,10 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
 
     #-------------------exo_mes_mass_pl---------------------
     #initialize columns exomercat['mass_pl_rel'] and exomercat['mass_pl_err']
-    exomercat['mass_pl_err']=ap.table.Column(dtype=object,length=len(exomercat))
+    exomercat['mass_pl_err']=ap.table.Column(dtype=float,length=len(exomercat))
     exomercat['mass_pl_rel']=ap.table.Column(dtype=object,length=len(exomercat))
+    exomercat['mass_pl_qual']=ap.table.MaskedColumn(dtype=object,length=len(exomercat))
+    exomercat['mass_pl_qual']=exomercat['mass_pl_qual'].filled()
     #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_pl_rel)
     for i in range(len(exomercat)):
@@ -807,7 +787,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
             if type(exomercat['mass_min'][i])==np.ma.core.MaskedConstant or \
                   exomercat['mass_min'][i]==np.inf:
                 exomercat['mass_pl_rel'][i]=None
-                exomercat['mass_pl_err'][i]=None
+                exomercat['mass_pl_err'][i]=1e+20
             else:
                 exomercat['mass_pl_rel'][i]='<'
                 exomercat['mass_pl_err'][i]=exomercat['mass_min'][i]
@@ -829,35 +809,12 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     #remove null values
     exo_mes_mass_pl=exo_mes_mass_pl[np.where(exo_mes_mass_pl['mass_pl_value']!=1e+20)]
 
-    grouped_mes_mass_pl=exo_mes_mass_pl.group_by('main_id')
-    #initialize best_mes_mass_pl as a table that hase same columns as exo_mes_mass_pl
-    # but no rows
-    best_mes_mass_pl=exo_mes_mass_pl['main_id','mass_pl_value','mass_pl_err','mass_pl_rel',
-                            'mass_pl_ref'][:0]
-    for i in range(len(grouped_mes_mass_pl.groups.keys)):
-        #sort by quality
-        row=grouped_mes_mass_pl.groups[i][np.where(
-                grouped_mes_mass_pl['mass_pl_err'].groups[i]==np.min(
-                grouped_mes_mass_pl['mass_pl_err'].groups[i]))][0]
-        #take first and add to best_paras
-        #which error to take when there are multiples...
-        best_mes_mass_pl.add_row([row['main_id'],row['mass_pl_value'],
-                              row['mass_pl_err'],row['mass_pl_rel'],row['mass_pl_ref']])
-    # changing from string to float, if I do it earlier it raises an error.
-    # change in future
-    exo_mes_mass_pl['mass_pl_err']=exo_mes_mass_pl['mass_pl_err'].astype(float)
-    best_mes_mass_pl['mass_pl_err']=best_mes_mass_pl['mass_pl_err'].astype(float)
-    # vstack other multiple measurements tables (currently none)
-    best_paras=best_mes_mass_pl
 
     #-------------exo_h_link---------------
     exo_h_link=exomercat['planet_main_id', 'host_main_id']
     exo_h_link.rename_columns(['planet_main_id','host_main_id'],
                               ['main_id','parent_main_id'])
     exo_h_link['h_link_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_h_link))]
-
-    #-------------exo_planet_basic
-    exo_planet_basic=best_mes_mass_pl
 
     #-------------exo_sources---------------
     ref_columns=[['provider_bibcode'],['h_link_ref'],['id_ref'],['mass_pl_ref']]
@@ -872,7 +829,6 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         if table_names[i]=='objects': exo_list_of_tables[i]=exo_objects
         if table_names[i]=='ident': exo_list_of_tables[i]=exo_ident
         if table_names[i]=='h_link': exo_list_of_tables[i]=exo_h_link
-        if table_names[i]=='planet_basic': exo_list_of_tables[i]=exo_planet_basic
         if table_names[i]=='mes_mass_pl': exo_list_of_tables[i]=exo_mes_mass_pl
         save([exo_list_of_tables[i]],['exo_'+table_names[i]])
     return exo_list_of_tables
@@ -908,7 +864,7 @@ def provider_life(table_names,life_list_of_tables):
                         for j in range(len(life_star_basic))]
     life_star_basic['coo_gal_err_min']=[-1
                         for j in range(len(life_star_basic))]
-    life_star_basic['coo_gal_qual']=['N'
+    life_star_basic['coo_gal_qual']=['?'
                         for j in range(len(life_star_basic))]
     life_star_basic['main_id']=life_star_basic['main_id'].astype(str)
     # source
@@ -1007,7 +963,9 @@ def provider_life(table_names,life_list_of_tables):
                         if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
                             cat[teffstring][j]=model_param['Teff'][i]
                             cat[rstring][j]=model_param['Radius'][i]
-                            cat[mstring][j]=model_param['Mass'][i]                                      
+                            cat[mstring][j]=model_param['Mass'][i] 
+            else:
+                cat[sptypestring][j]='None' 
         return cat
 
     def spec(cat):
@@ -1308,20 +1266,20 @@ def building(providers,table_names,list_of_tables):
     """
     This function builds from the input parameters the tables
     for the LIFE database.
-    :param sim: List of astropy table containing simbad data.
-    :param gk: List of astropy table containing grant kennedy data.
-    :param exo: List of astropy table containing exomercat data.
-    :return cat: List of astropy table containing
-        reference data, object data, identifier data, object to object
-        relation data, basic stellar data, basic planetary data, basic disk
-        data, distance measurement data and mass measurement data.
+    :param providers: List of astropy tables containing simbad, 
+        grant kennedy, exomercat, gaia and orb6 data.
+    :param table_names: List of strings corresponding to the names of the 
+        astropy tables contained in providers and the return list.
+    :param list_of_tables: List of empty astropy tables to be filled
+        in and returned.
+    :return list_of_tables: List of astropy table containing data 
+        combined from the different providers.
     """
     #creates empty tables as needed for final database ingestion
     init=initialize_database_tables(table_names,list_of_tables)
     n_tables=len(init)
 
     cat=[ap.table.Table() for i in range(n_tables)]
-
     #for the sources and objects joins tables from different providers
     
     print(f'Building {table_names[0]} table ...')
@@ -1433,7 +1391,7 @@ def building(providers,table_names,list_of_tables):
             #if they have reference columns
             if para+'_ref' in cat.colnames:
                 #if those reference columns are masked
-                cat=nullvalues(cat,para+'_ref','')
+                cat=nullvalues(cat,para+'_ref','None')
                 #join to each reference parameter its source_id
                 cat=ap.table.join(cat,sources['ref','source_id'][np.where(
                                 sources['provider_name']==provider)],
@@ -1449,7 +1407,7 @@ def building(providers,table_names,list_of_tables):
                 if para+'_value' in cat.colnames:
                     if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
                         for i in cat[para+'_value'].mask.nonzero()[0]:
-                            cat[f'{para}_source_idref'][i]=0
+                            cat[f'{para}_source_idref'][i]=999999
         return cat
     
     print(f'Building {table_names[2]} table ...')
@@ -1495,7 +1453,7 @@ def building(providers,table_names,list_of_tables):
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
             
-            def best_para(para,mes_table,binary=False):
+            def best_para(para,mes_table):
                 """
                 This function creates a table containing only the highest
                 quality measurement for each object.
@@ -1503,8 +1461,10 @@ def building(providers,table_names,list_of_tables):
                 :param mes_table: Astropy table containing only columns
                     'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
                 """
-                if binary:
+                if para=='binary':
                     columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
+                elif para=='mass_pl':
+                    columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
                 else:
                     columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
                 mes_table=mes_table[columns[0:]]
@@ -1513,7 +1473,7 @@ def building(providers,table_names,list_of_tables):
                 grouped_mes_table=mes_table.group_by('main_id')
                 #take highest quality
                 for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
-                    for qual in ['A','B','C','D','E']:
+                    for qual in ['A','B','C','D','E','?']:
                         for i in range(len(grouped_mes_table.groups[j])):
                             if grouped_mes_table.groups[j][i][para+'_qual']==qual:
                                 best_para.add_row(grouped_mes_table.groups[j][i])
@@ -1573,14 +1533,12 @@ def building(providers,table_names,list_of_tables):
                 cat[i]=ap.table.join(cat[i],temp,join_type='outer',
                                      keys='object_idref')
                 cat[i].remove_column('temp')
-            if table_names[i]=='planet_basic':
-                temp=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='pl')]
-                temp.rename_column('object_id','object_idref')
-                cat[i].remove_column('main_id')
-                cat[i]=ap.table.join(cat[i],temp,keys='object_idref',
-                                     join_type='outer')
-                cat[i]=nullvalues(cat[i],'mass_pl_qual','N')
+            if table_names[i]=='mes_dist_st':
+                dist_st_best_para=best_para('dist_st',cat[i])
+                cat[5].remove_columns(['dist_st_value','dist_st_err',
+                                      'dist_st_qual','dist_st_source_idref',
+                                      'dist_st_ref'])
+                cat[5]=ap.table.join(cat[5],dist_st_best_para,join_type='left')
             if table_names[i]=='mes_teff_st':
                 teff_st_best_para=best_para('teff_st',cat[i])
                 cat[5].remove_columns(['teff_st_value','teff_st_err',
@@ -1599,8 +1557,11 @@ def building(providers,table_names,list_of_tables):
                                        'mass_st_qual','mass_st_source_idref',
                                        'mass_st_ref'])
                 cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
+            if table_names[i]=='mes_mass_pl':
+                mass_pl_best_para=best_para('mass_pl',cat[i])
+                cat[6]=mass_pl_best_para
             if table_names[i]=='mes_binary':
-                binary_best_para=best_para('binary',cat[i],True)
+                binary_best_para=best_para('binary',cat[i])
                 cat[5].remove_columns(['binary_flag',
                                        'binary_qual','binary_source_idref',
                                        'binary_ref'])
@@ -1611,11 +1572,19 @@ def building(providers,table_names,list_of_tables):
                                       'sep_phys_qual','sep_phys_source_idref',
                                       'sep_phys_ref'])
                 cat[5]=ap.table.join(cat[5],sep_phys_best_para,join_type='left')
-                cat[5]=cat[5].filled()
             cat[i]=cat[i].filled()
         else:
             print('error: empty table',i,table_names[i])
-
+    cat[5]=cat[5].filled()
+    
+    #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
+    tables=[cat[5],cat[6],cat[9],cat[10],cat[11]]
+    columns=[['dist_st_qual','sep_phys_qual','teff_st_qual','radius_st_qual'],['mass_pl_qual'],['mass_pl_qual'],
+            ['teff_st_qual'],['radius_st_qual']]
+    for i in range(len(tables)):
+        for col in columns[i]:
+            tables[i][col][np.where(tables[i][col]=='N')]='?'
+    
     save(cat,table_names)
     return cat
 
@@ -1629,7 +1598,7 @@ table_names=['sources','objects','provider','ident','h_link','star_basic',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=25#25.
+distance_cut_in_pc=5#25.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
