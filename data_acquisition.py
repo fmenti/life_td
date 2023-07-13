@@ -778,7 +778,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     exomercat['mass_pl_err']=ap.table.Column(dtype=float,length=len(exomercat))
     exomercat['mass_pl_rel']=ap.table.Column(dtype=object,length=len(exomercat))
     exomercat['mass_pl_qual']=ap.table.MaskedColumn(dtype=object,length=len(exomercat))
-    exomercat['mass_pl_qual']=exomercat['mass_pl_qual'].filled()
+    exomercat['mass_pl_qual']=['?' for j in range(len(exomercat))]
     #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_pl_rel)
     for i in range(len(exomercat)):
@@ -801,7 +801,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
                 exomercat['mass_pl_err'][i]=max(exomercat['mass_max'][i],
                                         exomercat['mass_min'][i])
     exo_mes_mass_pl=exomercat['planet_main_id','mass','mass_pl_err','mass_url',
-                            'mass_pl_rel']
+                            'mass_pl_rel','mass_pl_qual']
     exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url'],
                                     ['main_id','mass_pl_value','mass_pl_ref'])
     #remove masked rows
@@ -1412,8 +1412,8 @@ def building(providers,table_names,list_of_tables):
     
     print(f'Building {table_names[2]} table ...')
     
-    paras=[['id'],['h_link'],['coo','plx','dist','coo_gal'],
-           ['mass_pl'],['rad'],['dist'],['mass_pl'],['teff_st'],
+    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal'],
+           ['mass_pl'],['rad'],['dist_st'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
     #merging the different provider tables
@@ -1560,6 +1560,10 @@ def building(providers,table_names,list_of_tables):
             if table_names[i]=='mes_mass_pl':
                 mass_pl_best_para=best_para('mass_pl',cat[i])
                 cat[6]=mass_pl_best_para
+                planets=cat[1]['object_id','main_id'][np.where(
+                                cat[1]['type']=='pl')]
+                cat[6]=ap.table.join(cat[6],planets['main_id','object_id'])
+                cat[6].rename_column('object_id','object_idref')
             if table_names[i]=='mes_binary':
                 binary_best_para=best_para('binary',cat[i])
                 cat[5].remove_columns(['binary_flag',
@@ -1573,17 +1577,23 @@ def building(providers,table_names,list_of_tables):
                                       'sep_phys_ref'])
                 cat[5]=ap.table.join(cat[5],sep_phys_best_para,join_type='left')
             cat[i]=cat[i].filled()
+            cat[i]=ap.table.unique(cat[i])
         else:
             print('error: empty table',i,table_names[i])
     cat[5]=cat[5].filled()
     
     #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
-    tables=[cat[5],cat[6],cat[9],cat[10],cat[11]]
-    columns=[['dist_st_qual','sep_phys_qual','teff_st_qual','radius_st_qual'],['mass_pl_qual'],['mass_pl_qual'],
-            ['teff_st_qual'],['radius_st_qual']]
+    tables=[cat[5],cat[6],cat[7],cat[9],cat[10],cat[11],cat[12],cat[13]]
+    columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
+              'sep_phys_qual','teff_st_qual','radius_st_qual',
+              'mass_st_qual','binary_qual'],
+             ['mass_pl_qual','mass_pl_rel'],
+             ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
+            ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
     for i in range(len(tables)):
         for col in columns[i]:
             tables[i][col][np.where(tables[i][col]=='N')]='?'
+            tables[i][col][np.where(tables[i][col]=='N/A')]='?'
     
     save(cat,table_names)
     return cat
