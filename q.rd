@@ -287,25 +287,25 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="dist_value" type="double precision"
+        <column name="dist_st_value" type="double precision"
             ucd="pos.distance" unit="pc"
             tablehead="Dist"
             description="Object distance."
             verbLevel="1" displayHint="sf=2"/>
-        <column name="dist_err" type="double precision"
+        <column name="dist_st_err" type="double precision"
             ucd="stat.error;pos.distance" unit="pc"
-            tablehead="dist_err"
+            tablehead="dist_st_err"
             description="Object distance error."
             verbLevel="1"/>
-        <column name="dist_qual" type="text"
+        <column name="dist_st_qual" type="text"
             ucd="meta.code.qual;pos.distance"
-            tablehead="dist_qual"
+            tablehead="dist_st_qual"
             description="Distance quality (A:best, E:worst)"
             verbLevel="1">
         </column>
-        <column name="dist_source_idref" type="integer"
+        <column name="dist_st_source_idref" type="integer"
             ucd="meta.ref"
-            tablehead="dist_source_idref"
+            tablehead="dist_st_source_idref"
             description="Identifier of the source of the
                 distance parameter."
             verbLevel="1">
@@ -463,49 +463,49 @@ tables may change at any time without prior warning.
                 <map key="coo_err_angle" nullExpr="1e+20" />
                 <map key="coo_err_maj" nullExpr="1e+20" />
                 <map key="coo_err_min" nullExpr="1e+20" />
-                <map key="coo_qual" nullExpr="'N'" />
+                <map key="coo_qual" nullExpr="'?'" />
                 <map key="coo_source_idref" nullExpr="999999" />
                 <map key="coo_gal_l" nullExpr="1e+20" />
                 <map key="coo_gal_b" nullExpr="1e+20" />
                 <!-- <map key="coo_gal_err_angle" nullExpr="1e+20" />
                 <map key="coo_gal_err_maj" nullExpr="1e+20" />
                 <map key="coo_gal_err_min" nullExpr="1e+20" />
-                <map key="coo_gal_qual" nullExpr="'N'" /> -->
+                <map key="coo_gal_qual" nullExpr="'?'" /> -->
                 <map key="coo_gal_source_idref" nullExpr="999999" />
                 <map key="plx_value" nullExpr="1e+20" />
                 <map key="plx_err" nullExpr="1e+20" />
-                <map key="plx_qual" nullExpr="'N'" />
+                <map key="plx_qual" nullExpr="'?'" />
                 <map key="plx_source_idref" nullExpr="999999" />
                 <map key="mag_i_value" nullExpr="1e+20" />
                 <map key="mag_i_source_idref" nullExpr="999999" />
                 <map key="mag_j_value" nullExpr="1e+20" />
                 <map key="mag_j_source_idref" nullExpr="999999" />
-                <map key="dist_value" nullExpr="1e+20" />
-                <map key="dist_err" nullExpr="1e+20" />
-                <map key="dist_qual" nullExpr="'N'" />
-                <map key="dist_source_idref" nullExpr="999999" />
+                <map key="dist_st_value" nullExpr="1e+20" />
+                <map key="dist_st_err" nullExpr="1e+20" />
+                <map key="dist_st_qual" nullExpr="'?'" />
+                <map key="dist_st_source_idref" nullExpr="999999" />
                 <map key="sptype_string" nullExpr="'None'" />
                 <map key="sptype_err" nullExpr="1e+20" />
-                <map key="sptype_qual" nullExpr="'N'" />
+                <map key="sptype_qual" nullExpr="'?'" />
                 <map key="sptype_source_idref" nullExpr="999999" />
                 <map key="teff_st_value" nullExpr="1e+20" />
                 <map key="teff_st_err" nullExpr="1e+20" />
-                <map key="teff_st_qual" nullExpr="'N'" />
+                <map key="teff_st_qual" nullExpr="'?'" />
                 <map key="teff_st_source_idref" nullExpr="999999" />
                 <map key="radius_st_value" nullExpr="1e+20" />
                 <map key="radius_st_err" nullExpr="1e+20" />
-                <map key="radius_st_qual" nullExpr="'N'" />
+                <map key="radius_st_qual" nullExpr="'?'" />
                 <map key="radius_st_source_idref" nullExpr="999999" />
                 <map key="mass_st_value" nullExpr="1e+20" />
                 <map key="mass_st_err" nullExpr="1e+20" />
-                <map key="mass_st_qual" nullExpr="'N'" />
+                <map key="mass_st_qual" nullExpr="'?'" />
                 <map key="mass_st_source_idref" nullExpr="999999" />
                 <map key="binary_flag" nullExpr="'None'" />
-                <map key="binary_qual" nullExpr="'N'" />
+                <map key="binary_qual" nullExpr="'?'" />
                 <map key="binary_source_idref" nullExpr="999999" />
                 <map key="sep_phys_value" nullExpr="1e+20" />
                 <map key="sep_phys_err" nullExpr="1e+20" />
-                <map key="sep_phys_qual" nullExpr="'N'" />
+                <map key="sep_phys_qual" nullExpr="'?'" />
                 <map key="sep_phys_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
@@ -560,7 +560,7 @@ tables may change at any time without prior warning.
         </column>
     </table>
 
-    <data id="import_planet">
+    <data id="import_planet_basic">
         <sources>data/planet_basic.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
@@ -568,9 +568,9 @@ tables may change at any time without prior warning.
             <rowmaker idmaps="*">
                 <map key="mass_pl_value" nullExpr="1e+20" />
                 <map key="mass_pl_err" nullExpr="1e+20" />
-                <map key="mass_pl_qual" nullExpr="'N'" />
+                <map key="mass_pl_qual" nullExpr="'?'" />
                 <map key="mass_pl_source_idref" nullExpr="999999" />
-                <map key="mass_pl_rel" nullExpr="'N'"/>
+                <map key="mass_pl_rel" nullExpr="'?'"/>
             </rowmaker>
         </make>
     </data>
@@ -630,9 +630,9 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="disk_basic">
             <rowmaker idmaps="*">
-                <map dest="rad_value">
-                    parseWithNull(@rad_value,float,"None")
-                </map>
+                <map key="rad_value" nullExpr="1e+20" />
+                <map key="rad_qual" nullExpr="'?'" />
+                <map key="rad_rel" nullExpr="'?'" />
             </rowmaker>
         </make>
     </data>
@@ -740,8 +740,8 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,dist_value,dist_err,
-            dist_source_idref
+        <primary>object_idref,dist_st_value,dist_st_err,
+            dist_st_source_idref
         </primary>
 
         <column name="object_idref" type="integer"
@@ -751,23 +751,23 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="dist_value" type="double precision"
+        <column name="dist_st_value" type="double precision"
             ucd="pos.distance" unit="AU"
-            tablehead="dist_value"
+            tablehead="dist_st_value"
             description="Object distance."
             required="True"
             verbLevel="1"/>
-        <column name="dist_err" type="double precision"
+        <column name="dist_st_err" type="double precision"
             ucd="stat.error;pos.distance" unit="AU"
             tablehead="dist_err"
             description="Distance error."
             verbLevel="1"/>
-        <column name="dist_qual" type="text"
+        <column name="dist_st_qual" type="text"
             ucd="meta.code.qual;pos.distance"
             tablehead="dist_qual"
             description="Distance quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="dist_source_idref" type="integer"
+        <column name="dist_st_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mes_dist_source_idref"
             description="Identifier of the source of the
@@ -782,7 +782,7 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="mes_dist_st">
             <rowmaker idmaps="*">
-                <map key="dist_qual" nullExpr="'?'" />
+                <map key="dist_st_qual" nullExpr="'?'" />
             </rowmaker>
         </make>
     </data>
@@ -841,8 +841,8 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
-                 <map key="mass_pl_rel" nullExpr="'N'"/>
-                 <map key="mass_pl_qual" nullExpr="'N'" />
+                 <map key="mass_pl_rel" nullExpr="'?'"/>
+                 <map key="mass_pl_qual" nullExpr="'?'" />
              </rowmaker>
         </make>
     </data>
@@ -899,7 +899,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="teff_st_value" nullExpr="1e+20" />
                  <map key="teff_st_err" nullExpr="1e+20" />
-                 <map key="teff_st_qual" nullExpr="'N'" />
+                 <map key="teff_st_qual" nullExpr="'?'" />
                  <map key="teff_st_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
@@ -957,7 +957,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="radius_st_value" nullExpr="1e+20" />
                  <map key="radius_st_err" nullExpr="1e+20" />
-                 <map key="radius_st_qual" nullExpr="'N'" />
+                 <map key="radius_st_qual" nullExpr="'?'" />
                  <map key="radius_st_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
@@ -1015,7 +1015,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="mass_st_value" nullExpr="1e+20" />
                  <map key="mass_st_err" nullExpr="1e+20" />
-                 <map key="mass_st_qual" nullExpr="'N'" />
+                 <map key="mass_st_qual" nullExpr="'?'" />
                  <map key="mass_st_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
@@ -1067,7 +1067,7 @@ tables may change at any time without prior warning.
            <make table="mes_binary">
              <rowmaker idmaps="*">
                  <map key="binary_flag" nullExpr="'None'" />
-                 <map key="binary_qual" nullExpr="'N'" />
+                 <map key="binary_qual" nullExpr="'?'" />
                  <map key="binary_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
@@ -1135,7 +1135,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="sep_phys_value" nullExpr="1e+20" />
                  <map key="sep_phys_err" nullExpr="1e+20" />
-                 <map key="sep_phys_qual" nullExpr="'N'" />
+                 <map key="sep_phys_qual" nullExpr="'?'" />
                  <map key="sep_phys_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
@@ -1154,7 +1154,7 @@ tables may change at any time without prior warning.
                 object.main_id, planet_name
                 star_basic.coo_ra, ra
                 star_basic.coo_dec, dec
-                star_basic.dist_value, dist
+                star_basic.dist_st_value, dist
                 planet_basic.mass_pl_value, planet_mass
                 planet_basic.mass_pl_err, planet_mass_error
             </csvItems>
@@ -1176,7 +1176,7 @@ tables may change at any time without prior warning.
                 planet_ob.main_id as planet_name,
                 coo_ra as ra,
                 coo_dec as dec,
-                dist_value as dist,
+                dist_st_value as dist,
                 mass_pl_value as planet_mass,
                 mass_pl_err as planet_mass_error
             from life.star_basic as s
