@@ -522,10 +522,19 @@ def provider_simbad(table_names,sim_list_of_tables):
     stars['mag_j_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
                                     mask=[True for j in range(len(stars))])
     #add simbad reference where no other is given
-    stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=sim_provider['provider_bibcode'][0]
-    stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=sim_provider['provider_bibcode'][0]
-    stars['plx_ref'][np.where(stars['plx_ref']=='')]=sim_provider['provider_bibcode'][0]
-    sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]=sim_provider['provider_bibcode'][0]
+    stars['mag_i_ref'][np.where(stars['mag_i_value'].mask==False)]=[
+            sim_provider['provider_bibcode'][0] for j in range(len(
+            stars['mag_i_ref'][np.where(stars['mag_i_value'].mask==False)]))]
+    stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]=[
+            sim_provider['provider_bibcode'][0] for j in range(len(
+            stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
+    stars['plx_ref'][np.where(stars['plx_ref']=='')]=[
+            sim_provider['provider_bibcode'][0] for j in range(len(
+            stars['plx_ref'][np.where(stars['plx_ref']=='')]))]
+    sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]=[
+            sim_provider['provider_bibcode'][0] for j in range(len(
+            sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]))]
+        
     stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
     #-----------------creating output table sim_planets------------------------
@@ -858,9 +867,7 @@ def provider_life(table_names,life_list_of_tables):
             ra=life_star_basic['coo_ra'],dec=life_star_basic['coo_dec'],frame='icrs')
     gal_coord=ircs_coord.galactic
     life_star_basic['coo_gal_l']=gal_coord.l.deg*ap.units.degree
-    life_star_basic['coo_gal_l'].fill_value=0 #null value
     life_star_basic['coo_gal_b']=gal_coord.b.deg*ap.units.degree
-    life_star_basic['coo_gal_b'].fill_value=0 #null value
     # can I do the same transformation with the errors? -> try on some examples and compare to simbad ones
     life_star_basic['coo_gal_err_angle']=[-1
                         for j in range(len(life_star_basic))]
@@ -875,7 +882,7 @@ def provider_life(table_names,life_list_of_tables):
     # transformed from simbad ircs coordinates using astropy
     life_star_basic['coo_gal_ref']=ap.table.MaskedColumn(dtype=object,length=len(life_star_basic),
                                     mask=[True for j in range(len(life_star_basic))])
-    life_star_basic['coo_gal_ref'][np.where(life_star_basic['coo_gal_l']!=0)]='LIFE' 
+    life_star_basic['coo_gal_ref']='LIFE' #assuming there are no masked entries
     life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
     life_star_basic=life_star_basic['main_id','coo_gal_l','coo_gal_b','coo_gal_err_angle',
                                    'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
@@ -1416,7 +1423,7 @@ def building(providers,table_names,list_of_tables):
     
     print(f'Building {table_names[2]} table ...')
     
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal'],
+    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j'],
            ['mass_pl'],['rad'],['dist_st'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
@@ -1593,7 +1600,7 @@ def building(providers,table_names,list_of_tables):
               'mass_st_qual','binary_qual'],
              ['mass_pl_qual','mass_pl_rel'],
              ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
-            ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
+             ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
     for i in range(len(tables)):
         for col in columns[i]:
             tables[i][col][np.where(tables[i][col]=='N')]='?'
