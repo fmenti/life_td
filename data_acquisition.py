@@ -486,20 +486,6 @@ def provider_simbad(table_names,sim_list_of_tables):
                             sim_mes_dist_st['dist_st_qual'].fill_value
     sim_mes_dist_st=sim_mes_dist_st['main_id','dist_st_value','dist_st_err',
                                     'dist_st_qual','dist_st_ref']
-    #--------------------creating helper table sim_stars-----------------------
-    #change null value of plx_qual
-    stars['plx_qual']=stars['plx_qual'].astype(object)
-    stars['plx_qual'][np.where(stars['plx_qual']=='')]= \
-                            stars['plx_qual'].fill_value
-    #first need to initiate those columns
-    stars['mag_i_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
-                                    mask=[True for j in range(len(stars))])
-    stars['mag_j_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
-                                    mask=[True for j in range(len(stars))])
-    stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=sim_provider['provider_bibcode'][0]
-    stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=sim_provider['provider_bibcode'][0]
-    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
-    stars['binary_qual']=['C' for j in range(len(stars))]
     
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
@@ -524,6 +510,24 @@ def provider_simbad(table_names,sim_list_of_tables):
         for i_child in range(len(sim_h_link['main_id'])):
             if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
                 stars['binary_flag'][i_star]=='True'
+                
+    #--------------------creating helper table sim_stars-----------------------
+    #change null value of plx_qual
+    stars['plx_qual']=stars['plx_qual'].astype(object)
+    stars['plx_qual'][np.where(stars['plx_qual']=='')]= \
+                            stars['plx_qual'].fill_value
+    #initiate some of the ref columns
+    stars['mag_i_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
+                                    mask=[True for j in range(len(stars))])
+    stars['mag_j_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
+                                    mask=[True for j in range(len(stars))])
+    #add simbad reference where no other is given
+    stars['mag_i_ref'][np.where(stars['mag_i_value']!=0)]=sim_provider['provider_bibcode'][0]
+    stars['mag_j_ref'][np.where(stars['mag_j_value']!=0)]=sim_provider['provider_bibcode'][0]
+    stars['plx_ref'][np.where(stars['plx_ref']=='')]=sim_provider['provider_bibcode'][0]
+    sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]=sim_provider['provider_bibcode'][0]
+    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
+    stars['binary_qual']=['C' for j in range(len(stars))]
     #-----------------creating output table sim_planets------------------------
     temp_sim_planets=simbad['main_id','ids',
                             'type'][np.where(simbad['type']=='pl')]
@@ -842,7 +846,7 @@ def provider_life(table_names,life_list_of_tables):
     """
     #---------------define provider--------------------------------------------
     life_provider=ap.table.Table()
-    life_provider['provider_name']=['adapted data']
+    life_provider['provider_name']=['LIFE']
     life_provider['provider_url']=['www.life-space-mission.com']
     life_provider['provider_bibcode']=['2022A&A...664A..21Q']
     
