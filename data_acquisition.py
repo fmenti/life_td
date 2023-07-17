@@ -153,6 +153,8 @@ def initialize_database_tables(table_names,list_of_tables):
                'dist_st_ref',
                'sptype_string','sptype_err','sptype_qual','sptype_source_idref',
                'sptype_ref',
+               'class_temp','class_temp_nr','class_lum','class_source_idref',
+               'class_ref',
                'teff_st_value','teff_st_err','teff_st_qual','teff_st_source_idref',
                'teff_st_ref',
                'radius_st_value','radius_st_err','radius_st_qual','radius_st_source_idref',
@@ -177,6 +179,8 @@ def initialize_database_tables(table_names,list_of_tables):
                float,float,object,int,#dist
                object,
                object,float,object,int,#sptype
+               object,
+               object,object,object,int,#class
                object,
                float,float,object,int,#teff
                object,
@@ -882,11 +886,52 @@ def provider_life(table_names,life_list_of_tables):
     # transformed from simbad ircs coordinates using astropy
     life_star_basic['coo_gal_ref']=ap.table.MaskedColumn(dtype=object,length=len(life_star_basic),
                                     mask=[True for j in range(len(life_star_basic))])
-    life_star_basic['coo_gal_ref']='LIFE' #assuming there are no masked entries
+    life_star_basic['coo_gal_ref']=life_provider['provider_name'][0] #assuming there are no masked entries
     life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
     life_star_basic=life_star_basic['main_id','coo_gal_l','coo_gal_b','coo_gal_err_angle',
                                    'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
                                    'coo_gal_ref','sptype_string']
+    
+    def sptype_string_to_class(temp,ref):
+        temp['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+        temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+        temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+        temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+        for i in range(len(temp)):
+            #sorting out entries like '', DA2.9, T1V
+            if len(temp['sptype_string'][i])>0 and temp['sptype_string'][i][0] in ['O','B','A','F','G','K','M']:
+                    temp['class_temp'][i]=temp['sptype_string'][i][0]
+                    temp['class_ref'][i]=ref
+                    #sorting out objects like DA2.9
+                    if len(temp['sptype_string'][i])>1 and temp['sptype_string'][i][1] in ['0','1','2','3','4','5','6','7','8','9']:
+                        temp['class_temp_nr'][i]=temp['sptype_string'][i][1]
+                        #distinguishing between objects like K5V and K5.5V
+                        if len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2]=='.':
+                            temp['class_temp_nr'][i]=temp['sptype_string'][i][1:4]
+                            if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
+                                temp['class_lum'][i]=temp['sptype_string'][i][4]
+                                if len(temp['sptype_string'][i])>5 and temp['sptype_string'][i][5] in ['I','V']:
+                                    temp['class_lum'][i]=temp['sptype_string'][i][4:6]
+                                    if len(temp['sptype_string'][i])>6 and temp['sptype_string'][i][6] in ['I','V']:
+                                        temp['class_lum'][i]=temp['sptype_string'][i][4:7]
+                            else:
+                                temp['class_lum'][i]='?'
+                        elif len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2] in ['I','V']:
+                            temp['class_lum'][i]=temp['sptype_string'][i][2]
+                            if len(temp['sptype_string'][i])>3 and temp['sptype_string'][i][3] in ['I','V']:
+                                temp['class_lum'][i]=temp['sptype_string'][i][2:4]
+                                if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
+                                    temp['class_lum'][i]=temp['sptype_string'][i][2:5]
+                        else:
+                            temp['class_lum'][i]='?'
+            else:
+                temp['class_temp'][i]='?'
+                temp['class_temp_nr'][i]='?'
+                temp['class_lum'][i]='?'
+                temp['class_ref'][i]='?'
+        return temp
+    life_star_basic=sptype_string_to_class(life_star_basic,life_provider['provider_name'][0])
+    
     #-----------measurement tables -----------------
     #applying model from E. E. Mamajek on SIMBAD spectral type
     
@@ -1423,7 +1468,7 @@ def building(providers,table_names,list_of_tables):
     
     print(f'Building {table_names[2]} table ...')
     
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j'],
+    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','class'],
            ['mass_pl'],['rad'],['dist_st'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
