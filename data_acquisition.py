@@ -1323,6 +1323,9 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_mes_sep_phys=orb6_mes_binary['main_id','sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref']
     orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
+    orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]]=lowerquality(
+            orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]],'sep_phys_qual')
+    
     orb6_mes_binary.remove_columns(['sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref'])
     orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
