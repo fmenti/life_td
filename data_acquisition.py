@@ -18,6 +18,7 @@ The document is structured as follows:
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
+from datetime import datetime
 
 #-------------------global helper functions------------------------------------
 def save(cats,paths):
@@ -112,8 +113,8 @@ def initialize_database_tables(table_names,list_of_tables):
     
     provider=ap.table.Table(
         #reference,...
-        names=['provider_name','provider_url','provider_bibcode'],
-        dtype=[object,object,object])
+        names=['provider_name','provider_url','provider_bibcode','provider_access'],
+        dtype=[object,object,object,object])
 
     #identifier table
     ident=ap.table.Table(
@@ -375,6 +376,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_provider['provider_name']=['SIMBAD']
     sim_provider['provider_url']=["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
     sim_provider['provider_bibcode']=['2000A&AS..143....9W']
+    sim_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     #---------------define queries---------------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
         b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
@@ -597,6 +599,7 @@ def provider_gk(table_names,gk_list_of_tables):
     gk_provider['provider_name']=['Grant Kennedy Disks']
     gk_provider['provider_url']=['http://drgmk.com/sdb/']
     gk_provider['provider_bibcode']=['priv. comm.']
+    gk_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
@@ -691,6 +694,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
     exo_provider['provider_bibcode']=['2020A&C....3100370A']
     
+    
     print('Creating ',exo_provider['provider_name'][0],' tables ...')
     #---------------define query-----------------------------------------------
     adql_query="""SELECT *
@@ -700,9 +704,11 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         #exomercat=ap.io.ascii.read("data/exomercat_Sep2.csv")
         exomercat=ap.io.ascii.read("data/exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
+        exo_provider['provider_access']=['2023-02-05']
 
     else:
         exomercat=query(exo_provider['provider_url'][0],adql_query)
+        exo_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     #----------------putting object main identifiers together-------------------
 
     # initializing column
@@ -862,6 +868,7 @@ def provider_life(table_names,life_list_of_tables):
     life_provider['provider_name']=['LIFE']
     life_provider['provider_url']=['www.life-space-mission.com']
     life_provider['provider_bibcode']=['2022A&A...664A..21Q']
+    life_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
     print('Creating ',life_provider['provider_name'][0],' tables ...')
     #---------------------star_basic----------------
@@ -965,7 +972,7 @@ def provider_life(table_names,life_list_of_tables):
         type, effective temperature radius and mass.
         :return votable: astropy table of the 4 parameters as columns
         """
-        EEM_table=ap.io.ascii.read("data/updatedEEM_dwarf_UBVIJHK_colors_Teff.csv")['SpT','Teff','R_Rsun','Msun']
+        EEM_table=ap.io.ascii.read("data/Mamajek2022-04-16.csv")['#SpT','Teff','R_Rsun','Msun']
         EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
         EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
         EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
@@ -1006,17 +1013,17 @@ def provider_life(table_names,life_list_of_tables):
             # for all the entries that are not empty
             if cat[sptypestring][j]!='':
                 #go through the model spectral types of Mamajek 
-                for i in range(len(model_param['SpT'])): 
+                for i in range(len(model_param['#SpT'])): 
                     #match first two letters
-                    if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
+                    if model_param['#SpT'][i][:2]==cat[sptypestring][j][:2]: 
                             cat[teffstring][j]=model_param['Teff'][i]
                             cat[rstring][j]=model_param['Radius'][i]
                             cat[mstring][j]=model_param['Mass'][i]
                 #as the model does not cover all spectral types on .5 accuracy, check those separately
                 if cat[sptypestring][j][2:4]=='.5':
-                    for i in range(len(model_param['SpT'])):
+                    for i in range(len(model_param['#SpT'])):
                         # match first four letters
-                        if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
+                        if model_param['#SpT'][i][:4]==cat[sptypestring][j][:4]:
                             cat[teffstring][j]=model_param['Teff'][i]
                             cat[rstring][j]=model_param['Radius'][i]
                             cat[mstring][j]=model_param['Mass'][i] 
@@ -1053,17 +1060,17 @@ def provider_life(table_names,life_list_of_tables):
     life_mes_teff_st=cat['main_id','mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff','teff_st_value')
     life_mes_teff_st['teff_st_qual']=['C' for i in range(len(life_mes_teff_st))]
-    life_mes_teff_st['teff_st_ref']=['LIFE' for i in range(len(life_mes_teff_st))]
+    life_mes_teff_st['teff_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
     
     life_mes_radius_st=cat['main_id','mod_R']
     life_mes_radius_st.rename_column('mod_R','radius_st_value')
     life_mes_radius_st['radius_st_qual']=['C' for i in range(len(life_mes_radius_st))]
-    life_mes_radius_st['radius_st_ref']=['LIFE' for i in range(len(life_mes_radius_st))]
+    life_mes_radius_st['radius_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
     
     life_mes_mass_st=cat['main_id','mod_M']
     life_mes_mass_st.rename_column('mod_M','mass_st_value')
     life_mes_mass_st['mass_st_qual']=['C' for i in range(len(life_mes_mass_st))]
-    life_mes_mass_st['mass_st_ref']=['LIFE' for i in range(len(life_mes_mass_st))]
+    life_mes_mass_st['mass_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
     
     #specifying stars cocerning multiplicity
     #main sequence simbad object type: MS*, MS? -> luminocity class
@@ -1102,6 +1109,7 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     gaia_provider['provider_name']=['Gaia']
     gaia_provider['provider_url']=["https://gea.esac.esa.int/tap-server/tap"]
     gaia_provider['provider_bibcode']=['2016A&A...595A...1G']
+    gaia_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
     print('Creating ',gaia_provider['provider_name'][0],' tables ...')
     
@@ -1245,6 +1253,7 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_provider['provider_name']=['ORB6']
     orb6_provider['provider_url']=["http://tapvizier.cds.unistra.fr/TAPVizieR/tap"]
     orb6_provider['provider_bibcode']=['https://crf.usno.navy.mil/wds-orb6/']
+    orb6_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
     print('Creating ',orb6_provider['provider_name'][0],' tables ...')
     
