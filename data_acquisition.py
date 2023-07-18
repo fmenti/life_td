@@ -362,6 +362,18 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
         print(colname,'is no masked column')
     return cat
 
+def lowerquality(cat,colname):
+    for i in range(len(cat)):
+        if cat[colname][i]=='A':
+            cat[colname][i]='B'
+        elif cat[colname][i]=='B':
+            cat[colname][i]='C'
+        elif cat[colname][i]=='C':
+            cat[colname][i]='D'
+        elif cat[colname][i]=='D':
+            cat[colname][i]='E'
+    return cat
+
 #-----------------------------provider data ingestion--------------------------
 def provider_simbad(table_names,sim_list_of_tables):
     """
@@ -490,6 +502,12 @@ def provider_simbad(table_names,sim_list_of_tables):
                             sim_mes_dist_st['dist_st_qual'].fill_value
     sim_mes_dist_st['dist_st_qual'][np.where(sim_mes_dist_st['dist_st_qual']==':')]= \
                             sim_mes_dist_st['dist_st_qual'].fill_value
+    #in case simbad does not provide any quality information I assign a quality of C and
+    if len(sim_mes_dist_st['dist_st_qual'][np.where(
+        sim_mes_dist_st['dist_st_qual']!=sim_mes_dist_st['dist_st_qual'].fill_value)])==0:
+        sim_mes_dist_st['dist_st_qual']=['C' for j in range(len(sim_mes_dist_st))]
+        sim_mes_dist_st[sim_mes_dist_st['dist_st_err'].mask.nonzero()[0]]=lowerquality(sim_mes_dist_st[sim_mes_dist_st['dist_st_err'].mask.nonzero()[0]],'dist_st_qual')
+        sim_mes_dist_st[np.where(sim_mes_dist_st['dist_st_prec']<2)]=lowerquality(sim_mes_dist_st[np.where(sim_mes_dist_st['dist_st_prec']<2)],'dist_st_qual')
     sim_mes_dist_st=sim_mes_dist_st['main_id','dist_st_value','dist_st_err',
                                     'dist_st_qual','dist_st_ref']
     
