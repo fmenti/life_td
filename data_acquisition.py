@@ -1,7 +1,7 @@
 """
 Authors Note
 This code was written by Franziska Menti in 2023.
-It creates the tables for the prototype of the LIFE target database.
+It creates the tables for the LIFE target database.
 For more information on LIFE please visit www.life-space-mission.com.
 Beta warning: As a prototype this code will change. In particular
 the addition of more providers, parameters as well as a possible
@@ -15,23 +15,24 @@ The document is structured as follows:
 #-------------------------definition of functions------------------------------
 ###############################################################################
 #general
+#importing libraries
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
 
 #-------------------global helper functions------------------------------------
-def save(cats,paths):
+def save(cats,names):
     """
     This functions saves the tables given as python list in the cats parameter.
-    The saving location is 'data/{path}.xml' where path is given in the paths
+    The saving location is 'data/{name}.xml' where path is given in the paths
     parameter.
     :param cats: Python list of astropy table to be saved.
-    :param paths: Python list of paths to where to save the tables given in
-    	cats.
+    :param names: Python list of strings containing names for saving location
+        of tables in cats.
     """
     #go through all the elements in both lists
-    for cat,path in zip(cats,paths):
+    for cat,path in zip(cats,names):
         #for each column header
         for i in cat.colnames:
             #if the type of the column is object (=adaptable length string)
@@ -47,11 +48,12 @@ def stringtoobject(cat,number=100):
     """
     This function changes from string to object format.
     The later has the advantace of allowing strings of varying length.
-    Without it strings can get truncated.
+    Without it truncation of entries is a risk.
     :param cat: Astropy table.
     :param number: Length of longest string type element in the table.
         Default is 100.
-    :return cat: Astropy table.
+    :return cat: Astropy table with all string columns transformed into
+        object type ones.
     """
     #defining string types as calling them string does not work and instead
     #the type name <U3 is needed for a string of length 3
@@ -67,7 +69,8 @@ def stringtoobject(cat,number=100):
 def load(paths,stringtoobjects=True):
     """
     This function loads the tables saved in XML format at saving locations
-    specified in paths.
+    specified in paths. If stringtoobject is True the function 
+    stringtoobjects is invoked.
     :param paths: Python list of saving locations.
     :return cats: Python list of loaded astropy tables.
     """
@@ -90,10 +93,14 @@ def initialize_database_tables(table_names,list_of_tables):
     This function initializes the database tables with column name and data
     type specified but no actual data in them.
     :return list_of_tables: List of astropy tables in the order sources,
-                objects, ident (identifiers), h_link (relation between
+                objects, provider, ident (identifiers), h_link (relation between
                 objects),star_basic,planet_basic, disk_basic,
-                mes_dist_st (distance measurements) and
-                mes_mass_st (mass measurements).
+                mes_dist_st (stellar distance measurements), mes_mass_pl 
+                (planetary mass measurements), mes_teff_st (stellar 
+                effective temperature measurements), mes_radius_st (stellar
+                radius measurements), mes_mass_st (stellar mass measurements),
+                mes_binary (binarity information) and mes_sep_phys (stellar
+                physical separation between binaries measurement).
     """
     #explanation of abbreviations: id stands for identifier, idref for
     # reference identifier and parameter_source_idref for the identifier in the
@@ -113,7 +120,8 @@ def initialize_database_tables(table_names,list_of_tables):
     
     provider=ap.table.Table(
         #reference,...
-        names=['provider_name','provider_url','provider_bibcode','provider_access'],
+        names=['provider_name','provider_url','provider_bibcode',
+               'provider_access'],
         dtype=[object,object,object,object])
 
     #identifier table
@@ -158,8 +166,8 @@ def initialize_database_tables(table_names,list_of_tables):
                'class_ref',
                'teff_st_value','teff_st_err','teff_st_qual','teff_st_source_idref',
                'teff_st_ref',
-               'radius_st_value','radius_st_err','radius_st_qual','radius_st_source_idref',
-               'radius_st_ref',
+               'radius_st_value','radius_st_err','radius_st_qual',
+               'radius_st_source_idref','radius_st_ref',
                'mass_st_value','mass_st_err','mass_st_qual','mass_st_source_idref',
                'mass_st_ref',
                'binary_flag','binary_qual','binary_source_idref','binary_ref',
@@ -185,8 +193,8 @@ def initialize_database_tables(table_names,list_of_tables):
                object,
                float,float,object,int,#teff
                object,
-               float,float,object,int,#rad
-               object,
+               float,float,object,#rad
+               int,object,
                float,float,object,int,#mass
                object,
                object,object,int,object,#binary
@@ -196,8 +204,8 @@ def initialize_database_tables(table_names,list_of_tables):
     planet_basic=ap.table.Table(
         #object idref, mass value, mass error, mass realtion (min, max, equal),
         #mass quality, source idref of mass parameter, mass reference
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel','mass_pl_qual',
-               'mass_pl_source_idref','mass_pl_ref'],
+        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
+               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
         dtype=[int,float,float,object,object,int,object])
 
     disk_basic=ap.table.Table(
@@ -214,8 +222,8 @@ def initialize_database_tables(table_names,list_of_tables):
                int,object])
 
     mes_mass_pl=ap.table.Table(
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel','mass_pl_qual',
-               'mass_pl_source_idref','mass_pl_ref'],
+        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
+               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
         dtype=[int,float,float,object,object,int,object])
     
     mes_teff_st=ap.table.Table(
@@ -224,8 +232,8 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,int,object])
     
     mes_radius_st=ap.table.Table(
-        names=['object_idref','radius_st_value','radius_st_err','radius_st_qual',
-               'radius_st_source_idref','radius_st_ref'],
+        names=['object_idref','radius_st_value','radius_st_err',
+               'radius_st_qual','radius_st_source_idref','radius_st_ref'],
         dtype=[int,float,float,object,int,object])
     
     mes_mass_st=ap.table.Table(
@@ -234,7 +242,8 @@ def initialize_database_tables(table_names,list_of_tables):
         dtype=[int,float,float,object,int,object])
     
     mes_binary=ap.table.Table(
-        names=['object_idref','binary_flag','binary_qual','binary_source_idref','binary_ref'],
+        names=['object_idref','binary_flag','binary_qual',
+               'binary_source_idref','binary_ref'],
         dtype=[int,object,object,int,object])
     
     mes_sep_phys=ap.table.Table(
@@ -269,7 +278,7 @@ def query(link,query,catalogs=[]):
     """
     Performs a query via TAP on the service given in the link parameter.
     If a list of tables is given in the catalogs parameter,
-    those are uploaded to the service.
+    those are uploaded to the service beforehand.
     :param link: Service access URL.
     :param query: Query to be asked of the external database service in ADQL.
     :param catalogs: List of astropy tables to be uploaded to the service.
@@ -294,10 +303,10 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     """
     This function creates or updates the source table out of the given
     references. The entries are unique and the columns consist out of the
-    reference, provider_name, provider_url and provider_bibcode.
+    reference and provider_name.
     :param cat: Astropy table on which the references should be gathered.
     :param ref_columns: Header of the columns containing reference information.
-    :param provider: List containing name, url and bibcode of provider.
+    :param provider: String for provider name.
     :param old_sources: Previously created reference table.
     :return sources: Astropy table containing references and provider
         information.
@@ -326,14 +335,14 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     """
     Joins main_id from simbad to the column colname. Returns the whole
     table cat but without any rows where no simbad main_id was found.
-    :param cat: Astropy table.
+    :param cat: Astropy table containing column colname.
     :param colname: Column header of the identifiers that should be searched
         in SIMBAD.
     :param name: Column header for the SIMBAD main identifiers, default is
         main_id.
     :param oid: Specifies wether colname is a SIMBAD oid or normal identifier.
-    :return cat: Astropy table with all identifiers that could be found
-        in SIMBAD and column contining ther main identifier.
+    :return cat: Astropy table with all main SIMBAD identifiers that could 
+        be found in column "name".
     """
     #improvement idea to be performed at one point
     # tbd option to match on position instead of main_id or oid
@@ -355,6 +364,17 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     return cat
 
 def nullvalues(cat,colname,nullvalue,verbose=False):
+    """
+    This function transforms all masked entries of the column colname of
+    the table cat into the values given in nullvalue.
+    :param cat: Astropy table containing the column colname.
+    :param colname: String of the name of an astropy table column.
+    :param nullvalue: Value to be placed instead of masked elements.
+    :param verboxe: Bool default False, in case of True prints message
+        if the column is not an astropy masked column.
+    :return cat: Astropy table with masked elements of colname replaced
+        by nullvalue.
+    """
     if type(cat[colname])==ap.table.column.MaskedColumn:
                 cat[colname].fill_value=nullvalue
                 cat[colname]=cat[colname].filled()
@@ -363,6 +383,15 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
     return cat
 
 def lowerquality(cat,colname):
+    """
+    This function lowers the quality (A highest, E lowest) entry of the 
+    in colname specified column of the astropy table cat.
+    :param cat: Astropy table containing the column colname and only 
+        rows that should be altered.
+    :param colname: String of the name of an astropy table column.
+    :return cat: Astropy table with lowered quality entries in the column
+        colname.
+    """
     for i in range(len(cat)):
         if cat[colname][i]=='A':
             cat[colname][i]='B'
@@ -374,14 +403,36 @@ def lowerquality(cat,colname):
             cat[colname][i]='E'
     return cat
 
+def replace_value(cat,column,value,replace_by):
+    """
+    This function replaces the in the parameter value
+    specified entries of the column colname in the table
+    cat with the in replaced_by specified entry.
+    :param cat: Astropy table with column colname.
+    :param column: String designating column in which to replace
+        the entries.
+    :param value: Entry to be replaced.
+    :param replace_by: Entry to be put in place of param value.
+    :return cat: Astropy table with replaced entries.
+    """
+    cat[column][np.where(cat[column]==value)]= \
+            [replace_by for i in range(
+        len(cat[column][np.where(cat[column]==value)]))]
+    return cat
+
 #-----------------------------provider data ingestion--------------------------
 def provider_simbad(table_names,sim_list_of_tables):
     """
     This function obtains the SIMBAD data and arranges it in a way
     easy to ingest into the database.
+    :param table_names: List of strings containing the names for the 
+        output tables.
+    :param sim_list_of_tables: List of same length as table_names containing
+        empty astropy tables.
     :return simbad_list_of_tables: List of astropy tables containing
-        reference data, object data, identifier data, object to object
-        relation data, basic stellar data and distance measurement data.
+        reference data, provider data, object data, identifier data, object to 
+        object relation data, basic stellar data, distance measurement data
+        and binarity data.
     """
     #---------------define provider--------------------------------------------
     sim_provider=ap.table.Table()
@@ -454,6 +505,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     simbad['type']=['None' for i in range(len(simbad))]
     simbad['binary_flag']=['False' for i in range(len(simbad))]
     to_remove_list=[]
+    removed_otypes=[]
     for i in range(len(simbad)):
         #planets
         if "Pl" in simbad['otypes'][i]:
@@ -468,15 +520,15 @@ def provider_simbad(table_names,sim_list_of_tables):
             else:
                 simbad['type'][i]='st'
         else:
-            print('Removed one object because its type was',
-                  simbad['otypes'][i],
-                  'which is neither planet, star nor system.')
+            removed_otypes.append(simbad['otypes'][i])
             #most likely single brown dwarfs
             #storing information for later removal from table called simbad
             to_remove_list.append(i)
     #removing any objects that are neither planet, star or system in type
     if to_remove_list!=[]:
         simbad.remove_rows(to_remove_list)
+        print('removed',len(removed_otypes),' objects that had object types:',
+              list(set(removed_otypes)))
 
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
@@ -498,10 +550,11 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_mes_dist_st['dist_st_err']=np.maximum(sim_mes_dist_st['plus_err'],
                                        -sim_mes_dist_st['minus_err'])
     #change provider given quality null values all to same
-    sim_mes_dist_st['dist_st_qual'][np.where(sim_mes_dist_st['dist_st_qual']=='')]= \
-                            sim_mes_dist_st['dist_st_qual'].fill_value
-    sim_mes_dist_st['dist_st_qual'][np.where(sim_mes_dist_st['dist_st_qual']==':')]= \
-                            sim_mes_dist_st['dist_st_qual'].fill_value
+    sim_mes_dist_st=replace_value(sim_mes_dist_st,'dist_st_qual','',
+                                  sim_mes_dist_st['dist_st_qual'].fill_value)
+    sim_mes_dist_st=replace_value(sim_mes_dist_st,'dist_st_qual',':',
+                                  sim_mes_dist_st['dist_st_qual'].fill_value)
+    
     #in case simbad does not provide any quality information I assign a quality of C and
     if len(sim_mes_dist_st['dist_st_qual'][np.where(
         sim_mes_dist_st['dist_st_qual']!=sim_mes_dist_st['dist_st_qual'].fill_value)])==0:
@@ -513,12 +566,6 @@ def provider_simbad(table_names,sim_list_of_tables):
     
     #--------------creating output table sim_h_link ---------------------------
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
-    # if you want to exclude objects with lower membership probability
-    # use this line instead:
-    # sim_h_link=simbad['main_id','parent_oid','h_link_ref',
-    #                   'membership'][np.where(simbad['membership']>50)]
-    # consequence is that you loose objects with no membership value given (~)
-    # e.g. alf cen system
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
@@ -538,8 +585,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     #--------------------creating helper table sim_stars-----------------------
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
-    stars['plx_qual'][np.where(stars['plx_qual']=='')]= \
-                            stars['plx_qual'].fill_value
+    stars=replace_value(stars,'plx_qual','',stars['plx_qual'].fill_value)
     #initiate some of the ref columns
     stars['mag_i_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
                                     mask=[True for j in range(len(stars))])
@@ -552,12 +598,9 @@ def provider_simbad(table_names,sim_list_of_tables):
     stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]=[
             sim_provider['provider_bibcode'][0] for j in range(len(
             stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
-    stars['plx_ref'][np.where(stars['plx_ref']=='')]=[
-            sim_provider['provider_bibcode'][0] for j in range(len(
-            stars['plx_ref'][np.where(stars['plx_ref']=='')]))]
-    sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]=[
-            sim_provider['provider_bibcode'][0] for j in range(len(
-            sim_h_link['h_link_ref'][np.where(sim_h_link['h_link_ref']=='')]))]
+    stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
+    sim_h_link=replace_value(sim_h_link,'h_link_ref','',
+                             sim_provider['provider_bibcode'][0])
         
     stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
@@ -574,8 +617,9 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_sources=ap.table.Table()
     tables=[sim_provider,stars, sim_h_link, sim_mes_dist_st,sim_ident]
     #define header name of columns containing references data
-    ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref','mag_j_ref','binary_ref'],['h_link_ref'],
-                 ['dist_st_ref'],['id_ref']]
+    ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',
+                    'mag_j_ref','binary_ref'],['h_link_ref'],['dist_st_ref'],
+                    ['id_ref']]
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
     #------------------------creating output table sim_star_basic--------------
@@ -608,9 +652,13 @@ def provider_gk(table_names,gk_list_of_tables):
     """
     This function obtains the disk data and arranges it in a way
     easy to ingest into the database.
+    :param table_names: List of strings containing the names for the 
+        output tables.
+    :param gk_list_of_tables: List of same length as table_names containing
+        empty astropy tables.
     :return gk_list_of_tables: List of astropy tables containing
-        reference data, object data, identifier data, object to object
-        relation data and basic disk data.
+        reference data, provider data, object data, identifier data, object to 
+        object relation data and basic disk data.
     """
     #---------------define provider--------------------------------------------
     gk_provider=ap.table.Table()
@@ -676,8 +724,7 @@ def provider_gk(table_names,gk_list_of_tables):
         #replacing 'None' with 'nan' as the first one is not float convertible
         temp_length=len(gk_disk_basic[column][np.where(
                         gk_disk_basic[column]=='None')])
-        gk_disk_basic[column][np.where(gk_disk_basic[column]=='None')]=[
-                                        'nan' for i in range(temp_length)]
+        gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
         gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
         #though this poses the issue that the float default float fill_value is 1e20
         gk_disk_basic[column].filled()
@@ -702,9 +749,16 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     ingest into the database. Currently the exomercat server is not online.
     A temporary method to ingest old exomercat data was implemented and can be
     accessed by setting temp=True as argument.
+    :param table_names: List of strings containing the names for the 
+        output tables.
+    :param exo_list_of_tables: List of same length as table_names containing
+        empty astropy tables.
+    :param temp: Bool with default value True determining if the exomercat
+        data gets queried (False) or loaded from an old version (True).
     :return exo_list_of_tables: List of astropy table containing
         reference data, object data, identifier data, object to object
-        relation data, basic planetary data and mass measurement data.
+        relation data, basic planetary data and planetary mass measurement 
+        data.
     """
     #---------------define provider--------------------------------------------
     exo_provider=ap.table.Table()
@@ -759,11 +813,11 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
 
     def sort_out_20pc(cat,colname):
         """
-        This Function sorts out objects not within 20pc. The value comes from
-        the LIFE database distance cut.
-        :param cat: Input table to be matched against sim_objects table.
+        This Function sorts out objects not within the provider_simbad
+        distance cut (previously 20pc hence the name). 
+        :param cat: Astropy table to be matched against sim_objects table.
         :param colname: Name of the column to use for the match.
-        :return cat: Table like cat without any objects not found in sim_objects
+        :return cat: Table like cat without any objects not found in sim_objects.
         """
         [sim_objects]=load(['sim_objects'])
         sim_objects.rename_column('main_id','temp')
@@ -796,9 +850,9 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
                                exomercat['planet_main_id'][i]])
     exo_ident['id_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_ident))]
     # TBD: I have a wrong double object
-    # print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
-    # in exo_ident because there are different amount of white spaces between
-    # catalog and number.
+    print("""TBD: I have a wrong double object because of different amount of white
+          spaces between catalog and number""")
+    print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
 
     #-------------exo_objects---------------
     # tbd at one point: I think I want to add hosts to object
@@ -877,9 +931,16 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
 def provider_life(table_names,life_list_of_tables):
     """
     This function loads the SIMBAD data obtained by the function provider_simbad
-    and manipulates it.
+    and postprocesses it to provide more useful information. It uses a model
+    from Eric E. Mamajek to predict temperature, mass and radius from the simbad 
+    spectral type data.
+    :param table_names: List of strings containing the names for the 
+        output tables.
+    :param life_list_of_tables: List of same length as table_names containing
+        empty astropy tables.
     :return life_list_of_tables: List of astropy table containing
-        reference data and basic stellar data.
+        reference data, provider data, basic stellar data, stellar effective
+        temperature data, stellar radius data and stellar mass data.
     """
     #---------------define provider--------------------------------------------
     life_provider=ap.table.Table()
@@ -918,37 +979,53 @@ def provider_life(table_names,life_list_of_tables):
                                    'coo_gal_ref','sptype_string']
     
     def sptype_string_to_class(temp,ref):
+        """
+        This function extracts the temperature class, temperature class number
+        and luminocity class information from the spectral type string (e.g. 
+        M5V to M, 5 and V). It stores that information in the for this purpose
+        generated new columns. Only objects of temperature class O, B, A, F,
+        G, K, and M are processed. Only objects of luminocity class IV, V and VI
+        are processed.
+        :param temp: Astropy table containing spectral type information in
+            the column sptype_string.
+        :param ref: String designating origin of data.
+        :return temp: Astropy table like temp with additional columns class_temp,
+            class_temp_nr, class_lum and class_ref.
+        """
         temp['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         for i in range(len(temp)):
+            #sorting out objects like M5V+K7V
+            if (len(temp['sptype_string'][i].split('+'))==1 and
             #sorting out entries like '', DA2.9, T1V
-            if len(temp['sptype_string'][i])>0 and temp['sptype_string'][i][0] in ['O','B','A','F','G','K','M']:
-                    temp['class_temp'][i]=temp['sptype_string'][i][0]
-                    temp['class_ref'][i]=ref
-                    #sorting out objects like DA2.9
-                    if len(temp['sptype_string'][i])>1 and temp['sptype_string'][i][1] in ['0','1','2','3','4','5','6','7','8','9']:
-                        temp['class_temp_nr'][i]=temp['sptype_string'][i][1]
-                        #distinguishing between objects like K5V and K5.5V
-                        if len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2]=='.':
-                            temp['class_temp_nr'][i]=temp['sptype_string'][i][1:4]
-                            if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][4]
-                                if len(temp['sptype_string'][i])>5 and temp['sptype_string'][i][5] in ['I','V']:
-                                    temp['class_lum'][i]=temp['sptype_string'][i][4:6]
-                                    if len(temp['sptype_string'][i])>6 and temp['sptype_string'][i][6] in ['I','V']:
-                                        temp['class_lum'][i]=temp['sptype_string'][i][4:7]
-                            else:
-                                temp['class_lum'][i]='?'
-                        elif len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2] in ['I','V']:
-                            temp['class_lum'][i]=temp['sptype_string'][i][2]
-                            if len(temp['sptype_string'][i])>3 and temp['sptype_string'][i][3] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][2:4]
-                                if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                                    temp['class_lum'][i]=temp['sptype_string'][i][2:5]
+                    len(temp['sptype_string'][i])>0 and 
+                    temp['sptype_string'][i][0] in ['O','B','A','F','G','K','M']):
+                temp['class_temp'][i]=temp['sptype_string'][i][0]
+                temp['class_ref'][i]=ref
+                #sorting out objects like DA2.9
+                if len(temp['sptype_string'][i])>1 and temp['sptype_string'][i][1] in ['0','1','2','3','4','5','6','7','8','9']:
+                    temp['class_temp_nr'][i]=temp['sptype_string'][i][1]
+                    #distinguishing between objects like K5V and K5.5V
+                    if len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2]=='.':
+                        temp['class_temp_nr'][i]=temp['sptype_string'][i][1:4]
+                        if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
+                            temp['class_lum'][i]=temp['sptype_string'][i][4]
+                            if len(temp['sptype_string'][i])>5 and temp['sptype_string'][i][5] in ['I','V']:
+                                temp['class_lum'][i]=temp['sptype_string'][i][4:6]
+                                if len(temp['sptype_string'][i])>6 and temp['sptype_string'][i][6] in ['I','V']:
+                                    temp['class_lum'][i]=temp['sptype_string'][i][4:7]
                         else:
                             temp['class_lum'][i]='?'
+                    elif len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2] in ['I','V']:
+                        temp['class_lum'][i]=temp['sptype_string'][i][2]
+                        if len(temp['sptype_string'][i])>3 and temp['sptype_string'][i][3] in ['I','V']:
+                            temp['class_lum'][i]=temp['sptype_string'][i][2:4]
+                            if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
+                                temp['class_lum'][i]=temp['sptype_string'][i][2:5]
+                    else:
+                        temp['class_lum'][i]='?'
             else:
                 temp['class_temp'][i]='?'
                 temp['class_temp_nr'][i]='?'
@@ -960,11 +1037,6 @@ def provider_life(table_names,life_list_of_tables):
     #-----------measurement tables -----------------
     #applying model from E. E. Mamajek on SIMBAD spectral type
     
-    def replace_value(cat,column,value,replace_by):
-        cat[column][np.where(cat[column]==value)]= \
-                [replace_by for i in range(
-            len(cat[column][np.where(cat[column]==value)]))]
-        return cat
              
     def realspectype(cat):
         """
@@ -1678,8 +1750,8 @@ def building(providers,table_names,list_of_tables):
              ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
     for i in range(len(tables)):
         for col in columns[i]:
-            tables[i][col][np.where(tables[i][col]=='N')]='?'
-            tables[i][col][np.where(tables[i][col]=='N/A')]='?'
+            tables[i]=replace_value(tables[i],col,'N','?')
+            tables[i]=replace_value(tables[i],col,'N/A','?')
     
     save(cat,table_names)
     return cat
@@ -1694,7 +1766,7 @@ table_names=['sources','objects','provider','ident','h_link','star_basic',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=5#25.
+distance_cut_in_pc=25#25.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
