@@ -1,4 +1,4 @@
-<resource schema="life">
+<resource schema="life_td" resdir=".">
     <meta name="creationDate">2021-12-03T09:33:44Z</meta>
 
 <!-- Adjust the following text when you'd like to tone the beta
@@ -145,6 +145,11 @@ tables may change at any time without prior warning.
             ucd="meta.ref"
             tablehead="provider_bibcode"
             description="Reference, bibcode if possible."
+            verbLevel="1"/>
+        <column name="provider_access" type="text"
+            ucd="time"
+            tablehead="provider_access"
+            description="Date of access to provider."
             verbLevel="1"/>
     </table>
 
@@ -335,6 +340,29 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+        <column name="class_temp" type="text"
+            ucd="src.spType" 
+            tablehead="temp class"
+            description="Object spectral type MK temperature class."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="class_temp_nr" type="text"
+            ucd="src.spType" 
+            tablehead="temp class nr"
+            description="Object spectral type MK temperature class number."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="class_lum" type="text"
+            ucd="src.spType" 
+            tablehead="lum class"
+            description="Object spectral type MK luminosity class."
+            verbLevel="1" displayHint="sf=2"/>
+        <column name="class_source_idref" type="integer"
+            ucd="meta.ref;src.spType"
+            tablehead="class_source_idref"
+            description="Identifier of the source of the
+                spectral type MK classification parameter."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="teff_st_value" type="double precision"
             ucd="phys.temperature.effective" unit="K"
             tablehead="teff_st"
@@ -488,6 +516,10 @@ tables may change at any time without prior warning.
                 <map key="sptype_err" nullExpr="1e+20" />
                 <map key="sptype_qual" nullExpr="'?'" />
                 <map key="sptype_source_idref" nullExpr="999999" />
+                <map key="class_temp" nullExpr="'?'" />
+                <map key="class_temp_nr" nullExpr="'?'" />
+                <map key="class_lum" nullExpr="'?'" />
+                <map key="class_source_idref" nullExpr="999999" />
                 <map key="teff_st_value" nullExpr="1e+20" />
                 <map key="teff_st_err" nullExpr="1e+20" />
                 <map key="teff_st_qual" nullExpr="'?'" />
@@ -782,7 +814,10 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="mes_dist_st">
             <rowmaker idmaps="*">
+                <map key="dist_st_value" nullExpr="1e+20" />
+                <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
+                <map key="dist_st_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
     </data>
