@@ -765,63 +765,6 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
-    <table id="mes_dist_st" onDisk="True" adql="True">
-        <meta name="title">Distance measurement table</meta>
-        <meta name="description">
-        A list of the stellar distance measurements.
-
-        \betawarning
-        </meta>
-        <primary>object_idref,dist_st_value,dist_st_err,
-            dist_st_source_idref
-        </primary>
-
-        <column name="object_idref" type="integer"
-            ucd="meta.id"
-            tablehead="object_id"
-            description="Object key (unstable, use only for joining to the
-            other tables)."
-            required="True"
-            verbLevel="1"/>
-        <column name="dist_st_value" type="double precision"
-            ucd="pos.distance" unit="AU"
-            tablehead="dist_st_value"
-            description="Object distance."
-            required="True"
-            verbLevel="1"/>
-        <column name="dist_st_err" type="double precision"
-            ucd="stat.error;pos.distance" unit="AU"
-            tablehead="dist_err"
-            description="Distance error."
-            verbLevel="1"/>
-        <column name="dist_st_qual" type="text"
-            ucd="meta.code.qual;pos.distance"
-            tablehead="dist_qual"
-            description="Distance quality (A:best, E:worst)"
-            verbLevel="1"/>
-        <column name="dist_st_source_idref" type="integer"
-            ucd="meta.ref"
-            tablehead="mes_dist_source_idref"
-            description="Identifier of the source of the
-                distance parameter."
-            required="True"
-            verbLevel="1"/>
-    </table>
-
-    <data id="import_mes_dist_st">
-        <sources>data/mes_dist_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
-        <voTableGrammar/>
-        <make table="mes_dist_st">
-            <rowmaker idmaps="*">
-                <map key="dist_st_value" nullExpr="1e+20" />
-                <map key="dist_st_err" nullExpr="1e+20" />
-                <map key="dist_st_qual" nullExpr="'?'" />
-                <map key="dist_st_source_idref" nullExpr="999999" />
-            </rowmaker>
-        </make>
-    </data>
-
     <table id="mes_mass_pl" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
@@ -829,7 +772,7 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,mass_pl_value,mass_pl_source_idref</primary>
+        <primary>object_idref,mass_pl_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -889,7 +832,7 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,teff_st_value,teff_st_source_idref</primary>
+        <primary>object_idref,teff_st_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -947,7 +890,7 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,radius_st_value,radius_st_source_idref</primary>
+        <primary>object_idref,radius_st_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -1005,7 +948,7 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,mass_st_value,mass_st_source_idref</primary>
+        <primary>object_idref,mass_st_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -1115,7 +1058,7 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,sep_phys_value,sep_phys_source_idref</primary>
+        <primary>object_idref,sep_phys_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -1154,7 +1097,7 @@ tables may change at any time without prior warning.
 
     <data id="tables" auto="False">
         <LOOP listItems="source object star_basic planet_basic disk_basic
-            h_link ident mes_dist_st mes_mass_pl">
+            h_link ident mes_mass_pl">
             <events>
                 <make table="\item"/>
             </events>
@@ -1287,11 +1230,11 @@ tables may change at any time without prior warning.
             In LIFE, we have individual tables for all kinds of parameters
             where multiple measurements for the same object are available.
             They are kept in the tables starting with ``mes_`` e.g.
-            :taptable:`life.mes_dist_st`:
+            :taptable:`life.mes_teff_st`:
 
             .. tapquery::
                 SELECT *
-                FROM life.mes_dist_st
+                FROM life.mes_teff_st
                 JOIN life.ident USING(object_idref)
                 WHERE id = 'GJ    10'
                 </meta>
