@@ -211,7 +211,7 @@ def initialize_database_tables(table_names,list_of_tables):
         #object idref, black body radius value, bbr error,
         #bbr relation (min, max, equal), bbr quality,...
         names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
-               'rad_source_iderf','rad_ref'],
+               'rad_source_idref','rad_ref'],
         dtype=[int,float,float,object,object,int,object])
 
     mes_mass_pl=ap.table.Table(
@@ -423,8 +423,7 @@ def provider_simbad(table_names,sim_list_of_tables):
         empty astropy tables.
     :return simbad_list_of_tables: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
-        object relation data, basic stellar data, distance measurement data
-        and binarity data.
+        object relation data, basic stellar data and binarity data.
     """
     #---------------define provider--------------------------------------------
     sim_provider=ap.table.Table()
@@ -568,6 +567,7 @@ def provider_simbad(table_names,sim_list_of_tables):
             sim_provider['provider_bibcode'][0] for j in range(len(
             stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
+    stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
     sim_h_link=replace_value(sim_h_link,'h_link_ref','',
                              sim_provider['provider_bibcode'][0])
         
@@ -690,8 +690,6 @@ def provider_gk(table_names,gk_list_of_tables):
     #converting from string to float
     for column in ['rdisk_bb','e_rdisk_bb']:
         #replacing 'None' with 'nan' as the first one is not float convertible
-        temp_length=len(gk_disk_basic[column][np.where(
-                        gk_disk_basic[column]=='None')])
         gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
         gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
         #though this poses the issue that the float default float fill_value is 1e20
@@ -699,7 +697,7 @@ def provider_gk(table_names,gk_list_of_tables):
         gk_disk_basic[column]=gk_disk_basic[column].astype(float)
     gk_disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
                                  ['main_id','rad_value','rad_err','rad_ref'])
-    gk_disk_basic=gk_disk_basic[np.where(gk_disk_basic['rad_value']!='nan')]
+    gk_disk_basic=gk_disk_basic[np.where(np.isfinite(gk_disk_basic['rad_value']))]
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': gk_list_of_tables[i]=gk_sources
@@ -853,6 +851,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
             else:
                 exomercat['mass_pl_rel'][i]='<'
                 exomercat['mass_pl_err'][i]=exomercat['mass_min'][i]
+                #not correct yet. you can have a maximum error on a lower limit value
         else:
             if type(exomercat['mass_min'][i])==np.ma.core.MaskedConstant or \
                   exomercat['mass_min'][i]==np.inf:
@@ -926,6 +925,7 @@ def provider_life(table_names,life_list_of_tables):
     life_star_basic['coo_gal_l']=gal_coord.l.deg*ap.units.degree
     life_star_basic['coo_gal_b']=gal_coord.b.deg*ap.units.degree
     life_star_basic['dist_st_value']=1000./life_star_basic['plx_value'] 
+    life_star_basic['dist_st_value']=np.round(life_star_basic['dist_st_value'],2)
     #null value treatment: plx_value has masked entries therefore distance_values too
     #ref:
     life_star_basic['dist_st_ref']=ap.table.MaskedColumn(dtype=object,length=len(life_star_basic),
@@ -1167,8 +1167,8 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     A temporary method to ingest old gaia data was implemented and can be
     accessed by setting temp=True as argument.
     :return gaia_list_of_tables: List of astropy tables containing
-        reference data, object data and
-        basic stellar data.
+        reference data, provider data, object data, identifier data,  
+        stellar effective temperature, radius, mass and binarity data.
     """
     #---------------define provider--------------------------------------------
     gaia_provider=ap.table.Table()
@@ -1314,7 +1314,17 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     return gaia_list_of_tables
 
 def provider_orb6(table_names,orb6_list_of_tables):
-    
+    """
+    This function obtains the orb6 data and arranges it in a way
+    easy to ingest into the database.
+    :param table_names: List of strings containing the names for the 
+        output tables.
+    :param orb6_list_of_tables: List of same length as table_names containing
+        empty astropy tables.
+    :return orb6_list_of_tables: List of astropy table containing
+        reference data, provider data, object data, identifier data,  
+        binarity data and physical separation between binaries data.
+    """
     orb6_provider=ap.table.Table()
     orb6_provider['provider_name']=['ORB6']
     orb6_provider['provider_url']=["http://tapvizier.cds.unistra.fr/TAPVizieR/tap"]
@@ -1371,6 +1381,7 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_mes_sep_phys=orb6_mes_binary['main_id','sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref']
     orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
+    orb6_mes_sep_phys=orb6_mes_sep_phys[np.where(orb6_mes_sep_phys['sep_phys_value'].mask==False)]
     orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]]=lowerquality(
             orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]],'sep_phys_qual')
     
@@ -1547,7 +1558,7 @@ def building(providers,table_names,list_of_tables):
     print(f'Building {table_names[2]} table ...')
     
     paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','class'],
-           ['mass_pl'],['rad'],['dist_st'],['mass_pl'],['teff_st'],
+           ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
     #merging the different provider tables
@@ -1739,7 +1750,7 @@ table_names=['sources','objects','provider','ident','h_link','star_basic',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=5#25.
+distance_cut_in_pc=25#25.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
