@@ -117,7 +117,9 @@ tables may change at any time without prior warning.
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
         <make table="object">
-             <rowmaker idmaps="*"/>
+             <rowmaker idmaps="*">
+                <map key="type" nullExpr="'0.'"/>
+             </rowmaker>
         </make>
     </data>
     
