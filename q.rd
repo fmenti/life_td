@@ -117,7 +117,9 @@ tables may change at any time without prior warning.
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
         <make table="object">
-             <rowmaker idmaps="*"/>
+             <rowmaker idmaps="*">
+                <map key="type" nullExpr="'0.'"/>
+             </rowmaker>
         </make>
     </data>
     
@@ -1158,11 +1160,11 @@ tables may change at any time without prior warning.
                 dist_st_value as dist,
                 mass_pl_value as planet_mass,
                 mass_pl_err as planet_mass_error
-            from life.star_basic as s
-                join life.h_link as slink on (parent_object_idref=s.object_idref)
-                join life.planet_basic as p on (child_object_idref=p.object_idref)
-                join life.object as star_ob on (s.object_idref=star_ob.object_id)
-                join life.object as planet_ob on (p.object_idref=planet_ob.object_id))q)
+            from life_td.star_basic as s
+                join life_td.h_link as slink on (parent_object_idref=s.object_idref)
+                join life_td.planet_basic as p on (child_object_idref=p.object_idref)
+                join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
+                join life_td.object as planet_ob on (p.object_idref=planet_ob.object_id))q)
 
         </viewStatement>
     </table>
@@ -1172,7 +1174,7 @@ tables may change at any time without prior warning.
     </data>
 
     <service id="cone" allowed="form,scs.xml">
-        <meta name="shortName">lifetd cone</meta>
+        <meta name="shortName">life_td cone</meta>
         <meta>
             testQuery.ra: 312.27
             testQuery.dec: 37.47
@@ -1193,50 +1195,50 @@ tables may change at any time without prior warning.
         <meta name="_example" title="Filter objects by type">
             In LIFE, we have a single table for all kinds of objects
             (planets, stars, disks, multi-star systems).  They are kept in
-            :taptable:`life.object`:
+            :taptable:`life_td.object`:
 
             .. tapquery::
-                SELECT TOP 10 object_id, main_id FROM life.object
+                SELECT TOP 10 object_id, main_id FROM life_td.object
                 WHERE type='st'
         </meta>
         <meta name="_example" title="All children of an object">
             Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
             star).  The parent/child relationships are given in the
-            :taptable:`life.h_link` table which you can join to all other
+            :taptable:`life_td.h_link` table which you can join to all other
             tables that have an object_idref column.  For instance,
             to find (direct) children of a star, you would run:
 
             .. tapquery::
                 SELECT main_id as Child_main_id, object_id as child_object_id
-                FROM life.h_link
-                JOIN life.ident as p on p.object_idref=parent_object_idref
-                JOIN life.object on object_id=child_object_idref
+                FROM life_td.h_link
+                JOIN life_td.ident as p on p.object_idref=parent_object_idref
+                JOIN life_td.object on object_id=child_object_idref
                 WHERE p.id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All parents of an object">
             Objects in LIFE are in a hierarchy (e.g., a planet belongs to a
             star).  The parent/child relationships are given in the
-            :taptable:`life.h_link` table which you can join to all other
+            :taptable:`life_td.h_link` table which you can join to all other
             tables that have an object_idref column.  For instance,
             to find (direct) parents of a star, you would run:
 
             .. tapquery::
                 SELECT main_id as parent_main_id, object_id as parent_object_id
-                FROM life.h_link
-                JOIN life.ident as c on c.object_idref=child_object_idref
-                JOIN life.object on object_id=parent_object_idref
+                FROM life_td.h_link
+                JOIN life_td.ident as c on c.object_idref=child_object_idref
+                JOIN life_td.object on object_id=parent_object_idref
                 WHERE c.id =  '* alf Cen A'
                 </meta>
         <meta name="_example" title="All specific measurements of an object">
             In LIFE, we have individual tables for all kinds of parameters
             where multiple measurements for the same object are available.
             They are kept in the tables starting with ``mes_`` e.g.
-            :taptable:`life.mes_teff_st`:
+            :taptable:`life_td.mes_teff_st`:
 
             .. tapquery::
                 SELECT *
-                FROM life.mes_teff_st
-                JOIN life.ident USING(object_idref)
+                FROM life_td.mes_teff_st
+                JOIN life_td.ident USING(object_idref)
                 WHERE id = 'GJ    10'
                 </meta>
         <meta name="_example" title="All basic stellar data from an object name">
@@ -1247,8 +1249,8 @@ tables may change at any time without prior warning.
 
             .. tapquery::
                 SELECT  *
-                FROM life.star_basic
-                JOIN life.ident USING(object_idref)
+                FROM life_td.star_basic
+                JOIN life_td.ident USING(object_idref)
                 WHERE id = '* alf Cen'
                 </meta>
         <meta name="_example" title="All basic disk data from host name">
@@ -1259,10 +1261,10 @@ tables may change at any time without prior warning.
 
             .. tapquery::
                 SELECT main_id disk_main_id, object_id as disk_object_id, db.*
-                FROM life.h_link
-                JOIN life.disk_basic as db on db.object_idref=child_object_idref
-                JOIN life.ident as p on p.object_idref=parent_object_idref
-                JOIN life.object on object_id=child_object_idref
+                FROM life_td.h_link
+                JOIN life_td.disk_basic as db on db.object_idref=child_object_idref
+                JOIN life_td.ident as p on p.object_idref=parent_object_idref
+                JOIN life_td.object on object_id=child_object_idref
                 WHERE p.id = '* bet Cas' and type='di'
                 </meta>
         <meta name="_example" title="Missing reliable measurements">
@@ -1274,8 +1276,8 @@ tables may change at any time without prior warning.
             .. tapquery::
                 SELECT star_ob.main_id as star_name, plx_value, plx_err,
                 plx_qual, plx_source_idref
-                FROM life.star_basic as s
-                JOIN life.object as star_ob on
+                FROM life_td.star_basic as s
+                JOIN life_td.object as star_ob on
                 (s.object_idref=star_ob.object_id)
                 WHERE plx_value is Null or plx_qual in ('D','E') or
                 plx_qual is Null
@@ -1299,10 +1301,10 @@ tables may change at any time without prior warning.
         <regTest title="LIFE tables appear to be in place.">
             <url parSet="TAP" QUERY="
 SELECT * FROM
-  life.planet_basic AS p
-  JOIN life.object ON (p.object_idref=object_id)
-  JOIN life.h_link ON (child_object_idref=object_id)
-  JOIN life.star_basic AS s ON (parent_object_idref=s.object_idref)
+  life_td.planet_basic AS p
+  JOIN life_td.object ON (p.object_idref=object_id)
+  JOIN life_td.h_link ON (child_object_idref=object_id)
+  JOIN life_td.star_basic AS s ON (parent_object_idref=s.object_idref)
 WHERE
   main_id='*  14 Her b'
             ">/tap/sync</url>
