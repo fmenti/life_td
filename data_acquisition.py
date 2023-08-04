@@ -1727,8 +1727,8 @@ def building(providers,table_names,list_of_tables):
             cat[table_names.index('mes_teff_st')],cat[table_names.index('mes_radius_st')],
             cat[table_names.index('mes_mass_st')],cat[table_names.index('mes_binary')]]
     columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
-              'sep_phys_qual','teff_st_qual','radius_st_qual',
-              'mass_st_qual','binary_qual'],
+              'sep_phys_qual','teff_st_qual','radius_st_qual','binary_flag',
+              'binary_qual','mass_st_qual','sptype_qual','class_temp','class_temp_nr'],
              ['mass_pl_qual','mass_pl_rel'],
              ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
              ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
