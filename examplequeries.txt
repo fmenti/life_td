@@ -1,5 +1,13 @@
 http://localhost:8080/tap
 
+SELECT sb.coo_ra, sb.coo_dec, sb.plx_value, sb.dist_st_value, o.main_id, sb.sptype_string, sb.coo_gal_l, 
+sb.coo_gal_b, sb.teff_st_value, sb.mass_st_value, sb.radius_st_value, sb.sep_phys_value, sb.binary_flag,
+sb.mag_i_value, sb.mag_j_value
+FROM life_td.star_basic AS sb
+JOIN life_td.objects AS o ON sb.object_idref=o.object_id
+WHERE o.type = 'st' AND sb.plx_value > 33. AND sb.class_lum IS NOT NULL
+
+
 SELECT TOP 10 object_id, coo_ra, coo_dec, plx_value
 FROM life.star_basic
 JOIN life.object ON object_id=object_idref
