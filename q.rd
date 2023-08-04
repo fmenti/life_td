@@ -535,7 +535,7 @@ tables may change at any time without prior warning.
                 <map key="mass_st_err" nullExpr="1e+20" />
                 <map key="mass_st_qual" nullExpr="'?'" />
                 <map key="mass_st_source_idref" nullExpr="999999" />
-                <map key="binary_flag" nullExpr="'None'" />
+                <map key="binary_flag" nullExpr="'?'" />
                 <map key="binary_qual" nullExpr="'?'" />
                 <map key="binary_source_idref" nullExpr="999999" />
                 <map key="sep_phys_value" nullExpr="1e+20" />
