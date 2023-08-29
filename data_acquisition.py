@@ -303,24 +303,27 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     :return sources: Astropy table containing references and provider
         information.
     """
-    cat_sources=ap.table.Table() #table initialization
-    cat_reflist=[] #initialization of list to store reference information
-    #for all the columns given add reference information to the cat_reflist
-    for k in range(len(ref_columns)):
-        #In case the column has elements that are masked skip those
-        if type(cat[ref_columns[k]])==ap.table.column.MaskedColumn:
-            cat_reflist.extend(
-            	cat[ref_columns[k]][np.where(cat[ref_columns[k]].mask==False)])
-        else:
-            cat_reflist.extend(cat[ref_columns[k]])
-    #add list of collected references to the table and call the column ref
-    cat_sources['ref']=cat_reflist
-    cat_sources=ap.table.unique(cat_sources)#keeps only unique values
-    #attaches service information
-    cat_sources['provider_name']=[provider for j in range(len(cat_sources))]
-    #combine old and new sources into one table
-    sources=ap.table.vstack([old_sources,cat_sources])
-    sources=ap.table.unique(sources) #remove double entries
+    if len(cat)>0:
+        cat_sources=ap.table.Table() #table initialization
+        cat_reflist=[] #initialization of list to store reference information
+        #for all the columns given add reference information to the cat_reflist
+        for k in range(len(ref_columns)):
+            #In case the column has elements that are masked skip those
+            if type(cat[ref_columns[k]])==ap.table.column.MaskedColumn:
+                cat_reflist.extend(
+                    cat[ref_columns[k]][np.where(cat[ref_columns[k]].mask==False)])
+            else:
+                cat_reflist.extend(cat[ref_columns[k]])
+        #add list of collected references to the table and call the column ref
+        cat_sources['ref']=cat_reflist
+        cat_sources=ap.table.unique(cat_sources)#keeps only unique values
+        #attaches service information
+        cat_sources['provider_name']=[provider for j in range(len(cat_sources))]
+        #combine old and new sources into one table
+        sources=ap.table.vstack([old_sources,cat_sources])
+        sources=ap.table.unique(sources) #remove double entries
+    else:
+        sources=old_sources
     return sources
 
 def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
@@ -517,9 +520,11 @@ def provider_simbad(table_names,sim_list_of_tables):
             to_remove_list.append(i)
     #removing any objects that are neither planet, star or system in type
     if to_remove_list!=[]:
-        simbad.remove_rows(to_remove_list)
-        print('removed',len(removed_otypes),' objects that had object types:',
+        print('removing',len(removed_otypes),' objects that had object types:',
               list(set(removed_otypes)))
+        print('example object of them:', simbad['main_id'][to_remove_list[0]])
+        simbad.remove_rows(to_remove_list)
+        
 
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
@@ -542,15 +547,72 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_h_link['membership']=sim_h_link['membership'].astype(int)
     sim_h_link=nullvalues(sim_h_link,'membership',999999)
 
+                
+    #--------------------creating helper table sim_stars-----------------------
+    #updating multiplicity object type
+    #no children and sptype does not contain + -> type needs to be st
+    def stars_in_multiple_system(cat,sim_h_link,all_objects):
+        """
+        This function assignes object type 'st' to those objects that are in
+        multiple systems but don't have any stellar child object.
+        :param cat: Astropy table alias containing 
+        :param sim_h_link: Astropy table copy containing columns main_id,
+            type and sptype_string.
+        :param all_objects: Astropy table copy containing columns 
+            parent_main_id and h_link_ref. Rows are all objects with child
+            objects.
+        :return cat: Astropy table alias like param cat with desired types
+            adapted.
+        """
+        #all type sy objects: cat['main_id','type']
+        #this should work if alias works well
+        #need parent_main_id for sim_h_link here. but setdiff does not support that.
+        parents=sim_h_link['parent_main_id','h_link_ref'][:]
+        parents.rename_column('parent_main_id','main_id')
+        sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'],
+                                     parents,keys=['main_id'])
+        #that don t have children: sy_wo_child['main_id','type']
+        #list of those with children
+        sy_w_child=ap.table.setdiff(sy_wo_child,parents,keys=['main_id'])
+        #list of those with children joined with type of child
+        all_objects.rename_column('type','child_type')
+        sy_w_child=ap.table.join(sy_w_child,all_objects,keys=['main_id'])
+        #remove all where type child is not pl
+        sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
+        if len(sy_w_child_pl)==0:
+            #no systems with child of type planet
+            sy_wo_child_st=sy_wo_child
+        else:
+            #join with list of sy that dont habe children
+            sy_wo_child_st=ap.table.join(sy_wo_child,sy_w_child_pl)
+            sy_wo_child_st.remove_column('child_type')
+        #systems that don t have children except planets: sy_wo_child_st
+        #no + in sptype_string
+        temp=[len(i.split('+'))==1 for i in sy_wo_child_st['sptype_string']]
+        #have it as an array of bools 
+        temp=np.array(temp)
+        #have it as lisit of indices 
+        temp=list(np.where(temp==True)[0])
+        single_sptype=sy_wo_child_st[:][temp]
+        #and no + in spectral type: single_sptype['main_id','type']      
+        cat['type'][np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]=['st' for j in range(len(
+                    cat[np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]))]        
+        return cat
+    #all objects in stars table: stars['main_id','type']
+    stars[np.where(stars['type']=='sy')]=stars_in_multiple_system(
+            stars[np.where(stars['type']=='sy')],sim_h_link[:],simbad['main_id','type'][:])    
+    
     # binary_flag 'True' for all stars with parents
     # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'
     #could do this via two for loops but maybe easier way? maybe join. 
-    for i_star in range(len(stars['main_id'])):
-        for i_child in range(len(sim_h_link['main_id'])):
-            if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
-                stars['binary_flag'][i_star]=='True'
+    #for i_star in range(len(stars['main_id'])):
+     #   for i_child in range(len(sim_h_link['main_id'])):
+      #      if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
+       #         stars['binary_flag'][i_star]=='True'
                 
-    #--------------------creating helper table sim_stars-----------------------
+    stars['binary_flag'][np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]=['True' for j in range(len(
+                    stars[np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
+                
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
     stars=replace_value(stars,'plx_qual','',stars['plx_qual'].fill_value)
@@ -573,6 +635,7 @@ def provider_simbad(table_names,sim_list_of_tables):
         
     stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
+
     #-----------------creating output table sim_planets------------------------
     temp_sim_planets=simbad['main_id','ids',
                             'type'][np.where(simbad['type']=='pl')]
@@ -582,12 +645,13 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_objects=ap.table.vstack([sim_planets['main_id','ids','type'],
                              stars['main_id','ids','type']])
     sim_objects['ids']=sim_objects['ids'].astype(object)
+    print('tbd: add identifier simbad main_id without leading * and whitespaces')
     #--------------creating output table sim_sources --------------------------
     sim_sources=ap.table.Table()
     tables=[sim_provider,stars, sim_h_link,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',
-                    'mag_j_ref','binary_ref'],['h_link_ref'],
+                    'mag_j_ref','binary_ref','sptype_ref'],['h_link_ref'],
                     ['id_ref']]
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
@@ -709,7 +773,7 @@ def provider_gk(table_names,gk_list_of_tables):
         save([gk_list_of_tables[i]],['gk_'+table_names[i]])
     return gk_list_of_tables
 
-def provider_exo(table_names,exo_list_of_tables,temp=True):
+def provider_exo(table_names,exo_list_of_tables,temp=False):
     """
     This function obtains the exomercat data and arranges it in a way easy to
     ingest into the database. Currently the exomercat server is not online.
@@ -747,7 +811,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         exomercat=query(exo_provider['provider_url'][0],adql_query)
         exo_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     #----------------putting object main identifiers together-------------------
-
+    
     # initializing column
     exomercat['planet_main_id']=ap.table.Column(dtype=object,
                                                 length=len(exomercat))
@@ -767,7 +831,6 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
             exomercat['host_main_id'][i]=hostname
         exomercat['planet_main_id'][i]=exomercat[
                         'host_main_id'][i]+' '+exomercat['letter'][i]
-
     #join exomercat on host_main_id and sim_objects main_id
     # Unfortunately exomercat does not provide distance measurements so we
     # relie on matching it to simbad for enforcing the database cutoff of 20 pc.
@@ -790,9 +853,9 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
                           keys_left=colname,keys_right='temp')
         cat.remove_columns(['temp','ids'])
         return cat
-
+    
     exo=exomercat
-    exomercat=sort_out_20pc(exomercat,'host_main_id')
+    exomercat=sort_out_20pc(exomercat,'main_id')
 
     # removing whitespace in front of main_id and name.
     # done after sort_out_20pc function to prevent missing values error
@@ -814,11 +877,11 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
             exo_ident.add_row([exomercat['planet_main_id'][i],
                                exomercat['planet_main_id'][i]])
     exo_ident['id_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_ident))]
-    # TBD: I have a wrong double object
-    print("""TBD: I have a wrong double object because of different amount of white
-          spaces between catalog and number""")
-    print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
-
+    # TBD: I had a wrong double object though currently not any longer
+    #print("""TBD: I have a wrong double object because of different amount of white
+    #      spaces between catalog and number""")
+    #print(exo_ident[np.where(exo_ident['main_id']=='Wolf  940 b')])
+    
     #-------------exo_objects---------------
     # tbd at one point: I think I want to add hosts to object
     exo_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
@@ -832,7 +895,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
         ids="|".join(ids)
         exo_objects.add_row([grouped_exo_ident['main_id'][ind[i]],ids])
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
-
+    
     #-------------------exo_mes_mass_pl---------------------
     #initialize columns exomercat['mass_pl_rel'] and exomercat['mass_pl_err']
     exomercat['mass_pl_err']=ap.table.Column(dtype=float,length=len(exomercat))
@@ -869,21 +932,20 @@ def provider_exo(table_names,exo_list_of_tables,temp=True):
     exo_mes_mass_pl.remove_rows(exo_mes_mass_pl['mass_pl_value'].mask.nonzero()[0])
     #remove null values
     exo_mes_mass_pl=exo_mes_mass_pl[np.where(exo_mes_mass_pl['mass_pl_value']!=1e+20)]
-
+    print('tbd: include masssini measurements from exomercat')
 
     #-------------exo_h_link---------------
     exo_h_link=exomercat['planet_main_id', 'host_main_id']
     exo_h_link.rename_columns(['planet_main_id','host_main_id'],
                               ['main_id','parent_main_id'])
     exo_h_link['h_link_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_h_link))]
-
     #-------------exo_sources---------------
     ref_columns=[['provider_bibcode'],['h_link_ref'],['id_ref'],['mass_pl_ref']]
     exo_sources=ap.table.Table()
     tables=[exo_provider,exo_h_link,exo_ident,exo_mes_mass_pl]
     for cat,ref in zip(tables,ref_columns):
         exo_sources=sources_table(cat,ref,exo_provider['provider_name'][0],exo_sources)
-        
+  
     for i in range(len(table_names)):
         if table_names[i]=='sources': exo_list_of_tables[i]=exo_sources
         if table_names[i]=='provider': exo_list_of_tables[i]=exo_provider 
@@ -1107,7 +1169,8 @@ def provider_life(table_names,life_list_of_tables):
             'sim_sptype','sim_name' and 'sim_otypes'
         :return cat: Catalog of mainsequence stars with unique 
             simbad names, no binary subtypes and modeled parameters.
-        """    
+        """   
+        #Do I even need realspectype function? I can just take cat where class_temp not empty
         cat=realspectype(cat)
         #model_param=ap.io.votable.parse_single_table(\
             #f"catalogs/model_param.xml").to_table()
@@ -1119,6 +1182,7 @@ def provider_life(table_names,life_list_of_tables):
         return cat
 
     [sim_objects]=load(['sim_objects'],stringtoobjects=False)
+    
     stars=sim_objects[np.where(sim_objects['type']=='st')]
     cat=ap.table.join(stars,life_star_basic)
     cat=spec(cat['main_id','sptype_string'])
@@ -1557,7 +1621,7 @@ def building(providers,table_names,list_of_tables):
     
     print(f'Building {table_names[2]} table ...')
     
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','class'],
+    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','class','sptype'],
            ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
@@ -1718,7 +1782,7 @@ def building(providers,table_names,list_of_tables):
             cat[i]=cat[i].filled()
             cat[i]=ap.table.unique(cat[i])
         else:
-            print('error: empty table',i,table_names[i])
+            print('warning: empty table',i,table_names[i])
     cat[5]=cat[5].filled()
     
     #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
@@ -1764,7 +1828,7 @@ sim=provider_simbad(table_names,empty_provider[:])
 
 gk=provider_gk(table_names,empty_provider[:])
 
-exo=provider_exo(table_names,empty_provider[:])
+exo=provider_exo(table_names,empty_provider[:],temp=False)
 
 life=provider_life(table_names,empty_provider[:])
 
