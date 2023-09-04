@@ -541,6 +541,11 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
+    
+    #removing entries in h_link where parent objects are clusters or associations as we are 
+    #only interested in hierarchical multiples. 
+    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],stars['oid']))]
+    
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
     #typeconversion needed as smallint fill value != int null value
@@ -603,13 +608,7 @@ def provider_simbad(table_names,sim_list_of_tables):
             stars[np.where(stars['type']=='sy')],sim_h_link[:],simbad['main_id','type'][:])    
     
     # binary_flag 'True' for all stars with parents
-    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'
-    #could do this via two for loops but maybe easier way? maybe join. 
-    #for i_star in range(len(stars['main_id'])):
-     #   for i_child in range(len(sim_h_link['main_id'])):
-      #      if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
-       #         stars['binary_flag'][i_star]=='True'
-                
+    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'    
     stars['binary_flag'][np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]=['True' for j in range(len(
                     stars[np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
                 
@@ -629,6 +628,7 @@ def provider_simbad(table_names,sim_list_of_tables):
             sim_provider['provider_bibcode'][0] for j in range(len(
             stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
+    stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
     sim_h_link=replace_value(sim_h_link,'h_link_ref','',
                              sim_provider['provider_bibcode'][0])
@@ -1308,7 +1308,8 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     gaia_objects['type']=['None' for j in range(len(gaia_objects))]
     gaia_objects['main_id']=gaia_objects['main_id'].astype(str)
     gaia_objects=ap.table.join(gaia_objects,gaia['main_id','nss_solution_type'],join_type='left')
-    gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]='sy'
+    gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]=['sy' for j in range(len(
+            gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]))]
     gaia_objects.remove_column('nss_solution_type')
     #there might be issue in building merging now
 
