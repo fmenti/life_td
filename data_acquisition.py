@@ -541,6 +541,11 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_h_link=simbad['main_id','parent_oid','h_link_ref','membership']
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
+    
+    #removing entries in h_link where parent objects are clusters or associations as we are 
+    #only interested in hierarchical multiples. 
+    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],stars['oid']))]
+    
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
     #typeconversion needed as smallint fill value != int null value
@@ -603,13 +608,7 @@ def provider_simbad(table_names,sim_list_of_tables):
             stars[np.where(stars['type']=='sy')],sim_h_link[:],simbad['main_id','type'][:])    
     
     # binary_flag 'True' for all stars with parents
-    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'
-    #could do this via two for loops but maybe easier way? maybe join. 
-    #for i_star in range(len(stars['main_id'])):
-     #   for i_child in range(len(sim_h_link['main_id'])):
-      #      if stars['main_id'][i_star]==sim_h_link['main_id'][i_child]:
-       #         stars['binary_flag'][i_star]=='True'
-                
+    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'    
     stars['binary_flag'][np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]=['True' for j in range(len(
                     stars[np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
                 
@@ -629,6 +628,7 @@ def provider_simbad(table_names,sim_list_of_tables):
             sim_provider['provider_bibcode'][0] for j in range(len(
             stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
+    stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
     sim_h_link=replace_value(sim_h_link,'h_link_ref','',
                              sim_provider['provider_bibcode'][0])
@@ -1308,7 +1308,8 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     gaia_objects['type']=['None' for j in range(len(gaia_objects))]
     gaia_objects['main_id']=gaia_objects['main_id'].astype(str)
     gaia_objects=ap.table.join(gaia_objects,gaia['main_id','nss_solution_type'],join_type='left')
-    gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]='sy'
+    gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]=['sy' for j in range(len(
+            gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]))]
     gaia_objects.remove_column('nss_solution_type')
     #there might be issue in building merging now
 
@@ -1399,9 +1400,13 @@ def provider_orb6(table_names,orb6_list_of_tables):
     
     #query
     adql_query="""
-    SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS
+    SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS, sep3,
+    "id3-DR3" as gaia_id3, Grade
     FROM "J/MNRAS/517/2925/tablea3" 
     WHERE "plx1-DR3" >="""+str(plx_in_mas_cut)
+    #"id3-DR3" (gaia dr3 designation of next star to binary system),
+    #Grade (quality of orbital solution 1=definitiv, 5=intermediate),
+    #sep3 projected linear separation to id3-DR3 unit is 1000AU
     
     orb6=query(orb6_provider['provider_url'][0],adql_query)
     orb6['gaia_id']=['Gaia DR3 '+str(orb6['gaia_id'][j]) for j in range(len(orb6))]
@@ -1435,13 +1440,18 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_objects['type']=['sy' for j in range(len(orb6_objects))]
         
     #---------------mes_binary-------------------------------------
-    orb6_mes_binary=orb6['main_id','Axis','e_Axis','ref']
+    orb6_mes_binary=orb6['main_id','Axis','e_Axis','ref','Grade']
     orb6_mes_binary.rename_columns(['Axis','e_Axis','ref'],
                                    ['sep_phys_value','sep_phys_err','sep_phys_ref'])
     orb6_mes_binary['binary_flag']=['True' for j in range(len(orb6_mes_binary))]
     orb6_mes_binary['binary_ref']=orb6['ref']
     orb6_mes_binary['binary_qual']=['B' for j in range(len(orb6_mes_binary))]
-    orb6_mes_binary['sep_phys_qual']=['B' for j in range(len(orb6_mes_binary))]
+    
+    orb6_mes_binary['sep_phys_qual']=['E' for j in range(len(orb6_mes_binary))]
+    for qual,temp in zip(['A','B','C','D','E'],[[1],[2,3],[4,5],[6,7],[8,9]]):
+        orb6_mes_binary['sep_phys_qual'][np.where(np.in1d(orb6_mes_binary['Grade'],temp))]=[qual for j in range(len(
+                    orb6_mes_binary['sep_phys_qual'][np.where(np.in1d(orb6_mes_binary['Grade'],temp))]))]  
+    
     orb6_mes_sep_phys=orb6_mes_binary['main_id','sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref']
     orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
@@ -1450,7 +1460,7 @@ def provider_orb6(table_names,orb6_list_of_tables):
             orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]],'sep_phys_qual')
     
     orb6_mes_binary.remove_columns(['sep_phys_value','sep_phys_err',
-                                      'sep_phys_qual','sep_phys_ref'])
+                                      'sep_phys_qual','sep_phys_ref','Grade'])
     orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
     #---------------sources---------------------------------------
     orb6_sources=ap.table.Table()
@@ -1681,6 +1691,7 @@ def building(providers,table_names,list_of_tables):
                 #group mes_table by object (=main_id)
                 grouped_mes_table=mes_table.group_by('main_id')
                 #take highest quality
+                #quite time intensive (few minutes) could maybe be optimized using np.in1d function
                 for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
                     for qual in ['A','B','C','D','E','?']:
                         for i in range(len(grouped_mes_table.groups[j])):
