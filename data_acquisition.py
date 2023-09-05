@@ -1400,9 +1400,13 @@ def provider_orb6(table_names,orb6_list_of_tables):
     
     #query
     adql_query="""
-    SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS
+    SELECT "id1-DR3" as gaia_id, Axis, e_Axis, Name, WDS, sep3,
+    "id3-DR3" as gaia_id3, Grade
     FROM "J/MNRAS/517/2925/tablea3" 
     WHERE "plx1-DR3" >="""+str(plx_in_mas_cut)
+    #"id3-DR3" (gaia dr3 designation of next star to binary system),
+    #Grade (quality of orbital solution 1=definitiv, 5=intermediate),
+    #sep3 projected linear separation to id3-DR3 unit is 1000AU
     
     orb6=query(orb6_provider['provider_url'][0],adql_query)
     orb6['gaia_id']=['Gaia DR3 '+str(orb6['gaia_id'][j]) for j in range(len(orb6))]
@@ -1436,13 +1440,18 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_objects['type']=['sy' for j in range(len(orb6_objects))]
         
     #---------------mes_binary-------------------------------------
-    orb6_mes_binary=orb6['main_id','Axis','e_Axis','ref']
+    orb6_mes_binary=orb6['main_id','Axis','e_Axis','ref','Grade']
     orb6_mes_binary.rename_columns(['Axis','e_Axis','ref'],
                                    ['sep_phys_value','sep_phys_err','sep_phys_ref'])
     orb6_mes_binary['binary_flag']=['True' for j in range(len(orb6_mes_binary))]
     orb6_mes_binary['binary_ref']=orb6['ref']
     orb6_mes_binary['binary_qual']=['B' for j in range(len(orb6_mes_binary))]
-    orb6_mes_binary['sep_phys_qual']=['B' for j in range(len(orb6_mes_binary))]
+    
+    orb6_mes_binary['sep_phys_qual']=['E' for j in range(len(orb6_mes_binary))]
+    for qual,temp in zip(['A','B','C','D','E'],[[1],[2,3],[4,5],[6,7],[8,9]]):
+        orb6_mes_binary['sep_phys_qual'][np.where(np.in1d(orb6_mes_binary['Grade'],temp))]=[qual for j in range(len(
+                    orb6_mes_binary['sep_phys_qual'][np.where(np.in1d(orb6_mes_binary['Grade'],temp))]))]  
+    
     orb6_mes_sep_phys=orb6_mes_binary['main_id','sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref']
     orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
@@ -1451,7 +1460,7 @@ def provider_orb6(table_names,orb6_list_of_tables):
             orb6_mes_sep_phys[orb6_mes_sep_phys['sep_phys_err'].mask.nonzero()[0]],'sep_phys_qual')
     
     orb6_mes_binary.remove_columns(['sep_phys_value','sep_phys_err',
-                                      'sep_phys_qual','sep_phys_ref'])
+                                      'sep_phys_qual','sep_phys_ref','Grade'])
     orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
     #---------------sources---------------------------------------
     orb6_sources=ap.table.Table()
@@ -1682,6 +1691,7 @@ def building(providers,table_names,list_of_tables):
                 #group mes_table by object (=main_id)
                 grouped_mes_table=mes_table.group_by('main_id')
                 #take highest quality
+                #quite time intensive (few minutes) could maybe be optimized using np.in1d function
                 for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
                     for qual in ['A','B','C','D','E','?']:
                         for i in range(len(grouped_mes_table.groups[j])):
