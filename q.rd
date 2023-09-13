@@ -26,7 +26,7 @@ tables may change at any time without prior warning.
 
     <meta name="doi">10.21938/ke_e6lzO_jjX_vzvVIcwZA</meta>
 
-    <meta name="creator">Menti, F.; Quanz, S.; Alei E.; Caballero J.;
+    <meta name="creator">Menti, F.; Quanz, S.; Alei E.; Caballero J. A.;
     Demleitner M.; Garcia Munoz A.; Kennedy G.; Schmitt U.; Stassun K.; 
     Wyatt M.; LIFE Collaboration</meta>
     <meta name="instrument">LIFE</meta>
