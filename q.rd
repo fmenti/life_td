@@ -1061,7 +1061,6 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,sep_phys_qual,sep_phys_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
