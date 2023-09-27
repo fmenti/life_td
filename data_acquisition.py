@@ -863,6 +863,15 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         exomercat['planet_main_id'][i]=exomercat['planet_main_id'][i].strip()
         exomercat['main_id'][i]=exomercat['main_id'][i].strip()
         exomercat['name'][i]=exomercat['name'][i].strip()
+        
+    exomercat2=fetch_main_id(exomercat['planet_main_id','main_id'],
+                             colname='planet_main_id',name='sim_planet_main_id',oid=False)
+    #(needed since sometimes exomercat planet main id not same as simbad planet main id)
+    #I use a left join as otherwise I would loose some objects that are not in simbad
+    notinsimbad=exomercat['planet_main_id'][np.where(np.in1d(exomercat['planet_main_id'],
+                                                             exomercat2['planet_main_id'],invert=True))]
+    exomercat=ap.table.join(exomercat,exomercat2['sim_planet_main_id','planet_main_id'],
+                            keys='planet_main_id',join_type='left')
 
     #show which elements from exomercat were not found in sim_objects
     exo['name']=exo['name'].astype(object)
@@ -870,12 +879,26 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     save([removed_objects],['exomercat_removed_objects'])
 
     #-------------exo_ident---------------
-    exo_ident=exomercat['planet_main_id','name']
-    exo_ident.rename_columns(['planet_main_id','name'],['main_id','id'])
+    exo_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object])
+    exomercat['old_planet_main_id']=exomercat['planet_main_id']
     for i in range(len(exomercat)):
-        if exomercat['planet_main_id'][i]!=exomercat['name'][i]:
+        if exomercat['sim_planet_main_id'][i]!='':
+            exo_ident.add_row([exomercat['sim_planet_main_id'][i],
+                               exomercat['sim_planet_main_id'][i]])
+            if exomercat['planet_main_id'][i]!=exomercat['sim_planet_main_id'][i]:
+                exo_ident.add_row([exomercat['sim_planet_main_id'][i],
+                               exomercat['planet_main_id'][i]])
+            if exomercat['planet_main_id'][i]!=exomercat['name'][i] and \
+                    exomercat['sim_planet_main_id'][i]!=exomercat['name'][i]:
+                exo_ident.add_row([exomercat['sim_planet_main_id'][i],
+                               exomercat['name'][i]])
+            exomercat['planet_main_id'][i]=exomercat['sim_planet_main_id'][i]
+        else:
             exo_ident.add_row([exomercat['planet_main_id'][i],
                                exomercat['planet_main_id'][i]])
+            if exomercat['planet_main_id'][i]!=exomercat['name'][i]:
+                exo_ident.add_row([exomercat['planet_main_id'][i],
+                               exomercat['name'][i]])
     exo_ident['id_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_ident))]
     # TBD: I had a wrong double object though currently not any longer
     #print("""TBD: I have a wrong double object because of different amount of white
@@ -1100,7 +1123,7 @@ def provider_life(table_names,life_list_of_tables):
         type, effective temperature radius and mass.
         :return votable: astropy table of the 4 parameters as columns
         """
-        EEM_table=ap.io.ascii.read("data/Mamajek2022-04-16.csv")['#SpT','Teff','R_Rsun','Msun']
+        EEM_table=ap.io.ascii.read("data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
         EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
         EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
         EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
@@ -1141,17 +1164,17 @@ def provider_life(table_names,life_list_of_tables):
             # for all the entries that are not empty
             if cat[sptypestring][j]!='':
                 #go through the model spectral types of Mamajek 
-                for i in range(len(model_param['#SpT'])): 
+                for i in range(len(model_param['SpT'])): 
                     #match first two letters
-                    if model_param['#SpT'][i][:2]==cat[sptypestring][j][:2]: 
+                    if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
                             cat[teffstring][j]=model_param['Teff'][i]
                             cat[rstring][j]=model_param['Radius'][i]
                             cat[mstring][j]=model_param['Mass'][i]
                 #as the model does not cover all spectral types on .5 accuracy, check those separately
                 if cat[sptypestring][j][2:4]=='.5':
-                    for i in range(len(model_param['#SpT'])):
+                    for i in range(len(model_param['SpT'])):
                         # match first four letters
-                        if model_param['#SpT'][i][:4]==cat[sptypestring][j][:4]:
+                        if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
                             cat[teffstring][j]=model_param['Teff'][i]
                             cat[rstring][j]=model_param['Radius'][i]
                             cat[mstring][j]=model_param['Mass'][i] 
@@ -1462,6 +1485,8 @@ def provider_orb6(table_names,orb6_list_of_tables):
     orb6_mes_binary.remove_columns(['sep_phys_value','sep_phys_err',
                                       'sep_phys_qual','sep_phys_ref','Grade'])
     orb6_mes_binary=ap.table.unique(orb6_mes_binary,silent=True)
+    orb6_mes_sep_phys=ap.table.unique(orb6_mes_sep_phys,silent=True)
+    
     #---------------sources---------------------------------------
     orb6_sources=ap.table.Table()
     tables=[orb6_provider,orb6_ident,orb6_mes_binary,orb6_mes_sep_phys]
