@@ -1310,12 +1310,12 @@ WHERE
             ">/tap/sync</url>
             <code>
                 rows = self.getVOTableRows()
-                self.assertEqual(len(rows), 2)
+                self.assertEqual(len(rows), 1)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
                 ids = set("|".join(r["ids"] for r in rows).split("|"))
-                self.assertEqual(ids, {'*  14 Her b', '14 Her b',
-                    'HD 145675b', 'GJ   614 b'})
+                self.assertEqual(ids, {'*  14 Her  b','*  14 Her b',
+                                 'GJ   614 b','14 Her b','HD 145675b'})
             </code>
         </regTest>
     </regSuite>
