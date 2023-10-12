@@ -358,6 +358,28 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     cat=query(TAP_service,main_id_query,[cat])
     return cat
 
+def distance_cut(cat,colname,main_id=True):
+    """
+    This Function sorts out objects not within the provider_simbad
+    distance cut. 
+    :param cat: Astropy table to be matched against sim_objects table.
+    :param colname: Name of the column to use for the match.
+    :return cat: Table like cat without any objects not found in sim_objects.
+    """
+    if main_id:
+        [sim]=load(['sim_objects'])
+        sim.rename_columns(['main_id'],['temp1'])
+        cat=ap.table.join(cat,sim['temp1','temp2'],
+                      keys_left=colname,keys_right='temp1')
+        cat.remove_columns(['temp1','ids'])
+    else:
+        [sim]=load(['sim_ident'])
+        sim.rename_columns(['id'],['temp1'])
+        cat=ap.table.join(cat,sim['temp1','main_id'],
+                      keys_left=colname,keys_right='temp1')
+    cat.remove_columns(['temp1'])
+    return cat
+
 def nullvalues(cat,colname,nullvalue,verbose=False):
     """
     This function transforms all masked entries of the column colname of
@@ -803,9 +825,9 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
                   FROM exomercat.exomercat"""
     #---------------obtain data------------------------------------------------
     if temp:
-        exomercat=ap.io.ascii.read("data/additional_data/exo-mercat05-02-2023_v2.0.csv")
+        exomercat=ap.io.ascii.read("data/additional_data/exo-mercat_v2Sept1.csv")
         exomercat=stringtoobject(exomercat,3000)
-        exo_provider['provider_access']=['2023-02-05']
+        exo_provider['provider_access']=['2023-09-01']
 
     else:
         exomercat=query(exo_provider['provider_url'][0],adql_query)
@@ -838,27 +860,12 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     # identifier notation which means we loose some objects. That is, however,
     # preferrable to having to do the work of checking the literature.
     # A compromise is to keep the list of objects I lost for later improvement.
-
-    def sort_out_20pc(cat,colname):
-        """
-        This Function sorts out objects not within the provider_simbad
-        distance cut (previously 20pc hence the name). 
-        :param cat: Astropy table to be matched against sim_objects table.
-        :param colname: Name of the column to use for the match.
-        :return cat: Table like cat without any objects not found in sim_objects.
-        """
-        [sim_objects]=load(['sim_objects'])
-        sim_objects.rename_column('main_id','temp')
-        cat=ap.table.join(cat,sim_objects['temp','ids'],
-                          keys_left=colname,keys_right='temp')
-        cat.remove_columns(['temp','ids'])
-        return cat
     
     exo=exomercat
-    exomercat=sort_out_20pc(exomercat,'main_id')
+    exomercat=distance_cut(exomercat,'main_id')
 
     # removing whitespace in front of main_id and name.
-    # done after sort_out_20pc function to prevent missing values error
+    # done after distance_cut function to prevent missing values error
     for i in range(len(exomercat)):
         exomercat['planet_main_id'][i]=exomercat['planet_main_id'][i].strip()
         exomercat['main_id'][i]=exomercat['main_id'][i].strip()
