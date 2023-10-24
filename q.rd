@@ -10,15 +10,17 @@ tables may change at any time without prior warning.
 </macDef>
 
     <meta name="title">The LIFE Target Star Database LIFETD</meta>
-    <meta name="description">
+    <meta name="description" format="rst">
     The LIFE Target Star Database contains information useful
-    for the planned LIFE mission (mid-ir, nulling
+    for the planned `LIFE mission`_ (mid-ir, nulling
     interferometer in space). It characterizes possible
     target systems including information about stellar,
     planetary and disk properties. The data itself is mainly
     a collection from different other catalogs.
 
-    \betawarning</meta>
+    \betawarning
+
+    .. _LIFE mission: https://life-space-mission.com/</meta>
     <meta name="subject">stars</meta>
     <meta name="subject">exoplanets</meta>
     <meta name="subject">circumstellar-disks</meta>
@@ -27,7 +29,7 @@ tables may change at any time without prior warning.
     <meta name="doi">10.21938/ke_e6lzO_jjX_vzvVIcwZA</meta>
 
     <meta name="creator">Menti, F.; Quanz, S.; Alei E.; Caballero J. A.;
-    Demleitner M.; Garcia Munoz A.; Kennedy G.; Schmitt U.; Stassun K.; 
+    Demleitner M.; Garcia Munoz A.; Kennedy G.; Schmitt U.; Stassun K.;
     Wyatt M.; LIFE Collaboration</meta>
     <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
@@ -122,7 +124,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="provider" onDisk="True" adql="True">
         <meta name="title">Provider Table</meta>
         <meta name="description">
@@ -320,7 +322,7 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
         <column name="sptype_string" type="text"
-            ucd="src.spType" 
+            ucd="src.spType"
             tablehead="sptype"
             description="Object spectral type MK."
             verbLevel="1" displayHint="sf=2"/>
@@ -344,17 +346,17 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
         <column name="class_temp" type="text"
-            ucd="src.spType" 
+            ucd="src.spType"
             tablehead="temp class"
             description="Object spectral type MK temperature class."
             verbLevel="1" displayHint="sf=2"/>
         <column name="class_temp_nr" type="text"
-            ucd="src.spType" 
+            ucd="src.spType"
             tablehead="temp class nr"
             description="Object spectral type MK temperature class number."
             verbLevel="1" displayHint="sf=2"/>
         <column name="class_lum" type="text"
-            ucd="src.spType" 
+            ucd="src.spType"
             tablehead="lum class"
             description="Object spectral type MK luminosity class."
             verbLevel="1" displayHint="sf=2"/>
@@ -439,7 +441,7 @@ tables may change at any time without prior warning.
               <values nullLiteral="-1"/>
         </column>
         <column name="binary_flag" type="text"
-            ucd="meta.code.multip" 
+            ucd="meta.code.multip"
             tablehead="binary_flag"
             description="Binary flag."
             verbLevel="1" displayHint="sf=2"/>
@@ -827,7 +829,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_teff_st" onDisk="True" adql="True">
         <meta name="title">Effective temperature measurement table</meta>
         <meta name="description">
@@ -885,7 +887,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_radius_st" onDisk="True" adql="True">
         <meta name="title">Radius measurement table</meta>
         <meta name="description">
@@ -943,7 +945,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_mass_st" onDisk="True" adql="True">
         <meta name="title">Mass measurement table</meta>
         <meta name="description">
@@ -961,7 +963,7 @@ tables may change at any time without prior warning.
             description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
-            verbLevel="1"/>   
+            verbLevel="1"/>
         <column name="mass_st_value" type="double precision"
             ucd="phys.mass" unit="solMass"
             tablehead="mass_st"
@@ -985,7 +987,7 @@ tables may change at any time without prior warning.
                 mass parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
-        </column>     
+        </column>
     </table>
 
     <data id="import_mes_mass_st">
@@ -1001,7 +1003,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_binary" onDisk="True" adql="True">
         <meta name="title">Multiplicitz measurement table</meta>
         <meta name="description">
@@ -1019,9 +1021,9 @@ tables may change at any time without prior warning.
             description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
-            verbLevel="1"/>   
+            verbLevel="1"/>
         <column name="binary_flag" type="text"
-            ucd="meta.code.multip" 
+            ucd="meta.code.multip"
             tablehead="binary_flag"
             description="Binary flag."
             verbLevel="1" displayHint="sf=2"/>
@@ -1053,7 +1055,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_sep_phys" onDisk="True" adql="True">
         <meta name="title">Phys. separation measurement table</meta>
         <meta name="description">
@@ -1061,7 +1063,6 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,sep_phys_qual,sep_phys_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -1071,7 +1072,7 @@ tables may change at any time without prior warning.
             description="Object key (unstable, use only for joining to the
             other tables)."
             required="True"
-            verbLevel="1"/>   
+            verbLevel="1"/>
         <column name="sep_phys_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
             tablehead="Phys. separation"
@@ -1107,7 +1108,7 @@ tables may change at any time without prior warning.
         </LOOP>
         <publish sets="ivo_managed,local"/>
     </data>
-    
+
     <data id="import_mes_sep_phys">
         <sources>data/mes_sep_phys.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
@@ -1121,7 +1122,7 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
 
     <table id="scs_summary" onDisk="True">
         <meta name="description">A view containing the most
@@ -1162,9 +1163,10 @@ tables may change at any time without prior warning.
                 mass_pl_err as planet_mass_error
             from life_td.star_basic as s
                 join life_td.h_link as slink on (parent_object_idref=s.object_idref)
-                join life_td.planet_basic as p on (child_object_idref=p.object_idref)
                 join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
-                join life_td.object as planet_ob on (p.object_idref=planet_ob.object_id))q)
+                join life_td.object as planet_ob on (child_object_idref=planet_ob.object_id)
+                left outer join life_td.planet_basic as p on (child_object_idref=p.object_idref)
+        )q)
 
         </viewStatement>
     </table>
@@ -1179,6 +1181,16 @@ tables may change at any time without prior warning.
             testQuery.ra: 312.27
             testQuery.dec: 37.47
             testQuery.sr: 0.01
+        </meta>
+
+        <meta name="_longdoc" format="rst">
+            Please note that the Simple Cone Search service is
+            intended for very casual use only.  The primary interface
+            to the LIFE target database is `through TAP`_; see also
+            the `query examples`_ for LIFE-TD.
+
+            .. _through TAP: /tableinfo/life.object?tapinfo=true
+            .. _query examples: /life/q/ex/examples
         </meta>
         <publish render="scs.xml" sets="ivo_managed"/>
         <publish render="form" sets="ivo_managed,local"/>
@@ -1293,8 +1305,11 @@ tables may change at any time without prior warning.
         <regTest title="LIFE form service appears to work.">
         <url parSet="form" hscs_pos="14 Her" hscs_sr="1">cone/form</url>
         <code>
-            self.assertHasStrings("HD 145675c",
-                "17.90", "7.679")
+            self.assertHasStrings(
+                "Matched: 2",
+                "HD 145675c", # planet id
+                "17.90",  # Distance
+                "7.100")  # planet mass of planet c
         </code>
         </regTest>
 
@@ -1310,12 +1325,12 @@ WHERE
             ">/tap/sync</url>
             <code>
                 rows = self.getVOTableRows()
-                self.assertEqual(len(rows), 2)
+                self.assertEqual(len(rows), 1)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
                 ids = set("|".join(r["ids"] for r in rows).split("|"))
-                self.assertEqual(ids, {'*  14 Her b', '14 Her b',
-                    'HD 145675b', 'GJ   614 b'})
+                self.assertEqual(ids, {'*  14 Her  b','*  14 Her b',
+                                 'GJ   614 b','14 Her b','HD 145675b'})
             </code>
         </regTest>
     </regSuite>
