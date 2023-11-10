@@ -469,6 +469,13 @@ tables may change at any time without prior warning.
             tablehead="sep_phys_err"
             description="Object phys. separation error."
             verbLevel="1"/>
+        <column name="sep_phys_obs_date" type="integer"
+            ucd="time.epoch;obs"
+            tablehead="sep_phys_obs_date"
+            description="Year of observation."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="sep_phys_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
             tablehead="sep_phys_qual"
@@ -542,6 +549,7 @@ tables may change at any time without prior warning.
                 <map key="binary_source_idref" nullExpr="999999" />
                 <map key="sep_phys_value" nullExpr="1e+20" />
                 <map key="sep_phys_err" nullExpr="1e+20" />
+                <map key="sep_phys_obs_date" nullExpr="999999" />
                 <map key="sep_phys_qual" nullExpr="'?'" />
                 <map key="sep_phys_source_idref" nullExpr="999999" />
             </rowmaker>
@@ -824,8 +832,11 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
-                 <map key="mass_pl_rel" nullExpr="'?'"/>
+                 <map key="mass_pl_value" nullExpr="1e+20" />
+                 <map key="mass_pl_err" nullExpr="1e+20" />
                  <map key="mass_pl_qual" nullExpr="'?'" />
+                 <map key="mass_pl_source_idref" nullExpr="999999" />
+                 <map key="mass_pl_rel" nullExpr="'?'"/>
              </rowmaker>
         </make>
     </data>
@@ -1083,6 +1094,13 @@ tables may change at any time without prior warning.
             tablehead="sep_phys_err"
             description="Object phys. separation error."
             verbLevel="1"/>
+        <column name="sep_phys_obs_date" type="integer"
+            ucd="time.epoch;obs"
+            tablehead="sep_phys_obs_date"
+            description="Year of observation."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="sep_phys_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
             tablehead="sep_phys_qual"
@@ -1117,6 +1135,7 @@ tables may change at any time without prior warning.
              <rowmaker idmaps="*">
                  <map key="sep_phys_value" nullExpr="1e+20" />
                  <map key="sep_phys_err" nullExpr="1e+20" />
+                 <map key="sep_phys_obs_date" nullExpr="999999" />
                  <map key="sep_phys_qual" nullExpr="'?'" />
                  <map key="sep_phys_source_idref" nullExpr="999999" />
              </rowmaker>
@@ -1294,6 +1313,27 @@ tables may change at any time without prior warning.
                 WHERE plx_value is Null or plx_qual in ('D','E') or
                 plx_qual is Null
                 </meta>
+        <meta name="_example" title="LIFE-StarCat candidates">
+            The input catalog for the LIFE yield estimations (LIFE-StarCat) is
+            created using the following query in addition to some postprocessing
+            in regards of multiplicity afterwards.
+
+            .. tapquery::    
+                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value,
+                sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, sb.coo_gal_b,
+                sb.teff_st_value, sb.mass_st_value, sb.radius_st_value, 
+                sb.binary_flag, sb.mag_i_value, sb.mag_j_value,  
+                o_parent.main_id AS parent_main_id, sb_parent.sep_phys_value
+                FROM life_td.star_basic AS sb
+                JOIN life_td.object AS o ON sb.object_idref=o.object_id
+                LEFT JOIN life_td.h_link AS h ON o.object_id=h.child_object_idref
+                LEFT JOIN life_td.object AS o_parent ON
+                 h.parent_object_idref=o_parent.object_id
+                LEFT JOIN life_td.star_basic AS sb_parent ON
+                 o_parent.object_id=sb_parent.object_idref
+                WHERE o.type = 'st' AND sb.plx_value > 33. AND 
+                sb.class_lum IS NOT NULL
+                </meta>
         <nullCore/>
     </service>
 
@@ -1306,8 +1346,8 @@ tables may change at any time without prior warning.
         <url parSet="form" hscs_pos="14 Her" hscs_sr="1">cone/form</url>
         <code>
             self.assertHasStrings(
-                "Matched: 2",
-                "HD 145675c", # planet id
+                "Matched: 3",
+                "*  14 Her c", # planet id (main ids can change over time)
                 "17.90",  # Distance
                 "7.100")  # planet mass of planet c
         </code>
