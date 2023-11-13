@@ -570,12 +570,15 @@ def provider_simbad(table_names,sim_list_of_tables):
     #only interested in hierarchical multiples. 
     sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],stars['oid']))]
     
+    
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
     sim_h_link.remove_column('parent_oid')
     #typeconversion needed as smallint fill value != int null value
     sim_h_link['membership']=sim_h_link['membership'].astype(int)
     sim_h_link=nullvalues(sim_h_link,'membership',999999)
-
+    sim_h_link=replace_value(sim_h_link,'h_link_ref','',
+                             sim_provider['provider_bibcode'][0])
+    sim_h_link=ap.table.unique(sim_h_link)
                 
     #--------------------creating helper table sim_stars-----------------------
     #updating multiplicity object type
@@ -596,16 +599,19 @@ def provider_simbad(table_names,sim_list_of_tables):
         #all type sy objects: cat['main_id','type']
         #this should work if alias works well
         #need parent_main_id for sim_h_link here. but setdiff does not support that.
-        parents=sim_h_link['parent_main_id','h_link_ref'][:]
+        parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
+        parents.rename_column('main_id','child_main_id')
         parents.rename_column('parent_main_id','main_id')
-        sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'],
-                                     parents,keys=['main_id'])
+        sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'][:],
+                                     parents[:],keys=['main_id'])
         #that don t have children: sy_wo_child['main_id','type']
         #list of those with children
-        sy_w_child=ap.table.setdiff(sy_wo_child,parents,keys=['main_id'])
+        #sy_w_child=ap.table.setdiff(sy_wo_child,parents,keys=['main_id'])#old version
+        sy_w_child=ap.table.join(parents[:],cat['main_id','type','sptype_string'][:],keys=['main_id'])
         #list of those with children joined with type of child
-        all_objects.rename_column('type','child_type')
-        sy_w_child=ap.table.join(sy_w_child,all_objects,keys=['main_id'])
+        all_objects.rename_columns(['type','main_id'],['child_type','child_main_id'])
+        sy_w_child=ap.table.join(sy_w_child[:],all_objects['child_type','child_main_id'][:],\
+                                 keys=['child_main_id'],join_type='left')
         #remove all where type child is not pl
         sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
         if len(sy_w_child_pl)==0:
@@ -613,10 +619,10 @@ def provider_simbad(table_names,sim_list_of_tables):
             sy_wo_child_st=sy_wo_child
         else:
             #join with list of sy that dont habe children
-            sy_wo_child_st=ap.table.join(sy_wo_child,sy_w_child_pl)
+            sy_wo_child_st=ap.table.vstack([sy_wo_child[:],sy_w_child_pl[:]])
             sy_wo_child_st.remove_column('child_type')
         #systems that don t have children except planets: sy_wo_child_st
-        #no + in sptype_string
+        #no + in sptype_string because that is another indication of binarity
         temp=[len(i.split('+'))==1 for i in sy_wo_child_st['sptype_string']]
         #have it as an array of bools 
         temp=np.array(temp)
@@ -654,8 +660,6 @@ def provider_simbad(table_names,sim_list_of_tables):
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
-    sim_h_link=replace_value(sim_h_link,'h_link_ref','',
-                             sim_provider['provider_bibcode'][0])
         
     stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
@@ -827,9 +831,9 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
                   FROM exomercat.exomercat"""
     #---------------obtain data------------------------------------------------
     if temp:
-        exomercat=ap.io.ascii.read("data/additional_data/exo-mercat_v2Sept1.csv")
+        exomercat=ap.io.ascii.read("data/additional_data/exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
-        exo_provider['provider_access']=['2023-09-01']
+        exo_provider['provider_access']=['2023-02-05']
 
     else:
         exomercat=query(exo_provider['provider_url'][0],adql_query)
@@ -873,12 +877,15 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         exomercat['main_id'][i]=exomercat['main_id'][i].strip()
         exomercat['name'][i]=exomercat['name'][i].strip()
         
-    exomercat2=fetch_main_id(exomercat['planet_main_id','main_id'],
+    #fetching simbad main_id for planet since sometimes exomercat planet main id is not the same
+    exomercat2=fetch_main_id(exomercat['planet_main_id','host_main_id'],
+                             #host_main_id just present to create table in contrast to column
                              colname='planet_main_id',name='sim_planet_main_id',oid=False)
-    #(needed since sometimes exomercat planet main id not same as simbad planet main id)
-    #I use a left join as otherwise I would loose some objects that are not in simbad
+
+    
     notinsimbad=exomercat['planet_main_id'][np.where(np.in1d(exomercat['planet_main_id'],
                                                              exomercat2['planet_main_id'],invert=True))]
+    #I use a left join as otherwise I would loose some objects that are not in simbad
     exomercat=ap.table.join(exomercat,exomercat2['sim_planet_main_id','planet_main_id'],
                             keys='planet_main_id',join_type='left')
 
@@ -890,10 +897,12 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #-------------exo_ident---------------
     exo_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object])
     exomercat['old_planet_main_id']=exomercat['planet_main_id']
+    #why not found??
     for i in range(len(exomercat)):
         if exomercat['sim_planet_main_id'][i]!='':
-            exo_ident.add_row([exomercat['sim_planet_main_id'][i],
-                               exomercat['sim_planet_main_id'][i]])
+            #not included as already in simbad provider
+            #exo_ident.add_row([exomercat['sim_planet_main_id'][i],
+                               #exomercat['sim_planet_main_id'][i]]) 
             if exomercat['planet_main_id'][i]!=exomercat['sim_planet_main_id'][i]:
                 exo_ident.add_row([exomercat['sim_planet_main_id'][i],
                                exomercat['planet_main_id'][i]])
@@ -909,6 +918,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
                 exo_ident.add_row([exomercat['planet_main_id'][i],
                                exomercat['name'][i]])
     exo_ident['id_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_ident))]
+
     # TBD: I had a wrong double object though currently not any longer
     #print("""TBD: I have a wrong double object because of different amount of white
     #      spaces between catalog and number""")
@@ -946,16 +956,19 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
             else:
                 exomercat['mass_pl_rel'][i]='<'
                 exomercat['mass_pl_err'][i]=exomercat['mass_min'][i]
-                #not correct yet. you can have a maximum error on a lower limit value
+                exomercat['mass_pl_qual'][i]='C'
+                print('tbd: check if relation is correct in case of maximum error on a lower limit value')
         else:
             if type(exomercat['mass_min'][i])==np.ma.core.MaskedConstant or \
                   exomercat['mass_min'][i]==np.inf:
                 exomercat['mass_pl_rel'][i]='>'
                 exomercat['mass_pl_err'][i]=exomercat['mass_max'][i]
+                exomercat['mass_pl_qual'][i]='C'
             else:
                 exomercat['mass_pl_rel'][i]='='
                 exomercat['mass_pl_err'][i]=max(exomercat['mass_max'][i],
                                         exomercat['mass_min'][i])
+                exomercat['mass_pl_qual'][i]='B'
     exo_mes_mass_pl=exomercat['planet_main_id','mass','mass_pl_err','mass_url',
                             'mass_pl_rel','mass_pl_qual']
     exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url'],
@@ -1412,13 +1425,13 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
 
 def provider_wds(table_names,wds_list_of_tables,temp=False):
     """
-    This function obtains the newprovider data and arranges it in a way
+    This function obtains the wds provider data and arranges it in a way
     easy to ingest into the database.
     :param table_names: List of strings containing the names for the 
         output tables.
-    :param newprovider_list_of_tables: List of same length as table_names containing
+    :param wds_provider_list_of_tables: List of same length as table_names containing
         empty astropy tables.
-    :return newprovider_list_of_tables: List of astropy tables containing
+    :return wds_provider_list_of_tables: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.
     """
@@ -1506,7 +1519,7 @@ def provider_wds(table_names,wds_list_of_tables,temp=False):
         wds=ap.table.vstack([wds,Ts])
         
         save([wds],['wds'])
-        
+    
     wds['system_main_id']=wds['system_main_id'].astype(object)
     wds['ids']=wds['system_name'].astype(object)
     
@@ -1550,7 +1563,6 @@ def provider_wds(table_names,wds_list_of_tables,temp=False):
     wds_objects=ap.table.unique(wds_objects)  
     
     #-----------------creating output table wds_mes_binary------------------------
-    print('tbd binary table')
     wds_mes_binary=wds_objects['main_id','type'][np.where(wds_objects['type']=='sy')]
     wds_mes_binary.rename_column('type','binary_flag')
     wds_mes_binary['binary_flag']=wds_mes_binary['binary_flag'].astype(object)
@@ -1942,7 +1954,7 @@ table_names=['sources','objects','provider','ident','h_link','star_basic',
               'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_phys']
 
 #distance cut
-distance_cut_in_pc=25#25.
+distance_cut_in_pc=30.
 
 #transforming from pc distance cut into parallax in mas cut
 plx_in_mas_cut=1000./distance_cut_in_pc
@@ -1953,12 +1965,6 @@ plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
 empty_provider=[ap.table.Table() for i in range(len(table_names))]
 
 wds=provider_wds(table_names,empty_provider[:],True)
-#can I remove warnings by defining description meta data? how do I access that? 
-#-> wds[-1]['sep_phys_value'].info.description=...
-#does it even make a difference because when I read in my data into dachs I create my own descriptions
-#maybe I can take the ones from the data directly
-
-#can I read in data when I don't have any objects or ident given? 
 
 sim=provider_simbad(table_names,empty_provider[:])
 
