@@ -155,6 +155,8 @@ def initialize_database_tables(table_names,list_of_tables):
                'mag_i_ref',
                'mag_j_value','mag_j_err','mag_j_qual','mag_j_source_idref',
                'mag_j_ref',
+               'mag_k_value','mag_k_err','mag_k_qual','mag_k_source_idref',
+               'mag_k_ref',
                'plx_value','plx_err','plx_qual','plx_source_idref',
                'plx_ref',
                'dist_st_value','dist_st_err','dist_st_qual','dist_st_source_idref',
@@ -181,6 +183,8 @@ def initialize_database_tables(table_names,list_of_tables):
                float,float,object,int,#mag_i
                object,
                float,float,object,int,#mag_j
+               object,
+               float,float,object,int,#mag_k
                object,
                float,float,object,int,#plx
                object,
@@ -466,7 +470,7 @@ def provider_simbad(table_names,sim_list_of_tables):
         b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
         h_link.membership, h_link.parent AS parent_oid,
         h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids,
-        f.I as mag_i_value, f.J as mag_j_value
+        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value
         """#which parameters to query from simbad and what alias to give them
     #,f.I as mag_i_value, f.J as mag_j_value
     tables="""
@@ -645,18 +649,16 @@ def provider_simbad(table_names,sim_list_of_tables):
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
     stars=replace_value(stars,'plx_qual','',stars['plx_qual'].fill_value)
-    #initiate some of the ref columns
-    stars['mag_i_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
+    
+    for band in ['i','j','k']:
+        #initiate some of the ref columns
+        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
                                     mask=[True for j in range(len(stars))])
-    stars['mag_j_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
-                                    mask=[True for j in range(len(stars))])
-    #add simbad reference where no other is given
-    stars['mag_i_ref'][np.where(stars['mag_i_value'].mask==False)]=[
+        #add simbad reference where no other is given
+        stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]=[
             sim_provider['provider_bibcode'][0] for j in range(len(
-            stars['mag_i_ref'][np.where(stars['mag_i_value'].mask==False)]))]
-    stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]=[
-            sim_provider['provider_bibcode'][0] for j in range(len(
-            stars['mag_j_ref'][np.where(stars['mag_j_value'].mask==False)]))]
+            stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]))]
+        
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
@@ -679,7 +681,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     tables=[sim_provider,stars, sim_h_link,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',
-                    'mag_j_ref','binary_ref','sptype_ref'],['h_link_ref'],
+                    'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],['h_link_ref'],
                     ['id_ref']]
     for cat,ref in zip(tables,ref_columns):
         sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
@@ -687,6 +689,7 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
                          'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
+                         'mag_k_value','mag_k_ref',
                          'sptype_string','sptype_qual','sptype_ref',
                          'plx_value','plx_err','plx_qual','plx_ref']
     #-----------creating mes_binary table------------
@@ -725,7 +728,7 @@ def provider_gk(table_names,gk_list_of_tables):
     gk_provider['provider_name']=['Grant Kennedy Disks']
     gk_provider['provider_url']=['http://drgmk.com/sdb/']
     gk_provider['provider_bibcode']=['priv. comm.']
-    gk_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
+    gk_provider['provider_access']=['2022-12-06']
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
@@ -1457,6 +1460,7 @@ def provider_wds(table_names,wds_list_of_tables,temp=False):
         #currently temp=True not giving same result because wds['system_main_id'][j] are '' and not masked
         for col in ['system_main_id','parent_main_id','primary_main_id','secondary_main_id']:
             wds[col][np.where(wds[col]=='')]=np.ma.masked
+        print('tbd: add provider_access of last query')
     else:
         print(' querying...')
         wds=query(wds_provider['provider_url'][0],adql_query[0])
@@ -1758,7 +1762,7 @@ def building(providers,table_names,list_of_tables):
     
     print(f'Building {table_names[2]} table ...')
     
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','class','sptype'],
+    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
            ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_phys']]
     
@@ -1964,7 +1968,7 @@ plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
 #------------------------obtain data from external sources---------------------
 empty_provider=[ap.table.Table() for i in range(len(table_names))]
 
-wds=provider_wds(table_names,empty_provider[:],True)
+wds=provider_wds(table_names,empty_provider[:],False)
 
 sim=provider_simbad(table_names,empty_provider[:])
 

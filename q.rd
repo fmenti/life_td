@@ -273,6 +273,18 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+        <column name="mag_k_value" type="double precision"
+            ucd="phot.mag;em.IR.K" unit=""
+            tablehead="mag_k_value"
+            description="Magnitude in K filter."/>
+        <column name="mag_k_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="mag_k_source_id"
+            description="Source identifier corresponding
+            to the Magnitude in K filter parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="plx_value" type="double precision"
             ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
@@ -520,6 +532,8 @@ tables may change at any time without prior warning.
                 <map key="mag_i_source_idref" nullExpr="999999" />
                 <map key="mag_j_value" nullExpr="1e+20" />
                 <map key="mag_j_source_idref" nullExpr="999999" />
+                <map key="mag_k_value" nullExpr="1e+20" />
+                <map key="mag_k_source_idref" nullExpr="999999" />
                 <map key="dist_st_value" nullExpr="1e+20" />
                 <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
