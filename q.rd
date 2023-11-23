@@ -1199,6 +1199,7 @@ tables may change at any time without prior warning.
                 join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
                 join life_td.object as planet_ob on (child_object_idref=planet_ob.object_id)
                 left outer join life_td.planet_basic as p on (child_object_idref=p.object_idref)
+            WHERE star_ob.type = 'st' AND planet_ob.type = 'pl'
         )q)
 
         </viewStatement>
