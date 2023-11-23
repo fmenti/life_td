@@ -471,34 +471,34 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="sep_phys_value" type="double precision"
+        <column name="sep_ang_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
-            tablehead="Phys. separation"
-            description="Phys. separation of binary."
+            tablehead="Ang. separation"
+            description="Angular separation of binary."
             verbLevel="1" displayHint="sf=2"/>
-        <column name="sep_phys_err" type="double precision"
+        <column name="sep_ang_err" type="double precision"
             ucd="stat.error;pos.angDistance" unit="arcsec"
-            tablehead="sep_phys_err"
-            description="Object phys. separation error."
+            tablehead="sep_ang_err"
+            description="Object ang. separation error."
             verbLevel="1"/>
-        <column name="sep_phys_obs_date" type="integer"
+        <column name="sep_ang_obs_date" type="integer"
             ucd="time.epoch;obs"
-            tablehead="sep_phys_obs_date"
+            tablehead="sep_ang_obs_date"
             description="Year of observation."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="sep_phys_qual" type="text"
+        <column name="sep_ang_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
-            tablehead="sep_phys_qual"
-            description="Phys. separation quality (A:best, E:worst)"
+            tablehead="sep_ang_qual"
+            description="Ang. separation quality (A:best, E:worst)"
             verbLevel="1">
         </column>
-        <column name="sep_phys_source_idref" type="integer"
+        <column name="sep_ang_source_idref" type="integer"
             ucd="meta.ref;pos.angDistance"
-            tablehead="sep_phys_source_idref"
+            tablehead="sep_ang_source_idref"
             description="Identifier of the source of the
-                sep_phys parameter."
+                sep_ang parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
@@ -561,11 +561,11 @@ tables may change at any time without prior warning.
                 <map key="binary_flag" nullExpr="'?'" />
                 <map key="binary_qual" nullExpr="'?'" />
                 <map key="binary_source_idref" nullExpr="999999" />
-                <map key="sep_phys_value" nullExpr="1e+20" />
-                <map key="sep_phys_err" nullExpr="1e+20" />
-                <map key="sep_phys_obs_date" nullExpr="999999" />
-                <map key="sep_phys_qual" nullExpr="'?'" />
-                <map key="sep_phys_source_idref" nullExpr="999999" />
+                <map key="sep_ang_value" nullExpr="1e+20" />
+                <map key="sep_ang_err" nullExpr="1e+20" />
+                <map key="sep_ang_obs_date" nullExpr="999999" />
+                <map key="sep_ang_qual" nullExpr="'?'" />
+                <map key="sep_ang_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
     </data>
@@ -1081,7 +1081,7 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
-    <table id="mes_sep_phys" onDisk="True" adql="True">
+    <table id="mes_sep_ang" onDisk="True" adql="True">
         <meta name="title">Phys. separation measurement table</meta>
         <meta name="description">
         A list of the stellar phys. separation measurements.
@@ -1098,34 +1098,34 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="sep_phys_value" type="double precision"
+        <column name="sep_ang_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
-            tablehead="Phys. separation"
-            description="Phys. separation of binary."
+            tablehead="Ang. separation"
+            description="Angular separation of binary."
             verbLevel="1" displayHint="sf=2"/>
-        <column name="sep_phys_err" type="double precision"
+        <column name="sep_ang_err" type="double precision"
             ucd="stat.error;pos.angDistance" unit="arcsec"
-            tablehead="sep_phys_err"
-            description="Object phys. separation error."
+            tablehead="sep_ang_err"
+            description="Object ang. separation error."
             verbLevel="1"/>
-        <column name="sep_phys_obs_date" type="integer"
+        <column name="sep_ang_obs_date" type="integer"
             ucd="time.epoch;obs"
-            tablehead="sep_phys_obs_date"
+            tablehead="sep_ang_obs_date"
             description="Year of observation."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="sep_phys_qual" type="text"
+        <column name="sep_ang_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
-            tablehead="sep_phys_qual"
-            description="Phys. separation quality (A:best, E:worst)"
+            tablehead="sep_ang_qual"
+            description="Ang. separation quality (A:best, E:worst)"
             verbLevel="1">
         </column>
-        <column name="sep_phys_source_idref" type="integer"
+        <column name="sep_ang_source_idref" type="integer"
             ucd="meta.ref;pos.angDistance"
-            tablehead="sep_phys_source_idref"
+            tablehead="sep_ang_source_idref"
             description="Identifier of the source of the
-                sep_phys parameter."
+                sep_ang parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
@@ -1141,17 +1141,17 @@ tables may change at any time without prior warning.
         <publish sets="ivo_managed,local"/>
     </data>
 
-    <data id="import_mes_sep_phys">
-        <sources>data/mes_sep_phys.xml</sources>
+    <data id="import_mes_sep_ang">
+        <sources>data/mes_sep_ang.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-           <make table="mes_sep_phys">
+           <make table="mes_sep_ang">
              <rowmaker idmaps="*">
-                 <map key="sep_phys_value" nullExpr="1e+20" />
-                 <map key="sep_phys_err" nullExpr="1e+20" />
-                 <map key="sep_phys_obs_date" nullExpr="999999" />
-                 <map key="sep_phys_qual" nullExpr="'?'" />
-                 <map key="sep_phys_source_idref" nullExpr="999999" />
+                 <map key="sep_ang_value" nullExpr="1e+20" />
+                 <map key="sep_ang_err" nullExpr="1e+20" />
+                 <map key="sep_ang_obs_date" nullExpr="999999" />
+                 <map key="sep_ang_qual" nullExpr="'?'" />
+                 <map key="sep_ang_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
     </data>
@@ -1337,7 +1337,7 @@ tables may change at any time without prior warning.
                 sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, sb.coo_gal_b,
                 sb.teff_st_value, sb.mass_st_value, sb.radius_st_value, 
                 sb.binary_flag, sb.mag_i_value, sb.mag_j_value,  
-                o_parent.main_id AS parent_main_id, sb_parent.sep_phys_value
+                o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
                 FROM life_td.star_basic AS sb
                 JOIN life_td.object AS o ON sb.object_idref=o.object_id
                 LEFT JOIN life_td.h_link AS h ON o.object_id=h.child_object_idref
