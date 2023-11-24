@@ -273,6 +273,18 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+        <column name="mag_k_value" type="double precision"
+            ucd="phot.mag;em.IR.K" unit=""
+            tablehead="mag_k_value"
+            description="Magnitude in K filter."/>
+        <column name="mag_k_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="mag_k_source_id"
+            description="Source identifier corresponding
+            to the Magnitude in K filter parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
         <column name="plx_value" type="double precision"
             ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
@@ -459,27 +471,34 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="sep_phys_value" type="double precision"
+        <column name="sep_ang_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
-            tablehead="Phys. separation"
-            description="Phys. separation of binary."
+            tablehead="Ang. separation"
+            description="Angular separation of binary."
             verbLevel="1" displayHint="sf=2"/>
-        <column name="sep_phys_err" type="double precision"
+        <column name="sep_ang_err" type="double precision"
             ucd="stat.error;pos.angDistance" unit="arcsec"
-            tablehead="sep_phys_err"
-            description="Object phys. separation error."
+            tablehead="sep_ang_err"
+            description="Object ang. separation error."
             verbLevel="1"/>
-        <column name="sep_phys_qual" type="text"
+        <column name="sep_ang_obs_date" type="integer"
+            ucd="time.epoch;obs"
+            tablehead="sep_ang_obs_date"
+            description="Year of observation."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="sep_ang_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
-            tablehead="sep_phys_qual"
-            description="Phys. separation quality (A:best, E:worst)"
+            tablehead="sep_ang_qual"
+            description="Ang. separation quality (A:best, E:worst)"
             verbLevel="1">
         </column>
-        <column name="sep_phys_source_idref" type="integer"
+        <column name="sep_ang_source_idref" type="integer"
             ucd="meta.ref;pos.angDistance"
-            tablehead="sep_phys_source_idref"
+            tablehead="sep_ang_source_idref"
             description="Identifier of the source of the
-                sep_phys parameter."
+                sep_ang parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
@@ -513,6 +532,8 @@ tables may change at any time without prior warning.
                 <map key="mag_i_source_idref" nullExpr="999999" />
                 <map key="mag_j_value" nullExpr="1e+20" />
                 <map key="mag_j_source_idref" nullExpr="999999" />
+                <map key="mag_k_value" nullExpr="1e+20" />
+                <map key="mag_k_source_idref" nullExpr="999999" />
                 <map key="dist_st_value" nullExpr="1e+20" />
                 <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
@@ -540,10 +561,11 @@ tables may change at any time without prior warning.
                 <map key="binary_flag" nullExpr="'?'" />
                 <map key="binary_qual" nullExpr="'?'" />
                 <map key="binary_source_idref" nullExpr="999999" />
-                <map key="sep_phys_value" nullExpr="1e+20" />
-                <map key="sep_phys_err" nullExpr="1e+20" />
-                <map key="sep_phys_qual" nullExpr="'?'" />
-                <map key="sep_phys_source_idref" nullExpr="999999" />
+                <map key="sep_ang_value" nullExpr="1e+20" />
+                <map key="sep_ang_err" nullExpr="1e+20" />
+                <map key="sep_ang_obs_date" nullExpr="999999" />
+                <map key="sep_ang_qual" nullExpr="'?'" />
+                <map key="sep_ang_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
     </data>
@@ -824,8 +846,11 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
-                 <map key="mass_pl_rel" nullExpr="'?'"/>
+                 <map key="mass_pl_value" nullExpr="1e+20" />
+                 <map key="mass_pl_err" nullExpr="1e+20" />
                  <map key="mass_pl_qual" nullExpr="'?'" />
+                 <map key="mass_pl_source_idref" nullExpr="999999" />
+                 <map key="mass_pl_rel" nullExpr="'?'"/>
              </rowmaker>
         </make>
     </data>
@@ -1056,7 +1081,7 @@ tables may change at any time without prior warning.
         </make>
     </data>
 
-    <table id="mes_sep_phys" onDisk="True" adql="True">
+    <table id="mes_sep_ang" onDisk="True" adql="True">
         <meta name="title">Phys. separation measurement table</meta>
         <meta name="description">
         A list of the stellar phys. separation measurements.
@@ -1073,27 +1098,34 @@ tables may change at any time without prior warning.
             other tables)."
             required="True"
             verbLevel="1"/>
-        <column name="sep_phys_value" type="double precision"
+        <column name="sep_ang_value" type="double precision"
             ucd="pos.angDistance" unit="arcsec"
-            tablehead="Phys. separation"
-            description="Phys. separation of binary."
+            tablehead="Ang. separation"
+            description="Angular separation of binary."
             verbLevel="1" displayHint="sf=2"/>
-        <column name="sep_phys_err" type="double precision"
+        <column name="sep_ang_err" type="double precision"
             ucd="stat.error;pos.angDistance" unit="arcsec"
-            tablehead="sep_phys_err"
-            description="Object phys. separation error."
+            tablehead="sep_ang_err"
+            description="Object ang. separation error."
             verbLevel="1"/>
-        <column name="sep_phys_qual" type="text"
+        <column name="sep_ang_obs_date" type="integer"
+            ucd="time.epoch;obs"
+            tablehead="sep_ang_obs_date"
+            description="Year of observation."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="sep_ang_qual" type="text"
             ucd="meta.code.qual;pos.angDistance"
-            tablehead="sep_phys_qual"
-            description="Phys. separation quality (A:best, E:worst)"
+            tablehead="sep_ang_qual"
+            description="Ang. separation quality (A:best, E:worst)"
             verbLevel="1">
         </column>
-        <column name="sep_phys_source_idref" type="integer"
+        <column name="sep_ang_source_idref" type="integer"
             ucd="meta.ref;pos.angDistance"
-            tablehead="sep_phys_source_idref"
+            tablehead="sep_ang_source_idref"
             description="Identifier of the source of the
-                sep_phys parameter."
+                sep_ang parameter."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
@@ -1109,16 +1141,17 @@ tables may change at any time without prior warning.
         <publish sets="ivo_managed,local"/>
     </data>
 
-    <data id="import_mes_sep_phys">
-        <sources>data/mes_sep_phys.xml</sources>
+    <data id="import_mes_sep_ang">
+        <sources>data/mes_sep_ang.xml</sources>
         <!-- Data acquired using the skript data_acquisition.py. -->
         <voTableGrammar/>
-           <make table="mes_sep_phys">
+           <make table="mes_sep_ang">
              <rowmaker idmaps="*">
-                 <map key="sep_phys_value" nullExpr="1e+20" />
-                 <map key="sep_phys_err" nullExpr="1e+20" />
-                 <map key="sep_phys_qual" nullExpr="'?'" />
-                 <map key="sep_phys_source_idref" nullExpr="999999" />
+                 <map key="sep_ang_value" nullExpr="1e+20" />
+                 <map key="sep_ang_err" nullExpr="1e+20" />
+                 <map key="sep_ang_obs_date" nullExpr="999999" />
+                 <map key="sep_ang_qual" nullExpr="'?'" />
+                 <map key="sep_ang_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>
     </data>
@@ -1166,6 +1199,7 @@ tables may change at any time without prior warning.
                 join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
                 join life_td.object as planet_ob on (child_object_idref=planet_ob.object_id)
                 left outer join life_td.planet_basic as p on (child_object_idref=p.object_idref)
+            WHERE star_ob.type = 'st' AND planet_ob.type = 'pl'
         )q)
 
         </viewStatement>
@@ -1294,6 +1328,27 @@ tables may change at any time without prior warning.
                 WHERE plx_value is Null or plx_qual in ('D','E') or
                 plx_qual is Null
                 </meta>
+        <meta name="_example" title="LIFE-StarCat candidates">
+            The input catalog for the LIFE yield estimations (LIFE-StarCat) is
+            created using the following query in addition to some postprocessing
+            in regards of multiplicity afterwards.
+
+            .. tapquery::
+                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value,
+                sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, sb.coo_gal_b,
+                sb.teff_st_value, sb.mass_st_value, sb.radius_st_value,
+                sb.binary_flag, sb.mag_i_value, sb.mag_j_value,
+                o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
+                FROM life_td.star_basic AS sb
+                JOIN life_td.object AS o ON sb.object_idref=o.object_id
+                LEFT JOIN life_td.h_link AS h ON o.object_id=h.child_object_idref
+                LEFT JOIN life_td.object AS o_parent ON
+                 h.parent_object_idref=o_parent.object_id
+                LEFT JOIN life_td.star_basic AS sb_parent ON
+                 o_parent.object_id=sb_parent.object_idref
+                WHERE o.type = 'st' AND sb.plx_value > 33. AND
+                sb.class_lum IS NOT NULL
+                </meta>
         <nullCore/>
     </service>
 
@@ -1305,7 +1360,9 @@ tables may change at any time without prior warning.
         <regTest title="LIFE form service appears to work.">
         <url parSet="form" hscs_pos="14 Her" hscs_sr="1">cone/form</url>
         <code>
-            self.assertHasStrings("HD 145675c", # planet id
+            self.assertHasStrings(
+                "Matched: 3",
+                "*  14 Her c", # planet id (main ids can change over time)
                 "17.90",  # Distance
                 "7.100")  # planet mass of planet c
         </code>
