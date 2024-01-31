@@ -551,7 +551,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
 
 
 
-def provider_exo(table_names,exo_list_of_tables,distance_cut_in_pc,temp=False):
+def provider_exo(table_names,exo_list_of_tables,temp=False):
     """
     This function obtains the exomercat data and arranges it in a way easy to
     ingest into the database. Currently the exomercat server is not online.
@@ -753,7 +753,7 @@ def provider_exo(table_names,exo_list_of_tables,distance_cut_in_pc,temp=False):
 
 
 
-def provider_life(table_names,life_list_of_tables,distance_cut_in_pc):
+def provider_life(table_names,life_list_of_tables):
     """
     This function loads the SIMBAD data obtained by the function provider_simbad
     and postprocesses it to provide more useful information. It uses a model
@@ -1182,7 +1182,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
 
 
 
-def provider_wds(table_names,wds_list_of_tables,distance_cut_in_pc,temp=False):
+def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     """
     This function obtains the wds provider data and arranges it in a way
     easy to ingest into the database.
@@ -1219,70 +1219,84 @@ def provider_wds(table_names,wds_list_of_tables,distance_cut_in_pc,temp=False):
             wds[col][np.where(wds[col]=='')]=np.ma.masked
         print('tbd: add provider_access of last query')
     else:
-        print(' querying...')
+        print(' querying VizieR for WDS...')
         wds=query(wds_provider['provider_url'][0],adql_query[0])
         print('length query',len(wds))
         
         # I need to match the wds objects with the simbad ones to inforce the
-        # distance cut.
+        # distance cut since wds does not have distance information.
         
-        # type transformation for object comparison in later join 
+        # initializing and setting type for object comparison in later join 
         for col in ['sim_wds_id','system_name','primary','secondary']:
             wds[col]=wds['wds_name'].astype(object)
         
-        # simbad misses some system objects. Therefore I need to join on the
-        # children objects instead
+        # assigning correct name of system, primary and secondary for each wds object
         for j in range(len(wds)):
-            if wds['wds_comp'][j]=='':
-                wds['system_name'][j]='WDS J'+wds['wds_name'][j]
+            if wds['wds_comp'][j]=='':#trivial binaries
+                wds['system_name'][j]='WDS J'+wds['wds_name'][j]+'AB'
+                #AB added since apparently simbad calls trivial binary system AB too
                 wds['primary'][j]='WDS J'+wds['wds_name'][j]+'A'
                 wds['secondary'][j]='WDS J'+wds['wds_name'][j]+'B'
-            else:
+            else:#higer order multiples
                 wds['system_name'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j]
-                wds['primary'][j]=''
-                wds['secondary'][j]=''
-            
+                if len(wds['wds_comp'][j])==2:
+                    wds['primary'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j][0]
+                    wds['secondary'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j][1]
+                else:
+                    components=wds['wds_comp'][j].split(',')
+                    wds['primary'][j]='WDS J'+wds['wds_name'][j]+components[0]
+                    wds['secondary'][j]='WDS J'+wds['wds_name'][j]+components[1]
+        print('number of trivial binary systems:',len(wds[np.where(wds['wds_comp']=='')]))
+                
+        test_objects=np.array(test_objects)
+        if len(test_objects)>0:
+            print('in wds as system_name', test_objects[np.where(np.in1d(test_objects,wds['system_name']))])
+            print('in wds as primary',test_objects[np.where(np.in1d(test_objects,wds['primary']))])
+            print('in wds as secondary', test_objects[np.where(np.in1d(test_objects,wds['secondary']))])
+
+
     # an alternative would be to query simbad for the main id and then cut by distance
     # this however takes way longer as it joins 150'000 elements
     #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
     #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
         print(' performing distance cut...')
         
-        NTsy=wds[np.where(wds['wds_comp']!='')]
-        NTsy=distance_cut(NTsy,colname='system_name',main_id=False)
-        print('on non trivial binary systems e.g. WDS J...AB',len(NTsy))
-        
-        allTsy=wds[np.where(wds['wds_comp']=='')]
-        Tsy=distance_cut(allTsy[:],colname='system_name',main_id=False)
-        print('on trivial binariy systems e.g. WDS J...',len(Tsy))
-        #apparently simbad calls trivial binary system AB too
-        
-        wds=ap.table.vstack([NTsy,Tsy])
-        wds.rename_column('main_id','system_main_id')
-        
-        # get system_main_id for trivial binaries by joining sim_h_link on main_id
+        #assigning main_id for system using sim_hlink and cutting on the system or the components
+        wds_system_cut=distance_cut(wds,colname='system_name',main_id=False)
+        wds_system_cut.rename_column('main_id','system_main_id')
+        print(wds_system_cut.colnames)
+        print(wds_system_cut)
+        wds_primary_cut=distance_cut(wds,colname='primary',main_id=False)
+        print(wds_primary_cut.colnames)
+        print(wds_primary_cut)
+        wds_secondary_cut=distance_cut(wds,colname='secondary',main_id=False)
         [sim_h_link]=hf.load(['sim_h_link'])
-        
-        Tp=distance_cut(allTsy[:],colname='primary',main_id=False)
-        print('on trivial binaries primary star e.g. WDS J...A',len(Tp))
-        Tp=ap.table.join(Tp,sim_h_link['main_id','parent_main_id'],
+        #joining parent object
+        wds_primary_cut=ap.table.join(wds_primary_cut,sim_h_link['main_id','parent_main_id'],
                                   keys='main_id',join_type='left')
-        Tp.rename_column('main_id','primary_main_id')
-        
-        Ts=distance_cut(allTsy[:],colname='secondary',main_id=False)
-        print('on trivial binaries secondary star e.g. WDS J...B',len(Ts))
-        Ts=ap.table.join(Ts,sim_h_link['main_id','parent_main_id'],
+        wds_primary_cut.rename_columns(['main_id','parent_main_id'],['primary_main_id','system_main_id'])
+        print(wds_primary_cut.colnames)
+        print(wds_primary_cut)
+        wds_secondary_cut=ap.table.join(wds_secondary_cut,sim_h_link['main_id','parent_main_id'],
                                   keys='main_id',join_type='left')
-        Ts.rename_column('main_id','secondary_main_id')
-        
-        # Combining all tables into one, Tsy left out as no objects contained in it
-        wds=ap.table.vstack([wds,Tp])
-        wds=ap.table.vstack([wds,Ts])
+        wds_secondary_cut.rename_columns(['main_id','parent_main_id'],['secondary_main_id','system_main_id'])
+        wds=ap.table.vstack([wds_system_cut,wds_primary_cut])
+        wds=ap.table.vstack([wds,wds_secondary_cut])
+        print('lenwds',len(wds))
+                        
+        if len(test_objects)>0:
+            print(wds['system_main_id','primary_main_id','secondary_main_id'])
+            print('in wds as system_main_id',test_objects[np.where(np.in1d(test_objects,wds['system_main_id']))])
+            print('in wds as primary_main_id',test_objects[np.where(np.in1d(test_objects,wds['primary_main_id']))])
+            print('in wds as secondary_main_id',test_objects[np.where(np.in1d(test_objects,wds['secondary_main_id']))])
         
         hf.save([wds],['wds'])
     
     wds['system_main_id']=wds['system_main_id'].astype(object)
     wds['ids']=wds['system_name'].astype(object)
+    wds['ids_primary']=wds['primary'].astype(object)
+    wds['ids_secondary']=wds['secondary'].astype(object)
+
     
     #-----------------creating output table wds_ident and wds_h_link------------------------
     # create wds_ident (for systems)
@@ -1291,23 +1305,29 @@ def provider_wds(table_names,wds_list_of_tables,distance_cut_in_pc,temp=False):
     wds_h_link=ap.table.Table(names=['main_id','parent_main_id','h_link_ref'],dtype=[object,object,object])
     
     for j in range(len(wds)):
-        # filling in system_main_id from parent_main_id data
-        if type(wds['system_main_id'][j])==np.ma.core.MaskedConstant:
-            if type(wds['parent_main_id'][j])!=np.ma.core.MaskedConstant:
-                wds['system_main_id'][j]=wds['parent_main_id'][j]
-                # adding wds_ident info where the system_name does not match the simbad id in parent_main_id
-                wds_ident.add_row([wds['system_main_id'][j],wds['system_name'][j],wds_provider['provider_bibcode'][0]])
-            else:
-                wds['system_main_id'][j]=wds['system_name'][j]
-                # adding wds_ident info where there is no simbad id in parent_main_id
-                wds_ident.add_row([wds['system_main_id'][j],wds['system_name'][j],wds_provider['provider_bibcode'][0]])
-                if type(wds['primary_main_id'][j])!=np.ma.core.MaskedConstant:
-                    wds_h_link.add_row([wds['primary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
-                if type(wds['secondary_main_id'][j])!=np.ma.core.MaskedConstant:
-                    wds_h_link.add_row([wds['secondary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
-
+        # collecting all system identifiers
+        wds_ident.add_row([wds['system_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
+        wds_ident.add_row([wds['system_main_id'][j],wds['system_name'][j],wds_provider['provider_bibcode'][0]])
+        
+        # collecting primary identifiers in ident and add h_link entry for them
+        if type(wds['primary_main_id'][j])!=np.ma.core.MaskedConstant:
+            wds_h_link.add_row([wds['primary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
+            wds_ident.add_row([wds['primary_main_id'][j],wds['primary_main_id'][j],wds_provider['provider_bibcode'][0]])
+            if wds['primary_main_id'][j]!=wds['primary'][j]:
+                wds['ids_primary'][j]=wds['primary_main_id'][j]+'|'+wds['primary'][j]
+                wds_ident.add_row([wds['primary_main_id'][j],wds['primary'][j],wds_provider['provider_bibcode'][0]])
+        # collecting secondary identifiers in ident and add h_link entry for them
+        if type(wds['secondary_main_id'][j])!=np.ma.core.MaskedConstant:
+            wds_h_link.add_row([wds['secondary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
+            wds_ident.add_row([wds['secondary_main_id'][j],wds['secondary_main_id'][j],wds_provider['provider_bibcode'][0]])
+            if wds['secondary_main_id'][j]!=wds['secondary'][j]:
+                wds['ids_secondary'][j]=wds['secondary_main_id'][j]+'|'+wds['secondary'][j]
+                wds_ident.add_row([wds['secondary_main_id'][j],wds['secondary'][j],wds_provider['provider_bibcode'][0]])
+        # collecting ids for systems        
         if wds['system_main_id'][j]!=wds['system_name'][j]:
             wds['ids'][j]=wds['system_main_id'][j]+'|'+wds['system_name'][j]
+        
+        
     #I did not include identifiers that are from simbad in wds_ident[id]. 
     #I already have that information in the simbad provider
     
@@ -1321,7 +1341,20 @@ def provider_wds(table_names,wds_list_of_tables,distance_cut_in_pc,temp=False):
     wds_objects=wds['system_main_id','ids'][:]
     wds_objects.rename_column('system_main_id','main_id')
     wds_objects['type']=['sy' for j in wds_objects]
-    wds_objects=ap.table.unique(wds_objects)  
+     
+    #add primary and secondary identifiers but only those that are not in system. 
+    to_be_added_p=wds['primary_main_id','ids_primary'][np.where(np.invert(np.in1d(
+            wds['primary_main_id'],wds['system_main_id'])))]
+    to_be_added_p.rename_columns(['primary_main_id','ids_primary'],['main_id','ids'])
+    to_be_added_s=wds['secondary_main_id','ids_secondary'][np.where(np.invert(np.in1d(
+            wds['secondary_main_id'],wds['system_main_id'])))]
+    to_be_added_s.rename_columns(['secondary_main_id','ids_secondary'],['main_id','ids'])
+    to_be_added=ap.table.vstack([to_be_added_p,to_be_added_s])
+
+    to_be_added['type']=['st' for j in to_be_added]
+    wds_objects=ap.table.vstack([wds_objects,to_be_added])
+    wds_objects=ap.table.unique(wds_objects) 
+    
     
     #-----------------creating output table wds_mes_binary------------------------
     wds_mes_binary=wds_objects['main_id','type'][np.where(wds_objects['type']=='sy')]
