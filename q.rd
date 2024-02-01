@@ -70,7 +70,8 @@ tables may change at any time without prior warning.
 
     <data id="import_source">
         <sources>data/sources.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="source">
             <rowmaker idmaps="*">
@@ -116,7 +117,8 @@ tables may change at any time without prior warning.
 
     <data id="import_object">
         <sources>data/objects.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="object">
              <rowmaker idmaps="*">
@@ -160,7 +162,8 @@ tables may change at any time without prior warning.
 
     <data id="import_provider">
         <sources>data/provider.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="provider">
             <rowmaker idmaps="*">
@@ -506,7 +509,8 @@ tables may change at any time without prior warning.
 
     <data id="import_star_basic">
         <sources>data/star_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="star_basic">
             <rowmaker idmaps="*">
@@ -621,7 +625,8 @@ tables may change at any time without prior warning.
 
     <data id="import_planet_basic">
         <sources>data/planet_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="planet_basic">
             <rowmaker idmaps="*">
@@ -685,7 +690,8 @@ tables may change at any time without prior warning.
 
     <data id="import_disk_basic">
         <sources>data/disk_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="disk_basic">
             <rowmaker idmaps="*">
@@ -740,7 +746,8 @@ tables may change at any time without prior warning.
 
     <data id="import_h_link">
         <sources>data/h_link.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="h_link">
              <rowmaker idmaps="*">
@@ -784,7 +791,8 @@ tables may change at any time without prior warning.
 
     <data id="import_ident">
         <sources>data/ident.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="ident">
              <rowmaker idmaps="*">
@@ -842,7 +850,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_pl">
         <sources>data/mes_mass_pl.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
@@ -901,7 +910,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_teff_st">
         <sources>data/mes_teff_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_teff_st">
              <rowmaker idmaps="*">
@@ -959,7 +969,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_radius_st">
         <sources>data/mes_radius_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_radius_st">
              <rowmaker idmaps="*">
@@ -1017,7 +1028,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_st">
         <sources>data/mes_mass_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_mass_st">
              <rowmaker idmaps="*">
@@ -1070,7 +1082,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_binary">
         <sources>data/mes_binary.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_binary">
              <rowmaker idmaps="*">
@@ -1143,7 +1156,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_sep_ang">
         <sources>data/mes_sep_ang.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_sep_ang">
              <rowmaker idmaps="*">
