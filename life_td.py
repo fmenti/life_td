@@ -25,10 +25,10 @@ def create_life_td(distance_cut_in_pc):
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
     
     sim=p.provider_simbad(table_names,empty_provider[:],distance_cut_in_pc)
-    wds=p.provider_wds(table_names,empty_provider[:],distance_cut_in_pc,False)
+    wds=p.provider_wds(table_names,empty_provider[:],False)
     gk=p.provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
-    exo=p.provider_exo(table_names,empty_provider[:],distance_cut_in_pc,temp=False)
-    life=p.provider_life(table_names,empty_provider[:],distance_cut_in_pc)
+    exo=p.provider_exo(table_names,empty_provider[:],temp=False)
+    life=p.provider_life(table_names,empty_provider[:])
     gaia=p.provider_gaia(table_names,empty_provider[:],distance_cut_in_pc)
 
     #------------------------combine data from external sources-------------------
