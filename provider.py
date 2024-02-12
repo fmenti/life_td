@@ -471,20 +471,20 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     #---------------define provider--------------------------------------------
     gk_provider=ap.table.Table()
     gk_provider['provider_name']=['Grant Kennedy Disks']
-    gk_provider['provider_url']=['http://drgmk.com/sdb/']
+    gk_provider['provider_url']=['http://drgmk.com/sdb/samples/disks_30pc_/']
     gk_provider['provider_bibcode']=['priv. comm.']
-    gk_provider['provider_access']=['2022-12-06']
+    gk_provider['provider_access']=['2024-02-09']
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
+    print('tbd: automate downloading using  wget in a terminal with the url')
+    
     gk_disks=ap.io.votable.parse_single_table(
-        "data/additional_data/Grant_absil_2013_.xml").to_table()
+        "data/additional_data/sdb_30pc_09_02_2024.xml").to_table()
     #transforming from string type into object to have variable length
-    gk_disks=hf.stringtoobject(gk_disks,212)
+    gk_disks=hf.stringtoobject(gk_disks,300)
     #removing objects with plx_value=='None' or masked entries
-    gk_disks['plx_value']=gk_disks['plx_value'].filled('None')
-    gk_disks=gk_disks[np.where(gk_disks['plx_value']!='None')]
-    gk_disks['plx_value']=gk_disks['plx_value'].astype(float)
+    gk_disks=gk_disks[np.invert(gk_disks['plx_value'].mask.nonzero()[0])]
     #sorting out everything with plx_value too big
     gk_disks=gk_disks[np.where(gk_disks['plx_value']>plx_in_mas_cut)]
     #adds the column for object type
@@ -492,14 +492,15 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     gk_disks['disks_ref']=['Grant Kennedy'
                         for j in range(len(gk_disks))]
     #making sure identifiers are unique
-    ind=gk_disks.group_by('id').groups.indices
-    for i in range(len(ind)-1):
-        l=ind[i+1]-ind[i]
-        if l==2:
-            gk_disks['id'][ind[i]]=gk_disks['id'][ind[i]]+'a'
-            gk_disks['id'][ind[i]+1]=gk_disks['id'][ind[i]+1]+'b'
-        if l>2:
-            print('more than two disks with same name')
+    if len(np.unique(gk_disks['id']))!=len(gk_disks['id']):
+        ind=gk_disks.group_by('id').groups.indices
+        for i in range(len(ind)-1):
+            l=ind[i+1]-ind[i]
+            if l==2:
+                gk_disks['id'][ind[i]]=gk_disks['id'][ind[i]]+'a'
+                gk_disks['id'][ind[i]+1]=gk_disks['id'][ind[i]+1]+'b'
+            if l>2:
+                print('more than two disks with same name')
     #fetching updated main identifier of host star from simbad
     gk_disks.rename_column('main_id','gk_host_main_id')
     gk_disks=fetch_main_id(gk_disks,colname='gk_host_main_id',name='main_id',
@@ -528,13 +529,13 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     #--------------creating output table gk_disk_basic-------------------------
     gk_disk_basic=gk_disks['id','rdisk_bb','e_rdisk_bb','disks_ref']
     #converting from string to float
-    for column in ['rdisk_bb','e_rdisk_bb']:
-        #replacing 'None' with 'nan' as the first one is not float convertible
-        gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
-        gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
+    #for column in ['rdisk_bb','e_rdisk_bb']:
+     #   #replacing 'None' with 'nan' as the first one is not float convertible
+      #  gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
+       # gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
         #though this poses the issue that the float default float fill_value is 1e20
-        gk_disk_basic[column].filled()
-        gk_disk_basic[column]=gk_disk_basic[column].astype(float)
+    #    gk_disk_basic[column].filled()
+     #   gk_disk_basic[column]=gk_disk_basic[column].astype(float)
     gk_disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
                                  ['main_id','rad_value','rad_err','rad_ref'])
     gk_disk_basic=gk_disk_basic[np.where(np.isfinite(gk_disk_basic['rad_value']))]
@@ -548,7 +549,6 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
         if table_names[i]=='disk_basic': gk_list_of_tables[i]=gk_disk_basic
         hf.save([gk_list_of_tables[i]],['gk_'+table_names[i]])
     return gk_list_of_tables
-
 
 
 def provider_exo(table_names,exo_list_of_tables,temp=False):
