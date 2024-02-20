@@ -480,8 +480,7 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
         if table_names[i]=='h_link': sim_list_of_tables[i]=sim_h_link
         if table_names[i]=='star_basic': sim_list_of_tables[i]=sim_star_basic
         if table_names[i]=='mes_binary': sim_list_of_tables[i]=sim_mes_binary
-        hf.save([sim_list_of_tables[i]],['sim_'+table_names[i]])
-        
+        hf.save([sim_list_of_tables[i][:]],['sim_'+table_names[i]])
     return sim_list_of_tables
 
 
@@ -577,7 +576,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
         if table_names[i]=='ident': gk_list_of_tables[i]=gk_ident
         if table_names[i]=='h_link': gk_list_of_tables[i]=gk_h_link
         if table_names[i]=='disk_basic': gk_list_of_tables[i]=gk_disk_basic
-        hf.save([gk_list_of_tables[i]],['gk_'+table_names[i]])
+        hf.save([gk_list_of_tables[i][:]],['gk_'+table_names[i]])
     return gk_list_of_tables
 
 
@@ -780,7 +779,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         if table_names[i]=='ident': exo_list_of_tables[i]=exo_ident
         if table_names[i]=='h_link': exo_list_of_tables[i]=exo_h_link
         if table_names[i]=='mes_mass_pl': exo_list_of_tables[i]=exo_mes_mass_pl
-        hf.save([exo_list_of_tables[i]],['exo_'+table_names[i]])
+        hf.save([exo_list_of_tables[i][:]],['exo_'+table_names[i]])
     return exo_list_of_tables
 
 
@@ -864,9 +863,11 @@ def provider_life(table_names,life_list_of_tables):
         temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         #tbd: rewrite code using recoursive function
-        #tbd: rewrite code so that spectral types starting with small d are not droped.
+        
         for i in range(len(temp)):
             #sorting out objects like M5V+K7V
+            #strip d for spectral types starting with small d because it is an old annotation for dwarf star
+            temp['sptype_string'][i]=temp['sptype_string'][i].strip('d')
             if (len(temp['sptype_string'][i].split('+'))==1 and
             #sorting out entries like '', DA2.9, T1V
                     len(temp['sptype_string'][i])>0 and 
@@ -1045,6 +1046,10 @@ def provider_life(table_names,life_list_of_tables):
     for cat,ref in zip(tables,ref_columns):
         life_sources=sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
     
+    #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
+    #life parameter creation
+    life_star_basic.remove_column('sptype_string')
+    
     for i in range(len(table_names)):
         if table_names[i]=='sources': life_list_of_tables[i]=life_sources
         if table_names[i]=='provider': life_list_of_tables[i]=life_provider
@@ -1052,7 +1057,7 @@ def provider_life(table_names,life_list_of_tables):
         if table_names[i]=='mes_teff_st': life_list_of_tables[i]=life_mes_teff_st
         if table_names[i]=='mes_radius_st': life_list_of_tables[i]=life_mes_radius_st
         if table_names[i]=='mes_mass_st': life_list_of_tables[i]=life_mes_mass_st
-        hf.save([life_list_of_tables[i]],['life_'+table_names[i]])
+        hf.save([life_list_of_tables[i][:]],['life_'+table_names[i]])
     return life_list_of_tables
 
 
@@ -1212,7 +1217,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
         if table_names[i]=='mes_radius_st': gaia_list_of_tables[i]=gaia_mes_radius_st
         if table_names[i]=='mes_mass_st': gaia_list_of_tables[i]=gaia_mes_mass_st
         if table_names[i]=='mes_binary': gaia_list_of_tables[i]=gaia_mes_binary
-        hf.save([gaia_list_of_tables[i]],['gaia_'+table_names[i]])
+        hf.save([gaia_list_of_tables[i][:]],['gaia_'+table_names[i]])
     return gaia_list_of_tables
 
 
@@ -1246,6 +1251,7 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     #------------------querrying-----------------------------------------------
     print('Creating ',wds_provider['provider_name'][0],' tables ...')
     #perform query for objects with parallax >50mas
+    test_objects=np.array(test_objects)
     if temp:
         print(' loading...')
         [wds]=hf.load(['wds'])
@@ -1283,7 +1289,6 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
                     wds['secondary'][j]='WDS J'+wds['wds_name'][j]+components[1]
         print('number of trivial binary systems:',len(wds[np.where(wds['wds_comp']=='')]))
                 
-        test_objects=np.array(test_objects)
         if len(test_objects)>0:
             print('in wds as system_name', test_objects[np.where(np.in1d(test_objects,wds['system_name']))])
             print('in wds as primary',test_objects[np.where(np.in1d(test_objects,wds['primary']))])
@@ -1334,8 +1339,8 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     wds_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object],masked=True)
     # create wds_h_link (for systems)
     wds_h_link=ap.table.Table(names=['main_id','parent_main_id'],dtype=[object,object])
-
     #add all relevant invormation
+    #about identifiers
     table_main=['system_name','system_main_id','system_main_id',
                'primary','primary_main_id','primary_main_id',
                'secondary','secondary_main_id','secondary_main_id']
@@ -1344,21 +1349,21 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
              'secondary','secondary_main_id','secondary']
     empty=ap.table.Table(names=['main_id'],dtype=[object],masked=True)
     for id1,id2 in zip(table_main,table_id):
-        temp=empty
+        temp=empty.copy()
         temp['main_id']=wds[id1].astype(object)
         temp['id']=wds[id2].astype(object)
         wds_ident=ap.table.vstack([wds_ident,temp])
-
+    
+    #about relations of objects
     table_main_id=['primary','primary','primary_main_id','primary_main_id',
                    'secondary','secondary','secondary_main_id','secondary_main_id']
     table_parent=['system_name','system_main_id','system_name','system_main_id',
                   'system_name','system_main_id','system_name','system_main_id']
     for id1,id2 in zip(table_main_id,table_parent):
-        temp=empty
+        temp=empty.copy()
         temp['main_id']=wds[id1].astype(object)
         temp['parent_main_id']=wds[id2].astype(object)
         wds_h_link=ap.table.vstack([wds_h_link,temp])
-    
     #delete all rows containing masked entries
     wds_ident.remove_rows(wds_ident['main_id'].mask.nonzero()[0])
     wds_ident.remove_rows(wds_ident['id'].mask.nonzero()[0])
@@ -1381,20 +1386,38 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
 
     #where h_link main_id not in ident_main_id
     not_main_id=np.invert(np.in1d(wds_h_link['main_id'],wds_ident['main_id']))
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in h_link main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+        print('number of test objects that are in main_id of ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+        print('number of test objects that are in main_id of h_link but not ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id'][not_main_id]))])
 
     #replace it with the corresponding  ident main_id
     for j in range(len(wds_h_link['main_id'][not_main_id])):
-        wds_h_link['main_id'][not_main_id][j]=wds_ident['main_id'][np.where(
-                wds_ident['id']==wds_h_link['main_id'][not_main_id][j])]
-
+        temp=wds_h_link['main_id'][not_main_id][j]
+        #why is this line not working? am I assigning stuff to a copy instead of alias?
+        wds_h_link['main_id'][np.where(wds_h_link['main_id']==temp)]=wds_ident['main_id'][np.where(
+                wds_ident['id']==temp)]
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in h_link main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+        print('number of test objects that are in main_id of ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+    
+    #where h_link parent_main_id not in ident_main_id
     not_parent_main_id=np.invert(np.in1d(wds_h_link['parent_main_id'],wds_ident['main_id']))
 
     #replace it with the corresponding  ident main_id
     for j in range(len(wds_h_link['parent_main_id'][not_parent_main_id])):
         if len(wds_ident['main_id'][np.where(
                     wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])])==1:
-            wds_h_link['parent_main_id'][not_parent_main_id][j]=wds_ident['main_id'][np.where(
-                    wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])]
+            temp=wds_h_link['parent_main_id'][not_parent_main_id][j]
+            wds_h_link['parent_main_id'][np.where(wds_h_link['parent_main_id']==temp)]=wds_ident['main_id'][np.where(
+                    wds_ident['id']==temp)]
         #else:
         #nestled multiples with non hierarchical measurements e.g. AC component when A and B are closest and C further away
             #print(wds_ident['main_id'][np.where(
@@ -1481,6 +1504,5 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
         if table_names[i]=='h_link': wds_list_of_tables[i]=wds_h_link
         if table_names[i]=='mes_sep_ang': wds_list_of_tables[i]=wds_mes_sep_ang
         if table_names[i]=='mes_binary': wds_list_of_tables[i]=wds_mes_binary 
-        hf.save([wds_list_of_tables[i]],['wds_'+table_names[i]])
-        
+        hf.save([wds_list_of_tables[i][:]],['wds_'+table_names[i]])
     return wds_list_of_tables

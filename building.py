@@ -175,6 +175,16 @@ def initialize_database_tables(table_names,list_of_tables):
                float,float,
                int,object,
                int,object])
+    
+    best_h_link=ap.table.Table(
+        #child object idref (e.g. planet X),
+        #parent object idref (e.g. host star of planet X)
+        #source idref of h_link parameter, h_link reference,
+        #membership probability
+        names=['child_object_idref','parent_object_idref',
+               'h_link_source_idref','h_link_ref','membership'],
+        dtype=[int,int,int,object,int])
+
 
     for i in range(len(table_names)):
         if table_names[i]=='sources': list_of_tables[i]=sources
@@ -191,7 +201,8 @@ def initialize_database_tables(table_names,list_of_tables):
         if table_names[i]=='mes_mass_st': list_of_tables[i]=mes_mass_st
         if table_names[i]=='mes_binary': list_of_tables[i]=mes_binary
         if table_names[i]=='mes_sep_ang': list_of_tables[i]=mes_sep_ang
-        hf.save([list_of_tables[i]],['empty_'+table_names[i]])
+        if table_names[i]=='best_h_link': list_of_tables[i]=best_h_link
+        hf.save([list_of_tables[i][:]],['empty_'+table_names[i]])
     return list_of_tables
 
 #------------------------provider combining-----------------
@@ -200,7 +211,7 @@ def building(providers,table_names,list_of_tables):
     This function builds from the input parameters the tables
     for the LIFE database.
     :param providers: List of astropy tables containing simbad, 
-        grant kennedy, exomercat, gaia and orb6 data.
+        grant kennedy, exomercat, gaia and wds data.
     :param table_names: List of strings corresponding to the names of the 
         astropy tables contained in providers and the return list.
     :param list_of_tables: List of empty astropy tables to be filled
@@ -215,7 +226,7 @@ def building(providers,table_names,list_of_tables):
     cat=[ap.table.Table() for i in range(n_tables)]
     #for the sources and objects joins tables from different providers
     
-    print(f'Building {table_names[0]} table ...')
+    print(f'Building {table_names[0]} table ...')#sources
     for j in range(len(providers)):
         if len(cat[0])>0:
             #joining data from different providers
@@ -225,6 +236,7 @@ def building(providers,table_names,list_of_tables):
             cat[0]=providers[j][0]
         
     #I do this to get those columns that are empty in the data
+    print(cat[0])
     cat[0]=ap.table.vstack([cat[0],init[0]])
     
     # keeping only unique values then create identifiers for those tables
@@ -291,7 +303,7 @@ def building(providers,table_names,list_of_tables):
             cat.remove_columns(['type_1','type_2'])
         return cat
     
-    print(f'Building {table_names[1]} table ...')
+    print(f'Building {table_names[1]} table ...')#objects
     
     for j in range(len(providers)):
             if len(cat[1])>0:
@@ -343,7 +355,7 @@ def building(providers,table_names,list_of_tables):
                             cat[f'{para}_source_idref'][i]=999999
         return cat
     
-    print(f'Building {table_names[2]} table ...')
+    print(f'Building {table_names[2]} table ...')#provider
     
     paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
            ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
@@ -364,10 +376,10 @@ def building(providers,table_names,list_of_tables):
     for i in range(3,n_tables): # for the tables star_basic,...,mes_mass_st
         print(f'Building {table_names[i]} table ...')
         
-        for j in range(len(providers)):#for the different providers
+        for j in range(len(providers)):#for the different providers (simbad,...,wds)
             if len(providers[j][i])>0:
-                #replacing ref with source_idref columns
-                #getting source_idref to each ref
+                #providers[j] is a table containing the two columns ref and provider name
+                #replacing ref columns with corresponding source_idref one
                 #issue is that order providers and provider_name not the same
                 providers[j][i]=match(providers[j][i],cat[0],paras[i-3],providers[j][2]['provider_name'][0])
             if len(cat[i])>0:
@@ -381,135 +393,156 @@ def building(providers,table_names,list_of_tables):
         cat[i]=ap.table.vstack([cat[i],init[i]])
         cat[i]=cat[i].filled() #because otherwise unique does neglect masked columns
         
-        #if resulting catalog not empty
-        if len(cat[i])>0:
+            
+        def best_para(para,mes_table):
+            """
+            This function creates a table containing only the highest
+            quality measurement for each object.
+            :param para: string describing parameter e.g. mass
+            :param mes_table: Astropy table containing only columns
+                'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
+            """
+            if para=='membership':
+                best_para=mes_table[:0].copy()
+                grouped_mes_table=mes_table.group_by(['child_object_idref',
+                                                      'parent_object_idref'])
+                ind=grouped_mes_table.groups.indices
+                for i in range(len(ind)-1):
+                    l=ind[i+1]-ind[i]
+                    if l==1:
+                        best_para.add_row(grouped_mes_table[ind[i]])
+                    else:
+                        temp=grouped_mes_table[ind[i]:ind[i+1]]
+                        not_nan_temp=temp[np.where(temp[para]!=999999)]
+                        if len(not_nan_temp)>0:
+                            max_row=not_nan_temp[np.where(
+                                    not_nan_temp[para]==max(not_nan_temp[para]))]
+                            for j in range(ind[i],ind[i+1]):
+                                if grouped_mes_table[para][j]==max(not_nan_temp[para]):
+                                    best_para.add_row(grouped_mes_table[j])
+                                    break#make sure not multiple of same max value are added
+                        else:#if none of the objects has a membership entry then pick just first one
+                            best_para.add_row(grouped_mes_table[ind[i]])
+                return best_para
+            if para=='binary':
+                columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
+            elif para=='mass_pl':
+                columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
+            elif para=='sep_ang':
+                columns=['main_id',para+'_value',para+'_err',para+'_obs_date',para+'_qual',para+'_source_idref']
+            else:
+                columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
+            mes_table=mes_table[columns[0:]]
+            best_para=mes_table[columns[0:]][:0].copy()
+            #group mes_table by object (=main_id)
+            grouped_mes_table=mes_table.group_by('main_id')
+            #take highest quality
+            #quite time intensive (few minutes) could maybe be optimized using np.in1d function
+            for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
+                for qual in ['A','B','C','D','E','?']:
+                    for i in range(len(grouped_mes_table.groups[j])):
+                        if grouped_mes_table.groups[j][i][para+'_qual']==qual:
+                            best_para.add_row(grouped_mes_table.groups[j][i])
+                            break
+                    else:
+                        continue  # only executed if the inner loop did NOT break
+                    break  # only executed if the inner loop DID break 
+            return best_para
+            #I have quite some for loops here, will be slow
+            #this function is ready for testing
+
+        if 'object_idref' in cat[i].colnames and len(cat[i])>0: #add object_idref
+            #first remove the object_idref we got from empty initialization
+            #though I would prefer a more elegant way to do this
+            cat[i].remove_column('object_idref') 
+            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+                                 join_type='left')
+            cat[i].rename_column('object_id','object_idref')
+        if table_names[i]=='h_link':
+            #expanding from child_main_id to object_idref
+            #first remove the child_object_idref we got from empty
+            # initialization. Would prefer a more elegant way to do this
+            cat[i].remove_column('child_object_idref')
+            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+                                 keys='main_id',join_type='left')
+            cat[i].rename_columns(['object_id','main_id'],
+                                  ['child_object_idref','child_main_id'])
+            
+            #expanding from parent_main_id to parent_object_idref
+            cat[i].remove_column('parent_object_idref')
+            #kick out any h_link rows where parent_main_id not in
+            # objects (e.g. clusters)
+            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+                   keys_left='parent_main_id',keys_right='main_id')
+            #removing because same as parent_main_id
+            cat[i].remove_column('main_id')
+            cat[i].rename_column('object_id','parent_object_idref')
+            #null values
+            #cat[i]['membership'].fill_value=-1
+            #cat[i]['membership']=cat[i]['membership'].filled()
+        
+        if table_names[i]=='star_basic':
+            #choosing all objects with type star or system
+            #this I use to join the object_id parameter from objects table to star_basic
+            #what about gaia stuff where I don't know this? there I also don't have star_basic info
+            #Note: main_id was only added because I have not found out how
+            # to do join with just one column of a table
+            stars=cat[1]['object_id','main_id'][np.where(
+                            cat[1]['type']=='st')]
+            systems=cat[1]['object_id','main_id'][np.where(
+                            cat[1]['type']=='sy')]
+            temp=ap.table.vstack([stars,systems])
+            temp.rename_columns(['object_id','main_id'],
+                                ['object_idref','temp'])
+            cat[i]=ap.table.join(cat[i],temp,join_type='outer',
+                                 keys='object_idref')
+            cat[i].remove_column('temp')
+        if table_names[i]=='mes_teff_st':
+            teff_st_best_para=best_para('teff_st',cat[i])
+            cat[5].remove_columns(['teff_st_value','teff_st_err',
+                                   'teff_st_qual','teff_st_source_idref',
+                                       'teff_st_ref'])
+            cat[5]=ap.table.join(cat[5],teff_st_best_para,join_type='left')
+        if table_names[i]=='mes_radius_st':
+            radius_st_best_para=best_para('radius_st',cat[i])
+            cat[5].remove_columns(['radius_st_value','radius_st_err',
+                                   'radius_st_qual','radius_st_source_idref',
+                                   'radius_st_ref'])
+            cat[5]=ap.table.join(cat[5],radius_st_best_para,join_type='left')
+        if table_names[i]=='mes_mass_st':
+            mass_st_best_para=best_para('mass_st',cat[i])
+            cat[5].remove_columns(['mass_st_value','mass_st_err',
+                                   'mass_st_qual','mass_st_source_idref',
+                                   'mass_st_ref'])
+            cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
+        if table_names[i]=='mes_mass_pl':
+            mass_pl_best_para=best_para('mass_pl',cat[i])
+            cat[6]=mass_pl_best_para
+            planets=cat[1]['object_id','main_id'][np.where(
+                            cat[1]['type']=='pl')]
+            cat[6]=ap.table.join(cat[6],planets['main_id','object_id'])
+            cat[6].rename_column('object_id','object_idref')
+        if table_names[i]=='mes_binary':
+            binary_best_para=best_para('binary',cat[i])
+            cat[5].remove_columns(['binary_flag',
+                                   'binary_qual','binary_source_idref',
+                                   'binary_ref'])
+            cat[5]=ap.table.join(cat[5],binary_best_para,join_type='left')
+        if table_names[i]=='mes_sep_ang':
+            sep_ang_best_para=best_para('sep_ang',cat[i])
+            cat[5].remove_columns(['sep_ang_value','sep_ang_err','sep_ang_obs_date',
+                                  'sep_ang_qual','sep_ang_source_idref',
+                                  'sep_ang_ref'])
+            cat[5]=ap.table.join(cat[5],sep_ang_best_para,join_type='left')
+        if table_names[i]=='best_h_link':
+            cat[i]=best_para('membership',cat[4])
+        cat[i]=cat[i].filled()
+        
+        if len(cat[i])==0:
+            print('warning: empty table',i,table_names[i])
+        else:
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
-            
-            def best_para(para,mes_table):
-                """
-                This function creates a table containing only the highest
-                quality measurement for each object.
-                :param para: string describing parameter e.g. mass
-                :param mes_table: Astropy table containing only columns
-                    'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
-                """
-                if para=='binary':
-                    columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
-                elif para=='mass_pl':
-                    columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
-                elif para=='sep_ang':
-                    columns=['main_id',para+'_value',para+'_err',para+'_obs_date',para+'_qual',para+'_source_idref']
-                else:
-                    columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
-                mes_table=mes_table[columns[0:]]
-                best_para=mes_table[columns[0:]][:0].copy()
-                #group mes_table by object (=main_id)
-                grouped_mes_table=mes_table.group_by('main_id')
-                #take highest quality
-                #quite time intensive (few minutes) could maybe be optimized using np.in1d function
-                for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
-                    for qual in ['A','B','C','D','E','?']:
-                        for i in range(len(grouped_mes_table.groups[j])):
-                            if grouped_mes_table.groups[j][i][para+'_qual']==qual:
-                                best_para.add_row(grouped_mes_table.groups[j][i])
-                                break
-                        else:
-                            continue  # only executed if the inner loop did NOT break
-                        break  # only executed if the inner loop DID break
-                    
-                return best_para
-                #I have quite some for loops here, will be slow
-                #this function is ready for testing
-
-            if table_names[i]=='h_link':
-                #expanding from child_main_id to object_idref
-                #first remove the child_object_idref we got from empty
-                # initialization. Would prefer a more elegant way to do this
-                cat[i].remove_column('child_object_idref')
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                                     keys='main_id',join_type='left')
-                cat[i].rename_columns(['object_id','main_id'],
-                                      ['child_object_idref','child_main_id'])
-
-                #expanding from parent_main_id to parent_object_idref
-                cat[i].remove_column('parent_object_idref')
-                #kick out any h_link rows where parent_main_id not in
-                # objects (e.g. clusters)
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                   keys_left='parent_main_id',keys_right='main_id')
-                #removing because same as parent_main_id
-                cat[i].remove_column('main_id')
-                cat[i].rename_column('object_id','parent_object_idref')
-                #null values
-                #cat[i]['membership'].fill_value=-1
-                #cat[i]['membership']=cat[i]['membership'].filled()
-
-            #for all the other tables add object_idref
-            else:
-                #first remove the object_idref we got from empty initialization
-                #though I would prefer a more elegant way to do this
-                cat[i].remove_column('object_idref') 
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                                     join_type='left')
-                cat[i].rename_column('object_id','object_idref')
-            if table_names[i]=='star_basic':
-                #choosing all objects with type star or system
-                #this I use to join the object_id parameter from objects table to star_basic
-                #what about gaia stuff where I don't know this? there I also don't have star_basic info
-                #Note: main_id was only added because I have not found out how
-                # to do join with just one column of a table
-                stars=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='st')]
-                systems=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='sy')]
-                temp=ap.table.vstack([stars,systems])
-                temp.rename_columns(['object_id','main_id'],
-                                    ['object_idref','temp'])
-                cat[i]=ap.table.join(cat[i],temp,join_type='outer',
-                                     keys='object_idref')
-                cat[i].remove_column('temp')
-            if table_names[i]=='mes_teff_st':
-                teff_st_best_para=best_para('teff_st',cat[i])
-                cat[5].remove_columns(['teff_st_value','teff_st_err',
-                                       'teff_st_qual','teff_st_source_idref',
-                                       'teff_st_ref'])
-                cat[5]=ap.table.join(cat[5],teff_st_best_para,join_type='left')
-            if table_names[i]=='mes_radius_st':
-                radius_st_best_para=best_para('radius_st',cat[i])
-                cat[5].remove_columns(['radius_st_value','radius_st_err',
-                                       'radius_st_qual','radius_st_source_idref',
-                                       'radius_st_ref'])
-                cat[5]=ap.table.join(cat[5],radius_st_best_para,join_type='left')
-            if table_names[i]=='mes_mass_st':
-                mass_st_best_para=best_para('mass_st',cat[i])
-                cat[5].remove_columns(['mass_st_value','mass_st_err',
-                                       'mass_st_qual','mass_st_source_idref',
-                                       'mass_st_ref'])
-                cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
-            if table_names[i]=='mes_mass_pl':
-                mass_pl_best_para=best_para('mass_pl',cat[i])
-                cat[6]=mass_pl_best_para
-                planets=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='pl')]
-                cat[6]=ap.table.join(cat[6],planets['main_id','object_id'])
-                cat[6].rename_column('object_id','object_idref')
-            if table_names[i]=='mes_binary':
-                binary_best_para=best_para('binary',cat[i])
-                cat[5].remove_columns(['binary_flag',
-                                       'binary_qual','binary_source_idref',
-                                       'binary_ref'])
-                cat[5]=ap.table.join(cat[5],binary_best_para,join_type='left')
-            if table_names[i]=='mes_sep_ang':
-                sep_ang_best_para=best_para('sep_ang',cat[i])
-                cat[5].remove_columns(['sep_ang_value','sep_ang_err','sep_ang_obs_date',
-                                      'sep_ang_qual','sep_ang_source_idref',
-                                      'sep_ang_ref'])
-                cat[5]=ap.table.join(cat[5],sep_ang_best_para,join_type='left')
-            cat[i]=cat[i].filled()
-            cat[i]=ap.table.unique(cat[i])
-        else:
-            print('warning: empty table',i,table_names[i])
     cat[5]=cat[5].filled()
     
     #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
