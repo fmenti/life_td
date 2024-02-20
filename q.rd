@@ -745,7 +745,7 @@ tables may change at any time without prior warning.
     </table>
 
     <data id="import_h_link">
-        <sources>data/h_link.xml</sources>
+        <sources>data/best_h_link.xml</sources>
         <!-- Data acquired using the skripts life_td.py which uses the skripts
         building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
