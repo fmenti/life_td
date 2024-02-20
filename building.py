@@ -236,7 +236,6 @@ def building(providers,table_names,list_of_tables):
             cat[0]=providers[j][0]
         
     #I do this to get those columns that are empty in the data
-    print(cat[0])
     cat[0]=ap.table.vstack([cat[0],init[0]])
     
     # keeping only unique values then create identifiers for those tables
