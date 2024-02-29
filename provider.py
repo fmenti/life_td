@@ -1157,6 +1157,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
 
     #gaia_mes_binary
     gaia_mes_binary=gaia_objects['main_id','type'][np.where(gaia_objects['type']=='sy')]
+    print('tbd add binary flag True to children of system objects once I get h_link info from gaia')
     gaia_mes_binary.rename_column('type','binary_flag')
     gaia_mes_binary['binary_flag']=['True' for j in range(len(gaia_mes_binary))]
     gaia_mes_binary['binary_ref']=['2016A&A...595A...1G' for j in range(len(gaia_mes_binary))]
@@ -1390,6 +1391,8 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     if len(test_objects)>0:
         print('number of test objects that are in h_link main_id \n', \
               test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+        print('number of test objects that are in h_link parent_main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['parent_main_id']))])
         print('number of test objects that are in main_id of ident table \n', \
               test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
         print('number of test objects that are in main_id of h_link but not ident table \n', \
@@ -1442,15 +1445,24 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     wds_objects['type']=['sy' for j in range(len(wds_objects))]
     #change to st for those that have no children
     wds_objects['type'][np.invert(np.in1d(wds_objects['main_id'],wds_h_link['parent_main_id']))]=['st' for j in range(len(
-            [np.invert(np.in1d(wds_objects['main_id'],wds_h_link['parent_main_id']))]))]    
+            [np.invert(np.in1d(wds_objects['main_id'],wds_h_link['parent_main_id']))]))] 
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in objects main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_objects['main_id']))])
     
     #-----------------creating output table wds_mes_binary------------------------
-    wds_mes_binary=wds_objects['main_id','type'][np.where(wds_objects['type']=='sy')]
+    wds_mes_binary=wds_objects['main_id','type']#[np.where(wds_objects['type']=='sy')]
     wds_mes_binary.rename_column('type','binary_flag')
     wds_mes_binary['binary_flag']=wds_mes_binary['binary_flag'].astype(object)
     wds_mes_binary['binary_flag']=['True' for j in range(len(wds_mes_binary))]
     wds_mes_binary['binary_ref']=[wds_provider['provider_bibcode'][0] for j in range(len(wds_mes_binary))]
     wds_mes_binary['binary_qual']=['C' for j in range(len(wds_mes_binary))]
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in mes_binary main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_mes_binary['main_id']))])
+    
     #-----------------creating output table wds_mes_sep_ang------------------------
     #better join them
     wds_mes_sep_ang0=ap.table.join(wds['system_name','wds_sep1','wds_obs1','wds_sep2','wds_obs2'],
@@ -1487,6 +1499,10 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
         wds_mes_sep_ang=ap.table.vstack([unique_unknown_obs_date,unique_known_obs_date])
     else:
         wds_mes_sep_ang=ap.table.unique(wds_mes_sep_ang)
+        
+    if len(test_objects)>0:
+        print('number of test objects that are in mes_sep_ang main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_mes_sep_ang['main_id']))])
     #--------------creating output table wds_sources --------------------------
     wds_sources=ap.table.Table()
     tables=[wds_provider,wds_ident]
