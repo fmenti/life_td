@@ -54,14 +54,16 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
             #In case the column has elements that are masked skip those
             if type(cat[ref_columns[k]])==ap.table.column.MaskedColumn:
                 cat_reflist.extend(
-                    cat[ref_columns[k]][np.where(cat[ref_columns[k]].mask==False)])
+                    cat[ref_columns[k]][np.where(
+                            cat[ref_columns[k]].mask==False)])
             else:
                 cat_reflist.extend(cat[ref_columns[k]])
         #add list of collected references to the table and call the column ref
         cat_sources['ref']=cat_reflist
         cat_sources=ap.table.unique(cat_sources)#keeps only unique values
         #attaches service information
-        cat_sources['provider_name']=[provider for j in range(len(cat_sources))]
+        cat_sources['provider_name']=[provider for j in range(
+                len(cat_sources))]
         #combine old and new sources into one table
         sources=ap.table.vstack([old_sources,cat_sources])
         sources=ap.table.unique(sources) #remove double entries
@@ -201,7 +203,8 @@ def ids_from_ident(ident,objects):
 
 
 #-----------------------------provider data ingestion--------------------------
-def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objects=[]):
+def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,
+                    test_objects=[]):
     """
     This function obtains the SIMBAD data and arranges it in a way
     easy to ingest into the database.
@@ -219,7 +222,8 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
     #---------------define provider--------------------------------------------
     sim_provider=ap.table.Table()
     sim_provider['provider_name']=['SIMBAD']
-    sim_provider['provider_url']=["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
+    sim_provider['provider_url']=\
+            ["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
     sim_provider['provider_bibcode']=['2000A&AS..143....9W']
     sim_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     #---------------define queries---------------------------------------------
@@ -277,13 +281,16 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
     #perform query for objects with in distance given
     simbad=query(sim_provider['provider_url'][0],adql_query[0])
     #querries parent and children objects with no parallax value
-    parents_without_plx=query(sim_provider['provider_url'][0],upload_query[0],[simbad])
-    children_without_plx=query(sim_provider['provider_url'][0],upload_query[1],[simbad])
+    parents_without_plx=query(sim_provider['provider_url'][0],
+                                upload_query[0],[simbad])
+    children_without_plx=query(sim_provider['provider_url'][0],
+                                upload_query[1],[simbad])
     
     test_objects=np.array(test_objects)
     if len(test_objects)>0:
         print('in sim through plx query', 
-                  test_objects[np.where(np.in1d(test_objects,simbad['main_id']))])
+                  test_objects[np.where(np.in1d(test_objects,
+                                                simbad['main_id']))])
         print('in sim through child plx query', 
                   test_objects[np.where(np.in1d(test_objects,parents_without_plx['main_id']))])
         print('in sim through parent plx query', 
@@ -325,7 +332,8 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
         
     if len(test_objects)>0:
         print('in sim through otype criteria', 
-                  test_objects[np.where(np.in1d(test_objects,simbad['main_id']))])
+                  test_objects[np.where(np.in1d(test_objects,
+                                                simbad['main_id']))])
 
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
@@ -343,9 +351,11 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     
-    #removing entries in h_link where parent objects are clusters or associations as we are 
+    # removing entries in h_link where parent objects are clusters or 
+    # associations as we are 
     #only interested in hierarchical multiples. 
-    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],stars['oid']))]
+    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],
+                                            stars['oid']))]
     
     
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
@@ -375,7 +385,8 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
         """
         #all type sy objects: cat['main_id','type']
         #this should work if alias works well
-        #need parent_main_id for sim_h_link here. but setdiff does not support that.
+        #need parent_main_id for sim_h_link here. but setdiff does 
+        #not support that.
         parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
         parents.rename_column('main_id','child_main_id')
         parents.rename_column('parent_main_id','main_id')
@@ -383,11 +394,14 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
                                      parents[:],keys=['main_id'])
         #that don t have children: sy_wo_child['main_id','type']
         #list of those with children
-        #sy_w_child=ap.table.setdiff(sy_wo_child,parents,keys=['main_id'])#old version
-        sy_w_child=ap.table.join(parents[:],cat['main_id','type','sptype_string'][:],keys=['main_id'])
+        sy_w_child=ap.table.join(parents[:],
+                                cat['main_id','type','sptype_string'][:],
+                                keys=['main_id'])
         #list of those with children joined with type of child
-        all_objects.rename_columns(['type','main_id'],['child_type','child_main_id'])
-        sy_w_child=ap.table.join(sy_w_child[:],all_objects['child_type','child_main_id'][:],\
+        all_objects.rename_columns(['type','main_id'],
+                                    ['child_type','child_main_id'])
+        sy_w_child=ap.table.join(sy_w_child[:],
+                                all_objects['child_type','child_main_id'][:],
                                  keys=['child_main_id'],join_type='left')
         #remove all where type child is not pl
         sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
@@ -407,17 +421,23 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
         temp=list(np.where(temp==True)[0])
         single_sptype=sy_wo_child_st[:][temp]
         #and no + in spectral type: single_sptype['main_id','type']      
-        cat['type'][np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]=['st' for j in range(len(
-                    cat[np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]))]        
+        cat['type'][np.where(np.in1d(cat['main_id'],
+                                    single_sptype['main_id']))]=\
+                  ['st' for j in range(len(cat[np.where(np.in1d(cat['main_id'],
+                                            single_sptype['main_id']))]))]        
         return cat
     #all objects in stars table: stars['main_id','type']
     stars[np.where(stars['type']=='sy')]=stars_in_multiple_system(
-            stars[np.where(stars['type']=='sy')],sim_h_link[:],simbad['main_id','type'][:])    
+            stars[np.where(stars['type']=='sy')],sim_h_link[:],
+            simbad['main_id','type'][:])    
     
     # binary_flag 'True' for all stars with parents
-    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'    
-    stars['binary_flag'][np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]=['True' for j in range(len(
-                    stars[np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
+    # meaning stars[main_id] in sim_h_link[child_main_id] 
+    #-> stars[binary_flag]=='True'    
+    stars['binary_flag'][np.where(np.in1d(stars['main_id'],
+                                        sim_h_link['main_id']))]=\
+                    ['True' for j in range(len(stars[np.where(
+                    np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
                 
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
@@ -425,18 +445,23 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
     
     for band in ['i','j','k']:
         #initiate some of the ref columns
-        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
+        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,
+                                    length=len(stars),
                                     mask=[True for j in range(len(stars))])
         #add simbad reference where no other is given
-        stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]=[
-            sim_provider['provider_bibcode'][0] for j in range(len(
-            stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]))]
+        stars[f'mag_{band}_ref'][np.where(
+                stars[f'mag_{band}_value'].mask==False)]=[
+                sim_provider['provider_bibcode'][0] for j in range(len(
+                stars[f'mag_{band}_ref'][np.where(
+                stars[f'mag_{band}_value'].mask==False)]))]
         
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
-    stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
+    stars=replace_value(stars,'sptype_ref','',
+            sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
         
-    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
+    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(
+            len(stars))]
     stars['binary_qual']=['C' for j in range(len(stars))]
 
     #-----------------creating output table sim_planets------------------------
@@ -448,16 +473,18 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,test_objec
     sim_objects=ap.table.vstack([sim_planets['main_id','ids','type'],
                              stars['main_id','ids','type']])
     sim_objects['ids']=sim_objects['ids'].astype(object)
-    print('tbd: add identifier simbad main_id without leading * and whitespaces')
+    print('tbd: add identifier simbad main_id without leading * and \
+            whitespaces')
     #--------------creating output table sim_sources --------------------------
     sim_sources=ap.table.Table()
     tables=[sim_provider,stars, sim_h_link,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',
-                    'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],['h_link_ref'],
-                    ['id_ref']]
+                    'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],
+                    ['h_link_ref'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
-        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
+        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],
+                                sim_sources)
     #------------------------creating output table sim_star_basic--------------
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
@@ -1097,7 +1124,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
     WHERE s.parallax >="""+str(plx_in_mas_cut)
     
-    if temp:
+    if temp: #because of bug in gaia server where async not working currently
         service = vo.dal.TAPService(gaia_provider['provider_url'][0])
         result=service.run_sync(adql_query.format(**locals()), maxrec=160000)
         gaia=result.to_table()
