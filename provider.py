@@ -867,33 +867,33 @@ def provider_life(table_names,life_list_of_tables):
         for i in range(len(temp)):
             #sorting out objects like M5V+K7V
             #strip d for spectral types starting with small d because it is an old annotation for dwarf star
-            temp['sptype_string'][i]=temp['sptype_string'][i].strip('d')
-            if (len(temp['sptype_string'][i].split('+'))==1 and
+            sptype=temp['sptype_string'][i].strip('d')
+            if (len(sptype.split('+'))==1 and
             #sorting out entries like '', DA2.9, T1V
-                    len(temp['sptype_string'][i])>0 and 
-                    temp['sptype_string'][i][0] in ['O','B','A','F','G','K','M']):
-                temp['class_temp'][i]=temp['sptype_string'][i][0]
+                    len(sptype)>0 and 
+                    sptype[0] in ['O','B','A','F','G','K','M']):
+                temp['class_temp'][i]=sptype[0]
                 temp['class_ref'][i]=ref
                 #sorting out objects like DA2.9
-                if len(temp['sptype_string'][i])>1 and temp['sptype_string'][i][1] in ['0','1','2','3','4','5','6','7','8','9']:
-                    temp['class_temp_nr'][i]=temp['sptype_string'][i][1]
+                if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
+                    temp['class_temp_nr'][i]=sptype[1]
                     #distinguishing between objects like K5V and K5.5V
-                    if len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2]=='.':
-                        temp['class_temp_nr'][i]=temp['sptype_string'][i][1:4]
-                        if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                            temp['class_lum'][i]=temp['sptype_string'][i][4]
-                            if len(temp['sptype_string'][i])>5 and temp['sptype_string'][i][5] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][4:6]
-                                if len(temp['sptype_string'][i])>6 and temp['sptype_string'][i][6] in ['I','V']:
-                                    temp['class_lum'][i]=temp['sptype_string'][i][4:7]
+                    if len(sptype)>2 and sptype[2]=='.':
+                        temp['class_temp_nr'][i]=sptype[1:4]
+                        if len(sptype)>4 and sptype[4] in ['I','V']:
+                            temp['class_lum'][i]=sptype[4]
+                            if len(sptype)>5 and sptype[5] in ['I','V']:
+                                temp['class_lum'][i]=sptype[4:6]
+                                if len(sptype)>6 and sptype[6] in ['I','V']:
+                                    temp['class_lum'][i]=sptype[4:7]
                         else:
                             temp['class_lum'][i]='?'
-                    elif len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2] in ['I','V']:
-                        temp['class_lum'][i]=temp['sptype_string'][i][2]
-                        if len(temp['sptype_string'][i])>3 and temp['sptype_string'][i][3] in ['I','V']:
-                            temp['class_lum'][i]=temp['sptype_string'][i][2:4]
-                            if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][2:5]
+                    elif len(sptype)>2 and sptype[2] in ['I','V']:
+                        temp['class_lum'][i]=sptype[2]
+                        if len(sptype)>3 and sptype[3] in ['I','V']:
+                            temp['class_lum'][i]=sptype[2:4]
+                            if len(sptype)>4 and sptype[4] in ['I','V']:
+                                temp['class_lum'][i]=sptype[2:5]
                     else:
                         temp['class_lum'][i]='?'
                 else:
@@ -903,6 +903,9 @@ def provider_life(table_names,life_list_of_tables):
                 temp['class_temp_nr'][i]='?'
                 temp['class_lum'][i]='?'
                 temp['class_ref'][i]='?'
+            if len(temp['sptype_string'][i])>0:
+                if temp['sptype_string'][i][0]=='d':
+                    temp['class_lum'][i]='V'
         return temp
     life_star_basic=sptype_string_to_class(life_star_basic,life_provider['provider_name'][0])
     
