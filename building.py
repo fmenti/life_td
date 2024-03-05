@@ -423,7 +423,7 @@ def building(providers,table_names,list_of_tables):
                         else:#if none of the objects has a membership entry then pick just first one
                             best_para.add_row(grouped_mes_table[ind[i]])
                 return best_para
-            if para=='binary':
+            elif para=='binary':
                 columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
             elif para=='mass_pl':
                 columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']

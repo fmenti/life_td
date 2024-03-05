@@ -462,7 +462,7 @@ def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,
         
     stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(
             len(stars))]
-    stars['binary_qual']=['C' for j in range(len(stars))]
+    stars['binary_qual']=['D' for j in range(len(stars))]
 
     #-----------------creating output table sim_planets------------------------
     temp_sim_planets=simbad['main_id','ids',
