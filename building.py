@@ -423,7 +423,7 @@ def building(providers,table_names,list_of_tables):
                         else:#if none of the objects has a membership entry then pick just first one
                             best_para.add_row(grouped_mes_table[ind[i]])
                 return best_para
-            if para=='binary':
+            elif para=='binary':
                 columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
             elif para=='mass_pl':
                 columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
@@ -491,11 +491,11 @@ def building(providers,table_names,list_of_tables):
             systems=cat[1]['object_id','main_id'][np.where(
                             cat[1]['type']=='sy')]
             temp=ap.table.vstack([stars,systems])
-            temp.rename_columns(['object_id','main_id'],
-                                ['object_idref','temp'])
+            temp.rename_column('object_id','object_idref')
+            #cat[i] are all the star_cat tables from providers where those are given
+            #the new objects are needed to join the best parameters from mes_ tables later on
             cat[i]=ap.table.join(cat[i],temp,join_type='outer',
-                                 keys='object_idref')
-            cat[i].remove_column('temp')
+                                 keys=['object_idref','main_id'])
         if table_names[i]=='mes_teff_st':
             teff_st_best_para=best_para('teff_st',cat[i])
             cat[5].remove_columns(['teff_st_value','teff_st_err',
