@@ -1212,12 +1212,12 @@ tables may change at any time without prior warning.
             verbLevel="1"/>
     </table>
 
-    <data id="import_h_link">
+    <data id="import_mes_h_link">
         <sources>data/h_link.xml</sources>
         <!-- Data acquired using the skripts life_td.py which uses the skripts
         building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
-        <make table="h_link">
+        <make table="mes_h_link">
              <rowmaker idmaps="*">
                  <map key="parent_object_idref" nullExpr="999999"/>
                  <map key="child_object_idref" nullExpr="999999"/>
