@@ -1186,13 +1186,16 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     gaia_objects.remove_column('nss_solution_type')
 
     #gaia_mes_binary
-    gaia_mes_binary=gaia_objects['main_id','type'][np.where(gaia_objects['type']=='sy')]
+    gaia_mes_binary=gaia_objects['main_id','type']
     print('tbd add binary flag True to children of system objects once I get h_link info from gaia')
     gaia_mes_binary.rename_column('type','binary_flag')
-    gaia_mes_binary['binary_flag']=['True' for j in range(len(gaia_mes_binary))]
+    gaia_mes_binary['binary_flag']=gaia_mes_binary['binary_flag'].astype(object)
+    gaia_mes_binary=replace_value(gaia_mes_binary,'binary_flag','sy','True')
+    gaia_mes_binary=replace_value(gaia_mes_binary,'binary_flag','st','False')
     gaia_mes_binary['binary_ref']=['2016A&A...595A...1G' for j in range(len(gaia_mes_binary))]
-    gaia_mes_binary['binary_qual']=['B' for j in range(len(gaia_mes_binary))]
-    #there might be issue in building merging now
+    gaia_mes_binary['binary_qual']=['B' if gaia_mes_binary['binary_flag'][j]=='True' \
+                                    else 'E' for j in range(len(gaia_mes_binary))]
+    #if necessary lower binary_qual for binary_flag = False to level of simbad.
     
     #gaia_mes_teff
     gaia_mes_teff_st=gaia['main_id','teff_gspphot']
