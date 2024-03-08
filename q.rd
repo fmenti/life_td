@@ -1441,22 +1441,28 @@ tables may change at any time without prior warning.
 
         <regTest title="LIFE tables appear to be in place.">
             <url parSet="TAP" QUERY="
-SELECT * FROM
+SELECT po.main_id AS planet_name, so.main_id AS host_name, s.coo_ra, 
+    p.mass_pl_value, po.type
+FROM
   life_td.planet_basic AS p
-  JOIN life_td.object ON (p.object_idref=object_id)
-  JOIN life_td.h_link ON (child_object_idref=object_id)
+  JOIN life_td.object AS po ON (p.object_idref=po.object_id)
+  JOIN life_td.h_link ON (child_object_idref=po.object_id)
   JOIN life_td.star_basic AS s ON (parent_object_idref=s.object_idref)
+JOIN life_td.object AS so ON (s.object_idref=so.object_id)
 WHERE
-  main_id='*  14 Her b'
+  po.main_id='*  14 Her b'
             ">/tap/sync</url>
             <code>
                 rows = self.getVOTableRows()
                 self.assertEqual(len(rows), 1)
+                self.assertAlmostEqual(rows[0]["mass_pl_value"],
+                    8.053)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
-                ids = set("|".join(r["ids"] for r in rows).split("|"))
-                self.assertEqual(ids, {'*  14 Her  b','*  14 Her b',
-                                 'GJ   614 b','14 Her b','HD 145675b'})
+                self.assertEqual(rows[0]["type"],
+                    'pl')
+                self.assertEqual(rows[0]["host_name"],
+                    '*  14 Her')
             </code>
         </regTest>
     </regSuite>
