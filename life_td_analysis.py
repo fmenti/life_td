@@ -13,7 +13,33 @@ importlib.reload(hf)#reload module after changing it
 #-------------------------Sanity tests--------------------------------------------
 ###############################################################################
     
+def show(provider,
+         table='objects',
+         columns=[],
+         wherecol='main_id',
+         whereobj='* zet02 Ret'):
+    """
+    This function prints the specified columns of a table.
+    :para provider: database_tables, sim, wds, gaia, gk, life
+    :para table:
+    :para columns: if empty prints all
+    :para wehercol:
+    :para whereobj:
+    """
+    
+    table_names=['sources','objects','provider','ident','h_link','star_basic',
+              'planet_basic','disk_basic','mes_mass_pl',
+              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_ang','best_h_link']
+    
+    cat=provider[table_names.index(table)]
 
+    if columns==[]:
+        print(cat[np.where(cat[wherecol]==whereobj)])
+    else:
+        print(cat[columns][np.where(cat[wherecol]==whereobj)])
+    return
+    
+    
 def sanitytest(cat,colname):
     arr=cat[colname]
     if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
