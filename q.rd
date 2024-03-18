@@ -34,6 +34,9 @@ tables may change at any time without prior warning.
     <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
     <meta name="type">Archive</meta>
+    
+    <meta name="_news" author="FM" date="2024-03-05">Adding mes_h_link table
+    containing all links between pair of objects</meta>
 
     <table id="source" onDisk="True" adql="True">
         <meta name="title">Source Table</meta>
@@ -70,7 +73,8 @@ tables may change at any time without prior warning.
 
     <data id="import_source">
         <sources>data/sources.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="source">
             <rowmaker idmaps="*">
@@ -116,7 +120,8 @@ tables may change at any time without prior warning.
 
     <data id="import_object">
         <sources>data/objects.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="object">
              <rowmaker idmaps="*">
@@ -160,7 +165,8 @@ tables may change at any time without prior warning.
 
     <data id="import_provider">
         <sources>data/provider.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="provider">
             <rowmaker idmaps="*">
@@ -506,7 +512,8 @@ tables may change at any time without prior warning.
 
     <data id="import_star_basic">
         <sources>data/star_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="star_basic">
             <rowmaker idmaps="*">
@@ -621,7 +628,8 @@ tables may change at any time without prior warning.
 
     <data id="import_planet_basic">
         <sources>data/planet_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="planet_basic">
             <rowmaker idmaps="*">
@@ -685,7 +693,8 @@ tables may change at any time without prior warning.
 
     <data id="import_disk_basic">
         <sources>data/disk_basic.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="disk_basic">
             <rowmaker idmaps="*">
@@ -701,7 +710,8 @@ tables may change at any time without prior warning.
         <meta name="title">Object relation table</meta>
         <meta name="description">
         This table links subordinate objects (e.g. a planets of a star, or
-        a star in a multiple star system) to their parent objects.
+        a star in a multiple star system) to their parent objects. Contains
+        only best link for each pair of objects.
 
         \betawarning
         </meta>
@@ -739,8 +749,9 @@ tables may change at any time without prior warning.
     </table>
 
     <data id="import_h_link">
-        <sources>data/h_link.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <sources>data/best_h_link.xml</sources>
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="h_link">
              <rowmaker idmaps="*">
@@ -784,7 +795,8 @@ tables may change at any time without prior warning.
 
     <data id="import_ident">
         <sources>data/ident.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
         <make table="ident">
              <rowmaker idmaps="*">
@@ -842,7 +854,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_pl">
         <sources>data/mes_mass_pl.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
@@ -901,7 +914,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_teff_st">
         <sources>data/mes_teff_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_teff_st">
              <rowmaker idmaps="*">
@@ -959,7 +973,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_radius_st">
         <sources>data/mes_radius_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_radius_st">
              <rowmaker idmaps="*">
@@ -1017,7 +1032,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_st">
         <sources>data/mes_mass_st.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_mass_st">
              <rowmaker idmaps="*">
@@ -1070,7 +1086,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_binary">
         <sources>data/mes_binary.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_binary">
              <rowmaker idmaps="*">
@@ -1143,7 +1160,8 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_sep_ang">
         <sources>data/mes_sep_ang.xml</sources>
-        <!-- Data acquired using the skript data_acquisition.py. -->
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
         <voTableGrammar/>
            <make table="mes_sep_ang">
              <rowmaker idmaps="*">
@@ -1152,6 +1170,59 @@ tables may change at any time without prior warning.
                  <map key="sep_ang_obs_date" nullExpr="999999" />
                  <map key="sep_ang_qual" nullExpr="'?'" />
                  <map key="sep_ang_source_idref" nullExpr="999999" />
+             </rowmaker>
+        </make>
+    </data>
+    
+    <table id="mes_h_link" onDisk="True" adql="True">
+        <meta name="title">Object relation table</meta>
+        <meta name="description">
+        This table links subordinate objects (e.g. a planets of a star, or
+        a star in a multiple star system) to their parent objects. 
+
+        \betawarning
+        </meta>
+        <column name="parent_object_idref" type="integer"
+            ucd="meta.id.parent;meta.main"
+            tablehead="parent"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>
+        <column name="child_object_idref" type="integer"
+            ucd="meta.id"
+            tablehead="child"
+            description="Object key (unstable, use only for joining to the
+            other tables)."
+            required="True"
+            verbLevel="1"/>
+        <column name="membership" type="integer"
+            ucd="meta.record"
+            tablehead="membership"
+            description="Membership probability."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="h_link_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="h_link_source_idref"
+            description="Identifier of the source of the
+                relationship parameters."
+            required="True"
+            verbLevel="1"/>
+    </table>
+
+    <data id="import_mes_h_link">
+        <sources>data/h_link.xml</sources>
+        <!-- Data acquired using the skripts life_td.py which uses the skripts
+        building.py, provider.py and helperfunctions.py -->
+        <voTableGrammar/>
+        <make table="mes_h_link">
+             <rowmaker idmaps="*">
+                 <map key="parent_object_idref" nullExpr="999999"/>
+                 <map key="child_object_idref" nullExpr="999999"/>
+                 <map key="membership" nullExpr="999999"/>
+                 <map key="h_link_source_idref" nullExpr="999999"/>
              </rowmaker>
         </make>
     </data>
@@ -1370,22 +1441,28 @@ tables may change at any time without prior warning.
 
         <regTest title="LIFE tables appear to be in place.">
             <url parSet="TAP" QUERY="
-SELECT * FROM
+SELECT po.main_id AS planet_name, so.main_id AS host_name, s.coo_ra, 
+    p.mass_pl_value, po.type
+FROM
   life_td.planet_basic AS p
-  JOIN life_td.object ON (p.object_idref=object_id)
-  JOIN life_td.h_link ON (child_object_idref=object_id)
+  JOIN life_td.object AS po ON (p.object_idref=po.object_id)
+  JOIN life_td.h_link ON (child_object_idref=po.object_id)
   JOIN life_td.star_basic AS s ON (parent_object_idref=s.object_idref)
+JOIN life_td.object AS so ON (s.object_idref=so.object_id)
 WHERE
-  main_id='*  14 Her b'
+  po.main_id='*  14 Her b'
             ">/tap/sync</url>
             <code>
                 rows = self.getVOTableRows()
                 self.assertEqual(len(rows), 1)
+                self.assertAlmostEqual(rows[0]["mass_pl_value"],
+                    8.053)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
-                ids = set("|".join(r["ids"] for r in rows).split("|"))
-                self.assertEqual(ids, {'*  14 Her  b','*  14 Her b',
-                                 'GJ   614 b','14 Her b','HD 145675b'})
+                self.assertEqual(rows[0]["type"],
+                    'pl')
+                self.assertEqual(rows[0]["host_name"],
+                    '*  14 Her')
             </code>
         </regTest>
     </regSuite>
