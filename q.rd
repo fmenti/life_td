@@ -1,5 +1,6 @@
 <resource schema="life_td" resdir=".">
     <meta name="creationDate">2021-12-03T09:33:44Z</meta>
+    <meta name="schema-rank">100</meta>
 
 <!-- Adjust the following text when you'd like to tone the beta
     warning text up or down.  And don't indent it to avoid spurious
@@ -1282,6 +1283,7 @@ tables may change at any time without prior warning.
 
     <service id="cone" allowed="form,scs.xml">
         <meta name="shortName">life_td cone</meta>
+        <meta name="title">LIFE Target Database Cone Search</meta>
         <meta>
             testQuery.ra: 312.27
             testQuery.dec: 37.47
