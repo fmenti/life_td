@@ -1,5 +1,6 @@
 <resource schema="life_td" resdir=".">
     <meta name="creationDate">2021-12-03T09:33:44Z</meta>
+    <meta name="schema-rank">100</meta>
 
 <!-- Adjust the following text when you'd like to tone the beta
     warning text up or down.  And don't indent it to avoid spurious
@@ -1282,6 +1283,7 @@ tables may change at any time without prior warning.
 
     <service id="cone" allowed="form,scs.xml">
         <meta name="shortName">life_td cone</meta>
+        <meta name="title">LIFE Target Database Cone Search</meta>
         <meta>
             testQuery.ra: 312.27
             testQuery.dec: 37.47
@@ -1404,11 +1406,11 @@ tables may change at any time without prior warning.
             created using the following query in addition to some postprocessing
             in regards of multiplicity afterwards.
 
-            .. tapquery::    
+            .. tapquery::
                 SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value,
                 sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, sb.coo_gal_b,
-                sb.teff_st_value, sb.mass_st_value, sb.radius_st_value, 
-                sb.binary_flag, sb.mag_i_value, sb.mag_j_value,  
+                sb.teff_st_value, sb.mass_st_value, sb.radius_st_value,
+                sb.binary_flag, sb.mag_i_value, sb.mag_j_value,
                 o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
                 FROM life_td.star_basic AS sb
                 JOIN life_td.object AS o ON sb.object_idref=o.object_id
@@ -1417,7 +1419,7 @@ tables may change at any time without prior warning.
                  h.parent_object_idref=o_parent.object_id
                 LEFT JOIN life_td.star_basic AS sb_parent ON
                  o_parent.object_id=sb_parent.object_idref
-                WHERE o.type = 'st' AND sb.plx_value > 33. AND 
+                WHERE o.type = 'st' AND sb.plx_value > 33. AND
                 sb.class_lum IS NOT NULL
                 </meta>
         <nullCore/>
