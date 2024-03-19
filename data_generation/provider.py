@@ -1,275 +1,12 @@
-"""
-Authors Note
-This code was written by Franziska Menti in 2023.
-It creates the tables for the LIFE target database.
-For more information on LIFE please visit www.life-space-mission.com.
-Beta warning: As a prototype this code will change. In particular
-the addition of more providers, parameters as well as a possible
-overhaul of the planet data is planned.
-The document is structured as follows:
-- Authors note
-- Definition of functions
-- Main code
-"""
-###############################################################################
-#-------------------------definition of functions------------------------------
-###############################################################################
-#general
-#importing libraries
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
+import importlib #reloading external functions after modification
 
-#-------------------global helper functions------------------------------------
-def save(cats,names):
-    """
-    This functions saves the tables given as python list in the cats parameter.
-    The saving location is 'data/{name}.xml' where path is given in the paths
-    parameter.
-    :param cats: Python list of astropy table to be saved.
-    :param names: Python list of strings containing names for saving location
-        of tables in cats.
-    """
-    #go through all the elements in both lists
-    for cat,path in zip(cats,names):
-        #for each column header
-        for i in cat.colnames:
-            #if the type of the column is object (=adaptable length string)
-            if cat[i].dtype == object:
-                #transform the type into string
-                cat[i] = cat[i].astype(str)
-        #save the table
-        ap.io.votable.writeto(
-        	    ap.io.votable.from_table(cat), f'data/{path}.xml')
-    return
-
-def stringtoobject(cat,number=100):
-    """
-    This function changes from string to object format.
-    The later has the advantace of allowing strings of varying length.
-    Without it truncation of entries is a risk.
-    :param cat: Astropy table.
-    :param number: Length of longest string type element in the table.
-        Default is 100.
-    :return cat: Astropy table with all string columns transformed into
-        object type ones.
-    """
-    #defining string types as calling them string does not work and instead
-    #the type name <U3 is needed for a string of length 3
-    stringtypes=[np.dtype(f'<U{j}') for j in range(1,number)]
-    #for each column header
-    for i in cat.colnames:
-        #if the type of the column is string
-        if cat[i].dtype in stringtypes:
-            #transform the type into object
-            cat[i] = cat[i].astype(object)
-    return cat
-
-def load(paths,stringtoobjects=True):
-    """
-    This function loads the tables saved in XML format at saving locations
-    specified in paths. If stringtoobject is True the function 
-    stringtoobjects is invoked.
-    :param paths: Python list of saving locations.
-    :return cats: Python list of loaded astropy tables.
-    """
-    #initialize return parameter as list
-    cats=[]
-    #go through all the elements in the paths list
-    for path in paths:
-        #read the saved data into the cats lists as astropy votable element
-        to_append=ap.io.votable.parse_single_table(f'data/{path}.xml')
-        cats.append(to_append.to_table())
-    #go through all the tables in the cats list
-    if stringtoobjects:
-        for cat in cats:
-            cat=stringtoobject(cat,3000)
-    return cats
-
-#-------------------initialization function------------------------------------
-def initialize_database_tables(table_names,list_of_tables):
-    """
-    This function initializes the database tables with column name and data
-    type specified but no actual data in them.
-    :return list_of_tables: List of astropy tables in the order sources,
-                objects, provider, ident (identifiers), h_link (relation between
-                objects),star_basic,planet_basic, disk_basic, mes_mass_pl 
-                (planetary mass measurements), mes_teff_st (stellar 
-                effective temperature measurements), mes_radius_st (stellar
-                radius measurements), mes_mass_st (stellar mass measurements),
-                mes_binary (binarity information) and mes_sep_ang (stellar
-                angular separation between binaries measurement).
-    """
-    #explanation of abbreviations: id stands for identifier, idref for
-    # reference identifier and parameter_source_idref for the identifier in the
-    # source table corresponding to the mentioned parameter
-
-    
-    sources=ap.table.Table(
-        #reference,...
-        names=['ref','provider_name',
-               'source_id'],
-        dtype=[object,object,int])
-
-    objects=ap.table.Table(
-        #object id, type of object, all identifiers, main id
-        names=['object_id','type','ids','main_id'],
-        dtype=[int,object,object,object])
-    
-    provider=ap.table.Table(
-        #reference,...
-        names=['provider_name','provider_url','provider_bibcode',
-               'provider_access'],
-        dtype=[object,object,object,object])
-
-    #identifier table
-    ident=ap.table.Table(
-        #object idref, id, source idref for the id parameter, id reference
-        names=['object_idref','id','id_source_idref','id_ref'],
-        dtype=[int,object,int,object])
-
-    #hierarchical link table (which means relation between objects)
-    h_link=ap.table.Table(
-        #child object idref (e.g. planet X),
-        #parent object idref (e.g. host star of planet X)
-        #source idref of h_link parameter, h_link reference,
-        #membership probability
-        names=['child_object_idref','parent_object_idref',
-               'h_link_source_idref','h_link_ref','membership'],
-        dtype=[int,int,int,object,int])
-
-    star_basic=ap.table.Table(
-        #object idref, RA coordinate, DEC coordinate,
-        #coordinate error ellypse angle, major axis and minor axis,
-        #coordinate quality, source idref of coordinate parameter,
-        #coordinate reference, parallax value, parallax error, parallax quality
-        #source idref of parallax parameter ... same for distance parameter
-        names=['object_idref','coo_ra','coo_dec','coo_err_angle',
-               'coo_err_maj','coo_err_min','coo_qual',
-               'coo_source_idref','coo_ref',
-               'coo_gal_l','coo_gal_b','coo_gal_err_angle',
-               'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
-               'coo_gal_source_idref','coo_gal_ref',
-               'mag_i_value','mag_i_err','mag_i_qual','mag_i_source_idref',
-               'mag_i_ref',
-               'mag_j_value','mag_j_err','mag_j_qual','mag_j_source_idref',
-               'mag_j_ref',
-               'mag_k_value','mag_k_err','mag_k_qual','mag_k_source_idref',
-               'mag_k_ref',
-               'plx_value','plx_err','plx_qual','plx_source_idref',
-               'plx_ref',
-               'dist_st_value','dist_st_err','dist_st_qual','dist_st_source_idref',
-               'dist_st_ref',
-               'sptype_string','sptype_err','sptype_qual','sptype_source_idref',
-               'sptype_ref',
-               'class_temp','class_temp_nr','class_lum','class_source_idref',
-               'class_ref',
-               'teff_st_value','teff_st_err','teff_st_qual','teff_st_source_idref',
-               'teff_st_ref',
-               'radius_st_value','radius_st_err','radius_st_qual',
-               'radius_st_source_idref','radius_st_ref',
-               'mass_st_value','mass_st_err','mass_st_qual','mass_st_source_idref',
-               'mass_st_ref',
-               'binary_flag','binary_qual','binary_source_idref','binary_ref',
-               'sep_ang_value','sep_ang_err','sep_ang_obs_date','sep_ang_qual',
-               'sep_ang_source_idref','sep_ang_ref'],
-        dtype=[int,float,float,float,#coo
-               float,float,object,
-               int,object,
-               float,float,float,#coo_gal
-               float,float,object,
-               int,object,
-               float,float,object,int,#mag_i
-               object,
-               float,float,object,int,#mag_j
-               object,
-               float,float,object,int,#mag_k
-               object,
-               float,float,object,int,#plx
-               object,
-               float,float,object,int,#dist
-               object,
-               object,float,object,int,#sptype
-               object,
-               object,object,object,int,#class
-               object,
-               float,float,object,int,#teff
-               object,
-               float,float,object,#rad
-               int,object,
-               float,float,object,int,#mass
-               object,
-               object,object,int,object,#binary
-               float,float,int,object,#sep_ang
-               int,object])
-    
-    planet_basic=ap.table.Table(
-        #object idref, mass value, mass error, mass realtion (min, max, equal),
-        #mass quality, source idref of mass parameter, mass reference
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
-               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
-        dtype=[int,float,float,object,object,int,object])
-
-    disk_basic=ap.table.Table(
-        #object idref, black body radius value, bbr error,
-        #bbr relation (min, max, equal), bbr quality,...
-        names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
-               'rad_source_idref','rad_ref'],
-        dtype=[int,float,float,object,object,int,object])
-
-    mes_mass_pl=ap.table.Table(
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
-               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
-        dtype=[int,float,float,object,object,int,object])
-    
-    mes_teff_st=ap.table.Table(
-        names=['object_idref','teff_st_value','teff_st_err','teff_st_qual',
-               'teff_st_source_idref','teff_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_radius_st=ap.table.Table(
-        names=['object_idref','radius_st_value','radius_st_err',
-               'radius_st_qual','radius_st_source_idref','radius_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_mass_st=ap.table.Table(
-        names=['object_idref','mass_st_value','mass_st_err','mass_st_qual',
-               'mass_st_source_idref','mass_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_binary=ap.table.Table(
-        names=['object_idref','binary_flag','binary_qual',
-               'binary_source_idref','binary_ref'],
-        dtype=[int,object,object,int,object])
-    
-    mes_sep_ang=ap.table.Table(
-        names=['object_idref',
-               'sep_ang_value','sep_ang_err',
-               'sep_ang_obs_date','sep_ang_qual',
-               'sep_ang_source_idref','sep_ang_ref'],
-        dtype=[int,
-               float,float,
-               int,object,
-               int,object])
-
-    for i in range(len(table_names)):
-        if table_names[i]=='sources': list_of_tables[i]=sources
-        if table_names[i]=='provider': list_of_tables[i]=provider
-        if table_names[i]=='objects': list_of_tables[i]=objects
-        if table_names[i]=='ident': list_of_tables[i]=ident
-        if table_names[i]=='h_link': list_of_tables[i]=h_link
-        if table_names[i]=='star_basic': list_of_tables[i]=star_basic
-        if table_names[i]=='planet_basic': list_of_tables[i]=planet_basic
-        if table_names[i]=='disk_basic': list_of_tables[i]=disk_basic
-        if table_names[i]=='mes_mass_pl': list_of_tables[i]=mes_mass_pl
-        if table_names[i]=='mes_teff_st': list_of_tables[i]=mes_teff_st
-        if table_names[i]=='mes_radius_st': list_of_tables[i]=mes_radius_st
-        if table_names[i]=='mes_mass_st': list_of_tables[i]=mes_mass_st
-        if table_names[i]=='mes_binary': list_of_tables[i]=mes_binary
-        if table_names[i]=='mes_sep_ang': list_of_tables[i]=mes_sep_ang
-        save([list_of_tables[i]],['empty_'+table_names[i]])
-    return list_of_tables
+#self created modules
+import helperfunctions as hf
+importlib.reload(hf)#reload module after changing it
 
 #------------------------------provider helper functions-----------------------
 def query(link,query,catalogs=[]):
@@ -317,14 +54,16 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
             #In case the column has elements that are masked skip those
             if type(cat[ref_columns[k]])==ap.table.column.MaskedColumn:
                 cat_reflist.extend(
-                    cat[ref_columns[k]][np.where(cat[ref_columns[k]].mask==False)])
+                    cat[ref_columns[k]][np.where(
+                            cat[ref_columns[k]].mask==False)])
             else:
                 cat_reflist.extend(cat[ref_columns[k]])
         #add list of collected references to the table and call the column ref
         cat_sources['ref']=cat_reflist
         cat_sources=ap.table.unique(cat_sources)#keeps only unique values
         #attaches service information
-        cat_sources['provider_name']=[provider for j in range(len(cat_sources))]
+        cat_sources['provider_name']=[provider for j in range(
+                len(cat_sources))]
         #combine old and new sources into one table
         sources=ap.table.vstack([old_sources,cat_sources])
         sources=ap.table.unique(sources) #remove double entries
@@ -373,13 +112,13 @@ def distance_cut(cat,colname,main_id=True):
     :return cat: Table like cat without any objects not found in sim_objects.
     """
     if main_id:
-        [sim]=load(['sim_objects'])
+        [sim]=hf.load(['sim_objects'])
         sim.rename_columns(['main_id','ids'],['temp1','temp2'])
         cat=ap.table.join(cat,sim['temp1','temp2'],
                       keys_left=colname,keys_right='temp1')
         cat.remove_columns(['temp1','temp2'])
     else:
-        [sim]=load(['sim_ident'])
+        [sim]=hf.load(['sim_ident'])
         sim.rename_columns(['id'],['temp1'])
         cat=ap.table.join(cat,sim['temp1','main_id'],
                       keys_left=colname,keys_right='temp1')
@@ -443,8 +182,29 @@ def replace_value(cat,column,value,replace_by):
         len(cat[column][np.where(cat[column]==value)]))]
     return cat
 
+def ids_from_ident(ident,objects):
+    """
+    This function extracts the identifiers in column id of table ident
+    and concatenates them with delimiter | to the common main_id.
+    :param ident: astropy table containing the rows main_id and id
+    :param objects: astropy table containing the row main_id, ids
+    :return objects:
+    """
+    grouped_ident=ident.group_by('main_id')
+    ind=grouped_ident.groups.indices
+    for i in range(len(ind)-1):
+    # -1 is needed because else ind[i+1] is out of bonds
+        ids=[]
+        for j in range(ind[i],ind[i+1]):
+            ids.append(grouped_ident['id'][j])
+        ids="|".join(ids)
+        objects.add_row([grouped_ident['main_id'][ind[i]],ids])
+    return objects
+
+
 #-----------------------------provider data ingestion--------------------------
-def provider_simbad(table_names,sim_list_of_tables):
+def provider_simbad(table_names,sim_list_of_tables,distance_cut_in_pc,
+                    test_objects=[]):
     """
     This function obtains the SIMBAD data and arranges it in a way
     easy to ingest into the database.
@@ -456,10 +216,14 @@ def provider_simbad(table_names,sim_list_of_tables):
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.
     """
+    plx_in_mas_cut=1000./distance_cut_in_pc
+    #making cut a bit bigger for correct treatment of objects on boundary
+    plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
     #---------------define provider--------------------------------------------
     sim_provider=ap.table.Table()
     sim_provider['provider_name']=['SIMBAD']
-    sim_provider['provider_url']=["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
+    sim_provider['provider_url']=\
+            ["http://simbad.u-strasbg.fr:80/simbad/sim-tap"]
     sim_provider['provider_bibcode']=['2000A&AS..143....9W']
     sim_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     #---------------define queries---------------------------------------------
@@ -517,8 +281,21 @@ def provider_simbad(table_names,sim_list_of_tables):
     #perform query for objects with in distance given
     simbad=query(sim_provider['provider_url'][0],adql_query[0])
     #querries parent and children objects with no parallax value
-    parents_without_plx=query(sim_provider['provider_url'][0],upload_query[0],[simbad])
-    children_without_plx=query(sim_provider['provider_url'][0],upload_query[1],[simbad])
+    parents_without_plx=query(sim_provider['provider_url'][0],
+                                upload_query[0],[simbad])
+    children_without_plx=query(sim_provider['provider_url'][0],
+                                upload_query[1],[simbad])
+    
+    test_objects=np.array(test_objects)
+    if len(test_objects)>0:
+        print('in sim through plx query', 
+                  test_objects[np.where(np.in1d(test_objects,
+                                                simbad['main_id']))])
+        print('in sim through child plx query', 
+                  test_objects[np.where(np.in1d(test_objects,parents_without_plx['main_id']))])
+        print('in sim through parent plx query', 
+                  test_objects[np.where(np.in1d(test_objects,children_without_plx['main_id']))])
+    
     #adding of no_parallax objects to rest of simbad query objects
     simbad=ap.table.vstack([simbad,parents_without_plx])
     simbad=ap.table.vstack([simbad,children_without_plx])
@@ -552,6 +329,11 @@ def provider_simbad(table_names,sim_list_of_tables):
               list(set(removed_otypes)))
         print('example object of them:', simbad['main_id'][to_remove_list[0]])
         simbad.remove_rows(to_remove_list)
+        
+    if len(test_objects)>0:
+        print('in sim through otype criteria', 
+                  test_objects[np.where(np.in1d(test_objects,
+                                                simbad['main_id']))])
 
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
@@ -569,9 +351,11 @@ def provider_simbad(table_names,sim_list_of_tables):
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
     
-    #removing entries in h_link where parent objects are clusters or associations as we are 
+    # removing entries in h_link where parent objects are clusters or 
+    # associations as we are 
     #only interested in hierarchical multiples. 
-    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],stars['oid']))]
+    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],
+                                            stars['oid']))]
     
     
     sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
@@ -601,7 +385,8 @@ def provider_simbad(table_names,sim_list_of_tables):
         """
         #all type sy objects: cat['main_id','type']
         #this should work if alias works well
-        #need parent_main_id for sim_h_link here. but setdiff does not support that.
+        #need parent_main_id for sim_h_link here. but setdiff does 
+        #not support that.
         parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
         parents.rename_column('main_id','child_main_id')
         parents.rename_column('parent_main_id','main_id')
@@ -609,11 +394,14 @@ def provider_simbad(table_names,sim_list_of_tables):
                                      parents[:],keys=['main_id'])
         #that don t have children: sy_wo_child['main_id','type']
         #list of those with children
-        #sy_w_child=ap.table.setdiff(sy_wo_child,parents,keys=['main_id'])#old version
-        sy_w_child=ap.table.join(parents[:],cat['main_id','type','sptype_string'][:],keys=['main_id'])
+        sy_w_child=ap.table.join(parents[:],
+                                cat['main_id','type','sptype_string'][:],
+                                keys=['main_id'])
         #list of those with children joined with type of child
-        all_objects.rename_columns(['type','main_id'],['child_type','child_main_id'])
-        sy_w_child=ap.table.join(sy_w_child[:],all_objects['child_type','child_main_id'][:],\
+        all_objects.rename_columns(['type','main_id'],
+                                    ['child_type','child_main_id'])
+        sy_w_child=ap.table.join(sy_w_child[:],
+                                all_objects['child_type','child_main_id'][:],
                                  keys=['child_main_id'],join_type='left')
         #remove all where type child is not pl
         sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
@@ -633,17 +421,23 @@ def provider_simbad(table_names,sim_list_of_tables):
         temp=list(np.where(temp==True)[0])
         single_sptype=sy_wo_child_st[:][temp]
         #and no + in spectral type: single_sptype['main_id','type']      
-        cat['type'][np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]=['st' for j in range(len(
-                    cat[np.where(np.in1d(cat['main_id'],single_sptype['main_id']))]))]        
+        cat['type'][np.where(np.in1d(cat['main_id'],
+                                    single_sptype['main_id']))]=\
+                  ['st' for j in range(len(cat[np.where(np.in1d(cat['main_id'],
+                                            single_sptype['main_id']))]))]        
         return cat
     #all objects in stars table: stars['main_id','type']
     stars[np.where(stars['type']=='sy')]=stars_in_multiple_system(
-            stars[np.where(stars['type']=='sy')],sim_h_link[:],simbad['main_id','type'][:])    
+            stars[np.where(stars['type']=='sy')],sim_h_link[:],
+            simbad['main_id','type'][:])    
     
     # binary_flag 'True' for all stars with parents
-    # meaning stars[main_id] in sim_h_link[child_main_id] -> stars[binary_flag]=='True'    
-    stars['binary_flag'][np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]=['True' for j in range(len(
-                    stars[np.where(np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
+    # meaning stars[main_id] in sim_h_link[child_main_id] 
+    #-> stars[binary_flag]=='True'    
+    stars['binary_flag'][np.where(np.in1d(stars['main_id'],
+                                        sim_h_link['main_id']))]=\
+                    ['True' for j in range(len(stars[np.where(
+                    np.in1d(stars['main_id'],sim_h_link['main_id']))]))]   
                 
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
@@ -651,19 +445,24 @@ def provider_simbad(table_names,sim_list_of_tables):
     
     for band in ['i','j','k']:
         #initiate some of the ref columns
-        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,length=len(stars),
+        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,
+                                    length=len(stars),
                                     mask=[True for j in range(len(stars))])
         #add simbad reference where no other is given
-        stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]=[
-            sim_provider['provider_bibcode'][0] for j in range(len(
-            stars[f'mag_{band}_ref'][np.where(stars[f'mag_{band}_value'].mask==False)]))]
+        stars[f'mag_{band}_ref'][np.where(
+                stars[f'mag_{band}_value'].mask==False)]=[
+                sim_provider['provider_bibcode'][0] for j in range(len(
+                stars[f'mag_{band}_ref'][np.where(
+                stars[f'mag_{band}_value'].mask==False)]))]
         
     stars=replace_value(stars,'plx_ref','',sim_provider['provider_bibcode'][0])
-    stars=replace_value(stars,'sptype_ref','',sim_provider['provider_bibcode'][0])
+    stars=replace_value(stars,'sptype_ref','',
+            sim_provider['provider_bibcode'][0])
     stars=replace_value(stars,'coo_ref','',sim_provider['provider_bibcode'][0])
         
-    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(stars))]
-    stars['binary_qual']=['C' for j in range(len(stars))]
+    stars['binary_ref']=[sim_provider['provider_bibcode'][0] for j in range(
+            len(stars))]
+    stars['binary_qual']=['D' for j in range(len(stars))]
 
     #-----------------creating output table sim_planets------------------------
     temp_sim_planets=simbad['main_id','ids',
@@ -674,16 +473,18 @@ def provider_simbad(table_names,sim_list_of_tables):
     sim_objects=ap.table.vstack([sim_planets['main_id','ids','type'],
                              stars['main_id','ids','type']])
     sim_objects['ids']=sim_objects['ids'].astype(object)
-    print('tbd: add identifier simbad main_id without leading * and whitespaces')
+    print('tbd: add identifier simbad main_id without leading * and \
+            whitespaces')
     #--------------creating output table sim_sources --------------------------
     sim_sources=ap.table.Table()
     tables=[sim_provider,stars, sim_h_link,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',
-                    'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],['h_link_ref'],
-                    ['id_ref']]
+                    'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],
+                    ['h_link_ref'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
-        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],sim_sources)
+        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],
+                                sim_sources)
     #------------------------creating output table sim_star_basic--------------
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
@@ -706,11 +507,12 @@ def provider_simbad(table_names,sim_list_of_tables):
         if table_names[i]=='h_link': sim_list_of_tables[i]=sim_h_link
         if table_names[i]=='star_basic': sim_list_of_tables[i]=sim_star_basic
         if table_names[i]=='mes_binary': sim_list_of_tables[i]=sim_mes_binary
-        save([sim_list_of_tables[i]],['sim_'+table_names[i]])
-        
+        hf.save([sim_list_of_tables[i][:]],['sim_'+table_names[i]])
     return sim_list_of_tables
 
-def provider_gk(table_names,gk_list_of_tables):
+
+
+def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     """
     This function obtains the disk data and arranges it in a way
     easy to ingest into the database.
@@ -722,6 +524,7 @@ def provider_gk(table_names,gk_list_of_tables):
         reference data, provider data, object data, identifier data, object to 
         object relation data and basic disk data.
     """
+    plx_in_mas_cut=1000./distance_cut_in_pc
     #---------------define provider--------------------------------------------
     gk_provider=ap.table.Table()
     gk_provider['provider_name']=['Grant Kennedy Disks']
@@ -732,9 +535,9 @@ def provider_gk(table_names,gk_list_of_tables):
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=ap.io.votable.parse_single_table(
-        "data/additional_data/Grant_absil_2013_.xml").to_table()
+        "../data/additional_data/Grant_absil_2013_.xml").to_table()
     #transforming from string type into object to have variable length
-    gk_disks=stringtoobject(gk_disks,212)
+    gk_disks=hf.stringtoobject(gk_disks,212)
     #removing objects with plx_value=='None' or masked entries
     gk_disks['plx_value']=gk_disks['plx_value'].filled('None')
     gk_disks=gk_disks[np.where(gk_disks['plx_value']!='None')]
@@ -800,8 +603,10 @@ def provider_gk(table_names,gk_list_of_tables):
         if table_names[i]=='ident': gk_list_of_tables[i]=gk_ident
         if table_names[i]=='h_link': gk_list_of_tables[i]=gk_h_link
         if table_names[i]=='disk_basic': gk_list_of_tables[i]=gk_disk_basic
-        save([gk_list_of_tables[i]],['gk_'+table_names[i]])
+        hf.save([gk_list_of_tables[i][:]],['gk_'+table_names[i]])
     return gk_list_of_tables
+
+
 
 def provider_exo(table_names,exo_list_of_tables,temp=False):
     """
@@ -833,7 +638,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
                   FROM exomercat.exomercat"""
     #---------------obtain data------------------------------------------------
     if temp:
-        exomercat=ap.io.ascii.read("data/additional_data/exo-mercat05-02-2023_v2.0.csv")
+        exomercat=ap.io.ascii.read("../data/additional_data/exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
         exo_provider['provider_access']=['2023-02-05']
 
@@ -894,7 +699,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #show which elements from exomercat were not found in sim_objects
     exo['name']=exo['name'].astype(object)
     removed_objects=ap.table.setdiff(exo,exomercat,keys=['name'])
-    save([removed_objects],['exomercat_removed_objects'])
+    hf.save([removed_objects],['exomercat_removed_objects'])
 
     #-------------exo_ident---------------
     exo_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object])
@@ -929,15 +734,16 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #-------------exo_objects---------------
     # tbd at one point: I think I want to add hosts to object
     exo_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
-    grouped_exo_ident=exo_ident.group_by('main_id')
-    ind=grouped_exo_ident.groups.indices
-    for i in range(len(ind)-1):
+    exo_objects=ids_from_ident(exo_ident['main_id','id'],exo_objects)
+    #grouped_exo_ident=exo_ident.group_by('main_id')
+    #ind=grouped_exo_ident.groups.indices
+    #for i in range(len(ind)-1):
     # -1 is needed because else ind[i+1] is out of bonds
-        ids=[]
-        for j in range(ind[i],ind[i+1]):
-            ids.append(grouped_exo_ident['id'][j])
-        ids="|".join(ids)
-        exo_objects.add_row([grouped_exo_ident['main_id'][ind[i]],ids])
+     #   ids=[]
+      #  for j in range(ind[i],ind[i+1]):
+       #     ids.append(grouped_exo_ident['id'][j])
+        #ids="|".join(ids)
+        #exo_objects.add_row([grouped_exo_ident['main_id'][ind[i]],ids])
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
     
     #-------------------exo_mes_mass_pl---------------------
@@ -1000,8 +806,10 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         if table_names[i]=='ident': exo_list_of_tables[i]=exo_ident
         if table_names[i]=='h_link': exo_list_of_tables[i]=exo_h_link
         if table_names[i]=='mes_mass_pl': exo_list_of_tables[i]=exo_mes_mass_pl
-        save([exo_list_of_tables[i]],['exo_'+table_names[i]])
+        hf.save([exo_list_of_tables[i][:]],['exo_'+table_names[i]])
     return exo_list_of_tables
+
+
 
 def provider_life(table_names,life_list_of_tables):
     """
@@ -1027,7 +835,7 @@ def provider_life(table_names,life_list_of_tables):
     print('Creating ',life_provider['provider_name'][0],' tables ...')
     #---------------------star_basic----------------
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
-    [life_star_basic]=load(['sim_star_basic'])
+    [life_star_basic]=hf.load(['sim_star_basic'])
     ircs_coord=ap.coordinates.SkyCoord(\
             ra=life_star_basic['coo_ra'],dec=life_star_basic['coo_dec'],frame='icrs')
     gal_coord=ircs_coord.galactic
@@ -1081,34 +889,38 @@ def provider_life(table_names,life_list_of_tables):
         temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
         temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+        #tbd: rewrite code using recoursive function
+        
         for i in range(len(temp)):
             #sorting out objects like M5V+K7V
-            if (len(temp['sptype_string'][i].split('+'))==1 and
+            #strip d for spectral types starting with small d because it is an old annotation for dwarf star
+            sptype=temp['sptype_string'][i].strip('d')
+            if (len(sptype.split('+'))==1 and
             #sorting out entries like '', DA2.9, T1V
-                    len(temp['sptype_string'][i])>0 and 
-                    temp['sptype_string'][i][0] in ['O','B','A','F','G','K','M']):
-                temp['class_temp'][i]=temp['sptype_string'][i][0]
+                    len(sptype)>0 and 
+                    sptype[0] in ['O','B','A','F','G','K','M']):
+                temp['class_temp'][i]=sptype[0]
                 temp['class_ref'][i]=ref
                 #sorting out objects like DA2.9
-                if len(temp['sptype_string'][i])>1 and temp['sptype_string'][i][1] in ['0','1','2','3','4','5','6','7','8','9']:
-                    temp['class_temp_nr'][i]=temp['sptype_string'][i][1]
+                if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
+                    temp['class_temp_nr'][i]=sptype[1]
                     #distinguishing between objects like K5V and K5.5V
-                    if len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2]=='.':
-                        temp['class_temp_nr'][i]=temp['sptype_string'][i][1:4]
-                        if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                            temp['class_lum'][i]=temp['sptype_string'][i][4]
-                            if len(temp['sptype_string'][i])>5 and temp['sptype_string'][i][5] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][4:6]
-                                if len(temp['sptype_string'][i])>6 and temp['sptype_string'][i][6] in ['I','V']:
-                                    temp['class_lum'][i]=temp['sptype_string'][i][4:7]
+                    if len(sptype)>2 and sptype[2]=='.':
+                        temp['class_temp_nr'][i]=sptype[1:4]
+                        if len(sptype)>4 and sptype[4] in ['I','V']:
+                            temp['class_lum'][i]=sptype[4]
+                            if len(sptype)>5 and sptype[5] in ['I','V']:
+                                temp['class_lum'][i]=sptype[4:6]
+                                if len(sptype)>6 and sptype[6] in ['I','V']:
+                                    temp['class_lum'][i]=sptype[4:7]
                         else:
                             temp['class_lum'][i]='?'
-                    elif len(temp['sptype_string'][i])>2 and temp['sptype_string'][i][2] in ['I','V']:
-                        temp['class_lum'][i]=temp['sptype_string'][i][2]
-                        if len(temp['sptype_string'][i])>3 and temp['sptype_string'][i][3] in ['I','V']:
-                            temp['class_lum'][i]=temp['sptype_string'][i][2:4]
-                            if len(temp['sptype_string'][i])>4 and temp['sptype_string'][i][4] in ['I','V']:
-                                temp['class_lum'][i]=temp['sptype_string'][i][2:5]
+                    elif len(sptype)>2 and sptype[2] in ['I','V']:
+                        temp['class_lum'][i]=sptype[2]
+                        if len(sptype)>3 and sptype[3] in ['I','V']:
+                            temp['class_lum'][i]=sptype[2:4]
+                            if len(sptype)>4 and sptype[4] in ['I','V']:
+                                temp['class_lum'][i]=sptype[2:5]
                     else:
                         temp['class_lum'][i]='?'
                 else:
@@ -1118,6 +930,9 @@ def provider_life(table_names,life_list_of_tables):
                 temp['class_temp_nr'][i]='?'
                 temp['class_lum'][i]='?'
                 temp['class_ref'][i]='?'
+            if len(temp['sptype_string'][i])>0:
+                if temp['sptype_string'][i][0]=='d':
+                    temp['class_lum'][i]='V'
         return temp
     life_star_basic=sptype_string_to_class(life_star_basic,life_provider['provider_name'][0])
     
@@ -1148,7 +963,7 @@ def provider_life(table_names,life_list_of_tables):
         type, effective temperature radius and mass.
         :return votable: astropy table of the 4 parameters as columns
         """
-        EEM_table=ap.io.ascii.read("data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+        EEM_table=ap.io.ascii.read("../data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
         EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
         EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
         EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
@@ -1157,7 +972,7 @@ def provider_life(table_names,life_list_of_tables):
         EEM_table['Radius'].unit=ap.units.R_sun
         EEM_table['Mass'].unit=ap.units.M_sun       
         ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
-                              f'data/model_param.xml')#saving votable
+                              f'../data/model_param.xml')#saving votable
         return EEM_table
 
     def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
@@ -1229,7 +1044,7 @@ def provider_life(table_names,life_list_of_tables):
         cat=ap.table.unique(cat, keys='main_id')
         return cat
 
-    [sim_objects]=load(['sim_objects'],stringtoobjects=False)
+    [sim_objects]=hf.load(['sim_objects'],stringtoobjects=False)
     
     stars=sim_objects[np.where(sim_objects['type']=='st')]
     cat=ap.table.join(stars,life_star_basic)
@@ -1261,6 +1076,10 @@ def provider_life(table_names,life_list_of_tables):
     for cat,ref in zip(tables,ref_columns):
         life_sources=sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
     
+    #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
+    #life parameter creation
+    life_star_basic.remove_column('sptype_string')
+    
     for i in range(len(table_names)):
         if table_names[i]=='sources': life_list_of_tables[i]=life_sources
         if table_names[i]=='provider': life_list_of_tables[i]=life_provider
@@ -1268,10 +1087,12 @@ def provider_life(table_names,life_list_of_tables):
         if table_names[i]=='mes_teff_st': life_list_of_tables[i]=life_mes_teff_st
         if table_names[i]=='mes_radius_st': life_list_of_tables[i]=life_mes_radius_st
         if table_names[i]=='mes_mass_st': life_list_of_tables[i]=life_mes_mass_st
-        save([life_list_of_tables[i]],['life_'+table_names[i]])
+        hf.save([life_list_of_tables[i][:]],['life_'+table_names[i]])
     return life_list_of_tables
 
-def provider_gaia(table_names,gaia_list_of_tables,temp=True):
+
+
+def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     """
     This function obtains the gaia data and arranges it in a way
     easy to ingest into the database. Currently there is a provlem 
@@ -1282,6 +1103,9 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
         reference data, provider data, object data, identifier data,  
         stellar effective temperature, radius, mass and binarity data.
     """
+    plx_in_mas_cut=1000./distance_cut_in_pc
+    #making cut a bit bigger for correct treatment of objects on boundary
+    plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
     #---------------define provider--------------------------------------------
     gaia_provider=ap.table.Table()
     gaia_provider['provider_name']=['Gaia']
@@ -1300,7 +1124,7 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
     WHERE s.parallax >="""+str(plx_in_mas_cut)
     
-    if temp:
+    if temp: #because of bug in gaia server where async not working currently
         service = vo.dal.TAPService(gaia_provider['provider_url'][0])
         result=service.run_sync(adql_query.format(**locals()), maxrec=160000)
         gaia=result.to_table()
@@ -1344,15 +1168,16 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
 
     #-----------------gaia_objects------------------
     gaia_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
-    grouped_gaia_ident=gaia_ident.group_by('main_id')
-    ind=grouped_gaia_ident.groups.indices
-    for i in range(len(ind)-1):
+    gaia_objects=ids_from_ident(gaia_ident['main_id','id'],gaia_objects)
+    #grouped_gaia_ident=gaia_ident.group_by('main_id')
+    #ind=grouped_gaia_ident.groups.indices
+    #for i in range(len(ind)-1):
     # -1 is needed because else ind[i+1] is out of bonds
-        ids=[]
-        for j in range(ind[i],ind[i+1]):
-            ids.append(grouped_gaia_ident['id'][j])
-        ids="|".join(ids)
-        gaia_objects.add_row([grouped_gaia_ident['main_id'][ind[i]],ids])
+     #   ids=[]
+      #  for j in range(ind[i],ind[i+1]):
+       #     ids.append(grouped_gaia_ident['id'][j])
+       # ids="|".join(ids)
+        #gaia_objects.add_row([grouped_gaia_ident['main_id'][ind[i]],ids])
     gaia_objects['type']=['st' for j in range(len(gaia_objects))]
     gaia_objects['main_id']=gaia_objects['main_id'].astype(str)
     gaia_objects=ap.table.join(gaia_objects,gaia['main_id','nss_solution_type'],join_type='left')
@@ -1361,12 +1186,16 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
     gaia_objects.remove_column('nss_solution_type')
 
     #gaia_mes_binary
-    gaia_mes_binary=gaia_objects['main_id','type'][np.where(gaia_objects['type']=='sy')]
+    gaia_mes_binary=gaia_objects['main_id','type']
+    print('tbd add binary flag True to children of system objects once I get h_link info from gaia')
     gaia_mes_binary.rename_column('type','binary_flag')
-    gaia_mes_binary['binary_flag']=['True' for j in range(len(gaia_mes_binary))]
+    gaia_mes_binary['binary_flag']=gaia_mes_binary['binary_flag'].astype(object)
+    gaia_mes_binary=replace_value(gaia_mes_binary,'binary_flag','sy','True')
+    gaia_mes_binary=replace_value(gaia_mes_binary,'binary_flag','st','False')
     gaia_mes_binary['binary_ref']=['2016A&A...595A...1G' for j in range(len(gaia_mes_binary))]
-    gaia_mes_binary['binary_qual']=['B' for j in range(len(gaia_mes_binary))]
-    #there might be issue in building merging now
+    gaia_mes_binary['binary_qual']=['B' if gaia_mes_binary['binary_flag'][j]=='True' \
+                                    else 'E' for j in range(len(gaia_mes_binary))]
+    #if necessary lower binary_qual for binary_flag = False to level of simbad.
     
     #gaia_mes_teff
     gaia_mes_teff_st=gaia['main_id','teff_gspphot']
@@ -1422,10 +1251,12 @@ def provider_gaia(table_names,gaia_list_of_tables,temp=True):
         if table_names[i]=='mes_radius_st': gaia_list_of_tables[i]=gaia_mes_radius_st
         if table_names[i]=='mes_mass_st': gaia_list_of_tables[i]=gaia_mes_mass_st
         if table_names[i]=='mes_binary': gaia_list_of_tables[i]=gaia_mes_binary
-        save([gaia_list_of_tables[i]],['gaia_'+table_names[i]])
+        hf.save([gaia_list_of_tables[i][:]],['gaia_'+table_names[i]])
     return gaia_list_of_tables
 
-def provider_wds(table_names,wds_list_of_tables,temp=False):
+
+
+def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     """
     This function obtains the wds provider data and arranges it in a way
     easy to ingest into the database.
@@ -1454,142 +1285,257 @@ def provider_wds(table_names,wds_list_of_tables,temp=False):
     #------------------querrying-----------------------------------------------
     print('Creating ',wds_provider['provider_name'][0],' tables ...')
     #perform query for objects with parallax >50mas
+    test_objects=np.array(test_objects)
     if temp:
         print(' loading...')
-        [wds]=load(['wds'])
+        [wds]=hf.load(['wds'])
         #currently temp=True not giving same result because wds['system_main_id'][j] are '' and not masked
-        for col in ['system_main_id','parent_main_id','primary_main_id','secondary_main_id']:
+        for col in ['system_main_id','primary_main_id','secondary_main_id']:
             wds[col][np.where(wds[col]=='')]=np.ma.masked
         print('tbd: add provider_access of last query')
     else:
-        print(' querying...')
+        print(' querying VizieR for WDS...')
         wds=query(wds_provider['provider_url'][0],adql_query[0])
         print('length query',len(wds))
         
         # I need to match the wds objects with the simbad ones to inforce the
-        # distance cut.
+        # distance cut since wds does not have distance information.
         
-        # type transformation for object comparison in later join 
+        # initializing and setting type for object comparison in later join 
         for col in ['sim_wds_id','system_name','primary','secondary']:
             wds[col]=wds['wds_name'].astype(object)
         
-        # simbad misses some system objects. Therefore I need to join on the
-        # children objects instead
+        # assigning correct name of system, primary and secondary for each wds object
         for j in range(len(wds)):
-            if wds['wds_comp'][j]=='':
-                wds['system_name'][j]='WDS J'+wds['wds_name'][j]
+            if wds['wds_comp'][j]=='':#trivial binaries
+                wds['system_name'][j]='WDS J'+wds['wds_name'][j]+'AB'
+                #AB added since apparently simbad calls trivial binary system AB too
                 wds['primary'][j]='WDS J'+wds['wds_name'][j]+'A'
                 wds['secondary'][j]='WDS J'+wds['wds_name'][j]+'B'
-            else:
+            else:#higer order multiples
                 wds['system_name'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j]
-                wds['primary'][j]=''
-                wds['secondary'][j]=''
-            
+                if len(wds['wds_comp'][j])==2:
+                    wds['primary'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j][0]
+                    wds['secondary'][j]='WDS J'+wds['wds_name'][j]+wds['wds_comp'][j][1]
+                else:
+                    components=wds['wds_comp'][j].split(',')
+                    wds['primary'][j]='WDS J'+wds['wds_name'][j]+components[0]
+                    wds['secondary'][j]='WDS J'+wds['wds_name'][j]+components[1]
+        print('number of trivial binary systems:',len(wds[np.where(wds['wds_comp']=='')]))
+                
+        if len(test_objects)>0:
+            print('in wds as system_name', test_objects[np.where(np.in1d(test_objects,wds['system_name']))])
+            print('in wds as primary',test_objects[np.where(np.in1d(test_objects,wds['primary']))])
+            print('in wds as secondary', test_objects[np.where(np.in1d(test_objects,wds['secondary']))])
+
+
     # an alternative would be to query simbad for the main id and then cut by distance
     # this however takes way longer as it joins 150'000 elements
     #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
     #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
         print(' performing distance cut...')
         
-        NTsy=wds[np.where(wds['wds_comp']!='')]
-        NTsy=distance_cut(NTsy,colname='system_name',main_id=False)
-        print('on non trivial binary systems e.g. WDS J...AB',len(NTsy))
+        #assigning main_id for system using sim_hlink and cutting on the system or the components
+        wds_system_cut=distance_cut(wds,colname='system_name',main_id=False)
+        wds_system_cut.rename_column('main_id','system_main_id')
         
-        allTsy=wds[np.where(wds['wds_comp']=='')]
-        Tsy=distance_cut(allTsy[:],colname='system_name',main_id=False)
-        print('on trivial binariy systems e.g. WDS J...',len(Tsy))
-        #apparently simbad calls trivial binary system AB too
+        wds_primary_cut=distance_cut(wds,colname='primary',main_id=False)
         
-        wds=ap.table.vstack([NTsy,Tsy])
-        wds.rename_column('main_id','system_main_id')
-        
-        # get system_main_id for trivial binaries by joining sim_h_link on main_id
-        [sim_h_link]=load(['sim_h_link'])
-        
-        Tp=distance_cut(allTsy[:],colname='primary',main_id=False)
-        print('on trivial binaries primary star e.g. WDS J...A',len(Tp))
-        Tp=ap.table.join(Tp,sim_h_link['main_id','parent_main_id'],
+        wds_secondary_cut=distance_cut(wds,colname='secondary',main_id=False)
+        [sim_h_link]=hf.load(['sim_h_link'])
+        #joining parent object
+        wds_primary_cut=ap.table.join(wds_primary_cut,sim_h_link['main_id','parent_main_id'],
                                   keys='main_id',join_type='left')
-        Tp.rename_column('main_id','primary_main_id')
+        wds_primary_cut.rename_columns(['main_id','parent_main_id'],['primary_main_id','system_main_id'])
         
-        Ts=distance_cut(allTsy[:],colname='secondary',main_id=False)
-        print('on trivial binaries secondary star e.g. WDS J...B',len(Ts))
-        Ts=ap.table.join(Ts,sim_h_link['main_id','parent_main_id'],
+        wds_secondary_cut=ap.table.join(wds_secondary_cut,sim_h_link['main_id','parent_main_id'],
                                   keys='main_id',join_type='left')
-        Ts.rename_column('main_id','secondary_main_id')
+        wds_secondary_cut.rename_columns(['main_id','parent_main_id'],['secondary_main_id','system_main_id'])
+        #here some empty ones when child is known in simbad but no parent. in this case would I want to assign system_name in system main_id? do it later
         
-        # Combining all tables into one, Tsy left out as no objects contained in it
-        wds=ap.table.vstack([wds,Tp])
-        wds=ap.table.vstack([wds,Ts])
+        wds=ap.table.vstack([wds_system_cut,wds_primary_cut])
+        wds=ap.table.vstack([wds,wds_secondary_cut])
+        print('lenwds',len(wds))
+                        
+        if len(test_objects)>0:
+            print(wds['system_main_id','primary_main_id','secondary_main_id'])
+            print('in wds as system_main_id',test_objects[np.where(np.in1d(test_objects,wds['system_main_id']))])
+            print('in wds as primary_main_id',test_objects[np.where(np.in1d(test_objects,wds['primary_main_id']))])
+            print('in wds as secondary_main_id',test_objects[np.where(np.in1d(test_objects,wds['secondary_main_id']))])
         
-        save([wds],['wds'])
+        hf.save([wds],['wds'])
     
     wds['system_main_id']=wds['system_main_id'].astype(object)
-    wds['ids']=wds['system_name'].astype(object)
+    wds['system_name']=wds['system_name'].astype(object)
+
     
     #-----------------creating output table wds_ident and wds_h_link------------------------
-    # create wds_ident (for systems)
-    wds_ident=ap.table.Table(names=['main_id','id','id_ref'],dtype=[object,object,object])
+    wds_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object],masked=True)
     # create wds_h_link (for systems)
-    wds_h_link=ap.table.Table(names=['main_id','parent_main_id','h_link_ref'],dtype=[object,object,object])
+    wds_h_link=ap.table.Table(names=['main_id','parent_main_id'],dtype=[object,object])
+    #add all relevant invormation
+    #about identifiers
+    table_main=['system_name','system_main_id','system_main_id',
+               'primary','primary_main_id','primary_main_id',
+               'secondary','secondary_main_id','secondary_main_id']
+    table_id=['system_name','system_main_id','system_name',
+             'primary','primary_main_id','primary',
+             'secondary','secondary_main_id','secondary']
+    empty=ap.table.Table(names=['main_id'],dtype=[object],masked=True)
+    for id1,id2 in zip(table_main,table_id):
+        temp=empty.copy()
+        temp['main_id']=wds[id1].astype(object)
+        temp['id']=wds[id2].astype(object)
+        wds_ident=ap.table.vstack([wds_ident,temp])
     
-    for j in range(len(wds)):
-        # filling in system_main_id from parent_main_id data
-        if type(wds['system_main_id'][j])==np.ma.core.MaskedConstant:
-            if type(wds['parent_main_id'][j])!=np.ma.core.MaskedConstant:
-                wds['system_main_id'][j]=wds['parent_main_id'][j]
-                # adding wds_ident info where the system_name does not match the simbad id in parent_main_id
-                wds_ident.add_row([wds['system_main_id'][j],wds['system_name'][j],wds_provider['provider_bibcode'][0]])
-            else:
-                wds['system_main_id'][j]=wds['system_name'][j]
-                # adding wds_ident info where there is no simbad id in parent_main_id
-                wds_ident.add_row([wds['system_main_id'][j],wds['system_name'][j],wds_provider['provider_bibcode'][0]])
-                if type(wds['primary_main_id'][j])!=np.ma.core.MaskedConstant:
-                    wds_h_link.add_row([wds['primary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
-                if type(wds['secondary_main_id'][j])!=np.ma.core.MaskedConstant:
-                    wds_h_link.add_row([wds['secondary_main_id'][j],wds['system_main_id'][j],wds_provider['provider_bibcode'][0]])
+    #about relations of objects
+    table_main_id=['primary','primary','primary_main_id','primary_main_id',
+                   'secondary','secondary','secondary_main_id','secondary_main_id']
+    table_parent=['system_name','system_main_id','system_name','system_main_id',
+                  'system_name','system_main_id','system_name','system_main_id']
+    for id1,id2 in zip(table_main_id,table_parent):
+        temp=empty.copy()
+        temp['main_id']=wds[id1].astype(object)
+        temp['parent_main_id']=wds[id2].astype(object)
+        wds_h_link=ap.table.vstack([wds_h_link,temp])
+    #delete all rows containing masked entries
+    wds_ident.remove_rows(wds_ident['main_id'].mask.nonzero()[0])
+    wds_ident.remove_rows(wds_ident['id'].mask.nonzero()[0])
+    wds_h_link.remove_rows(wds_h_link['main_id'].mask.nonzero()[0])
+    wds_h_link.remove_rows(wds_h_link['parent_main_id'].mask.nonzero()[0])
 
-        if wds['system_main_id'][j]!=wds['system_name'][j]:
-            wds['ids'][j]=wds['system_main_id'][j]+'|'+wds['system_name'][j]
-    #I did not include identifiers that are from simbad in wds_ident[id]. 
-    #I already have that information in the simbad provider
-    
+    #uniqueness
     wds_ident=ap.table.unique(wds_ident)
-    wds_h_link=ap.table.unique(wds_h_link)    
+    wds_h_link=ap.table.unique(wds_h_link)
+
+    #delete entries where id instead of main_id used
+    not_identical_rows_id=wds_ident['id'][np.where(wds_ident['main_id']!=wds_ident['id'])]
+    remove=np.in1d(wds_ident['main_id'],not_identical_rows_id)
+    wds_ident.remove_rows(remove)
+
+    #for h_link replacing instead of deleting because there can be cases where the information I need is only available this way
+    #e.g. simbad query on system name results in system main_id. simbad query on primary gives primary_main_id. but 
+    #simbad does not have those two objects connected through h_link. therefore I only have [primary,system_main_id] but
+    #would want to have [primary_main_id,system_main_id]
+
+    #where h_link main_id not in ident_main_id
+    not_main_id=np.invert(np.in1d(wds_h_link['main_id'],wds_ident['main_id']))
     
-    #-----------------creating output table wds_objects------------------------
-    # create wds_objects (for systems)
-    #    since not all wds objects will be physical, do I need a type ref or is id_ref of main_id in object enough?
-    #wds_objects=ap.table.Table(names=['main_id'],dtype=[object])
-    wds_objects=wds['system_main_id','ids'][:]
-    wds_objects.rename_column('system_main_id','main_id')
-    wds_objects['type']=['sy' for j in wds_objects]
-    wds_objects=ap.table.unique(wds_objects)  
+    if len(test_objects)>0:
+        print('number of test objects that are in h_link main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+        print('number of test objects that are in h_link parent_main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['parent_main_id']))])
+        print('number of test objects that are in main_id of ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+        print('number of test objects that are in main_id of h_link but not ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id'][not_main_id]))])
+
+    #replace it with the corresponding  ident main_id
+    for j in range(len(wds_h_link['main_id'][not_main_id])):
+        temp=wds_h_link['main_id'][not_main_id][j]
+        #why is this line not working? am I assigning stuff to a copy instead of alias?
+        wds_h_link['main_id'][np.where(wds_h_link['main_id']==temp)]=wds_ident['main_id'][np.where(
+                wds_ident['id']==temp)]
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in h_link main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+        print('number of test objects that are in main_id of ident table \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+    
+    #where h_link parent_main_id not in ident_main_id
+    not_parent_main_id=np.invert(np.in1d(wds_h_link['parent_main_id'],wds_ident['main_id']))
+
+    #replace it with the corresponding  ident main_id
+    for j in range(len(wds_h_link['parent_main_id'][not_parent_main_id])):
+        if len(wds_ident['main_id'][np.where(
+                    wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])])==1:
+            temp=wds_h_link['parent_main_id'][not_parent_main_id][j]
+            wds_h_link['parent_main_id'][np.where(wds_h_link['parent_main_id']==temp)]=wds_ident['main_id'][np.where(
+                    wds_ident['id']==temp)]
+        #else:
+        #nestled multiples with non hierarchical measurements e.g. AC component when A and B are closest and C further away
+            #print(wds_ident['main_id'][np.where(
+            #        wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])])
+            #print(wds_h_link['parent_main_id'][not_parent_main_id][j])
+            #print(wds_h_link['main_id'][not_parent_main_id][j])
+            #wds_h_link['parent_main_id'][not_parent_main_id][j]=wds_ident['main_id'][np.where(
+            #        wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])][0]
+
+    wds_h_link=ap.table.unique(wds_h_link) 
+
+    #refs
+    wds_ident['id_ref']=[wds_provider['provider_bibcode'][0] for j in range(len(wds_ident))]
+    wds_h_link['h_link_ref']=[wds_provider['provider_bibcode'][0] for j in range(len(wds_h_link))]
+
+    #create objects table
+    #create ids
+    wds_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
+    wds_objects=ids_from_ident(wds_ident['main_id','id'],wds_objects)
+    #if it has children, it is type system
+    #if it has no children it can either be star or close in system
+    wds_objects['type']=['sy' for j in range(len(wds_objects))]
+    #change to st for those that have no children
+    wds_objects['type'][np.invert(np.in1d(wds_objects['main_id'],wds_h_link['parent_main_id']))]=['st' for j in range(len(
+            [np.invert(np.in1d(wds_objects['main_id'],wds_h_link['parent_main_id']))]))] 
+    
+    if len(test_objects)>0:
+        print('number of test objects that are in objects main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_objects['main_id']))])
     
     #-----------------creating output table wds_mes_binary------------------------
-    wds_mes_binary=wds_objects['main_id','type'][np.where(wds_objects['type']=='sy')]
+    wds_mes_binary=wds_objects['main_id','type']#[np.where(wds_objects['type']=='sy')]
     wds_mes_binary.rename_column('type','binary_flag')
     wds_mes_binary['binary_flag']=wds_mes_binary['binary_flag'].astype(object)
     wds_mes_binary['binary_flag']=['True' for j in range(len(wds_mes_binary))]
     wds_mes_binary['binary_ref']=[wds_provider['provider_bibcode'][0] for j in range(len(wds_mes_binary))]
     wds_mes_binary['binary_qual']=['C' for j in range(len(wds_mes_binary))]
-    #-----------------creating output table wds_mes_sep_ang------------------------
-    wds_mes_sep_ang=wds['system_main_id','wds_sep1','wds_obs1']
-    wds_mes_sep_ang.rename_columns(['wds_sep1','wds_obs1'],['sep_ang_value','sep_ang_obs_date'])
-    wds_mes_sep_ang['sep_ang_qual']= \
-            ['C' if type(j)!=np.ma.core.MaskedConstant else 'E' for j in wds_mes_sep_ang['sep_ang_obs_date']]
     
-    wds_mes_sep_ang2=wds['system_main_id','wds_sep2','wds_obs2']
+    if len(test_objects)>0:
+        print('number of test objects that are in mes_binary main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_mes_binary['main_id']))])
+    
+    #-----------------creating output table wds_mes_sep_ang------------------------
+    #better join them
+    wds_mes_sep_ang0=ap.table.join(wds['system_name','wds_sep1','wds_obs1','wds_sep2','wds_obs2'],
+                                  wds_ident['main_id','id'],keys_left='system_name', keys_right='id')
+    #replacing empty system_main_id with main_id from ident using system_name column
+    #masked_system_main_id=wds['system_main_id'].mask.nonzero()[0]
+    #for j in range(len(wds[masked_system_main_id])):
+     #   wds['system_main_id'][masked_system_main_id][j]=wds_ident['main_id'][np.where(
+      #          wds_ident['id']==wds['system_name'][masked_system_main_id][j])]
+    wds_mes_sep_ang1=wds_mes_sep_ang0['main_id','wds_sep1','wds_obs1']
+    wds_mes_sep_ang1.rename_columns(['wds_sep1','wds_obs1'],['sep_ang_value','sep_ang_obs_date'])
+    wds_mes_sep_ang1['sep_ang_qual']= \
+            ['C' if type(j)!=np.ma.core.MaskedConstant else 'E' for j in wds_mes_sep_ang1['sep_ang_obs_date']]
+    #issue, what if system_main_id is empty?
+    
+    
+    wds_mes_sep_ang2=wds_mes_sep_ang0['main_id','wds_sep2','wds_obs2']
     wds_mes_sep_ang2.rename_columns(['wds_sep2','wds_obs2'],['sep_ang_value','sep_ang_obs_date'])
     wds_mes_sep_ang2['sep_ang_qual']= \
             ['B' if type(j)!=np.ma.core.MaskedConstant else 'E' for j in wds_mes_sep_ang2['sep_ang_obs_date']]
-    
-    wds_mes_sep_ang=ap.table.vstack([wds_mes_sep_ang,wds_mes_sep_ang2])
+    wds_mes_sep_ang=ap.table.vstack([wds_mes_sep_ang1,wds_mes_sep_ang2])
     #add a quality to sep1 which is better than sep2. because newer measurements should be better.
     wds_mes_sep_ang['sep_ang_ref']=[wds_provider['provider_bibcode'][0] for j in range(len(wds_mes_sep_ang))]
-    wds_mes_sep_ang.rename_column('system_main_id','main_id')
-    wds_mes_sep_ang=ap.table.unique(wds_mes_sep_ang)
-    
+    #wds_mes_sep_ang.rename_column('system_main_id','main_id')
+    #remove columns where sep_ang_value is masked
+    wds_mes_sep_ang.remove_columns(wds_mes_sep_ang['sep_ang_value'].mask.nonzero()[0])
+    #uniqueness where obs date not known 
+    if len(wds_mes_sep_ang['sep_ang_obs_date'].mask.nonzero()[0])>0:
+        unique_unknown_obs_date=ap.table.unique(wds_mes_sep_ang[np.where(
+                wds_mes_sep_ang['sep_ang_obs_date'].mask.nonzero()[0])],keys=['main_id','sep_ang_value'])
+        unique_known_obs_date=ap.table.unique(wds_mes_sep_ang[np.where(
+                np.invert(wds_mes_sep_ang['sep_ang_obs_date'].mask.nonzero()[0]))],
+                keys=['main_id','sep_ang_value','sep_ang_obs_date'])   
+        wds_mes_sep_ang=ap.table.vstack([unique_unknown_obs_date,unique_known_obs_date])
+    else:
+        wds_mes_sep_ang=ap.table.unique(wds_mes_sep_ang)
+        
+    if len(test_objects)>0:
+        print('number of test objects that are in mes_sep_ang main_id \n', \
+              test_objects[np.where(np.in1d(test_objects,wds_mes_sep_ang['main_id']))])
     #--------------creating output table wds_sources --------------------------
     wds_sources=ap.table.Table()
     tables=[wds_provider,wds_ident]
@@ -1607,378 +1553,5 @@ def provider_wds(table_names,wds_list_of_tables,temp=False):
         if table_names[i]=='h_link': wds_list_of_tables[i]=wds_h_link
         if table_names[i]=='mes_sep_ang': wds_list_of_tables[i]=wds_mes_sep_ang
         if table_names[i]=='mes_binary': wds_list_of_tables[i]=wds_mes_binary 
-        save([wds_list_of_tables[i]],['wds_'+table_names[i]])
-        
+        hf.save([wds_list_of_tables[i][:]],['wds_'+table_names[i]])
     return wds_list_of_tables
-
-#------------------------provider combining-----------------
-def building(providers,table_names,list_of_tables):
-    """
-    This function builds from the input parameters the tables
-    for the LIFE database.
-    :param providers: List of astropy tables containing simbad, 
-        grant kennedy, exomercat, gaia and orb6 data.
-    :param table_names: List of strings corresponding to the names of the 
-        astropy tables contained in providers and the return list.
-    :param list_of_tables: List of empty astropy tables to be filled
-        in and returned.
-    :return list_of_tables: List of astropy table containing data 
-        combined from the different providers.
-    """
-    #creates empty tables as needed for final database ingestion
-    init=initialize_database_tables(table_names,list_of_tables)
-    n_tables=len(init)
-
-    cat=[ap.table.Table() for i in range(n_tables)]
-    #for the sources and objects joins tables from different providers
-    
-    print(f'Building {table_names[0]} table ...')
-    for j in range(len(providers)):
-        if len(cat[0])>0:
-            #joining data from different providers
-            if len(providers[j][0])>0:
-                cat[0]=ap.table.join(cat[0],providers[j][0],join_type='outer')
-        else:
-            cat[0]=providers[j][0]
-        
-    #I do this to get those columns that are empty in the data
-    cat[0]=ap.table.vstack([cat[0],init[0]])
-    
-    # keeping only unique values then create identifiers for those tables
-    if len(cat[0])>0:
-        cat[0]=ap.table.unique(cat[0],silent=True)
-        cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
-
-    def idsjoin(cat,column_ids1,column_ids2):
-        """
-        This function merges the identifiers from two different columns
-        into one.
-        :param cat: Astropy table containing two identifer columns.
-        :param column_ids1: column name for the first identifier column
-        :param column_ids2: column name for the second identifier column
-        :return cat: Astropy table like input cat but with only one identifier
-            column containing the unique identifiers of both of the
-            previous identifier columns.
-        """
-        #initializing column
-        cat['ids']=ap.table.Column(dtype=object, length=len(cat))
-        for column in [column_ids1,column_ids2]:
-            cat=nullvalues(cat,column,'')
-        for i in range(len(cat)):
-            #splitting object into list of elements
-            ids1=cat[column_ids1][i].split('|')
-            ids2=cat[column_ids2][i].split('|')
-            if ids2==['']:
-                cat['ids'][i]=cat[column_ids1][i]
-            elif ids1==['']:
-                cat['ids'][i]=cat[column_ids2][i]
-            else:
-                ids=ids1+ids2#should be list
-                #removing double entries
-                ids=set(ids)
-                #changing type back into list
-                ids=list(ids)
-                #joining list into object with elements separated by |
-                ids="|".join(ids)
-                cat['ids'][i]=ids
-            cat['ids'][i]=cat['ids'][i].strip('|')
-        return cat
-
-    def objectmerging(cat):
-        """
-        This function merges the data from the same physical object obtained
-        from different providers into one entry.
-        :param cat: Astropy table containing multiple entries for the same
-            physical objects due to data from different providers.
-        :return cat: Astropy table with unique object entries.
-        """
-        cat=idsjoin(cat,'ids_1','ids_2')
-        cat.remove_columns(['ids_1','ids_2'])
-        #merging types
-        #initializing column
-        if 'type' not in cat.colnames:#----------
-            cat['type']=ap.table.Column(dtype=object, length=len(cat))
-            cat['type_1']=cat['type_1'].astype(object)
-            cat['type_2']=cat['type_2'].astype(object)
-            for i in range(len(cat)):
-                if type(cat['type_2'][i])==np.ma.core.MaskedConstant or cat['type_2'][i]=='None':
-                    cat['type'][i]=cat['type_1'][i]
-                else:
-                    cat['type'][i]=cat['type_2'][i]
-            cat.remove_columns(['type_1','type_2'])
-        return cat
-    
-    print(f'Building {table_names[1]} table ...')
-    
-    for j in range(len(providers)):
-            if len(cat[1])>0:
-                #joining data from different providers
-                if len(providers[j][1])>0:
-                    cat[1]=ap.table.join(cat[1],providers[j][1],keys='main_id',join_type='outer')
-                    cat[1]=objectmerging(cat[1])
-            else:
-                cat[1]=providers[j][1]
-                
-    #removed vstack with init to not have object_id as is empty anyways
-    
-    #assigning object_id
-    cat[1]['object_id']=[j+1 for j in range(len(cat[1]))]
-
-    # At one point I would like to be able to merge objects with main_id
-    # NAME Proxima Centauri b and Proxima Centauri b
-    def match(cat,sources,paras,provider):
-        """
-        This function joins the source identifiers to the in paras specified
-        parameters of cat.
-        :param cat: Astropy table with empty para_source_id columns.
-        :param sources: Astropy table containing reference data.
-        :param paras: String describing a parameter in cat.
-        :param provider: Name of the data provider as string.
-        :return cat: Astropy table containing para_source_id data.
-        """
-        #for all parameters specified
-        for para in paras:
-            #if they have reference columns
-            if para+'_ref' in cat.colnames:
-                #if those reference columns are masked
-                cat=nullvalues(cat,para+'_ref','None')
-                #join to each reference parameter its source_id
-                cat=ap.table.join(cat,sources['ref','source_id'][np.where(
-                                sources['provider_name']==provider)],
-                                keys_left=para+'_ref',keys_right='ref',
-                                join_type='left')
-                #renaming column to specify to which parameter the source_id
-                # correspond
-                cat.rename_column('source_id',f'{para}_source_idref')
-                #deleting double column containing reference information
-                cat.remove_columns('ref')
-                #in case the para_value entry is masked this if environment
-                # will put the source_id entry to null
-                if para+'_value' in cat.colnames:
-                    if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
-                        for i in cat[para+'_value'].mask.nonzero()[0]:
-                            cat[f'{para}_source_idref'][i]=999999
-        return cat
-    
-    print(f'Building {table_names[2]} table ...')
-    
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
-           ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
-          ['radius_st'],['mass_st'],['binary'],['sep_ang']]
-    
-    #merging the different provider tables
-    for j in range(len(providers)):
-        if len(cat[2])>0:
-            #joining data from different providers
-            if len(providers[j][2])>0:
-                cat[2]=ap.table.join(cat[2],providers[j][2],join_type='outer')
-        else:
-            cat[2]=providers[j][2]
-    #I do this to get those columns that are empty in the data
-    cat[2]=ap.table.vstack([cat[2],init[2]])
-       
-    
-    for i in range(3,n_tables): # for the tables star_basic,...,mes_mass_st
-        print(f'Building {table_names[i]} table ...')
-        
-        for j in range(len(providers)):#for the different providers
-            if len(providers[j][i])>0:
-                #replacing ref with source_idref columns
-                #getting source_idref to each ref
-                #issue is that order providers and provider_name not the same
-                providers[j][i]=match(providers[j][i],cat[0],paras[i-3],providers[j][2]['provider_name'][0])
-            if len(cat[i])>0:
-                #joining data from different providers
-                if len(providers[j][i])>0:
-                    cat[i]=ap.table.join(cat[i],providers[j][i],join_type='outer')
-            else:
-                cat[i]=providers[j][i]
-        
-        #I do this to get those columns that are empty in the data
-        cat[i]=ap.table.vstack([cat[i],init[i]])
-        cat[i]=cat[i].filled() #because otherwise unique does neglect masked columns
-        
-        #if resulting catalog not empty
-        if len(cat[i])>0:
-            #only keeping unique entries
-            cat[i]=ap.table.unique(cat[i],silent=True)
-            
-            def best_para(para,mes_table):
-                """
-                This function creates a table containing only the highest
-                quality measurement for each object.
-                :param para: string describing parameter e.g. mass
-                :param mes_table: Astropy table containing only columns
-                    'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
-                """
-                if para=='binary':
-                    columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
-                elif para=='mass_pl':
-                    columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
-                elif para=='sep_ang':
-                    columns=['main_id',para+'_value',para+'_err',para+'_obs_date',para+'_qual',para+'_source_idref']
-                else:
-                    columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
-                mes_table=mes_table[columns[0:]]
-                best_para=mes_table[columns[0:]][:0].copy()
-                #group mes_table by object (=main_id)
-                grouped_mes_table=mes_table.group_by('main_id')
-                #take highest quality
-                #quite time intensive (few minutes) could maybe be optimized using np.in1d function
-                for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
-                    for qual in ['A','B','C','D','E','?']:
-                        for i in range(len(grouped_mes_table.groups[j])):
-                            if grouped_mes_table.groups[j][i][para+'_qual']==qual:
-                                best_para.add_row(grouped_mes_table.groups[j][i])
-                                break
-                        else:
-                            continue  # only executed if the inner loop did NOT break
-                        break  # only executed if the inner loop DID break
-                    
-                return best_para
-                #I have quite some for loops here, will be slow
-                #this function is ready for testing
-
-            if table_names[i]=='h_link':
-                #expanding from child_main_id to object_idref
-                #first remove the child_object_idref we got from empty
-                # initialization. Would prefer a more elegant way to do this
-                cat[i].remove_column('child_object_idref')
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                                     keys='main_id',join_type='left')
-                cat[i].rename_columns(['object_id','main_id'],
-                                      ['child_object_idref','child_main_id'])
-
-                #expanding from parent_main_id to parent_object_idref
-                cat[i].remove_column('parent_object_idref')
-                #kick out any h_link rows where parent_main_id not in
-                # objects (e.g. clusters)
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                   keys_left='parent_main_id',keys_right='main_id')
-                #removing because same as parent_main_id
-                cat[i].remove_column('main_id')
-                cat[i].rename_column('object_id','parent_object_idref')
-                #null values
-                #cat[i]['membership'].fill_value=-1
-                #cat[i]['membership']=cat[i]['membership'].filled()
-
-            #for all the other tables add object_idref
-            else:
-                #first remove the object_idref we got from empty initialization
-                #though I would prefer a more elegant way to do this
-                cat[i].remove_column('object_idref') 
-                cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
-                                     join_type='left')
-                cat[i].rename_column('object_id','object_idref')
-            if table_names[i]=='star_basic':
-                #choosing all objects with type star or system
-                #this I use to join the object_id parameter from objects table to star_basic
-                #what about gaia stuff where I don't know this? there I also don't have star_basic info
-                #Note: main_id was only added because I have not found out how
-                # to do join with just one column of a table
-                stars=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='st')]
-                systems=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='sy')]
-                temp=ap.table.vstack([stars,systems])
-                temp.rename_columns(['object_id','main_id'],
-                                    ['object_idref','temp'])
-                cat[i]=ap.table.join(cat[i],temp,join_type='outer',
-                                     keys='object_idref')
-                cat[i].remove_column('temp')
-            if table_names[i]=='mes_teff_st':
-                teff_st_best_para=best_para('teff_st',cat[i])
-                cat[5].remove_columns(['teff_st_value','teff_st_err',
-                                       'teff_st_qual','teff_st_source_idref',
-                                       'teff_st_ref'])
-                cat[5]=ap.table.join(cat[5],teff_st_best_para,join_type='left')
-            if table_names[i]=='mes_radius_st':
-                radius_st_best_para=best_para('radius_st',cat[i])
-                cat[5].remove_columns(['radius_st_value','radius_st_err',
-                                       'radius_st_qual','radius_st_source_idref',
-                                       'radius_st_ref'])
-                cat[5]=ap.table.join(cat[5],radius_st_best_para,join_type='left')
-            if table_names[i]=='mes_mass_st':
-                mass_st_best_para=best_para('mass_st',cat[i])
-                cat[5].remove_columns(['mass_st_value','mass_st_err',
-                                       'mass_st_qual','mass_st_source_idref',
-                                       'mass_st_ref'])
-                cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
-            if table_names[i]=='mes_mass_pl':
-                mass_pl_best_para=best_para('mass_pl',cat[i])
-                cat[6]=mass_pl_best_para
-                planets=cat[1]['object_id','main_id'][np.where(
-                                cat[1]['type']=='pl')]
-                cat[6]=ap.table.join(cat[6],planets['main_id','object_id'])
-                cat[6].rename_column('object_id','object_idref')
-            if table_names[i]=='mes_binary':
-                binary_best_para=best_para('binary',cat[i])
-                cat[5].remove_columns(['binary_flag',
-                                       'binary_qual','binary_source_idref',
-                                       'binary_ref'])
-                cat[5]=ap.table.join(cat[5],binary_best_para,join_type='left')
-            if table_names[i]=='mes_sep_ang':
-                sep_ang_best_para=best_para('sep_ang',cat[i])
-                cat[5].remove_columns(['sep_ang_value','sep_ang_err','sep_ang_obs_date',
-                                      'sep_ang_qual','sep_ang_source_idref',
-                                      'sep_ang_ref'])
-                cat[5]=ap.table.join(cat[5],sep_ang_best_para,join_type='left')
-            cat[i]=cat[i].filled()
-            cat[i]=ap.table.unique(cat[i])
-        else:
-            print('warning: empty table',i,table_names[i])
-    cat[5]=cat[5].filled()
-    
-    #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
-    tables=[cat[table_names.index('star_basic')],cat[table_names.index('planet_basic')],
-            cat[table_names.index('disk_basic')],cat[table_names.index('mes_mass_pl')],
-            cat[table_names.index('mes_teff_st')],cat[table_names.index('mes_radius_st')],
-            cat[table_names.index('mes_mass_st')],cat[table_names.index('mes_binary')]]
-    columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
-              'sep_ang_qual','teff_st_qual','radius_st_qual','binary_flag',
-              'binary_qual','mass_st_qual','sptype_qual','class_temp','class_temp_nr'],
-             ['mass_pl_qual','mass_pl_rel'],
-             ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
-             ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],['binary_qual']]
-    for i in range(len(tables)):
-        for col in columns[i]:
-            tables[i]=replace_value(tables[i],col,'N','?')
-            tables[i]=replace_value(tables[i],col,'N/A','?')
-    
-    save(cat,table_names)
-    return cat
-
-###############################################################################
-#-------------------------Main code--------------------------------------------
-###############################################################################
-
-#------------------------initialize empty database tables----------------------
-table_names=['sources','objects','provider','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_ang']
-
-#distance cut
-distance_cut_in_pc=30.
-
-#transforming from pc distance cut into parallax in mas cut
-plx_in_mas_cut=1000./distance_cut_in_pc
-#making cut a bit bigger for correct treatment of objects on boundary
-plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
-
-#------------------------obtain data from external sources---------------------
-empty_provider=[ap.table.Table() for i in range(len(table_names))]
-
-sim=provider_simbad(table_names,empty_provider[:])
-
-wds=provider_wds(table_names,empty_provider[:],False)
-
-gk=provider_gk(table_names,empty_provider[:])
-
-exo=provider_exo(table_names,empty_provider[:],temp=False)
-
-life=provider_life(table_names,empty_provider[:])
-
-gaia=provider_gaia(table_names,empty_provider[:])
-
-#------------------------combine data from external sources-------------------
-database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])

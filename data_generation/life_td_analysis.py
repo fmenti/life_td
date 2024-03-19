@@ -262,7 +262,7 @@ def sanity_tests(table_names,database_tables, distance_cut_in_pc):
 
     disthist(database_tables[5]['dist_st_value'],['star_basic'],'test',distance_cut_in_pc,'dist_st_value')
 
-    ltc3=ap.io.ascii.read("data/additional_data/LIFE-StarCat3.csv")
+    ltc3=ap.io.ascii.read("../data/additional_data/LIFE-StarCat3.csv")
     ltc3=hf.stringtoobject(ltc3,3000)
     print(ltc3['distance'])
     ltc3['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(ltc3))

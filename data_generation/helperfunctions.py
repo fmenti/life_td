@@ -27,7 +27,7 @@ def save(cats,names):
                 cat[i] = cat[i].astype(str)
         #save the table
         ap.io.votable.writeto(
-        	    ap.io.votable.from_table(cat), f'data/{path}.xml')
+        	    ap.io.votable.from_table(cat), f'../data/{path}.xml')
     return
 
 def stringtoobject(cat,number=100):
@@ -65,7 +65,7 @@ def load(paths,stringtoobjects=True):
     #go through all the elements in the paths list
     for path in paths:
         #read the saved data into the cats lists as astropy votable element
-        to_append=ap.io.votable.parse_single_table(f'data/{path}.xml')
+        to_append=ap.io.votable.parse_single_table(f'../data/{path}.xml')
         cats.append(to_append.to_table())
     #go through all the tables in the cats list
     if stringtoobjects:
