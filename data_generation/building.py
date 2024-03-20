@@ -3,6 +3,7 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
 import importlib #reloading external functions after modification
+from time import time,ctime
 
 #self created modules
 import helperfunctions as hf
@@ -13,22 +14,22 @@ importlib.reload(p)#reload module after changing it
 #-------------------initialization function------------------------------------
 def initialize_database_tables(table_names,list_of_tables):
     """
-    This function initializes the database tables with column name and data
+    This function initializes the database tables.
+    
+    It does so with column name and data
     type specified but no actual data in them.
-    :return list_of_tables: List of astropy tables in the order sources,
-                objects, provider, ident (identifiers), h_link (relation between
-                objects),star_basic,planet_basic, disk_basic, mes_mass_pl 
-                (planetary mass measurements), mes_teff_st (stellar 
-                effective temperature measurements), mes_radius_st (stellar
-                radius measurements), mes_mass_st (stellar mass measurements),
-                mes_binary (binarity information) and mes_sep_ang (stellar
-                angular separation between binaries measurement).
+    :param table_names:
+    :type table_names: list of objects of type str
+    :param list_of_tables:
+    :type list_of_tables:
+    :returns: Initiated database tables in the order of table_names.
+    :rtype: list containing objects of type astropy.table.table.Table
     """
+    
     #explanation of abbreviations: id stands for identifier, idref for
     # reference identifier and parameter_source_idref for the identifier in the
     # source table corresponding to the mentioned parameter
 
-    
     sources=ap.table.Table(
         #reference,...
         names=['ref','provider_name',
@@ -48,9 +49,9 @@ def initialize_database_tables(table_names,list_of_tables):
 
     #identifier table
     ident=ap.table.Table(
-        #object idref, id, source idref for the id parameter, id reference
-        names=['object_idref','id','id_source_idref','id_ref'],
-        dtype=[int,object,int,object])
+        #object idref, id, source idref for the id parameter
+        names=['object_idref','id','id_source_idref'],
+        dtype=[int,object,int])
 
     #hierarchical link table (which means relation between objects)
     h_link=ap.table.Table(
@@ -205,21 +206,232 @@ def initialize_database_tables(table_names,list_of_tables):
         hf.save([list_of_tables[i][:]],['empty_'+table_names[i]])
     return list_of_tables
 
+def idsjoin(cat,column_ids1,column_ids2):
+    """
+    This function merges the identifiers from two different columns into one.
+    
+    :param cat: Astropy table containing two identifer columns.
+    :type cat: astropy.table.table.Table
+    :param column_ids1: column name for the first identifier column
+    :type column_ids1: str
+    :param column_ids2: column name for the second identifier column
+    :type column_ids2: str
+    :return: Like input cat but with only one identifier
+        column containing the unique identifiers of both of the
+        previous identifier columns.
+    :rtype: astropy.table.table.Table
+    """
+    
+    cat['ids']=ap.table.Column(dtype=object, length=len(cat))
+    for column in [column_ids1,column_ids2]:
+        cat=p.nullvalues(cat,column,'')
+    for i in range(len(cat)):
+        # splitting object into list of elements
+        ids1=cat[column_ids1][i].split('|')
+        ids2=cat[column_ids2][i].split('|')
+        if ids2==['']:
+            cat['ids'][i]=cat[column_ids1][i]
+        elif ids1==['']:
+            cat['ids'][i]=cat[column_ids2][i]
+        else:
+            ids=ids1+ids2#should be list
+            #removing double entries
+            ids=set(ids)
+            #changing type back into list
+            ids=list(ids)
+            #joining list into object with elements separated by |
+            ids="|".join(ids)
+            cat['ids'][i]=ids
+        cat['ids'][i]=cat['ids'][i].strip('|')
+    return cat
+
+def objectmerging(cat):
+    """
+    This function merges the data of one object from different providers.
+    
+    The object is the same physical one but the data is provided by different 
+    providers and merged into one entry.
+    :param cat: Astropy table containing multiple entries for the same
+        physical objects due to data from different providers.
+    :type cat: astropy.table.table.Table
+    :returns: Like cat with unique object entries.
+    :rtype: astropy.table.table.Table
+    """
+    
+    cat=idsjoin(cat,'ids_1','ids_2')
+    cat.remove_columns(['ids_1','ids_2'])
+    #merging types
+    #initializing column
+    if 'type' not in cat.colnames:#----------
+        cat['type']=ap.table.Column(dtype=object, length=len(cat))
+        cat['type_1']=cat['type_1'].astype(object)
+        cat['type_2']=cat['type_2'].astype(object)
+        for i in range(len(cat)):
+            if type(cat['type_2'][i])==np.ma.core.MaskedConstant or cat['type_2'][i]=='None':
+                cat['type'][i]=cat['type_1'][i]
+            else:
+                cat['type'][i]=cat['type_2'][i]
+        cat.remove_columns(['type_1','type_2'])
+    return cat
+
+def match(cat,sources,paras,provider):
+    """
+    This function joins the source identifiers of parameters of cat.
+    
+    :param cat: With empty para_source_id columns.
+    :type cat: astropy.table.table.Table
+    :param sources: Contains reference data.
+    :type sources: astropy.table.table.Table
+    :param paras: Describes a parameter in cat.
+    :type paras: str
+    :param provider: Name of the data provider.
+    :type provider: str
+    :returns: Astropy table containing para_source_id data.
+    :rtype: astropy.table.table.Table
+    """
+    #for all parameters specified
+    for para in paras:
+        #if they have reference columns
+        if para+'_ref' in cat.colnames:
+            #if those reference columns are masked
+            cat=p.nullvalues(cat,para+'_ref','None')
+            #join to each reference parameter its source_id
+            cat=ap.table.join(cat,sources['ref','source_id'][np.where(
+                            sources['provider_name']==provider)],
+                            keys_left=para+'_ref',keys_right='ref',
+                            join_type='left')
+            #renaming column to specify to which parameter the source_id
+            # correspond
+            cat.rename_column('source_id',f'{para}_source_idref')
+            #deleting double column containing reference information
+            cat.remove_columns('ref')
+            #in case the para_value entry is masked this if environment
+            # will put the source_id entry to null
+            if para+'_value' in cat.colnames:
+                if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
+                    for i in cat[para+'_value'].mask.nonzero()[0]:
+                        cat[f'{para}_source_idref'][i]=999999
+    return cat
+
+def best_para(para,mes_table):
+    """
+    This function keeps only highest quality row for each object. 
+    
+    tried to avoid . for performance reasons
+    :param para: Describes parameter e.g. mass
+    :type para: str
+    :param mes_table: Contains only columns
+        'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
+    :type mes_table: astropy.table.table.Table
+    :returns: Table like mes_table but only highest quality rows for each object
+    :rtype: astropy.table.table.Table
+    """
+    
+    if para=='id_temp':
+        best_para=mes_table[:0].copy()
+        grouped_mes_table=mes_table.group_by('id_ref')
+        mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W'# sim
+        best_para=grouped_mes_table.groups[mask]
+        for ref in ['2022A&A...664A..21Q','2016A&A...595A...1G','priv. comm.',
+                    '2020A&C....3100370A','2001AJ....122.3466M']:
+            mask = grouped_mes_table.groups.keys['id_ref'] == ref
+            new_ids=grouped_mes_table.groups[mask][np.where(np.invert(np.in1d(
+                                        grouped_mes_table.groups[mask]['id'],
+                                        best_para['id'])))]
+        best_para=ap.table.vstack([best_para,new_ids])
+        best_para.remove_column('id_ref')
+        return best_para
+    elif para=='id': #this makes the code take much longer
+        best_para=mes_table[:0].copy()
+        grouped_mes_table=mes_table.group_by('id')
+        groups_grouped_mes_table=grouped_mes_table.groups
+        ind=groups_grouped_mes_table.indices
+        print(len(grouped_mes_table.groups.keys))
+        print('tbd: use source id_ref as variable instead of string')
+
+        len_table=len(groups_grouped_mes_table.keys)
+        source_list=['2000A&AS..143....9W','2022A&A...664A..21Q',
+                           '2016A&A...595A...1G','priv. comm.','2020A&C....3100370A',
+                           '2001AJ....122.3466M']
+        for i in range(len(ind)-1):
+        # -1 is needed because else ind[i+1] is out of bonds
+            if ind[i+1]-ind[i]==1:
+                best_para.add_row(grouped_mes_table[ind[i]])
+            else:
+                for source in source_list:
+                    for j in range(ind[i],ind[i+1]):
+                        if grouped_mes_table[j]['id_ref']==source:
+                            best_para.add_row(grouped_mes_table[j])
+                            break
+                    else:
+                        continue
+                    break
+        return best_para
+    elif para=='membership':
+        best_para=mes_table[:0].copy()
+        grouped_mes_table=mes_table.group_by(['child_object_idref',
+                                              'parent_object_idref'])
+        ind=grouped_mes_table.groups.indices
+        for i in range(len(ind)-1):
+            l=ind[i+1]-ind[i]
+            if l==1:
+                best_para.add_row(grouped_mes_table[ind[i]])
+            else:
+                temp=grouped_mes_table[ind[i]:ind[i+1]]
+                not_nan_temp=temp[np.where(temp[para]!=999999)]
+                if len(not_nan_temp)>0:
+                    max_row=not_nan_temp[np.where(
+                            not_nan_temp[para]==max(not_nan_temp[para]))]
+                    for j in range(ind[i],ind[i+1]):
+                        if grouped_mes_table[para][j]==max(not_nan_temp[para]):
+                            best_para.add_row(grouped_mes_table[j])
+                            break#make sure not multiple of same max value are added
+                else:#if none of the objects has a membership entry then pick just first one
+                    best_para.add_row(grouped_mes_table[ind[i]])
+        return best_para
+    elif para=='binary':
+        columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
+    elif para=='mass_pl':
+        columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
+    elif para=='sep_ang':
+        columns=['main_id',para+'_value',para+'_err',para+'_obs_date',para+'_qual',para+'_source_idref']
+    else:
+        columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
+    mes_table=mes_table[columns[0:]]
+    best_para=mes_table[columns[0:]][:0].copy()
+    #group mes_table by object (=main_id)
+    grouped_mes_table=mes_table.group_by('main_id')
+    #take highest quality
+    #quite time intensive (few minutes) could maybe be optimized using np.in1d function
+    for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
+        for qual in ['A','B','C','D','E','?']:
+            for i in range(len(grouped_mes_table.groups[j])):
+                if grouped_mes_table.groups[j][i][para+'_qual']==qual:
+                    best_para.add_row(grouped_mes_table.groups[j][i])
+                    break # if best para found go to next main_id group
+            else:
+                continue  # only executed if the inner loop did NOT break
+            break  # only executed if the inner loop DID break 
+    return best_para
+
 #------------------------provider combining-----------------
 def building(providers,table_names,list_of_tables):
     """
-    This function builds from the input parameters the tables
-    for the LIFE database.
-    :param providers: List of astropy tables containing simbad, 
-        grant kennedy, exomercat, gaia and wds data.
-    :param table_names: List of strings corresponding to the names of the 
+    This function builds the tables for the LIFE database.
+    
+    :param providers: Containing simbad, grant kennedy, exomercat, gaia and wds data.
+    :type providers: list containing objects of type astropy.table.table.Table
+    :param table_names: Objects correspond to the names of the 
         astropy tables contained in providers and the return list.
-    :param list_of_tables: List of empty astropy tables to be filled
+    :type table_names: list of objects of type str
+    :param list_of_tables: Empty astropy tables to be filled
         in and returned.
-    :return list_of_tables: List of astropy table containing data 
-        combined from the different providers.
+    :type list_of_tables: list containing objects of type astropy.table.table.Table
+    :returns: Containing data combined from the different providers.
+    :rtype: list containing objects of type astropy.table.table.Table
     """
-    #creates empty tables as needed for final database ingestion
+    
+    # Creates empty tables as needed for final database ingestion
     init=initialize_database_tables(table_names,list_of_tables)
     n_tables=len(init)
 
@@ -243,64 +455,6 @@ def building(providers,table_names,list_of_tables):
         cat[0]=ap.table.unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
 
-    def idsjoin(cat,column_ids1,column_ids2):
-        """
-        This function merges the identifiers from two different columns
-        into one.
-        :param cat: Astropy table containing two identifer columns.
-        :param column_ids1: column name for the first identifier column
-        :param column_ids2: column name for the second identifier column
-        :return cat: Astropy table like input cat but with only one identifier
-            column containing the unique identifiers of both of the
-            previous identifier columns.
-        """
-        #initializing column
-        cat['ids']=ap.table.Column(dtype=object, length=len(cat))
-        for column in [column_ids1,column_ids2]:
-            cat=p.nullvalues(cat,column,'')
-        for i in range(len(cat)):
-            #splitting object into list of elements
-            ids1=cat[column_ids1][i].split('|')
-            ids2=cat[column_ids2][i].split('|')
-            if ids2==['']:
-                cat['ids'][i]=cat[column_ids1][i]
-            elif ids1==['']:
-                cat['ids'][i]=cat[column_ids2][i]
-            else:
-                ids=ids1+ids2#should be list
-                #removing double entries
-                ids=set(ids)
-                #changing type back into list
-                ids=list(ids)
-                #joining list into object with elements separated by |
-                ids="|".join(ids)
-                cat['ids'][i]=ids
-            cat['ids'][i]=cat['ids'][i].strip('|')
-        return cat
-
-    def objectmerging(cat):
-        """
-        This function merges the data from the same physical object obtained
-        from different providers into one entry.
-        :param cat: Astropy table containing multiple entries for the same
-            physical objects due to data from different providers.
-        :return cat: Astropy table with unique object entries.
-        """
-        cat=idsjoin(cat,'ids_1','ids_2')
-        cat.remove_columns(['ids_1','ids_2'])
-        #merging types
-        #initializing column
-        if 'type' not in cat.colnames:#----------
-            cat['type']=ap.table.Column(dtype=object, length=len(cat))
-            cat['type_1']=cat['type_1'].astype(object)
-            cat['type_2']=cat['type_2'].astype(object)
-            for i in range(len(cat)):
-                if type(cat['type_2'][i])==np.ma.core.MaskedConstant or cat['type_2'][i]=='None':
-                    cat['type'][i]=cat['type_1'][i]
-                else:
-                    cat['type'][i]=cat['type_2'][i]
-            cat.remove_columns(['type_1','type_2'])
-        return cat
     
     print(f'Building {table_names[1]} table ...')#objects
     
@@ -320,39 +474,7 @@ def building(providers,table_names,list_of_tables):
 
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
-    def match(cat,sources,paras,provider):
-        """
-        This function joins the source identifiers to the in paras specified
-        parameters of cat.
-        :param cat: Astropy table with empty para_source_id columns.
-        :param sources: Astropy table containing reference data.
-        :param paras: String describing a parameter in cat.
-        :param provider: Name of the data provider as string.
-        :return cat: Astropy table containing para_source_id data.
-        """
-        #for all parameters specified
-        for para in paras:
-            #if they have reference columns
-            if para+'_ref' in cat.colnames:
-                #if those reference columns are masked
-                cat=p.nullvalues(cat,para+'_ref','None')
-                #join to each reference parameter its source_id
-                cat=ap.table.join(cat,sources['ref','source_id'][np.where(
-                                sources['provider_name']==provider)],
-                                keys_left=para+'_ref',keys_right='ref',
-                                join_type='left')
-                #renaming column to specify to which parameter the source_id
-                # correspond
-                cat.rename_column('source_id',f'{para}_source_idref')
-                #deleting double column containing reference information
-                cat.remove_columns('ref')
-                #in case the para_value entry is masked this if environment
-                # will put the source_id entry to null
-                if para+'_value' in cat.colnames:
-                    if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
-                        for i in cat[para+'_value'].mask.nonzero()[0]:
-                            cat[f'{para}_source_idref'][i]=999999
-        return cat
+
     
     print(f'Building {table_names[2]} table ...')#provider
     
@@ -392,61 +514,7 @@ def building(providers,table_names,list_of_tables):
         cat[i]=ap.table.vstack([cat[i],init[i]])
         cat[i]=cat[i].filled() #because otherwise unique does neglect masked columns
         
-            
-        def best_para(para,mes_table):
-            """
-            This function creates a table containing only the highest
-            quality measurement for each object.
-            :param para: string describing parameter e.g. mass
-            :param mes_table: Astropy table containing only columns
-                'main_id', para+'_value',para+'_err',para+'_qual' and para+'_ref'
-            """
-            if para=='membership':
-                best_para=mes_table[:0].copy()
-                grouped_mes_table=mes_table.group_by(['child_object_idref',
-                                                      'parent_object_idref'])
-                ind=grouped_mes_table.groups.indices
-                for i in range(len(ind)-1):
-                    l=ind[i+1]-ind[i]
-                    if l==1:
-                        best_para.add_row(grouped_mes_table[ind[i]])
-                    else:
-                        temp=grouped_mes_table[ind[i]:ind[i+1]]
-                        not_nan_temp=temp[np.where(temp[para]!=999999)]
-                        if len(not_nan_temp)>0:
-                            max_row=not_nan_temp[np.where(
-                                    not_nan_temp[para]==max(not_nan_temp[para]))]
-                            for j in range(ind[i],ind[i+1]):
-                                if grouped_mes_table[para][j]==max(not_nan_temp[para]):
-                                    best_para.add_row(grouped_mes_table[j])
-                                    break#make sure not multiple of same max value are added
-                        else:#if none of the objects has a membership entry then pick just first one
-                            best_para.add_row(grouped_mes_table[ind[i]])
-                return best_para
-            elif para=='binary':
-                columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
-            elif para=='mass_pl':
-                columns=['main_id',para+'_value',para+'_rel',para+'_err',para+'_qual',para+'_source_idref']
-            elif para=='sep_ang':
-                columns=['main_id',para+'_value',para+'_err',para+'_obs_date',para+'_qual',para+'_source_idref']
-            else:
-                columns=['main_id',para+'_value',para+'_err',para+'_qual',para+'_source_idref']
-            mes_table=mes_table[columns[0:]]
-            best_para=mes_table[columns[0:]][:0].copy()
-            #group mes_table by object (=main_id)
-            grouped_mes_table=mes_table.group_by('main_id')
-            #take highest quality
-            #quite time intensive (few minutes) could maybe be optimized using np.in1d function
-            for j in range(len(grouped_mes_table.groups.keys)):#go through all objects
-                for qual in ['A','B','C','D','E','?']:
-                    for i in range(len(grouped_mes_table.groups[j])):
-                        if grouped_mes_table.groups[j][i][para+'_qual']==qual:
-                            best_para.add_row(grouped_mes_table.groups[j][i])
-                            break
-                    else:
-                        continue  # only executed if the inner loop did NOT break
-                    break  # only executed if the inner loop DID break 
-            return best_para
+
             #I have quite some for loops here, will be slow
             #this function is ready for testing
 
@@ -457,6 +525,10 @@ def building(providers,table_names,list_of_tables):
             cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                                  join_type='left')
             cat[i].rename_column('object_id','object_idref')
+        if table_names[i]=='ident':
+            print(ctime(time()))
+            cat[i]=best_para('id_temp',cat[i])
+            print(ctime(time()))
         if table_names[i]=='h_link':
             #expanding from child_main_id to object_idref
             #first remove the child_object_idref we got from empty
