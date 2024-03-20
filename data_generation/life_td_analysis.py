@@ -177,7 +177,7 @@ def final_plot(stars,labels,distance_cut_in_pc,path='results/final_plot.png',col
         xticks_name=['0-5','5-10','10-15','15-20','20-25','25-30'][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
-    plt.savefig('plots/final_plot', dpi=300)
+    plt.savefig('../plots/final_plot', dpi=300)
     return
 
 def spechistplot(stars,name,path=''):
@@ -209,7 +209,7 @@ def spechistplot(stars,name,path=''):
     ax.set_xticklabels(spec[2:])
     ax.legend()
     fig.tight_layout()
-    plt.savefig('plots/'+path, dpi=300)
+    plt.savefig('../plots/'+path, dpi=300)
     plt.show()
     return
 
@@ -228,7 +228,7 @@ def objecthistplot(cat,name,path=''):
     plt.xlabel('Number of objects')
     plt.hist(cat,histtype='bar',log=True,orientation='horizontal')
     plt.yticks(np.arange(4),spec)
-    plt.savefig('plots/'+path, dpi=300)
+    plt.savefig('../plots/'+path, dpi=300)
     plt.show()
     return
 

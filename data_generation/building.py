@@ -3,7 +3,6 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
 import importlib #reloading external functions after modification
-from time import time,ctime
 
 #self created modules
 import helperfunctions as hf
@@ -26,7 +25,7 @@ def initialize_database_tables(table_names,list_of_tables):
     :rtype: list containing objects of type astropy.table.table.Table
     """
     
-    #explanation of abbreviations: id stands for identifier, idref for
+    # Explanation of abbreviations: id stands for identifier, idref for
     # reference identifier and parameter_source_idref for the identifier in the
     # source table corresponding to the mentioned parameter
 
@@ -186,7 +185,6 @@ def initialize_database_tables(table_names,list_of_tables):
                'h_link_source_idref','h_link_ref','membership'],
         dtype=[int,int,int,object,int])
 
-
     for i in range(len(table_names)):
         if table_names[i]=='sources': list_of_tables[i]=sources
         if table_names[i]=='provider': list_of_tables[i]=provider
@@ -327,11 +325,12 @@ def best_para(para,mes_table):
     :rtype: astropy.table.table.Table
     """
     
-    if para=='id_temp':
+    if para=='id':
         best_para=mes_table[:0].copy()
         grouped_mes_table=mes_table.group_by('id_ref')
         mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W'# sim
         best_para=grouped_mes_table.groups[mask]
+        print('TBD: use id_ref as variable from provider_bibcode instad of constant')
         for ref in ['2022A&A...664A..21Q','2016A&A...595A...1G','priv. comm.',
                     '2020A&C....3100370A','2001AJ....122.3466M']:
             mask = grouped_mes_table.groups.keys['id_ref'] == ref
@@ -340,32 +339,6 @@ def best_para(para,mes_table):
                                         best_para['id'])))]
         best_para=ap.table.vstack([best_para,new_ids])
         best_para.remove_column('id_ref')
-        return best_para
-    elif para=='id': #this makes the code take much longer
-        best_para=mes_table[:0].copy()
-        grouped_mes_table=mes_table.group_by('id')
-        groups_grouped_mes_table=grouped_mes_table.groups
-        ind=groups_grouped_mes_table.indices
-        print(len(grouped_mes_table.groups.keys))
-        print('tbd: use source id_ref as variable instead of string')
-
-        len_table=len(groups_grouped_mes_table.keys)
-        source_list=['2000A&AS..143....9W','2022A&A...664A..21Q',
-                           '2016A&A...595A...1G','priv. comm.','2020A&C....3100370A',
-                           '2001AJ....122.3466M']
-        for i in range(len(ind)-1):
-        # -1 is needed because else ind[i+1] is out of bonds
-            if ind[i+1]-ind[i]==1:
-                best_para.add_row(grouped_mes_table[ind[i]])
-            else:
-                for source in source_list:
-                    for j in range(ind[i],ind[i+1]):
-                        if grouped_mes_table[j]['id_ref']==source:
-                            best_para.add_row(grouped_mes_table[j])
-                            break
-                    else:
-                        continue
-                    break
         return best_para
     elif para=='membership':
         best_para=mes_table[:0].copy()
@@ -454,10 +427,8 @@ def building(providers,table_names,list_of_tables):
     if len(cat[0])>0:
         cat[0]=ap.table.unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
-
     
     print(f'Building {table_names[1]} table ...')#objects
-    
     for j in range(len(providers)):
             if len(cat[1])>0:
                 #joining data from different providers
@@ -477,7 +448,6 @@ def building(providers,table_names,list_of_tables):
 
     
     print(f'Building {table_names[2]} table ...')#provider
-    
     paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
            ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
           ['radius_st'],['mass_st'],['binary'],['sep_ang']]
@@ -526,9 +496,7 @@ def building(providers,table_names,list_of_tables):
                                  join_type='left')
             cat[i].rename_column('object_id','object_idref')
         if table_names[i]=='ident':
-            print(ctime(time()))
-            cat[i]=best_para('id_temp',cat[i])
-            print(ctime(time()))
+            cat[i]=best_para('id',cat[i])
         if table_names[i]=='h_link':
             #expanding from child_main_id to object_idref
             #first remove the child_object_idref we got from empty
@@ -615,7 +583,7 @@ def building(providers,table_names,list_of_tables):
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
     cat[5]=cat[5].filled()
-    
+    print('Unifying null values...')
     #unify null values (had 'N' and '?' because of ap default fill_value and type conversion string vs object)
     tables=[cat[table_names.index('star_basic')],cat[table_names.index('planet_basic')],
             cat[table_names.index('disk_basic')],cat[table_names.index('mes_mass_pl')],
@@ -633,5 +601,6 @@ def building(providers,table_names,list_of_tables):
             tables[i]=p.replace_value(tables[i],col,'N/A','?')
     print('TBD: Add exact object distance cut. So far for correct treatment \
           of boundary objects 10% additional distance cut used')
+    print('Saving data...')
     hf.save(cat,table_names)
     return cat
