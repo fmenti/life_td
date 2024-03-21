@@ -1358,7 +1358,7 @@ tables may change at any time without prior warning.
                 SELECT *
                 FROM life_td.mes_teff_st
                 JOIN life_td.ident USING(object_idref)
-                WHERE id = 'GJ    10'
+                WHERE id = '* alf Cen A'
                 </meta>
         <meta name="_example" title="All basic stellar data from an object name">
             In LIFE we keep for each object the best measurements of its kind
@@ -1381,7 +1381,8 @@ tables may change at any time without prior warning.
             .. tapquery::
                 SELECT main_id disk_main_id, object_id as disk_object_id, db.*
                 FROM life_td.h_link
-                JOIN life_td.disk_basic as db on db.object_idref=child_object_idref
+                JOIN life_td.disk_basic as db ON 
+                 db.object_idref=child_object_idref
                 JOIN life_td.ident as p on p.object_idref=parent_object_idref
                 JOIN life_td.object on object_id=child_object_idref
                 WHERE p.id = '* bet Cas' and type='di'
@@ -1407,20 +1408,22 @@ tables may change at any time without prior warning.
             in regards of multiplicity afterwards.
 
             .. tapquery::
-                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value,
-                sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, sb.coo_gal_b,
-                sb.teff_st_value, sb.mass_st_value, sb.radius_st_value,
-                sb.binary_flag, sb.mag_i_value, sb.mag_j_value,
-                o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
+                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value, 
+                 sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, 
+                 sb.coo_gal_b, sb.teff_st_value, sb.mass_st_value, 
+                 sb.radius_st_value, sb.binary_flag, sb.mag_i_value, 
+                 sb.mag_j_value,  sb.class_lum, sb.class_temp, 
+                 o_parent.main_id AS parent_main_id, 
+                 sb_parent.sep_ang_value
                 FROM life_td.star_basic AS sb
                 JOIN life_td.object AS o ON sb.object_idref=o.object_id
-                LEFT JOIN life_td.h_link AS h ON o.object_id=h.child_object_idref
-                LEFT JOIN life_td.object AS o_parent ON
+                LEFT JOIN life_td.h_link AS h ON 
+                 o.object_id=h.child_object_idref
+                LEFT JOIN life_td.object AS o_parent ON 
                  h.parent_object_idref=o_parent.object_id
-                LEFT JOIN life_td.star_basic AS sb_parent ON
+                LEFT JOIN life_td.star_basic AS sb_parent ON 
                  o_parent.object_id=sb_parent.object_idref
-                WHERE o.type = 'st' AND sb.plx_value > 33. AND
-                sb.class_lum IS NOT NULL
+                WHERE o.type = 'st' AND sb.dist_st_value < 30.
                 </meta>
         <nullCore/>
     </service>
