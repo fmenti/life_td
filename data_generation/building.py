@@ -22,7 +22,7 @@ def initialize_database_tables(table_names,list_of_tables):
     :param list_of_tables:
     :type list_of_tables:
     :returns: Initiated database tables in the order of table_names.
-    :rtype: list containing objects of type astropy.table.table.Table
+    :rtype: list(astropy.table.table.Table)
     """
     
     # Explanation of abbreviations: id stands for identifier, idref for

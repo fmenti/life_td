@@ -8,7 +8,7 @@ import astropy as ap #votables
 import matplotlib.pyplot as plt
 
 #-------------------global helper functions------------------------------------
-def save(cats,names):
+def save(cats,names,location='../data/'):
     """
     This functions saves the tables given as python list in the cats parameter.
     The saving location is 'data/{name}.xml' where path is given in the paths
@@ -27,7 +27,7 @@ def save(cats,names):
                 cat[i] = cat[i].astype(str)
         #save the table
         ap.io.votable.writeto(
-        	    ap.io.votable.from_table(cat), f'../data/{path}.xml')
+        	    ap.io.votable.from_table(cat), f'{location}{path}.xml')
     return
 
 def stringtoobject(cat,number=100):
@@ -52,7 +52,7 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
-def load(paths,stringtoobjects=True):
+def load(paths,stringtoobjects=True,location='../data/'):
     """
     This function loads the tables saved in XML format at saving locations
     specified in paths. If stringtoobject is True the function 
@@ -65,7 +65,7 @@ def load(paths,stringtoobjects=True):
     #go through all the elements in the paths list
     for path in paths:
         #read the saved data into the cats lists as astropy votable element
-        to_append=ap.io.votable.parse_single_table(f'../data/{path}.xml')
+        to_append=ap.io.votable.parse_single_table(f'{location}{path}.xml')
         cats.append(to_append.to_table())
     #go through all the tables in the cats list
     if stringtoobjects:

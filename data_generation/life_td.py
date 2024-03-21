@@ -22,6 +22,14 @@ table_names=['sources','objects','provider','ident','h_link','star_basic',
 
 
 def create_life_td(distance_cut_in_pc):
+    """
+    Generates the life_td data.
+    
+    :param distance_cut_in_pc: Distance cut of the objects in parsec.
+    :type distance_cut_in_pc: float
+    :return: life_td data in different tables
+    :rtype: list(astropy.table.table.Table)
+    """
     
     #------------------------obtain data from external sources---------------------
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
