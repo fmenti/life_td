@@ -1423,7 +1423,7 @@ tables may change at any time without prior warning.
                  h.parent_object_idref=o_parent.object_id
                 LEFT JOIN life_td.star_basic AS sb_parent ON 
                  o_parent.object_id=sb_parent.object_idref
-                WHERE o.type = 'st' AND sb.dist_st_value < 30.
+                WHERE o.type = 'st' AND sb.dist_st_value &lt; 30.
                 </meta>
         <nullCore/>
     </service>
