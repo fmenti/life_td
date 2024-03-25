@@ -9,6 +9,7 @@ you can use the ``create_life_td()`` function:
 
 .. autofunction:: life_td.create_life_td
 
+
 LIFE Target Database Tutorial
 -----------------------------
 

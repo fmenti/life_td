@@ -17,25 +17,6 @@ the python data generation code for life_td.
 
 Check out the :doc:`usage` section for further information.
 
-
-The main goal of this documentation is to make both the code used to create the
-LIFE Target Database as well as the database itself follow the FAIR Principle.
-
-FAIR
-----
-
-**Findability** Metadata
-
-**Accessibility** Free and open source. The whole code can be accessed through 
-GitHub <https://github.com/fmenti/life_td>. Once run the code produces all the 
-data that goes into the database. The database itself can be accessed through 
-topcat or python (Check out the :ref:`LIFE Target Database Tutorial <tutorial>`).
-
-**Interoperability** Python, VO standards
-
-**Reuse** provenance
-
-
 .. note::
     
     This project is under active development.
