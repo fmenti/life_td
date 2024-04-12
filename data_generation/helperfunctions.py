@@ -11,11 +11,14 @@ import matplotlib.pyplot as plt
 def save(cats,names,location='../data/'):
     """
     This functions saves the tables given as python list in the cats parameter.
+    
     The saving location is 'data/{name}.xml' where path is given in the paths
     parameter.
     :param cats: Python list of astropy table to be saved.
-    :param names: Python list of strings containing names for saving location
+    :type cats: list(astropy.table.table.Table)
+    :param names: Contains names for saving location
         of tables in cats.
+    :type names: list(str)
     """
     #go through all the elements in both lists
     for cat,path in zip(cats,names):
@@ -38,8 +41,8 @@ def stringtoobject(cat,number=100):
     :param cat: Astropy table.
     :param number: Length of longest string type element in the table.
         Default is 100.
-    :return cat: Astropy table with all string columns transformed into
-        object type ones.
+    :return: All string columns transformed into object type ones.
+    :rtype: astropy.table.table.Table
     """
     #defining string types as calling them string does not work and instead
     #the type name <U3 is needed for a string of length 3
@@ -95,9 +98,12 @@ def object_contained(stars,cat,details=False):
 
 def compare_catalogs(cat1,cat2,cat1_idname,cat2_idname,cat1_paranames,cat2_paranames):
     """
-    This function
-    :param cat1: astropy table to be compared to cat2
-    :param cat2: astropy table to be compared to cat1
+    This function compares two catalogs.
+    
+    :param cat1:  to be compared to cat2
+    :type cat1: astropy.table.table.Table
+    :param cat2:  to be compared to cat1
+    :type cat2: astropy.table.table.Table
     :param cat1_idname: column name of cat 1 column containing object identifiers
     :param cat2_idname: column name of cat 2 column containing object identifiers
     :param cat1_paranames: column names of cat 1 columns containing measurements to be compared to cat 2
@@ -170,3 +176,21 @@ def compare_catalogs(cat1,cat2,cat1_idname,cat2_idname,cat1_paranames,cat2_paran
         plt.hist(difference[f'diff_{cat1_paranames[i]}'],histtype='bar',log=True)
         plt.show()
     return
+
+def create_common(cat1,cat2):
+    """
+    This function ...
+    
+    :param cat1:
+    :type cat1:
+    :param cat2:
+    :type cat2:
+    :returns:
+    :rtype:
+    """
+    common_stars=np.intersect1d(list(cat1['main_id']),list(cat2['main_id']))
+    common_cat1=cat1[np.where(np.in1d(cat1['main_id'],common_stars))]
+    common_cat2=cat2[np.where(np.in1d(cat2['main_id'],common_stars))]   
+    common_cat2=stringtoobject(common_cat2,number=1000)
+    common_cat1=stringtoobject(common_cat1,number=1000)
+    return common_cat1, common_cat2

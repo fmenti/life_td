@@ -41,6 +41,10 @@ def show(provider,
     
     
 def sanitytest(cat,colname):
+    """
+    
+    """
+    
     arr=cat[colname]
     if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
         print(colname,'is empty')
@@ -103,7 +107,7 @@ def spechist(spectypes,mute=False):
     specdist=specdist.astype(int)
     return spec, specdist
 
-def final_plot(stars,labels,distance_cut_in_pc,path='results/final_plot.png',color=['tab:blue','tab:orange','tab:green']):
+def final_plot(stars,labels,distance_cut_in_pc,path='../plots/final_plot.png',color=['tab:blue','tab:orange','tab:green']):
     """
     Makes plot with two subfigures, first a histogram of spectral 
     type and then one of spectral type for each distance sample of 
@@ -177,7 +181,7 @@ def final_plot(stars,labels,distance_cut_in_pc,path='results/final_plot.png',col
         xticks_name=['0-5','5-10','10-15','15-20','20-25','25-30'][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
-    plt.savefig('../plots/final_plot', dpi=300)
+    plt.savefig(path, dpi=300)
     return
 
 def spechistplot(stars,name,path=''):

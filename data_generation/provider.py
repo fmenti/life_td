@@ -73,9 +73,11 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
 
 def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     """
-    Joins main_id from simbad to the column colname. Returns the whole
-    table cat but without any rows where no simbad main_id was found.
+    Joins main_id from simbad to the column colname. 
+    
+    Returns the whole table cat but without any rows where no simbad main_id was found.
     :param cat: Astropy table containing column colname.
+    :type cat: astropy.table.table.Table
     :param colname: Column header of the identifiers that should be searched
         in SIMBAD.
     :param name: Column header for the SIMBAD main identifiers, default is
