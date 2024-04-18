@@ -5,17 +5,34 @@ adql_query="""
     WHERE type='st'"""
 
 def example_query(adql_query=adql_query):
+    """
+    Performs an example query via TAP on the LIFE Target Database.
+    
+    :param adql_query: Query, default is main identifier of the first 
+        ten stellar objects.
+    :type adql_query: str
+    :returns: Result of the query.
+    :rtype: astropy.table.table.Table   
+    """
+    
     def query(link,query):
         """
-        Performs a query via TAP on the service given in the link parameter.
+        Performs a query via TAP on the service given.
+        
         :param link: Service access URL.
-        :param query: Query to be asked of the external database service in ADQL.
-        :return cat: Astropy table containing the result of the query.
+        :type link: str
+        :param query: Query to be asked of the external database service
+             in ADQL.
+        :type query: str
+        :returns: Result of the query.
+        :rtype: astropy.table.table.Table
         """
+        
         #defining the vo service using the given link
         service = vo.dal.TAPService(link)
 
-        result=service.run_async(query.format(**locals()), maxrec=160000)
+        result=service.run_async(query.format(**locals()), 
+                                                maxrec=160000)
     
         cat=result.to_table()
         return cat

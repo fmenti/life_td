@@ -7,13 +7,11 @@ import numpy as np #arrays
 import astropy as ap #votables
 import matplotlib.pyplot as plt
 
-#-------------------global helper functions------------------------------------
+#-------------------global helper functions----------------------------
 def save(cats,names,location='../data/'):
     """
-    This functions saves the tables given as python list in the cats parameter.
+    This functions saves the tables given as list in the cats parameter.
     
-    The saving location is 'data/{name}.xml' where path is given in the paths
-    parameter.
     :param cats: Python list of astropy table to be saved.
     :type cats: list(astropy.table.table.Table)
     :param names: Contains names for saving location
@@ -24,8 +22,7 @@ def save(cats,names,location='../data/'):
     for cat,path in zip(cats,names):
         #for each column header
         for i in cat.colnames:
-            #if the type of the column is object (=adaptable length string)
-            if cat[i].dtype == object:
+            if cat[i].dtype == object: #object =adaptable length string
                 #transform the type into string
                 cat[i] = cat[i].astype(str)
         #save the table
@@ -44,8 +41,8 @@ def stringtoobject(cat,number=100):
     :return: All string columns transformed into object type ones.
     :rtype: astropy.table.table.Table
     """
-    #defining string types as calling them string does not work and instead
-    #the type name <U3 is needed for a string of length 3
+    # defining string types as calling them string does not work and 
+    # instead the type name <U3 is needed for a string of length 3
     stringtypes=[np.dtype(f'<U{j}') for j in range(1,number)]
     #for each column header
     for i in cat.colnames:
@@ -56,12 +53,18 @@ def stringtoobject(cat,number=100):
     return cat
 
 def load(paths,stringtoobjects=True,location='../data/'):
-    """
-    This function loads the tables saved in XML format at saving locations
-    specified in paths. If stringtoobject is True the function 
-    stringtoobjects is invoked.
-    :param paths: Python list of saving locations.
-    :return cats: Python list of loaded astropy tables.
+    """    
+    This function loads xml tables. 
+    
+    :param paths: Filenames.
+    :type paths: list(str)
+    :param stringtoobjects: Wheter stringtoobject function should be 
+        called.
+    :type stringtoobjects: bool
+    :param location: Folder to save the file in, default is ../data/.
+    :type location: str
+    :returns: Loaded tables.
+    :rtype: list(astropy.table.table.Table)
     """
     #initialize return parameter as list
     cats=[]

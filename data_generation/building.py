@@ -18,9 +18,9 @@ def initialize_database_tables(table_names,list_of_tables):
     It does so with column name and data
     type specified but no actual data in them.
     :param table_names:
-    :type table_names: list of objects of type str
+    :type table_names: list(str)
     :param list_of_tables:
-    :type list_of_tables:
+    :type list_of_tables: list(astropy.table.table.Table)
     :returns: Initiated database tables in the order of table_names.
     :rtype: list(astropy.table.table.Table)
     """
