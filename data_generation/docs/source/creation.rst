@@ -9,6 +9,6 @@ Generating data
 The data for the LIFE database is first generated using the function 
 ``create_life_td()`` :
 
-.. autofunction:: life_td.create_life_td
+..    .. autofunction:: life_td.create_life_td
 
 

@@ -1,8 +1,11 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
-import pathlib
+import os
+#import pathlib
 import sys
-sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
+#sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
+sys.path.insert(0, os.path.abspath('../../modules'))
+
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -29,6 +32,8 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
-html_theme = 'alabaster'
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+html_theme = 'furo' #'alabaster'
 html_static_path = ['_static']

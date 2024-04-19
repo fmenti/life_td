@@ -17,6 +17,7 @@ def initialize_database_tables(table_names,list_of_tables):
     
     It does so with column name and data
     type specified but no actual data in them.
+    
     :param table_names:
     :type table_names: list(str)
     :param list_of_tables:
@@ -251,6 +252,7 @@ def objectmerging(cat):
     
     The object is the same physical one but the data is provided by 
     different providers and merged into one entry.
+    
     :param cat: Astropy table containing multiple entries for the same
         physical objects due to data from different providers.
     :type cat: astropy.table.table.Table
@@ -319,6 +321,7 @@ def best_para(para,mes_table):
     This function keeps only highest quality row for each object. 
     
     tried to avoid . for performance reasons
+    
     :param para: Describes parameter e.g. mass
     :type para: str
     :param mes_table: Contains only columns 'main_id',

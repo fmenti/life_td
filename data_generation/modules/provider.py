@@ -12,13 +12,18 @@ importlib.reload(hf)#reload module after changing it
 def query(link,query,catalogs=[]):
     """
     Performs a query via TAP on the service given in the link parameter.
+    
     If a list of tables is given in the catalogs parameter,
     those are uploaded to the service beforehand.
-    :param link: Service access URL.
-    :param query: Query to be asked of the external database service in ADQL.
+    
+    :param str link: Service access URL.
+    :param str query: Query to be asked of the external database service in ADQL.
     :param catalogs: List of astropy tables to be uploaded to the service.
-    :return cat: Astropy table containing the result of the query.
+    :type catalogs: list(astropy.table.table.Table)
+    :returns: Result of the query.
+    :rtype: astropy.table.table.Table
     """
+    
     #defining the vo service using the given link
     service = vo.dal.TAPService(link)
     #without upload tables
@@ -36,9 +41,11 @@ def query(link,query,catalogs=[]):
 
 def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     """
-    This function creates or updates the source table out of the given
-    references. The entries are unique and the columns consist out of the
+    Creates or updates the source table out of the given references.
+    
+    The entries are unique and the columns consist out of the
     reference and provider_name.
+    
     :param cat: Astropy table on which the references should be gathered.
     :param ref_columns: Header of the columns containing reference information.
     :param provider: String for provider name.
@@ -46,6 +53,7 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     :return sources: Astropy table containing references and provider
         information.
     """
+    
     if len(cat)>0:
         cat_sources=ap.table.Table() #table initialization
         cat_reflist=[] #initialization of list to store reference information
@@ -75,7 +83,9 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     """
     Joins main_id from simbad to the column colname. 
     
-    Returns the whole table cat but without any rows where no simbad main_id was found.
+    Returns the whole table cat but without any rows where no simbad 
+    main_id was found.
+    
     :param cat: Astropy table containing column colname.
     :type cat: astropy.table.table.Table
     :param colname: Column header of the identifiers that should be searched
@@ -86,6 +96,7 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     :return cat: Astropy table with all main SIMBAD identifiers that could 
         be found in column "name".
     """
+    
     #improvement idea to be performed at one point
     # tbd option to match on position instead of main_id or oid
     #SIMBAD TAP service
@@ -107,12 +118,13 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
 
 def distance_cut(cat,colname,main_id=True):
     """
-    This Function sorts out objects not within the provider_simbad
-    distance cut. 
+    Sorts out objects not within the provider_simbad distance cut. 
+    
     :param cat: Astropy table to be matched against sim_objects table.
     :param colname: Name of the column to use for the match.
     :return cat: Table like cat without any objects not found in sim_objects.
     """
+    
     if main_id:
         [sim]=hf.load(['sim_objects'])
         sim.rename_columns(['main_id','ids'],['temp1','temp2'])
@@ -129,8 +141,8 @@ def distance_cut(cat,colname,main_id=True):
 
 def nullvalues(cat,colname,nullvalue,verbose=False):
     """
-    This function transforms all masked entries of the column colname of
-    the table cat into the values given in nullvalue.
+    This function fills masked entries specified column. 
+    
     :param cat: Astropy table containing the column colname.
     :param colname: String of the name of an astropy table column.
     :param nullvalue: Value to be placed instead of masked elements.
@@ -139,6 +151,7 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
     :return cat: Astropy table with masked elements of colname replaced
         by nullvalue.
     """
+    
     if type(cat[colname])==ap.table.column.MaskedColumn:
                 cat[colname].fill_value=nullvalue
                 cat[colname]=cat[colname].filled()
@@ -148,14 +161,15 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
 
 def lowerquality(cat,colname):
     """
-    This function lowers the quality (A highest, E lowest) entry of the 
-    in colname specified column of the astropy table cat.
+    This function lowers the quality (A highest, E lowest) entry.
+    
     :param cat: Astropy table containing the column colname and only 
         rows that should be altered.
     :param colname: String of the name of an astropy table column.
     :return cat: Astropy table with lowered quality entries in the column
         colname.
     """
+    
     for i in range(len(cat)):
         if cat[colname][i]=='A':
             cat[colname][i]='B'
@@ -169,9 +183,8 @@ def lowerquality(cat,colname):
 
 def replace_value(cat,column,value,replace_by):
     """
-    This function replaces the in the parameter value
-    specified entries of the column colname in the table
-    cat with the in replaced_by specified entry.
+    This function replaces values.
+    
     :param cat: Astropy table with column colname.
     :param column: String designating column in which to replace
         the entries.
@@ -179,6 +192,7 @@ def replace_value(cat,column,value,replace_by):
     :param replace_by: Entry to be put in place of param value.
     :return cat: Astropy table with replaced entries.
     """
+    
     cat[column][np.where(cat[column]==value)]= \
             [replace_by for i in range(
         len(cat[column][np.where(cat[column]==value)]))]
@@ -190,8 +204,10 @@ def ids_from_ident(ident,objects):
     and concatenates them with delimiter | to the common main_id.
     :param ident: astropy table containing the rows main_id and id
     :param objects: astropy table containing the row main_id, ids
-    :return objects:
+    :returns:
+    :rtype:
     """
+    
     grouped_ident=ident.group_by('main_id')
     ind=grouped_ident.groups.indices
     for i in range(len(ind)-1):

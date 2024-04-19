@@ -1,5 +1,7 @@
 """
-Helper functions for the creation and analysis of the LIFE Target database.
+Helper functions for the creation and analysis of the LIFE Target 
+    database.
+    
 Author: Franziska Menti 22.12.2023
 """
 
@@ -18,6 +20,7 @@ def save(cats,names,location='../data/'):
         of tables in cats.
     :type names: list(str)
     """
+    
     #go through all the elements in both lists
     for cat,path in zip(cats,names):
         #for each column header
@@ -33,14 +36,17 @@ def save(cats,names,location='../data/'):
 def stringtoobject(cat,number=100):
     """
     This function changes from string to object format.
+    
     The later has the advantace of allowing strings of varying length.
     Without it truncation of entries is a risk.
+    
     :param cat: Astropy table.
     :param number: Length of longest string type element in the table.
         Default is 100.
     :return: All string columns transformed into object type ones.
     :rtype: astropy.table.table.Table
     """
+    
     # defining string types as calling them string does not work and 
     # instead the type name <U3 is needed for a string of length 3
     stringtypes=[np.dtype(f'<U{j}') for j in range(1,number)]
@@ -66,6 +72,7 @@ def load(paths,stringtoobjects=True,location='../data/'):
     :returns: Loaded tables.
     :rtype: list(astropy.table.table.Table)
     """
+    
     #initialize return parameter as list
     cats=[]
     #go through all the elements in the paths list
@@ -81,16 +88,20 @@ def load(paths,stringtoobjects=True,location='../data/'):
 
 def object_contained(stars,cat,details=False):
     """
+    Checks which of the entries in stars is also in cat.
+    
     This function checks which of the star identifiers in stars are not 
     present in cat. If details is True then the amount and individual objects
     which are in stars but not cat are printed. Returns only star identifiers 
     in stars that are also present in cat.
+    
     :param stars: numpy string array containing star identifiers
     :param cat: numpy string array containing star identifiers
     :param details: Bool, default is False.
     :return stars: numpy string array containing star identifiers 
         which are also present in cat
     """
+    
     lost=stars[np.where(np.invert(np.in1d(stars,cat)))]
     if len(lost)>0:
         print('This criterion was not met by:',len(lost))
@@ -107,12 +118,16 @@ def compare_catalogs(cat1,cat2,cat1_idname,cat2_idname,cat1_paranames,cat2_paran
     :type cat1: astropy.table.table.Table
     :param cat2:  to be compared to cat1
     :type cat2: astropy.table.table.Table
-    :param cat1_idname: column name of cat 1 column containing object identifiers
-    :param cat2_idname: column name of cat 2 column containing object identifiers
-    :param cat1_paranames: column names of cat 1 columns containing measurements to be compared to cat 2
+    :param cat1_idname: column name of cat 1 column containing object 
+        identifiers
+    :param cat2_idname: column name of cat 2 column containing object 
+        identifiers
+    :param cat1_paranames: column names of cat 1 columns containing 
+        measurements to be compared to cat 2
     :param cat2_paranames: column names of cat 2 columns containing measurements 
         to be compared to cat 1. Order of column names needs to be same as in cat1_parameters
     """
+    
     print('lenght cat 1:',len(cat1))
     print('lenght cat 2:',len(cat2))
     common=cat1[np.where(np.in1d(cat1[cat1_idname],cat2[cat2_idname]))]
@@ -184,13 +199,15 @@ def create_common(cat1,cat2):
     """
     This function ...
     
-    :param cat1:
-    :type cat1:
-    :param cat2:
-    :type cat2:
-    :returns:
-    :rtype:
+    :param cat1: First catalog.
+    :type cat1: astropy.table.table.Table
+    :param cat2: Second catalog.
+    :type cat2: astropy.table.table.Table
+    :returns: Touple of cat1 containing only objects that are also in 
+        cat2 and cat2 containing only objects that are also in cat1.
+    :rtype: astropy.table.table.Table,astropy.table.table.Table
     """
+    
     common_stars=np.intersect1d(list(cat1['main_id']),list(cat2['main_id']))
     common_cat1=cat1[np.where(np.in1d(cat1['main_id'],common_stars))]
     common_cat2=cat2[np.where(np.in1d(cat2['main_id'],common_stars))]   
