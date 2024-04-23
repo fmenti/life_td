@@ -27,18 +27,16 @@ class structured_data:
         self.table_names = []
         self.list_of_tables = []
     
-    def add_table(self,table_name,table=ap.table.Table()):
+    def add_table(self,table_name):
         """
         Adds a table and its table_name to
         
         :param str table_name: Name of the to be added table
-        :param table: Table to be added to the class object
-        :type table: astropy.table.table.Table, optional
         """
         
         self.table_name = table_name
         self.table_names.append(table_name)
-        self.list_of_tables.append(table)
+        self.list_of_tables.append(ap.table.Table())
         
     def table(self,table_name):
         """
@@ -229,19 +227,20 @@ class provider(structured_data):
                             'sep_ang_qual','sep_ang_source_idref',
                             'sep_ang_ref'],
                             [float,float,int,object,int,object])                   
-                            
+        
         # table for collection of basic planetary data
         self.add_table('planet_basic')
+        
         # database internal object identifier
         self.add_parameter('planet_basic','object_idref',int)
-        
+                
         # mass data
         self.add_parameters('planet_basic',
                             ['mass_pl_value','mass_pl_err','mass_pl_rel',
                             'mass_pl_qual','mass_pl_source_idref',
                             'mass_pl_ref'],
                             [float,float,object,object,int,object])
-                            
+                                    
         # table for collection of basic disk data
         self.add_table('disk_basic')
         # database internal object identifier
@@ -259,7 +258,7 @@ class provider(structured_data):
         # database internal object identifier
         self.add_parameter('mes_mass_pl','object_idref',int)
         # mass data
-        self.add_parameters('planet_basic',
+        self.add_parameters('mes_mass_pl',
                             ['mass_pl_value','mass_pl_err','mass_pl_rel',
                             'mass_pl_qual','mass_pl_source_idref',
                             'mass_pl_ref'],
