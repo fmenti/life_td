@@ -11,19 +11,18 @@ from datetime import datetime
 import importlib #reloading external functions after modification
 
 #self created modules
+import structured_data_class as sdc
 import helperfunctions as hf
 import provider as p
 import building as b
+importlib.reload(sdc)#reload module after changing it
 importlib.reload(hf)#reload module after changing it
 importlib.reload(p)#reload module after changing it
 importlib.reload(b)#reload module after changing it
 
 
-
-table_names=['sources','objects','provider','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary',
-             'mes_sep_ang','best_h_link']
+empty=sdc.provider('empty')
+table_names=empty.table_names
 #tbd change provider to provider_info to minimize confusion in bulilding function with providers list
 
 
@@ -42,7 +41,7 @@ def create_life_td(distance_cut_in_pc):
     #------------------------obtain data from external sources---------------------
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
     
-    sim=p.provider_simbad(table_names,empty_provider[:],distance_cut_in_pc)
+    sim=p.provider_simbad(empty_provider[:],distance_cut_in_pc)
     gk=p.provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
     wds=p.provider_wds(table_names,empty_provider[:],False)
     exo=p.provider_exo(table_names,empty_provider[:],temp=False)
@@ -107,7 +106,7 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
     
     if 'sim' in create:
-        sim=p.provider_simbad(table_names,empty_provider[:],distance_cut_in_pc)
+        sim=p.provider_simbad(empty_provider[:],distance_cut_in_pc)
     else:
         sim=hf.load(['sim_' + direction for direction in table_names])
     for i in range(len(sim)):

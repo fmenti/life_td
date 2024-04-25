@@ -122,6 +122,9 @@ class provider(structured_data):
         self.add_table('objects')
         # database internal object identifier
         self.add_parameter('objects','object_id',int)
+        self.add_parameters('objects',
+                            ['type','ids','main_id'],
+                            [object,object,object])
 
         # table for collection of metadata on provider
         self.add_table('provider')

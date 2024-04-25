@@ -9,203 +9,8 @@ import helperfunctions as hf
 importlib.reload(hf)#reload module after changing it
 import provider as p
 importlib.reload(p)#reload module after changing it
-
-#-------------------initialization function----------------------------
-def initialize_database_tables(table_names,list_of_tables):
-    """
-    This function initializes the database tables.
-    
-    It does so with column name and data
-    type specified but no actual data in them.
-    
-    :param table_names:
-    :type table_names: list(str)
-    :param list_of_tables:
-    :type list_of_tables: list(astropy.table.table.Table)
-    :returns: Initiated database tables in the order of table_names.
-    :rtype: list(astropy.table.table.Table)
-    """
-    
-    # Explanation of abbreviations: id stands for identifier, idref for
-    # reference identifier and parameter_source_idref for the 
-    # identifier in the source table corresponding to the mentioned 
-    # parameter
-
-    sources=ap.table.Table(
-        #reference,...
-        names=['ref','provider_name',
-               'source_id'],
-        dtype=[object,object,int])
-
-    objects=ap.table.Table(
-        #object id, type of object, all identifiers, main id
-        names=['object_id','type','ids','main_id'],
-        dtype=[int,object,object,object])
-    
-    provider=ap.table.Table(
-        #reference,...
-        names=['provider_name','provider_url','provider_bibcode',
-               'provider_access'],
-        dtype=[object,object,object,object])
-
-    #identifier table
-    ident=ap.table.Table(
-        #object idref, id, source idref for the id parameter
-        names=['object_idref','id','id_source_idref'],
-        dtype=[int,object,int])
-
-    #hierarchical link table (which means relation between objects)
-    h_link=ap.table.Table(
-        #child object idref (e.g. planet X),
-        #parent object idref (e.g. host star of planet X)
-        #source idref of h_link parameter, h_link reference,
-        #membership probability
-        names=['child_object_idref','parent_object_idref',
-               'h_link_source_idref','h_link_ref','membership'],
-        dtype=[int,int,int,object,int])
-
-    star_basic=ap.table.Table(
-        # object idref, RA coordinate, DEC coordinate, coordinate error 
-        # ellypse angle, major axis and minor axis, coordinate quality, 
-        # source idref of coordinate parameter, coordinate reference, 
-        # parallax value, parallax error, parallax quality, source 
-        # idref of parallax parameter ... same for distance parameter
-        names=['object_idref','coo_ra','coo_dec','coo_err_angle',
-               'coo_err_maj','coo_err_min','coo_qual',
-               'coo_source_idref','coo_ref',
-               'coo_gal_l','coo_gal_b','coo_gal_err_angle',
-               'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
-               'coo_gal_source_idref','coo_gal_ref',
-               'mag_i_value','mag_i_err','mag_i_qual','mag_i_source_idref',
-               'mag_i_ref',
-               'mag_j_value','mag_j_err','mag_j_qual','mag_j_source_idref',
-               'mag_j_ref',
-               'mag_k_value','mag_k_err','mag_k_qual','mag_k_source_idref',
-               'mag_k_ref',
-               'plx_value','plx_err','plx_qual','plx_source_idref',
-               'plx_ref',
-               'dist_st_value','dist_st_err','dist_st_qual',
-               'dist_st_source_idref','dist_st_ref',
-               'sptype_string','sptype_err','sptype_qual','sptype_source_idref',
-               'sptype_ref',
-               'class_temp','class_temp_nr','class_lum','class_source_idref',
-               'class_ref',
-               'teff_st_value','teff_st_err','teff_st_qual',
-               'teff_st_source_idref','teff_st_ref',
-               'radius_st_value','radius_st_err','radius_st_qual',
-               'radius_st_source_idref','radius_st_ref',
-               'mass_st_value','mass_st_err','mass_st_qual',
-               'mass_st_source_idref','mass_st_ref',
-               'binary_flag','binary_qual','binary_source_idref','binary_ref',
-               'sep_ang_value','sep_ang_err','sep_ang_obs_date','sep_ang_qual',
-               'sep_ang_source_idref','sep_ang_ref'],
-        dtype=[int,float,float,float,#coo
-               float,float,object,
-               int,object,
-               float,float,float,#coo_gal
-               float,float,object,
-               int,object,
-               float,float,object,int,#mag_i
-               object,
-               float,float,object,int,#mag_j
-               object,
-               float,float,object,int,#mag_k
-               object,
-               float,float,object,int,#plx
-               object,
-               float,float,object,#dist
-               int,object,
-               object,float,object,int,#sptype
-               object,
-               object,object,object,int,#class
-               object,
-               float,float,object,#teff
-               int,object,
-               float,float,object,#rad
-               int,object,
-               float,float,object,#mass
-               int,object,
-               object,object,int,object,#binary
-               float,float,int,object,#sep_ang
-               int,object])
-    
-    planet_basic=ap.table.Table(
-        # object idref, mass value, mass error, mass realtion (min, max,
-        # equal), mass quality, source idref of mass parameter, 
-        # mass reference
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
-               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
-        dtype=[int,float,float,object,object,int,object])
-
-    disk_basic=ap.table.Table(
-        #object idref, black body radius value, bbr error,
-        #bbr relation (min, max, equal), bbr quality,...
-        names=['object_idref','rad_value','rad_err','rad_rel','rad_qual',
-               'rad_source_idref','rad_ref'],
-        dtype=[int,float,float,object,object,int,object])
-
-    mes_mass_pl=ap.table.Table(
-        names=['object_idref','mass_pl_value','mass_pl_err','mass_pl_rel',
-               'mass_pl_qual','mass_pl_source_idref','mass_pl_ref'],
-        dtype=[int,float,float,object,object,int,object])
-    
-    mes_teff_st=ap.table.Table(
-        names=['object_idref','teff_st_value','teff_st_err','teff_st_qual',
-               'teff_st_source_idref','teff_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_radius_st=ap.table.Table(
-        names=['object_idref','radius_st_value','radius_st_err',
-               'radius_st_qual','radius_st_source_idref','radius_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_mass_st=ap.table.Table(
-        names=['object_idref','mass_st_value','mass_st_err','mass_st_qual',
-               'mass_st_source_idref','mass_st_ref'],
-        dtype=[int,float,float,object,int,object])
-    
-    mes_binary=ap.table.Table(
-        names=['object_idref','binary_flag','binary_qual',
-               'binary_source_idref','binary_ref'],
-        dtype=[int,object,object,int,object])
-    
-    mes_sep_ang=ap.table.Table(
-        names=['object_idref',
-               'sep_ang_value','sep_ang_err',
-               'sep_ang_obs_date','sep_ang_qual',
-               'sep_ang_source_idref','sep_ang_ref'],
-        dtype=[int,
-               float,float,
-               int,object,
-               int,object])
-    
-    best_h_link=ap.table.Table(
-        #child object idref (e.g. planet X),
-        #parent object idref (e.g. host star of planet X)
-        #source idref of h_link parameter, h_link reference,
-        #membership probability
-        names=['child_object_idref','parent_object_idref',
-               'h_link_source_idref','h_link_ref','membership'],
-        dtype=[int,int,int,object,int])
-
-    for i in range(len(table_names)):
-        if table_names[i]=='sources': list_of_tables[i]=sources
-        if table_names[i]=='provider': list_of_tables[i]=provider
-        if table_names[i]=='objects': list_of_tables[i]=objects
-        if table_names[i]=='ident': list_of_tables[i]=ident
-        if table_names[i]=='h_link': list_of_tables[i]=h_link
-        if table_names[i]=='star_basic': list_of_tables[i]=star_basic
-        if table_names[i]=='planet_basic': list_of_tables[i]=planet_basic
-        if table_names[i]=='disk_basic': list_of_tables[i]=disk_basic
-        if table_names[i]=='mes_mass_pl': list_of_tables[i]=mes_mass_pl
-        if table_names[i]=='mes_teff_st': list_of_tables[i]=mes_teff_st
-        if table_names[i]=='mes_radius_st': list_of_tables[i]=mes_radius_st
-        if table_names[i]=='mes_mass_st': list_of_tables[i]=mes_mass_st
-        if table_names[i]=='mes_binary': list_of_tables[i]=mes_binary
-        if table_names[i]=='mes_sep_ang': list_of_tables[i]=mes_sep_ang
-        if table_names[i]=='best_h_link': list_of_tables[i]=best_h_link
-        hf.save([list_of_tables[i][:]],['empty_'+table_names[i]])
-    return list_of_tables
+import structured_data_class as sdc
+importlib.reload(sdc)#reload module after changing it
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -422,8 +227,9 @@ def building(providers,table_names,list_of_tables):
     """
     
     # Creates empty tables as needed for final database ingestion
-    init=initialize_database_tables(table_names,list_of_tables)
-    n_tables=len(init)
+    empty=sdc.provider('empty')
+    
+    n_tables=len(empty.list_of_tables)
 
     cat=[ap.table.Table() for i in range(n_tables)]
     #for the sources and objects joins tables from different providers
@@ -438,7 +244,7 @@ def building(providers,table_names,list_of_tables):
             cat[0]=providers[j][0]
         
     #I do this to get those columns that are empty in the data
-    cat[0]=ap.table.vstack([cat[0],init[0]])
+    cat[0]=ap.table.vstack([cat[0],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
     if len(cat[0])>0:
@@ -465,9 +271,10 @@ def building(providers,table_names,list_of_tables):
 
     
     print(f'Building {table_names[2]} table ...')#provider
+    print('careful, I have here hardcoded parameter and table order')
     paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
            ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
-          ['radius_st'],['mass_st'],['binary'],['sep_ang']]
+          ['radius_st'],['mass_st'],['binary'],['sep_ang'],['h_link']]
     
     #merging the different provider tables
     for j in range(len(providers)):
@@ -478,7 +285,7 @@ def building(providers,table_names,list_of_tables):
         else:
             cat[2]=providers[j][2]
     #I do this to get those columns that are empty in the data
-    cat[2]=ap.table.vstack([cat[2],init[2]])
+    cat[2]=ap.table.vstack([cat[2],empty.table('provider')])
        
     
     for i in range(3,n_tables): 
@@ -492,6 +299,7 @@ def building(providers,table_names,list_of_tables):
                 # and provider name. replacing ref columns with 
                 # corresponding source_idref one. issue is that order 
                 # providers and provider_name not the same
+                print(i,paras[i-3],providers[j][i])
                 providers[j][i]=match(providers[j][i],cat[0],paras[i-3],
                                         providers[j][2]['provider_name'][0])
             if len(cat[i])>0:
@@ -503,7 +311,7 @@ def building(providers,table_names,list_of_tables):
                 cat[i]=providers[j][i]
         
         #I do this to get those columns that are empty in the data
-        cat[i]=ap.table.vstack([cat[i],init[i]])
+        cat[i]=ap.table.vstack([cat[i],empty.table(table_names[i])])
         cat[i]=cat[i].filled() 
         # because otherwise unique does neglect masked columns
         
@@ -515,7 +323,7 @@ def building(providers,table_names,list_of_tables):
             # add object_idref
             # first remove the object_idref we got from empty 
             # initialization though I would prefer a more elegant way 
-            # to do this
+            # to do this. Is needed as empty columns don't work for join
             cat[i].remove_column('object_idref') 
             cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
                                  join_type='left')
@@ -541,10 +349,7 @@ def building(providers,table_names,list_of_tables):
             #removing because same as parent_main_id
             cat[i].remove_column('main_id')
             cat[i].rename_column('object_id','parent_object_idref')
-            #null values
-            #cat[i]['membership'].fill_value=-1
-            #cat[i]['membership']=cat[i]['membership'].filled()
-        
+            cat[table_names.index('best_h_link')]=best_para('membership',cat[table_names.index('h_link')])
         if table_names[i]=='star_basic':
             #choosing all objects with type star or system. this I use 
             # to join the object_id parameter from objects table to 
@@ -599,9 +404,9 @@ def building(providers,table_names,list_of_tables):
             cat[5].remove_columns(['sep_ang_value','sep_ang_err',
                                     'sep_ang_obs_date','sep_ang_qual',
                                     'sep_ang_source_idref','sep_ang_ref'])
-            cat[5]=ap.table.join(cat[5],sep_ang_best_para,join_type='left')
-        if table_names[i]=='best_h_link':
-            cat[i]=best_para('membership',cat[4])
+            cat[table_names.index('star_basic')]=ap.table.join(
+                    cat[table_names.index('star_basic')],sep_ang_best_para,join_type='left')
+            
         cat[i]=cat[i].filled()
         
         if len(cat[i])==0:
@@ -609,7 +414,7 @@ def building(providers,table_names,list_of_tables):
         else:
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
-    cat[5]=cat[5].filled()
+    cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
     print('Unifying null values...')
     # unify null values (had 'N' and '?' because of ap default 
     # fill_value and type conversion string vs object)
@@ -633,8 +438,8 @@ def building(providers,table_names,list_of_tables):
         for col in columns[i]:
             tables[i]=p.replace_value(tables[i],col,'N','?')
             tables[i]=p.replace_value(tables[i],col,'N/A','?')
-    print('TBD: Add exact object distance cut. So far for correct treatment \
-          of boundary objects 10% additional distance cut used')
+    print("""TBD: Add exact object distance cut. So far for correct treatment
+          of boundary objects 10% additional distance cut used""")
     print('Saving data...')
     hf.save(cat,table_names)
     return cat
