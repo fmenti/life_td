@@ -121,6 +121,29 @@ def match(cat,sources,paras,provider):
                         cat[f'{para}_source_idref'][i]=999999
     return cat
 
+def merge_table(cat1,cat2):
+    """
+    Merges two tables.
+    
+    :param cat1:
+    :type cat1: astropy.table.table.Table
+    :param cat2:
+    :type cat2: astropy.table.table.Table
+    :returns: Merged table.
+    :rtype: astropy.table.table.Table
+    """
+    
+    if len(cat1)==0 or len(cat2)==0:
+        #in this case ap join function wouldn't work
+        merged_cat=ap.table.vstack([cat1,cat2])
+    #elif #some columns being empty, others not:
+        #remove empty columns
+        #make sure merged_cat has all colnames it needs
+    else:
+        merged_cat=ap.table.join(cat1,cat2)
+    
+    return merged_cat
+
 def best_para(para,mes_table):
     """
     This function keeps only highest quality row for each object. 
@@ -208,42 +231,108 @@ def best_para(para,mes_table):
             break  # only executed if the inner loop DID break 
     return best_para
 
+def best_parameters_ingestion(cat_mes,cat_basic,para,columns=[]):
+    """
+    Takes from the multiple measurement table best parameters for basic table.
+
+    :para cat_mes:
+    :type cat_mes: astropy.table.table.Table
+    :para cat_basic:
+    :type cat_basic: astropy.table.table.Table
+    :para str para:
+    :para columns:
+    :type columns: list(str)
+    :returns:
+    :rtype: astropy.table.table.Table
+    """
+    best_para_cat_mes=best_para(para,cat_mes)
+    if columns!=[]:
+        cat_basic.remove_columns(columns)
+    cat_basic=ap.table.join(cat_basic,best_para_cat_mes,join_type='left')
+    return cat_basic
+
+def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=False,para_match=False):
+    """
+    Merges the data from the different providers.
+    
+    :para cat: 
+    :type cat: list(astropy.table.table.Table)
+    :para table_names:
+    :type table_names: list(str)
+    :para str table_name: 
+    :param prov_tables_list: Containing simbad, grant kennedy, exomercat, gaia 
+        and wds data.
+    :type prov_tables_list: list(astropy.table.table.Table)
+    :para bool o_merging:
+    :para bool para_match:
+    :returns:
+    :rtype: astropy.table.table.Table
+    """
+    print(f'Building {table_name} table ...')#sources
+    n=table_names.index(table_name)
+    
+    for j in range(len(prov_tables_list)):
+        if para_match:
+            # redefining of paras multiple times is not optimal but easier to 
+            # read the code if I don't have to define them globally or pass
+            # them to the function.
+            #print('careful, I have here hardcoded parameter and table order')
+            paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i',
+                                      'mag_j','mag_k','class','sptype'],
+                   ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
+                   ['radius_st'],['mass_st'],['binary'],['sep_ang'],['h_link']]
+            if len(prov_tables_list[j][n])>0:
+                #prov_tables_list[j] is a table containing the two columns ref 
+                # and provider name. replacing ref columns with 
+                # corresponding source_idref one. issue is that order 
+                # prov_tables_list and provider_name not the same
+                prov_tables_list[j][n]=match(prov_tables_list[j][n],cat[0],paras[n-3],
+                                        prov_tables_list[j][2]['provider_name'][0])
+        if len(cat[n])>0:
+            #joining data from different providers (simbad,...,wds)
+            if len(prov_tables_list[j][n])>0:
+                if o_merging:
+                    cat[n]=ap.table.join(cat[n],prov_tables_list[j][n],
+                                         keys='main_id',join_type='outer')
+                    cat[n]=objectmerging(cat[n])
+                else:
+                    cat[n]=ap.table.join(cat[n],prov_tables_list[j][n],join_type='outer')
+                
+        else:
+            cat[n]=prov_tables_list[j][n]
+    return cat[n]
+
+
+
 #------------------------provider combining----------------------------
-def building(providers,table_names,list_of_tables):
+def building(prov_tables_list,table_names,list_of_tables):
     """
     This function builds the tables for the LIFE database.
     
-    :param providers: Containing simbad, grant kennedy, exomercat, gaia 
+    :param prov_tables_list: Containing simbad, grant kennedy, exomercat, gaia 
         and wds data.
-    :type providers: list(astropy.table.table.Table)
+    :type prov_tables_list: list(astropy.table.table.Table)
     :param table_names: Objects correspond to the names of the 
-        astropy tables contained in providers and the return list.
+        astropy tables contained in prov_tables_list and the return list.
     :type table_names: list of objects of type str
     :param list_of_tables: Empty astropy tables to be filled
         in and returned.
     :type list_of_tables: list(astropy.table.table.Table)
-    :returns: Containing data combined from the different providers.
+    :returns: Containing data combined from the different prov_tables_list.
     :rtype: list containing objects of type astropy.table.table.Table
     """
     
     # Creates empty tables as needed for final database ingestion
     empty=sdc.provider('empty')
-    
     n_tables=len(empty.list_of_tables)
-
     cat=[ap.table.Table() for i in range(n_tables)]
-    #for the sources and objects joins tables from different providers
     
-    print(f'Building {table_names[0]} table ...')#sources
-    for j in range(len(providers)):
-        if len(cat[0])>0:
-            #joining data from different providers
-            if len(providers[j][0])>0:
-                cat[0]=ap.table.join(cat[0],providers[j][0],join_type='outer')
-        else:
-            cat[0]=providers[j][0]
-        
+    #for the sources and objects joins tables from different prov_tables_list
+    cat[0]=provider_data_merging(cat,table_names,'sources',prov_tables_list)
+    
     #I do this to get those columns that are empty in the data
+    #but do I need to do that here, need to remove quite some of them again later
+    #to work with the join function
     cat[0]=ap.table.vstack([cat[0],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
@@ -251,15 +340,7 @@ def building(providers,table_names,list_of_tables):
         cat[0]=ap.table.unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
     
-    print(f'Building {table_names[1]} table ...')#objects
-    for j in range(len(providers)):
-            if len(cat[1])>0:
-                #joining data from different providers
-                if len(providers[j][1])>0:
-                    cat[1]=ap.table.join(cat[1],providers[j][1],keys='main_id',join_type='outer')
-                    cat[1]=objectmerging(cat[1])
-            else:
-                cat[1]=providers[j][1]
+    cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
                 
     #removed vstack with init to not have object_id as is empty anyways
     
@@ -269,55 +350,21 @@ def building(providers,table_names,list_of_tables):
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
 
+    cat[2]=provider_data_merging(cat,table_names,'provider',prov_tables_list)
     
-    print(f'Building {table_names[2]} table ...')#provider
-    print('careful, I have here hardcoded parameter and table order')
-    paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i','mag_j','mag_k','class','sptype'],
-           ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
-          ['radius_st'],['mass_st'],['binary'],['sep_ang'],['h_link']]
-    
-    #merging the different provider tables
-    for j in range(len(providers)):
-        if len(cat[2])>0:
-            #joining data from different providers
-            if len(providers[j][2])>0:
-                cat[2]=ap.table.join(cat[2],providers[j][2],join_type='outer')
-        else:
-            cat[2]=providers[j][2]
     #I do this to get those columns that are empty in the data
     cat[2]=ap.table.vstack([cat[2],empty.table('provider')])
        
     
     for i in range(3,n_tables): 
     # for the tables star_basic,...,mes_mass_st
-        print(f'Building {table_names[i]} table ...')
-        
-        for j in range(len(providers)):
-        # for the different providers (simbad,...,wds)
-            if len(providers[j][i])>0:
-                #providers[j] is a table containing the two columns ref 
-                # and provider name. replacing ref columns with 
-                # corresponding source_idref one. issue is that order 
-                # providers and provider_name not the same
-                print(i,paras[i-3],providers[j][i])
-                providers[j][i]=match(providers[j][i],cat[0],paras[i-3],
-                                        providers[j][2]['provider_name'][0])
-            if len(cat[i])>0:
-                #joining data from different providers
-                if len(providers[j][i])>0:
-                    cat[i]=ap.table.join(cat[i],providers[j][i],
-                                        join_type='outer')
-            else:
-                cat[i]=providers[j][i]
-        
+        cat[i]=provider_data_merging(cat,table_names,table_names[i],
+                                     prov_tables_list,para_match=True)
+
         #I do this to get those columns that are empty in the data
         cat[i]=ap.table.vstack([cat[i],empty.table(table_names[i])])
         cat[i]=cat[i].filled() 
         # because otherwise unique does neglect masked columns
-        
-
-            #I have quite some for loops here, will be slow
-            #this function is ready for testing
 
         if 'object_idref' in cat[i].colnames and len(cat[i])>0: 
             # add object_idref
@@ -363,49 +410,52 @@ def building(providers,table_names,list_of_tables):
                             cat[1]['type']=='sy')]
             temp=ap.table.vstack([stars,systems])
             temp.rename_column('object_id','object_idref')
-            # cat[i] are all the star_cat tables from providers where 
+            # cat[i] are all the star_cat tables from prov_tables_list where 
             # those are given the new objects are needed to join the 
             # best parameters from mes_ tables later on
             cat[i]=ap.table.join(cat[i],temp,join_type='outer',
                                  keys=['object_idref','main_id'])
-        if table_names[i]=='mes_teff_st':
-            teff_st_best_para=best_para('teff_st',cat[i])
-            cat[5].remove_columns(['teff_st_value','teff_st_err',
-                                   'teff_st_qual','teff_st_source_idref',
-                                       'teff_st_ref'])
-            cat[5]=ap.table.join(cat[5],teff_st_best_para,join_type='left')
-        if table_names[i]=='mes_radius_st':
-            radius_st_best_para=best_para('radius_st',cat[i])
-            cat[5].remove_columns(['radius_st_value','radius_st_err',
-                                   'radius_st_qual','radius_st_source_idref',
-                                   'radius_st_ref'])
-            cat[5]=ap.table.join(cat[5],radius_st_best_para,join_type='left')
-        if table_names[i]=='mes_mass_st':
-            mass_st_best_para=best_para('mass_st',cat[i])
-            cat[5].remove_columns(['mass_st_value','mass_st_err',
-                                   'mass_st_qual','mass_st_source_idref',
-                                   'mass_st_ref'])
-            cat[5]=ap.table.join(cat[5],mass_st_best_para,join_type='left')
-        if table_names[i]=='mes_mass_pl':
-            mass_pl_best_para=best_para('mass_pl',cat[i])
-            cat[6]=mass_pl_best_para
+        if table_names[i]=='planet_basic':
             planets=cat[1]['object_id','main_id'][np.where(
                             cat[1]['type']=='pl')]
-            cat[6]=ap.table.join(cat[6],planets['main_id','object_id'])
-            cat[6].rename_column('object_id','object_idref')
+            planets.rename_column('object_id','object_idref')
+            cat[i]=planets #can't use line below because cat[i] has no rows
+            #cat[i]=ap.table.join(cat[i],temp,join_type='outer',
+            #                     keys=['object_idref'])
+        if table_names[i]=='mes_teff_st':
+            cat[table_names.index('star_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('star_basic')],
+                    'teff_st',['teff_st_value','teff_st_err',
+                               'teff_st_qual','teff_st_source_idref',
+                               'teff_st_ref'])
+        if table_names[i]=='mes_radius_st':
+            cat[table_names.index('star_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('star_basic')],
+                    'radius_st',['radius_st_value','radius_st_err',
+                                 'radius_st_qual','radius_st_source_idref',
+                                 'radius_st_ref'])
+        if table_names[i]=='mes_mass_st':
+            cat[table_names.index('star_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('star_basic')],
+                    'mass_st',['mass_st_value','mass_st_err',
+                               'mass_st_qual','mass_st_source_idref',
+                               'mass_st_ref'])
+        if table_names[i]=='mes_mass_pl':
+            cat[table_names.index('planet_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('planet_basic')],
+                    'mass_pl')
         if table_names[i]=='mes_binary':
-            binary_best_para=best_para('binary',cat[i])
-            cat[5].remove_columns(['binary_flag',
-                                   'binary_qual','binary_source_idref',
-                                   'binary_ref'])
-            cat[5]=ap.table.join(cat[5],binary_best_para,join_type='left')
+            cat[table_names.index('star_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('star_basic')],
+                    'binary',['binary_flag',
+                              'binary_qual','binary_source_idref',
+                               'binary_ref'])
         if table_names[i]=='mes_sep_ang':
-            sep_ang_best_para=best_para('sep_ang',cat[i])
-            cat[5].remove_columns(['sep_ang_value','sep_ang_err',
-                                    'sep_ang_obs_date','sep_ang_qual',
-                                    'sep_ang_source_idref','sep_ang_ref'])
-            cat[table_names.index('star_basic')]=ap.table.join(
-                    cat[table_names.index('star_basic')],sep_ang_best_para,join_type='left')
+            cat[table_names.index('star_basic')]=best_parameters_ingestion(
+                    cat[i], cat[table_names.index('star_basic')],
+                    'sep_ang',['sep_ang_value','sep_ang_err',
+                               'sep_ang_obs_date','sep_ang_qual',
+                               'sep_ang_source_idref','sep_ang_ref'])
             
         cat[i]=cat[i].filled()
         
@@ -414,7 +464,10 @@ def building(providers,table_names,list_of_tables):
         else:
             #only keeping unique entries
             cat[i]=ap.table.unique(cat[i],silent=True)
+            
+    #next line is needed as multimeasurement adaptions lead to potentially masked entries
     cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
+    
     print('Unifying null values...')
     # unify null values (had 'N' and '?' because of ap default 
     # fill_value and type conversion string vs object)
@@ -438,8 +491,10 @@ def building(providers,table_names,list_of_tables):
         for col in columns[i]:
             tables[i]=p.replace_value(tables[i],col,'N','?')
             tables[i]=p.replace_value(tables[i],col,'N/A','?')
+            
     print("""TBD: Add exact object distance cut. So far for correct treatment
           of boundary objects 10% additional distance cut used""")
+    
     print('Saving data...')
     hf.save(cat,table_names)
     return cat
