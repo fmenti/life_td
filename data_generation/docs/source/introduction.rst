@@ -1,14 +1,19 @@
+.. _introduction:
+
 Introduction
 ============
 
 Documentation Motivation
 ------------------------
+
 The main goal of this documentation is to make both the code used to 
 create the LIFE Target Database as well as the database itself follow 
 the FAIR Principle.
 
 FAIR
-^^^
+^^^^
+
+TBD distinguish between FAIR data and FAIR software
 
 **Findability** Contains richly annotated metadata to make clear what 
 the data describes.
@@ -28,5 +33,6 @@ reproducing everything.
 
 Database Motivation
 -------------------
+
 TBD include here stuff from the report
 

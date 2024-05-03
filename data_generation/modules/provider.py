@@ -229,35 +229,101 @@ def ids_from_ident(ident,objects):
         objects.add_row([grouped_ident['main_id'][ind[i]],ids])
     return objects
 
+def stars_in_multiple_system(cat,sim_h_link,all_objects):
+    """
+    Assigns object type to special subset of stars.
+
+    This function assignes object type 'st' to those objects that are in
+    multiple systems but don't have any stellar child object.
+
+    :param cat: Table alias containing 
+    :type cat: astropy.table.table.Table
+    :param sim_h_link: Table copy containing columns main_id,
+        type and sptype_string.
+    :type sim_h_link: astropy.table.table.Table
+    :param all_objects: Table copy containing columns 
+        parent_main_id and h_link_ref. Rows are all objects with child
+        objects.
+    :type all_objects: astropy.table.table.Table
+    :returns: Table alias like param cat with desired types
+        adapted.
+    :rtype: astropy.table.table.Table
+    """
+
+    #all type sy objects: cat['main_id','type']
+    #this should work if alias works well
+    #need parent_main_id for sim_h_link here. but setdiff does 
+    #not support that.
+    parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
+    parents.rename_column('main_id','child_main_id')
+    parents.rename_column('parent_main_id','main_id')
+    sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'][:],
+                                 parents[:],keys=['main_id'])
+    #that don t have children: sy_wo_child['main_id','type']
+    #list of those with children
+    sy_w_child=ap.table.join(parents[:],
+                            cat['main_id','type','sptype_string'][:],
+                            keys=['main_id'])
+    #list of those with children joined with type of child
+    all_objects.rename_columns(['type','main_id'],
+                                ['child_type','child_main_id'])
+    sy_w_child=ap.table.join(sy_w_child[:],
+                            all_objects['child_type','child_main_id'][:],
+                             keys=['child_main_id'],join_type='left')
+    #remove all where type child is not pl
+    sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
+    if len(sy_w_child_pl)==0:
+        #no systems with child of type planet
+        sy_wo_child_st=sy_wo_child
+    else:
+        #join with list of sy that dont habe children
+        sy_wo_child_st=ap.table.vstack([sy_wo_child[:],sy_w_child_pl[:]])
+        sy_wo_child_st.remove_column('child_type')
+    #systems that don t have children except planets: sy_wo_child_st
+    #no + in sptype_string because that is another indication of binarity
+    temp=[len(i.split('+'))==1 for i in sy_wo_child_st['sptype_string']]
+    #have it as an array of bools 
+    temp=np.array(temp)
+    #have it as lisit of indices 
+    temp=list(np.where(temp==True)[0])
+    single_sptype=sy_wo_child_st[:][temp]
+    #and no + in spectral type: single_sptype['main_id','type']      
+    cat['type'][np.where(np.in1d(cat['main_id'],
+                                single_sptype['main_id']))]=\
+              ['st' for j in range(len(cat[np.where(np.in1d(cat['main_id'],
+                                        single_sptype['main_id']))]))]        
+    return cat
 
 #-----------------------------provider data ingestion-------------------
 def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
                     test_objects=[]):
     """
-    This function obtains the SIMBAD data and arranges it in a way
-    easy to ingest into the database.
-    :param table_names: List of strings containing the names for the 
-        output tables.
-    :param sim_list_of_tables: List of same length as table_names containing
-        empty astropy tables.
-    :return simbad_list_of_tables: List of astropy tables containing
+    Optains and arranges SIMBAD data.
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
+    :param sim_list_of_tables: Contains empty output tables.
+    :type sim_list_of_tables: list(astropy.table.table.Table)
+    :returns: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.
+    :rtype: list(astropy.table.table.Table)
     """
+    
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
     #---------------define provider-------------------------------------
-    simbad_=sdc.provider('simbad')
-    table_names=simbad_.table_names
-    simbad_.table('provider').add_row()
-    simbad_.table('provider')['provider_name']='SIMBAD',
-    simbad_.table('provider')['provider_url']=\
+    sdc_simbad=sdc.provider('simbad')
+    table_names=sdc_simbad.table_names
+    sdc_simbad.table('provider').add_row()
+    sdc_simbad.table('provider')['provider_name']='SIMBAD',
+    sdc_simbad.table('provider')['provider_url']=\
             "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
-    simbad_.table('provider')['provider_bibcode']='2000A&AS..143....9W'
-    simbad_.table('provider')['provider_access']=datetime.now().strftime('%Y-%m-%d')
+    sdc_simbad.table('provider')['provider_bibcode']='2000A&AS..143....9W'
+    sdc_simbad.table('provider')['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
-    sim_provider=simbad_.table('provider')
+    sim_provider=sdc_simbad.table('provider')
     #---------------define queries--------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
         b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
@@ -373,8 +439,10 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     stars=ap.table.Table(ap.table.unique(temp_stars,keys='main_id'),copy=True)
     
     #-----------------creating output table sim_ident-------------------
+    #issue if I want to replace this here with sdc is that I have main_id column but no id_source_idref
+    #sdc_simbad.table('ident').remove_column('id_source_idref')
     sim_ident=query(sim_provider['provider_url'][0],upload_query[3],
-                    [simbad['oid','main_id'][:].copy()])
+                    [simbad['oid','main_id'][:].copy()]) #adds column id
     sim_ident['id_ref']=[sim_provider['provider_bibcode'][0] for j in range(len(sim_ident))]
     sim_ident.remove_column('oid')
     
@@ -402,62 +470,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     #--------------------creating helper table sim_stars----------------
     #updating multiplicity object type
     #no children and sptype does not contain + -> type needs to be st
-    def stars_in_multiple_system(cat,sim_h_link,all_objects):
-        """
-        This function assignes object type 'st' to those objects that are in
-        multiple systems but don't have any stellar child object.
-        :param cat: Astropy table alias containing 
-        :param sim_h_link: Astropy table copy containing columns main_id,
-            type and sptype_string.
-        :param all_objects: Astropy table copy containing columns 
-            parent_main_id and h_link_ref. Rows are all objects with child
-            objects.
-        :return cat: Astropy table alias like param cat with desired types
-            adapted.
-        """
-        #all type sy objects: cat['main_id','type']
-        #this should work if alias works well
-        #need parent_main_id for sim_h_link here. but setdiff does 
-        #not support that.
-        parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
-        parents.rename_column('main_id','child_main_id')
-        parents.rename_column('parent_main_id','main_id')
-        sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'][:],
-                                     parents[:],keys=['main_id'])
-        #that don t have children: sy_wo_child['main_id','type']
-        #list of those with children
-        sy_w_child=ap.table.join(parents[:],
-                                cat['main_id','type','sptype_string'][:],
-                                keys=['main_id'])
-        #list of those with children joined with type of child
-        all_objects.rename_columns(['type','main_id'],
-                                    ['child_type','child_main_id'])
-        sy_w_child=ap.table.join(sy_w_child[:],
-                                all_objects['child_type','child_main_id'][:],
-                                 keys=['child_main_id'],join_type='left')
-        #remove all where type child is not pl
-        sy_w_child_pl=sy_w_child[np.where(sy_w_child['child_type']=='pl')]
-        if len(sy_w_child_pl)==0:
-            #no systems with child of type planet
-            sy_wo_child_st=sy_wo_child
-        else:
-            #join with list of sy that dont habe children
-            sy_wo_child_st=ap.table.vstack([sy_wo_child[:],sy_w_child_pl[:]])
-            sy_wo_child_st.remove_column('child_type')
-        #systems that don t have children except planets: sy_wo_child_st
-        #no + in sptype_string because that is another indication of binarity
-        temp=[len(i.split('+'))==1 for i in sy_wo_child_st['sptype_string']]
-        #have it as an array of bools 
-        temp=np.array(temp)
-        #have it as lisit of indices 
-        temp=list(np.where(temp==True)[0])
-        single_sptype=sy_wo_child_st[:][temp]
-        #and no + in spectral type: single_sptype['main_id','type']      
-        cat['type'][np.where(np.in1d(cat['main_id'],
-                                    single_sptype['main_id']))]=\
-                  ['st' for j in range(len(cat[np.where(np.in1d(cat['main_id'],
-                                            single_sptype['main_id']))]))]        
-        return cat
+
     #all objects in stars table: stars['main_id','type']
     stars[np.where(stars['type']=='sy')]=stars_in_multiple_system(
             stars[np.where(stars['type']=='sy')],sim_h_link[:],
@@ -543,19 +556,21 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     return sim_list_of_tables
 
 
-
 def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     """
-    This function obtains the disk data and arranges it in a way
-    easy to ingest into the database.
-    :param table_names: List of strings containing the names for the 
-        output tables.
+    Optains and arranges disk data.
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
     :param gk_list_of_tables: List of same length as table_names containing
         empty astropy tables.
-    :return gk_list_of_tables: List of astropy tables containing
+    :type gk_list_of_tables: list(astropy.table.table.Table)
+    :returns: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data and basic disk data.
+    :rtype: list(astropy.table.table.Table)
     """
+    
     plx_in_mas_cut=1000./distance_cut_in_pc
     #---------------define provider-------------------------------------
     gk_provider=ap.table.Table()
@@ -642,21 +657,26 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
 
 def provider_exo(table_names,exo_list_of_tables,temp=False):
     """
-    This function obtains the exomercat data and arranges it in a way easy to
-    ingest into the database. Currently the exomercat server is not online.
-    A temporary method to ingest old exomercat data was implemented and can be
-    accessed by setting temp=True as argument.
-    :param table_names: List of strings containing the names for the 
-        output tables.
+    This function obtains and arranges exomercat data.
+    
+    If the exomercat server is not online a temporary method to 
+    ingest old exomercat data was implemented and can be accessed by 
+    setting temp=True as argument.
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
     :param exo_list_of_tables: List of same length as table_names containing
         empty astropy tables.
-    :param temp: Bool with default value True determining if the exomercat
+    :type exo_list_of_tables: list(astropy.table.table.Table)
+    :param bool temp: Defaults to True.  Determines if the exomercat
         data gets queried (False) or loaded from an old version (True).
-    :return exo_list_of_tables: List of astropy table containing
+    :returns: List of astropy table containing
         reference data, object data, identifier data, object to object
         relation data, basic planetary data and planetary mass measurement 
         data.
+    :rtype: list(astropy.table.table.Table)
     """
+    
     #---------------define provider-------------------------------------
     exo_provider=ap.table.Table()
     exo_provider['provider_name']=['Exo-MerCat']
@@ -841,22 +861,222 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         hf.save([exo_list_of_tables[i][:]],['exo_'+table_names[i]])
     return exo_list_of_tables
 
+def sptype_string_to_class(temp,ref):
+    """
+    Extracts stellar parameters from spectral type string one.
 
+    This function extracts the temperature class, temperature class number
+    and luminocity class information from the spectral type string (e.g. 
+    M5V to M, 5 and V). It stores that information in the for this purpose
+    generated new columns. Only objects of temperature class O, B, A, F,
+    G, K, and M are processed. Only objects of luminocity class IV, V and VI
+    are processed.
+
+    :param temp: Table containing spectral type information in
+        the column sptype_string.
+    :type temp: astropy.table.table.Table
+    :param str ref: Designates origin of data.
+    :returns: Table like temp with additional columns class_temp,
+        class_temp_nr, class_lum and class_ref.
+    :rtype: astropy.table.table.Table
+    """
+
+    temp['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+    temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+    temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+    temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+    #tbd: rewrite code using recoursive function
+
+    for i in range(len(temp)):
+        #sorting out objects like M5V+K7V
+        #strip d for spectral types starting with small d because it is an old annotation for dwarf star
+        sptype=temp['sptype_string'][i].strip('d')
+        if (len(sptype.split('+'))==1 and
+        #sorting out entries like '', DA2.9, T1V
+                len(sptype)>0 and 
+                sptype[0] in ['O','B','A','F','G','K','M']):
+            temp['class_temp'][i]=sptype[0]
+            temp['class_ref'][i]=ref
+            #sorting out objects like DA2.9
+            if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
+                temp['class_temp_nr'][i]=sptype[1]
+                #distinguishing between objects like K5V and K5.5V
+                if len(sptype)>2 and sptype[2]=='.':
+                    temp['class_temp_nr'][i]=sptype[1:4]
+                    if len(sptype)>4 and sptype[4] in ['I','V']:
+                        temp['class_lum'][i]=sptype[4]
+                        if len(sptype)>5 and sptype[5] in ['I','V']:
+                            temp['class_lum'][i]=sptype[4:6]
+                            if len(sptype)>6 and sptype[6] in ['I','V']:
+                                temp['class_lum'][i]=sptype[4:7]
+                    else:
+                        temp['class_lum'][i]='?'
+                elif len(sptype)>2 and sptype[2] in ['I','V']:
+                    temp['class_lum'][i]=sptype[2]
+                    if len(sptype)>3 and sptype[3] in ['I','V']:
+                        temp['class_lum'][i]=sptype[2:4]
+                        if len(sptype)>4 and sptype[4] in ['I','V']:
+                            temp['class_lum'][i]=sptype[2:5]
+                else:
+                    temp['class_lum'][i]='?'
+            else:
+                temp['class_lum'][i]='?'
+        else:
+            temp['class_temp'][i]='?'
+            temp['class_temp_nr'][i]='?'
+            temp['class_lum'][i]='?'
+            temp['class_ref'][i]='?'
+        if len(temp['sptype_string'][i])>0:
+            if temp['sptype_string'][i][0]=='d':
+                temp['class_lum'][i]='V'
+    return temp
+
+def realspectype(cat):
+    """
+    Removes rows not containing main sequence stars.
+
+    Removes rows of cat where elements in column named 'sim_sptype' are
+    either '', 'nan' or start with an other letter than the main sequence
+    spectral type classification.
+
+    :param cat: Table containing 'sim_sptype' column
+    :type cat: astropy.table.table.Table
+    :returns: Table, param cat with undesired rows removed
+    :rtype: astropy.table.table.Table
+    """
+
+    index=[]
+    for j in range(len(cat['sptype_string'])):
+        if cat['sptype_string'][j] in ['','nan']:
+            index.append(j)
+        elif cat['sptype_string'][j][0] not in ['O','B','A','F','G','K','M']:
+            index.append(j)
+    cat.remove_rows(index)
+    return cat
+
+def model_param():
+    """
+    Loads and cleans up model file.
+
+    Loads the table of Eric E. Mamajek containing stellar parameters 
+    modeled from spectral types. Cleans up the columns for spectral 
+    type, effective temperature radius and mass.
+
+    :returns: Table of the 4 parameters as columns
+    :rtype: astropy.table.table.Table
+    """
+
+    EEM_table=ap.io.ascii.read("../../data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
+    EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
+    EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
+    EEM_table=replace_value(EEM_table,'Mass',' ....','nan')
+    EEM_table['Teff'].unit=ap.units.K
+    EEM_table['Radius'].unit=ap.units.R_sun
+    EEM_table['Mass'].unit=ap.units.M_sun       
+    ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
+                          f'../../data/model_param.xml')#saving votable
+    return EEM_table
+
+def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
+                 rstring='mod_R',mstring='mod_M'):
+    """
+    Assigns modeled parameter values.
+
+    Matches the spectral types with the ones in Mamajek's table and 
+    includes the modeled effective Temperature,
+    stellar radius and stellar mass into the catalog.
+
+    :param cat: astropy table containing spectral type information
+    :type cat: astropy.table.table.Table
+    :param str sptypestring: Column name where the spectral 
+        type information is located
+    :param str teffstring: Column name for the stellar effective 
+        temperature column
+    :param str rstring: Column name for the stellar radius column
+    :param str mstring: Column name for the stellar mass column
+    :returns: Table cat with added new columns for 
+        effective temperature, radius and mass filled with model values
+    :rtype: astropy.table.table.Table
+    """
+
+    #initiating columns with right units
+
+    arr=np.zeros(len(cat))
+    cat[teffstring]=arr*np.nan*ap.units.K
+    cat[teffstring]=ap.table.MaskedColumn(mask=np.full(len(cat),True), \
+                                         length=len(cat),unit=ap.units.K)
+    cat[rstring]=arr*np.nan*ap.units.R_sun
+    cat[mstring]=arr*np.nan*ap.units.M_sun
+    #go through all spectral types in cat
+    for j in range(len(cat[sptypestring])): 
+        # for all the entries that are not empty
+        if cat[sptypestring][j]!='':
+            #go through the model spectral types of Mamajek 
+            for i in range(len(model_param['SpT'])): 
+                #match first two letters
+                if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
+                        cat[teffstring][j]=model_param['Teff'][i]
+                        cat[rstring][j]=model_param['Radius'][i]
+                        cat[mstring][j]=model_param['Mass'][i]
+            #as the model does not cover all spectral types on .5 accuracy, check those separately
+            if cat[sptypestring][j][2:4]=='.5':
+                for i in range(len(model_param['SpT'])):
+                    # match first four letters
+                    if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
+                        cat[teffstring][j]=model_param['Teff'][i]
+                        cat[rstring][j]=model_param['Radius'][i]
+                        cat[mstring][j]=model_param['Mass'][i] 
+        else:
+            cat[sptypestring][j]='None' 
+    return cat
+
+def spec(cat):
+    """
+    Runs the spectral type related functions realspectype and match_sptype. 
+
+    It also removes all empty columns of the effective temperature, removes 
+    rows that are not main sequence, removes rows with binary subtype and 
+    non unique simbad name.
+
+    :param cat: astropy table containing columns named 
+        'sim_sptype','sim_name' and 'sim_otypes'
+    :type cat: astropy.table.table.Table
+    :returns: Catalog of mainsequence stars with unique 
+        simbad names, no binary subtypes and modeled parameters.
+    :rtype: astropy.table.table.Table
+    """   
+
+    #Do I even need realspectype function? I can just take cat where class_temp not empty
+    cat=realspectype(cat)
+    #model_param=ap.io.votable.parse_single_table(\
+        #f"catalogs/model_param.xml").to_table()
+    mp=model_param()#create model table as votable
+    cat=match_sptype(cat,mp,sptypestring='sptype_string')
+    cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
+    cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
+    cat=ap.table.unique(cat, keys='main_id')
+    return cat
 
 def provider_life(table_names,life_list_of_tables):
     """
-    This function loads the SIMBAD data obtained by the function provider_simbad
-    and postprocesses it to provide more useful information. It uses a model
+    Loads SIMBAD data and postprocesses it. 
+    
+    Postprocessing enables to provide more useful information. It uses a model
     from Eric E. Mamajek to predict temperature, mass and radius from the simbad 
     spectral type data.
-    :param table_names: List of strings containing the names for the 
-        output tables.
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
     :param life_list_of_tables: List of same length as table_names containing
         empty astropy tables.
-    :return life_list_of_tables: List of astropy table containing
+    :type life_list_of_tables: list(astropy.table.table.Table)
+    :returns: List of astropy table containing
         reference data, provider data, basic stellar data, stellar effective
         temperature data, stellar radius data and stellar mass data.
+    :rtype: list(astropy.table.table.Table)
     """
+    
     #---------------define provider-------------------------------------
     life_provider=ap.table.Table()
     life_provider['provider_name']=['LIFE']
@@ -903,178 +1123,11 @@ def provider_life(table_names,life_list_of_tables):
                                    'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
                                    'coo_gal_ref','dist_st_value','dist_st_ref','sptype_string']
     
-    def sptype_string_to_class(temp,ref):
-        """
-        This function extracts the temperature class, temperature class number
-        and luminocity class information from the spectral type string (e.g. 
-        M5V to M, 5 and V). It stores that information in the for this purpose
-        generated new columns. Only objects of temperature class O, B, A, F,
-        G, K, and M are processed. Only objects of luminocity class IV, V and VI
-        are processed.
-        :param temp: Astropy table containing spectral type information in
-            the column sptype_string.
-        :param ref: String designating origin of data.
-        :return temp: Astropy table like temp with additional columns class_temp,
-            class_temp_nr, class_lum and class_ref.
-        """
-        temp['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-        temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-        temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-        temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-        #tbd: rewrite code using recoursive function
-        
-        for i in range(len(temp)):
-            #sorting out objects like M5V+K7V
-            #strip d for spectral types starting with small d because it is an old annotation for dwarf star
-            sptype=temp['sptype_string'][i].strip('d')
-            if (len(sptype.split('+'))==1 and
-            #sorting out entries like '', DA2.9, T1V
-                    len(sptype)>0 and 
-                    sptype[0] in ['O','B','A','F','G','K','M']):
-                temp['class_temp'][i]=sptype[0]
-                temp['class_ref'][i]=ref
-                #sorting out objects like DA2.9
-                if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
-                    temp['class_temp_nr'][i]=sptype[1]
-                    #distinguishing between objects like K5V and K5.5V
-                    if len(sptype)>2 and sptype[2]=='.':
-                        temp['class_temp_nr'][i]=sptype[1:4]
-                        if len(sptype)>4 and sptype[4] in ['I','V']:
-                            temp['class_lum'][i]=sptype[4]
-                            if len(sptype)>5 and sptype[5] in ['I','V']:
-                                temp['class_lum'][i]=sptype[4:6]
-                                if len(sptype)>6 and sptype[6] in ['I','V']:
-                                    temp['class_lum'][i]=sptype[4:7]
-                        else:
-                            temp['class_lum'][i]='?'
-                    elif len(sptype)>2 and sptype[2] in ['I','V']:
-                        temp['class_lum'][i]=sptype[2]
-                        if len(sptype)>3 and sptype[3] in ['I','V']:
-                            temp['class_lum'][i]=sptype[2:4]
-                            if len(sptype)>4 and sptype[4] in ['I','V']:
-                                temp['class_lum'][i]=sptype[2:5]
-                    else:
-                        temp['class_lum'][i]='?'
-                else:
-                    temp['class_lum'][i]='?'
-            else:
-                temp['class_temp'][i]='?'
-                temp['class_temp_nr'][i]='?'
-                temp['class_lum'][i]='?'
-                temp['class_ref'][i]='?'
-            if len(temp['sptype_string'][i])>0:
-                if temp['sptype_string'][i][0]=='d':
-                    temp['class_lum'][i]='V'
-        return temp
+
     life_star_basic=sptype_string_to_class(life_star_basic,life_provider['provider_name'][0])
     
     #-----------measurement tables -------------------------------------
     #applying model from E. E. Mamajek on SIMBAD spectral type
-             
-    def realspectype(cat):
-        """
-        Removes rows of cat where elements in column named 'sim_sptype' are
-        either '', 'nan' or start with an other letter than the main sequence
-        spectral type classification.
-        :param cat: astropy table containing 'sim_sptype' column
-        :return cat: astropy table, param cat with undesired rows removed
-        """
-        index=[]
-        for j in range(len(cat['sptype_string'])):
-            if cat['sptype_string'][j] in ['','nan']:
-                index.append(j)
-            elif cat['sptype_string'][j][0] not in ['O','B','A','F','G','K','M']:
-                index.append(j)
-        cat.remove_rows(index)
-        return cat
-
-    def model_param():
-        """
-        Loads the table of Eric E. Mamajek containing stellar parameters 
-        modeled from spectral types. Cleans up the columns for spectral 
-        type, effective temperature radius and mass.
-        :return votable: astropy table of the 4 parameters as columns
-        """
-        EEM_table=ap.io.ascii.read("../../data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
-        EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
-        EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
-        EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
-        EEM_table=replace_value(EEM_table,'Mass',' ....','nan')
-        EEM_table['Teff'].unit=ap.units.K
-        EEM_table['Radius'].unit=ap.units.R_sun
-        EEM_table['Mass'].unit=ap.units.M_sun       
-        ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
-                              f'../../data/model_param.xml')#saving votable
-        return EEM_table
-
-    def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
-                     rstring='mod_R',mstring='mod_M'):
-        """
-        Matches the spectral types with the ones in Mamajek's table and 
-        includes the modeled effective Temperature,
-        stellar radius and stellar mass into the catalog.
-        :param cat: astropy table containing spectral type information
-        :param sptypestring: string of column name where the spectral 
-            type information is located
-        :param teffstring: string of column name for the stellar effective 
-            temperature column
-        :param rstring: string of column name for the stellar radius column
-        :param mstring: string of column name for the stellar mass column
-        :return cat: the astropy table cat with added new columns for 
-            effective temperature, radius and mass filled with model values
-        """
-        #initiating columns with right units
-    
-        arr=np.zeros(len(cat))
-        cat[teffstring]=arr*np.nan*ap.units.K
-        cat[teffstring]=ap.table.MaskedColumn(mask=np.full(len(cat),True), \
-                                             length=len(cat),unit=ap.units.K)
-        cat[rstring]=arr*np.nan*ap.units.R_sun
-        cat[mstring]=arr*np.nan*ap.units.M_sun
-        #go through all spectral types in cat
-        for j in range(len(cat[sptypestring])): 
-            # for all the entries that are not empty
-            if cat[sptypestring][j]!='':
-                #go through the model spectral types of Mamajek 
-                for i in range(len(model_param['SpT'])): 
-                    #match first two letters
-                    if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
-                            cat[teffstring][j]=model_param['Teff'][i]
-                            cat[rstring][j]=model_param['Radius'][i]
-                            cat[mstring][j]=model_param['Mass'][i]
-                #as the model does not cover all spectral types on .5 accuracy, check those separately
-                if cat[sptypestring][j][2:4]=='.5':
-                    for i in range(len(model_param['SpT'])):
-                        # match first four letters
-                        if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
-                            cat[teffstring][j]=model_param['Teff'][i]
-                            cat[rstring][j]=model_param['Radius'][i]
-                            cat[mstring][j]=model_param['Mass'][i] 
-            else:
-                cat[sptypestring][j]='None' 
-        return cat
-
-    def spec(cat):
-        """
-        Runs the spectral type related functions realspectype and match_sptype. 
-        It also removes all empty columns of the effective temperature, removes 
-        rows that are not main sequence, removes rows with binary subtype and 
-        non unique simbad name.
-        :param cat: astropy table containing columns named 
-            'sim_sptype','sim_name' and 'sim_otypes'
-        :return cat: Catalog of mainsequence stars with unique 
-            simbad names, no binary subtypes and modeled parameters.
-        """   
-        #Do I even need realspectype function? I can just take cat where class_temp not empty
-        cat=realspectype(cat)
-        #model_param=ap.io.votable.parse_single_table(\
-            #f"catalogs/model_param.xml").to_table()
-        mp=model_param()#create model table as votable
-        cat=match_sptype(cat,mp,sptypestring='sptype_string')
-        cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
-        cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
-        cat=ap.table.unique(cat, keys='main_id')
-        return cat
 
     [sim_objects]=hf.load(['sim_objects'],stringtoobjects=False)
     
@@ -1126,15 +1179,24 @@ def provider_life(table_names,life_list_of_tables):
 
 def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     """
-    This function obtains the gaia data and arranges it in a way
-    easy to ingest into the database. Currently there is a provlem 
-    in obtaining the data through pyvo.
+    Obtains and arranges gaia data.
+    
+    Currently there is a provlem in obtaining the data through pyvo.
     A temporary method to ingest old gaia data was implemented and can be
     accessed by setting temp=True as argument.
-    :return gaia_list_of_tables: List of astropy tables containing
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
+    :param gaia_list_of_tables:
+    :type gaia_list_of_tables: list(astropy.table.table.Table)
+    :param distance_cut_in_pc:
+    :param bool temp: 
+    :returnss: List of astropy tables containing
         reference data, provider data, object data, identifier data,  
         stellar effective temperature, radius, mass and binarity data.
+    :rtype: list(astropy.table.table.Table)
     """
+    
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
@@ -1287,20 +1349,22 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     return gaia_list_of_tables
 
 
-
 def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     """
-    This function obtains the wds provider data and arranges it in a way
-    easy to ingest into the database.
-    :param table_names: List of strings containing the names for the 
-        output tables.
+    This function obtains and arranges wds data.
+    
+    :param table_names: Contains the names for the output tables.
+    :type table_names: list(str)
     :param wds_provider_list_of_tables: List of same length as table_names containing
         empty astropy tables.
-    :param temp: used for debugging. saves querrying time.
-    :return wds_provider_list_of_tables: List of astropy tables containing
+    :type wds_provider_list_of_tables: list(astropy.table.table.Table)
+    :param bool temp: Defaults to False. Used for debugging. saves querrying time.
+    :returns: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.
+    :rtype:  list(astropy.table.table.Table)
     """
+    
     #---------------define provider--------------------------------------------
     wds_provider=ap.table.Table()
     wds_provider['provider_name']=['WDS']

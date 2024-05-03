@@ -7,36 +7,39 @@ This page contains a list of all available modules and a short description of wh
 
 (write here in human understandable for what functions do what)
 
+.. note::
+    
+   The building and provider modules are currently in the status of "working but difficult to understand". Some new functions and classes are in the process of being implemented in an attempt to improve the readability.
+
 helperfunctions module
 ----------------------
 
-.. automodule:: helperfunctions
-   :members:
-   :undoc-members:
-   :show-inheritance:
+
+
+
 
 life_td module
 --------------
 
-.. automodule:: life_td
-   :members:
-   :undoc-members:
-   :show-inheritance:
+* ``create_life_td()``
+
+.. .. autofunction:: life_td.create_life_td
    
+structured_data_class module
+----------------------------
+
+
+   
+
+
 building module
 ---------------
 
-.. automodule:: building
-   :members:
-   :undoc-members:
-   :show-inheritance:
+
    
 provider module
 ---------------
 
-.. .. automodule:: provider
-   :members:
-   :undoc-members:
-   :show-inheritance:
+
    
 

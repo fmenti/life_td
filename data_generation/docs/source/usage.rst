@@ -1,9 +1,7 @@
+.. _usage:
+
 Usage
 =====
-
-Installation
-------------
-TBD
 
 Database Access Tutorial
 -----------------------------

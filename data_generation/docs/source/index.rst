@@ -8,7 +8,6 @@
 Welcome!
 ========
 
-
 This is the documentation of **life_td**, a Python package that generates the data for the `LIFE Target Database <https://
 dc.zah.uni-heidelberg.de/voidoi/q/lp/custom/10.21938/
 ke_e6lzO_jjX_vzvVIcwZA>`_. The database contains information useful for the 
@@ -49,6 +48,7 @@ Check out the :doc:`usage` section for further information on how to use the dat
    creation
    usage
    modules
+   api_doc
 
 .. toctree::
    :maxdepth: 2

@@ -1,8 +1,6 @@
 """
 Helper functions for the creation and analysis of the LIFE Target 
-    database.
-    
-Author: Franziska Menti 22.12.2023
+    Database.
 """
 
 import numpy as np #arrays
@@ -19,6 +17,7 @@ def save(cats,names,location='../../data/'):
     :param names: Contains names for saving location
         of tables in cats.
     :type names: list(str)
+    :param str location: Defaults to '../../data/'
     """
     
     #go through all the elements in both lists
@@ -35,15 +34,16 @@ def save(cats,names,location='../../data/'):
 
 def stringtoobject(cat,number=100):
     """
-    This function changes from string to object format.
+    This function changes string type columns to object type.
     
     The later has the advantace of allowing strings of varying length.
     Without it truncation of entries is a risk.
     
-    :param cat: Astropy table.
-    :param number: Length of longest string type element in the table.
+    :param cat: Table with at least two columns
+    :type cat: astropy.table.table.Table
+    :param int number: Length of longest string type element in the table.
         Default is 100.
-    :return: All string columns transformed into object type ones.
+    :returns: Table with all string type columns transformed into object type ones.
     :rtype: astropy.table.table.Table
     """
     
@@ -96,10 +96,13 @@ def object_contained(stars,cat,details=False):
     in stars that are also present in cat.
     
     :param stars: numpy string array containing star identifiers
+    :type stars:
     :param cat: numpy string array containing star identifiers
-    :param details: Bool, default is False.
-    :return stars: numpy string array containing star identifiers 
+    :type cat:
+    :param bool details: Defaults to False.
+    :returns: numpy string array containing star identifiers 
         which are also present in cat
+    :rtype: 
     """
     
     lost=stars[np.where(np.invert(np.in1d(stars,cat)))]
@@ -118,14 +121,16 @@ def compare_catalogs(cat1,cat2,cat1_idname,cat2_idname,cat1_paranames,cat2_paran
     :type cat1: astropy.table.table.Table
     :param cat2:  to be compared to cat1
     :type cat2: astropy.table.table.Table
-    :param cat1_idname: column name of cat 1 column containing object 
+    :param str cat1_idname: column name of cat 1 column containing object 
         identifiers
-    :param cat2_idname: column name of cat 2 column containing object 
+    :param str cat2_idname: column name of cat 2 column containing object 
         identifiers
     :param cat1_paranames: column names of cat 1 columns containing 
         measurements to be compared to cat 2
+    :type cat1_paranames: list(str)
     :param cat2_paranames: column names of cat 2 columns containing measurements 
         to be compared to cat 1. Order of column names needs to be same as in cat1_parameters
+    :type cat2_paranames: list(str)
     """
     
     print('lenght cat 1:',len(cat1))
@@ -197,7 +202,7 @@ def compare_catalogs(cat1,cat2,cat1_idname,cat2_idname,cat1_paranames,cat2_paran
 
 def create_common(cat1,cat2):
     """
-    This function ...
+    Takes two catalogs, removes objects that are not in the other one.
     
     :param cat1: First catalog.
     :type cat1: astropy.table.table.Table
@@ -205,7 +210,7 @@ def create_common(cat1,cat2):
     :type cat2: astropy.table.table.Table
     :returns: Touple of cat1 containing only objects that are also in 
         cat2 and cat2 containing only objects that are also in cat1.
-    :rtype: astropy.table.table.Table,astropy.table.table.Table
+    :rtype: list(astropy.table.table.Table)
     """
     
     common_stars=np.intersect1d(list(cat1['main_id']),list(cat2['main_id']))
