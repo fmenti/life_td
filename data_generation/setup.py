@@ -30,6 +30,7 @@ setup(
         'pyvo ~= 1.4.1',
         'matplotlib ~= 3.6.3',
     ],
+    extras_required={
         'docs': [
             'furo',
             'sphinx',
