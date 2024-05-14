@@ -16,7 +16,7 @@ from setuptools import find_packages, setup
 
 # Get version from VERSION file
 with open(join(dirname(__file__), \
-    "life_td/data_generation/life_td_data_generation/VERSION")) as version_file:
+    "life_td_data_generation/VERSION")) as version_file:
     version = version_file.read().strip()
 
 # Run setup()
