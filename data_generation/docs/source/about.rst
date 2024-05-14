@@ -29,4 +29,4 @@ Join the `LIFE Target Database Work Group <https://life-space-mission.com/contac
 Acknowledgements
 ----------------
 
-TBD (gavo, numpy, astropy,...)
+TBD (numpy, astropy, pyvo, book databases...)

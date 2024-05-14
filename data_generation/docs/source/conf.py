@@ -4,7 +4,7 @@ import os
 #import pathlib
 import sys
 #sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
-sys.path.insert(0, os.path.abspath('../../modules'))
+sys.path.insert(0, os.path.abspath('../../life_td_data_generation'))
 
 
 # Configuration file for the Sphinx documentation builder.
@@ -15,10 +15,16 @@ sys.path.insert(0, os.path.abspath('../../modules'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'life_td'
+project = 'life_td_data_generation'
 copyright = '2024, Franziska Menti'
 author = 'Franziska Menti'
-release = '0.1'
+
+# The short X.Y version
+with open(os.path.join(os.path.dirname(__file__), "../../life_td_data_generation/VERSION")) as version_file:
+    version = version_file.read().strip()
+
+# The full version, including alpha/beta/rc tags
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

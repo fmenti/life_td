@@ -1,4 +1,4 @@
-.. life_td documentation master file, created by
+.. life_td_data_generation documentation master file, created by
    sphinx-quickstart on Wed Mar 20 14:47:58 2024.
    You can adapt this file completely to your liking, but it should at 
    least contain the root `toctree` directive.
@@ -8,7 +8,7 @@
 Welcome!
 ========
 
-This is the documentation of **life_td**, a Python package that generates the data for the `LIFE Target Database <https://
+This is the documentation of **life_td_data_generation**, a Python package that generates the data for the `LIFE Target Database <https://
 dc.zah.uni-heidelberg.de/voidoi/q/lp/custom/10.21938/
 ke_e6lzO_jjX_vzvVIcwZA>`_. The database contains information useful for the 
 planned `LIFE mission <https://life-space-mission.com/>`_ (mid-ir, 

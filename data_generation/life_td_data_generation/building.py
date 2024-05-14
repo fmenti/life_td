@@ -1,7 +1,6 @@
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
-from datetime import datetime
 import importlib #reloading external functions after modification
 
 #self created modules

@@ -34,5 +34,25 @@ reproducing everything.
 Database Motivation
 -------------------
 
-TBD include here stuff from the report
+Broader context - The LIFE initiative
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This project is part of the larger `LIFE <https://life-space-mission.com/>`_ initiative standing for Large Interferometer For Exoplanets. A brief overview is given here: 
+LIFE was initiated in 2017 and officially kicked-off in 2018 with the goal to develop the science, the technology and a roadmap for an ambitious space mission that will allow humankind to detect and characterize the atmospheres of hundreds of nearby extrasolar planets including dozens that are similar to Earth. Thanks to NASA’s Kepler and TESS missions and dedicated, long-term exoplanet searches from the ground, we know that small, rocky exoplanets are ubiquitous in the Milky Way and also in the immediate Solar neighbourhood. Detecting the nearest exoplanets, scrutinizing their atmospheres and searching for habitable conditions and indications of biological activity is a cornerstone of 21st century astrophysics.
+
+LIFE Target Database
+^^^^^^^^^^^^^^^^^^^
+
+The Target Database for LIFE and ancillary observations is a
+repository for relevant data about potential stellar target systems.
+Our primary objectives include offering easy database access and
+extracting input target catalogs to predict exoplanet detection
+yields. Simultaneously, we aim to determine important missing
+observations, offer data to derive mission design decisions,
+and provide context for the analysis of data obtained by LIFE.
+
+Complementary databases and catalogs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+TBD (HOSTS SPORES, Starchive, HOSTS, HPIC)
 
