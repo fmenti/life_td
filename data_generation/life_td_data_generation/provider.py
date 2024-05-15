@@ -966,7 +966,7 @@ def model_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=ap.io.ascii.read("../../data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table=ap.io.ascii.read("../../data/additional_data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
     EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
     EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ...','nan')

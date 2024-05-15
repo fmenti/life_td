@@ -8,7 +8,7 @@ import astropy as ap #votables
 import matplotlib.pyplot as plt
 
 #-------------------global helper functions----------------------------
-def save(cats,names,location='../../data/'):
+def save(cats,names,location='../../data/additional_data/'):
     """
     This functions saves the tables given as list in the cats parameter.
     
@@ -58,7 +58,7 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
-def load(paths,stringtoobjects=True,location='../../data/'):
+def load(paths,stringtoobjects=True,location='../../data/additional_data/'):
     """    
     This function loads xml tables. 
     

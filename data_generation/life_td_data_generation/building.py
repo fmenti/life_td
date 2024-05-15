@@ -495,5 +495,5 @@ def building(prov_tables_list,table_names,list_of_tables):
           of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
-    hf.save(cat,table_names)
+    hf.save(cat,table_names,location='../../data/')
     return cat
