@@ -7,7 +7,7 @@ import importlib #reloading external functions after modification
 #self created modules
 import helperfunctions as hf
 importlib.reload(hf)#reload module after changing it
-import structured_data_class as sdc
+import sdc
 importlib.reload(sdc)#reload module after changing it
 
 

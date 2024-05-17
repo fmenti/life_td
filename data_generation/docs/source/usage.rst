@@ -35,6 +35,7 @@ You need to install PyVO. Afterwards just copy paste the code below. It will giv
                                                 
     catalog=result.to_table()
 
+
 LIFE Star Catalog
 -----------------
 

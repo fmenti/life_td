@@ -26,6 +26,7 @@ This applies, of course, also if you find any bugs or problems (either in the co
 Check out the :doc:`usage` section for further information on how to use the database.
 
 
+
 .. note::
     
     This project is under active development.
@@ -45,10 +46,10 @@ Check out the :doc:`usage` section for further information on how to use the dat
    
    introduction
    architecture
-   creation
    usage
-   modules
-   api_doc
+   doc_modules
+   generated/modules
+.. .. api_doc
 
 .. toctree::
    :maxdepth: 2

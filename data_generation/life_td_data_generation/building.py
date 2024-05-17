@@ -8,7 +8,7 @@ import helperfunctions as hf
 importlib.reload(hf)#reload module after changing it
 import provider as p
 importlib.reload(p)#reload module after changing it
-import structured_data_class as sdc
+import sdc
 importlib.reload(sdc)#reload module after changing it
 
 def idsjoin(cat,column_ids1,column_ids2):

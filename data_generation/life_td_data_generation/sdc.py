@@ -1,3 +1,7 @@
+"""
+Structured data class
+"""
+
 import astropy as ap
 import importlib #reloading external functions after modification
 

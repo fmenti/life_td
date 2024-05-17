@@ -10,7 +10,7 @@ import astropy as ap #votables
 import importlib #reloading external functions after modification
 
 #self created modules
-import structured_data_class as sdc
+import sdc
 import helperfunctions as hf
 import provider as p
 import building as b

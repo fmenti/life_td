@@ -18,12 +18,22 @@ helperfunctions module
 
 
 
+
 life_td module
 --------------
 
-* ``create_life_td()``
+The data for the LIFE database is generated using the function :py:func:`life_td.create_life_td`:
 
-.. .. autofunction:: life_td.create_life_td
+..    .. autofunction:: life_td.create_life_td
+        trying to figure out how to create a link to the api function here
+
+It is also the one being called when the module is run as a script.
+Other functions in this module are:
+
+* ``partial_create()`` 
+* ``load_life_td()`` 
+
+
    
 structured_data_class module
 ----------------------------

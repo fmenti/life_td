@@ -26,7 +26,7 @@ itself can be accessed through topcat or python (Check out the
 
 **Interoperability** Independent of operating system. To access the 
 database either python or Topcat is needed. Following the 
-`Virtual Observatory standards <https://ivoa.net/>`_.
+`Virtual Observatory <https://ivoa.net/>`_ standards.
 
 **Reuse** Provenance in form of sources and code provided to enable 
 reproducing everything.
