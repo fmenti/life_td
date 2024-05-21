@@ -48,8 +48,7 @@ Check out the :doc:`usage` section for further information on how to use the dat
    architecture
    usage
    doc_modules
-   generated/modules
-.. .. api_doc
+   generated/api
 
 .. toctree::
    :maxdepth: 2
