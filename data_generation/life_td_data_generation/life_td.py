@@ -1,32 +1,47 @@
+"""
+Generates the data for the LIFE Target Database.
+
+"""
+
+
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
-from datetime import datetime
 import importlib #reloading external functions after modification
 
 #self created modules
+import sdc
 import helperfunctions as hf
 import provider as p
 import building as b
+importlib.reload(sdc)#reload module after changing it
 importlib.reload(hf)#reload module after changing it
 importlib.reload(p)#reload module after changing it
 importlib.reload(b)#reload module after changing it
 
 
-
-table_names=['sources','objects','provider','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary',
-             'mes_sep_ang','best_h_link']
+empty=sdc.provider('empty')
+table_names=empty.table_names
 #tbd change provider to provider_info to minimize confusion in bulilding function with providers list
 
 
 def create_life_td(distance_cut_in_pc):
+    """
+    Generates the life_td data.
     
+    Calls the modules provider, helperfunctions and building.
+    
+    :param distance_cut_in_pc: Distance cut of the objects in parsec.
+    :type distance_cut_in_pc: float
+    :return: life_td data in different tables
+    :rtype: list(astropy.table.table.Table)
+    """
+    
+    print(f'Generating life_td data with distance cut of {distance_cut_in_pc} pc')
     #------------------------obtain data from external sources---------------------
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
     
-    sim=p.provider_simbad(table_names,empty_provider[:],distance_cut_in_pc)
+    sim=p.provider_simbad(empty_provider[:],distance_cut_in_pc)
     gk=p.provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
     wds=p.provider_wds(table_names,empty_provider[:],False)
     exo=p.provider_exo(table_names,empty_provider[:],temp=False)
@@ -41,14 +56,20 @@ def create_life_td(distance_cut_in_pc):
         life[i]=hf.stringtoobject(life[i])
         gaia[i]=hf.stringtoobject(gaia[i])
 
-    #------------------------combine data from external sources-------------------
+    #------------------------combine data from external sources---------
     database_tables=b.building([sim[:],gk[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
     return sim, gk, wds, exo, life, gaia, database_tables
 
 
 def load_life_td():
-    #loading instead of running data:
+    """
+    Loads previously created life_td data.
     
+    :return: life_td data in different tables
+    :rtype: list(astropy.table.table.Table)
+    """    
+    
+    print(f'Loading life_td generated data with distance cut of {distance_cut_in_pc} pc')
     
     sim=hf.load(['sim_' + direction for direction in table_names])
     gk=hf.load(['gk_' + direction for direction in table_names])
@@ -56,7 +77,7 @@ def load_life_td():
     exo=hf.load(['exo_' + direction for direction in table_names])
     life=hf.load(['life_' + direction for direction in table_names])
     gaia=hf.load(['gaia_' + direction for direction in table_names])
-    database_tables=hf.load(table_names)
+    database_tables=hf.load(table_names,location='../../data/')
     
     for i in range(len(sim)):
         sim[i]=hf.stringtoobject(sim[i])
@@ -69,10 +90,28 @@ def load_life_td():
     return sim, gk, wds, exo, life, gaia, database_tables
 
 def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life', 'gaia']):
+    """
+    Partially generates, partially loads life_td data.
+    
+    Generates the in the create list specified life_td data, loads the 
+    rest and builds everything together.
+    
+    :param distance_cut_in_pc: Distance cut of the objects in parsec.
+    :type distance_cut_in_pc: float
+    :param create: If one or more of 'sim', 'gk', 'wds', 'exo', 'life',
+        and 'gaia'  are present, generates those tables, the missing 
+        ones are loaded.
+    :type create: list(str)
+    :return: life_td data in different tables
+    :rtype: list(astropy.table.table.Table)
+    """
+    
+    print(f'Building life_td data with distance cut of {distance_cut_in_pc} pc')
+    
     empty_provider=[ap.table.Table() for i in range(len(table_names))]
     
     if 'sim' in create:
-        sim=p.provider_simbad(table_names,empty_provider[:],distance_cut_in_pc)
+        sim=p.provider_simbad(empty_provider[:],distance_cut_in_pc)
     else:
         sim=hf.load(['sim_' + direction for direction in table_names])
     for i in range(len(sim)):
@@ -113,6 +152,11 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
     for i in range(len(gaia)):
         gaia[i]=hf.stringtoobject(gaia[i])
             
-    #------------------------combine data from external sources-------------------
+    #------------------------combine data from external sources---------
     database_tables=b.building([sim[:],gk[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
     return sim, gk, wds, exo, life, gaia, database_tables
+    
+if (__name__ == '__main__'):
+    print('Executing as standalone script')
+    create_life_td(5.)
+

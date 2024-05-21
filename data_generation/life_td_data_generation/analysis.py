@@ -20,6 +20,7 @@ def show(provider,
          whereobj='* zet02 Ret'):
     """
     This function prints the specified columns of a table.
+    
     :para provider: database_tables, sim, wds, gaia, gk, life
     :para table:
     :para columns: if empty prints all
@@ -41,6 +42,10 @@ def show(provider,
     
     
 def sanitytest(cat,colname):
+    """
+    TBD
+    """
+    
     arr=cat[colname]
     if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
         print(colname,'is empty')
@@ -59,11 +64,13 @@ def sanitytest(cat,colname):
 def disthist(arr,names,path,max_dist,xaxis):
     '''
     Makes a histogram of the stellar distance distribution.
+    
     :param arr: ndarray containing the distance for 
-    each star for multiple sets of stars
+        each star for multiple sets of stars
     :param names: list containing the labels for the sets
     :param path: location where the plot is saved
     '''
+    
     n_bins=np.arange(0,max_dist+1,2.5)
     
     plt.figure
@@ -80,6 +87,7 @@ def disthist(arr,names,path,max_dist,xaxis):
 def spechist(spectypes,mute=False):
     '''
     Makes a histogram of the spectral type distribution.
+    
     :param spectypes: array containing a spectral type for each star
     :param mute: if true prints the number of total stars, total 
         spectral types and spec and specdist
@@ -88,6 +96,7 @@ def spechist(spectypes,mute=False):
     :return specdist: array containing the number of stars for
         each spectral type in spec
     '''
+    
     spec=np.array(['O','B','A','F','G','K','M'])
     s=len(spec)
     specdist =np.zeros(s)
@@ -103,16 +112,21 @@ def spechist(spectypes,mute=False):
     specdist=specdist.astype(int)
     return spec, specdist
 
-def final_plot(stars,labels,distance_cut_in_pc,path='results/final_plot.png',color=['tab:blue','tab:orange','tab:green']):
+def final_plot(stars,labels,distance_cut_in_pc,path='../plots/final_plot.png', \
+                color=['tab:blue','tab:orange','tab:green']):
     """
+    TBD
+    
     Makes plot with two subfigures, first a histogram of spectral 
     type and then one of spectral type for each distance sample of 
     0-5, 5-10, 10-15 and 15-20pc.
+    
     :param stars: list of astropy.table.table.Table of shape (,2) 
         with columns first spectral type and then distance in pc.
     :param labels: list containing the labels for the plot
     :param path: location to save the plot
     """
+    
     steps=int(distance_cut_in_pc/5)
 
     n_legend=len(stars)
@@ -177,17 +191,19 @@ def final_plot(stars,labels,distance_cut_in_pc,path='results/final_plot.png',col
         xticks_name=['0-5','5-10','10-15','15-20','20-25','25-30'][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
-    plt.savefig('../plots/final_plot', dpi=300)
+    plt.savefig(path, dpi=300)
     return
 
 def spechistplot(stars,name,path=''):
     """
     Makes a histogram of the spectral distribution of the stars sample.
+    
     :param stars: nd array containing at least one astropy table 
         with column spectral type
     :param name: list containing the labels for the plot
     :param path: location to save the plot
     """
+    
     n=len(stars)
     spec=np.array(['O','B','A','F','G','K','M'])
     s=len(spec)
@@ -216,11 +232,13 @@ def spechistplot(stars,name,path=''):
 def objecthistplot(cat,name,path=''):
     """
     Makes a histogram of the object type distribution of the cat sample.
+    
     :param cat: nd array containing at least one astropy table 
         with column object type
     :param name: list containing the labels for the plot
     :param path: location to save the plot
     """
+    
     spec=np.array(['System','Star','Exoplanet','Disk'])
     
     plt.figure
@@ -233,7 +251,10 @@ def objecthistplot(cat,name,path=''):
     return
 
 def sanity_tests(table_names,database_tables, distance_cut_in_pc):
-
+    """
+    TBD
+    """
+    
     data=database_tables
     #data=exo
     print('looking at table data and metadata \n')

@@ -1,4 +1,10 @@
-LIFEDaCHS.odt
 *.ipynb
-data/
+data/*.xml
+data/additional_data/*.xml
+data/additional_data/*.csv
+data/additional_data/*.txt
+!data/additional_data/Mamajek2022-04-16.csv
+!data/additional_data/exo-mercat05-02-2023_v2.0.csv
+!/data/additional_data/Grant_absil_2013_.xml
 plots/
+data_generation/docs/build/
