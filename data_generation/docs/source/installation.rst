@@ -46,7 +46,7 @@ Once you have set up a suitable virtualenv, clone this repository and install `l
 .. code-block:: console
 
     git clone git@github.com:fmenti/life_td.git ;
-    cd life_td/data_generation ;
+    cd life_td ;
     pip install .
     
 Once a local copy of the repository exists, new commits can be pulled from Github with:
