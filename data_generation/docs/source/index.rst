@@ -55,5 +55,8 @@ Check out the :doc:`usage` section for further information on how to use the dat
    :caption: About
    :hidden:
    
-   about
+   contact
+   attribution
+   contribution
+   acknowledgements
 

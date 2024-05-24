@@ -3,10 +3,8 @@ Structured data class
 """
 
 import astropy as ap
-import importlib #reloading external functions after modification
 
-import helperfunctions as hf
-importlib.reload(hf)#reload module after changing it
+import utils as hf
 
 #now create a class that returns an astropy table
 class structured_data:

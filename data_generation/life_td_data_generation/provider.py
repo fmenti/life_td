@@ -1,15 +1,15 @@
+""" 
+Generates the data for the database for each of the data providers separately. 
+"""
+
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
-import importlib #reloading external functions after modification
 
 #self created modules
-import helperfunctions as hf
-importlib.reload(hf)#reload module after changing it
-import sdc
-importlib.reload(sdc)#reload module after changing it
-
+import utils as hf
+import sdata as sdc
 
 #------------------------------provider helper functions----------------
 def query(link,query,catalogs=[]):

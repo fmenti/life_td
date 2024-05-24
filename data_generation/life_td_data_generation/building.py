@@ -1,15 +1,14 @@
+""" Combines the data from the individual data providers. """
+
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
-import importlib #reloading external functions after modification
 
 #self created modules
-import helperfunctions as hf
-importlib.reload(hf)#reload module after changing it
+import utils as hf
 import provider as p
-importlib.reload(p)#reload module after changing it
-import sdc
-importlib.reload(sdc)#reload module after changing it
+import sdata as sdc
+
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -238,8 +237,8 @@ def best_parameters_ingestion(cat_mes,cat_basic,para,columns=[]):
     :type cat_mes: astropy.table.table.Table
     :para cat_basic:
     :type cat_basic: astropy.table.table.Table
-    :para str para:
-    :para columns:
+    :para str para: Parameter name
+    :para columns: List of column names of the parameter.
     :type columns: list(str)
     :returns:
     :rtype: astropy.table.table.Table

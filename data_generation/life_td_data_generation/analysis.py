@@ -2,12 +2,10 @@ import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
 from datetime import datetime
-import importlib #reloading external functions after modification
 import matplotlib.pyplot as plt
 
 #self created modules
-import helperfunctions as hf
-importlib.reload(hf)#reload module after changing it
+import utils as hf
 
 ###############################################################################
 #-------------------------Sanity tests--------------------------------------------
@@ -21,11 +19,11 @@ def show(provider,
     """
     This function prints the specified columns of a table.
     
-    :para provider: database_tables, sim, wds, gaia, gk, life
-    :para table:
-    :para columns: if empty prints all
-    :para wehercol:
-    :para whereobj:
+    :param provider: database_tables, sim, wds, gaia, gk, life
+    :param table:
+    :param columns: if empty prints all
+    :param wehercol:
+    :param whereobj:
     """
     
     table_names=['sources','objects','provider','ident','h_link','star_basic',
@@ -43,7 +41,11 @@ def show(provider,
     
 def sanitytest(cat,colname):
     """
-    TBD
+    Prints histogram of parameter for quick sanity test.
+    
+    :param cat: Table containing column colname.
+    :type cat: astropy.table.table.Table
+    :param str colname: Column name
     """
     
     arr=cat[colname]
@@ -89,12 +91,13 @@ def spechist(spectypes,mute=False):
     Makes a histogram of the spectral type distribution.
     
     :param spectypes: array containing a spectral type for each star
-    :param mute: if true prints the number of total stars, total 
+    :type spectypes: 
+    :param bool mute: if true prints the number of total stars, total 
         spectral types and spec and specdist
-    :return spec: array containig the spectral type abreviations 
-        O B A F G K M
-    :return specdist: array containing the number of stars for
-        each spectral type in spec
+    :returns: array containig the spectral type abreviations 
+        O B A F G K M. array containing the number of stars for
+        each spectral type in spec.
+    :rtype: touple(np.array)
     '''
     
     spec=np.array(['O','B','A','F','G','K','M'])
@@ -115,7 +118,7 @@ def spechist(spectypes,mute=False):
 def final_plot(stars,labels,distance_cut_in_pc,path='../plots/final_plot.png', \
                 color=['tab:blue','tab:orange','tab:green']):
     """
-    TBD
+    Plots spectral distribution in two subplots.
     
     Makes plot with two subfigures, first a histogram of spectral 
     type and then one of spectral type for each distance sample of 
