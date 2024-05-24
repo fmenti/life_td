@@ -7,17 +7,12 @@ Generates the data for the LIFE Target Database.
 import numpy as np #arrays
 import pyvo as vo #catalog query
 import astropy as ap #votables
-import importlib #reloading external functions after modification
 
 #self created modules
-import sdc
-import helperfunctions as hf
+import sdata as sdc
+import utils as hf
 import provider as p
 import building as b
-importlib.reload(sdc)#reload module after changing it
-importlib.reload(hf)#reload module after changing it
-importlib.reload(p)#reload module after changing it
-importlib.reload(b)#reload module after changing it
 
 
 empty=sdc.provider('empty')
