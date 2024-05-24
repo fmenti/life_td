@@ -35,5 +35,5 @@ sphinx:
 #        - data_generation/docs/source
 python:
    install:
-      - requirements: docs/requirements.txt
+      - requirements: data_generation/docs/requirements.txt
       - requirements: requirements.txt
