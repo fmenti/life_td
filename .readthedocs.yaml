@@ -10,7 +10,7 @@ build:
 
 python:
   install:
-    - requirements: docs/requirements.txt
+    - requirements: data_generation/requirements.txt
 
 sphinx:
-  configuration: docs/source/conf.py
+  configuration: data_generation/docs/source/conf.py
