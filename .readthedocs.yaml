@@ -33,3 +33,7 @@ sphinx:
 #      path: data_generation
 #      extra_requirements:
 #        - data_generation/docs/source
+python:
+   install:
+      - requirements: docs/requirements.txt
+      - requirements: requirements.txt
