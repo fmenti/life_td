@@ -11,9 +11,9 @@ build:
 python:
   install:
     - method: pip
-      path: .
+      path: data_generation
       extra_requirements:
-        - data_generation/docs
+        - data_generation/docs/source
 
 sphinx:
   configuration: data_generation/docs/source/conf.py
