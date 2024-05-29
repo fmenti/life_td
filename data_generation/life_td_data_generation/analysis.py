@@ -6,11 +6,15 @@ import matplotlib.pyplot as plt
 
 #self created modules
 import utils as hf
+import sdata as sdc
 
 ###############################################################################
 #-------------------------Sanity tests--------------------------------------------
 ###############################################################################
     
+empty=sdc.provider('empty')
+table_names=empty.table_names
+
 def show(provider,
          table='objects',
          columns=[],
@@ -25,10 +29,6 @@ def show(provider,
     :param wehercol:
     :param whereobj:
     """
-    
-    table_names=['sources','objects','provider','ident','h_link','star_basic',
-              'planet_basic','disk_basic','mes_mass_pl',
-              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_ang','best_h_link']
     
     cat=provider[table_names.index(table)]
 
@@ -49,12 +49,16 @@ def sanitytest(cat,colname):
     """
     
     arr=cat[colname]
-    if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
-        print(colname,'is empty')
-        return
-    elif max(arr)==1e20:
-        arr=arr[np.where(arr!=1e20)]
-    plt.figure
+    # because python and np disagree on arr!=1e20 result
+    if type(arr[0])==np.str_:
+        pass
+    else:
+        if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
+            print(colname,'is empty')
+            return
+        if max(arr)==1e20:
+            arr=arr[np.where(arr!=1e20)]
+    plt.figure()
     plt.xlabel(f'{colname}')
     plt.ylabel('Number of objects')
     plt.hist(arr,histtype='bar',log=True)
@@ -115,7 +119,7 @@ def spechist(spectypes,mute=False):
     specdist=specdist.astype(int)
     return spec, specdist
 
-def final_plot(stars,labels,distance_cut_in_pc,path='../plots/final_plot.png', \
+def final_plot(stars,labels,distance_cut_in_pc,path='../../plots/final_plot.png', \
                 color=['tab:blue','tab:orange','tab:green']):
     """
     Plots spectral distribution in two subplots.
@@ -186,12 +190,9 @@ def final_plot(stars,labels,distance_cut_in_pc,path='../plots/final_plot.png', \
          
     ax2.set_xlabel('Distance [pc]')
     plt.sca(ax2)
-    if distance_cut_in_pc==20.:
-        xticks_name=['0-5','5-10','10-15','15-20'][:steps]
-    elif distance_cut_in_pc==25.:
-        xticks_name=['0-5','5-10','10-15','15-20','20-25'][:steps]
-    elif distance_cut_in_pc==30.:
-        xticks_name=['0-5','5-10','10-15','15-20','20-25','25-30'][:steps]
+    xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
+    num_dist_bin=int(distance_cut_in_pc/5.)
+    xticks_name= xticks_total[0:num_dist_bin][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
     plt.savefig(path, dpi=300)
@@ -228,7 +229,7 @@ def spechistplot(stars,name,path=''):
     ax.set_xticklabels(spec[2:])
     ax.legend()
     fig.tight_layout()
-    plt.savefig('../plots/'+path, dpi=300)
+    plt.savefig('../../plots/'+path, dpi=300)
     plt.show()
     return
 
@@ -244,18 +245,25 @@ def objecthistplot(cat,name,path=''):
     
     spec=np.array(['System','Star','Exoplanet','Disk'])
     
-    plt.figure
+    plt.figure()
     plt.title('Object type distribution')
     plt.xlabel('Number of objects')
     plt.hist(cat,histtype='bar',log=True,orientation='horizontal')
     plt.yticks(np.arange(4),spec)
-    plt.savefig('../plots/'+path, dpi=300)
+    plt.savefig('../../plots/'+path, dpi=300)
     plt.show()
     return
 
-def sanity_tests(table_names,database_tables, distance_cut_in_pc):
+def sanity_tests(database_tables, distance_cut_in_pc,StarCat3=False):
     """
-    TBD
+    Performs some sanity tests.
+    
+    TBD: split into four functions that can be run separately.
+    
+    :param database_tables:
+    :type database_tables:
+    :param float distance_cut_in_pc:
+    :param bool StarCat3: Dafaults to False. If true plots StarCat3.
     """
     
     data=database_tables
@@ -263,47 +271,60 @@ def sanity_tests(table_names,database_tables, distance_cut_in_pc):
     print('looking at table data and metadata \n')
     for i in range(len(table_names)):
         print(table_names[i],i,'\n')
-        print(data[i].info)
+        print(data[i].info(['attributes', 'stats']))
         print(data[i][0:5],'\n','\n')
 
     print('looking at plots')
 
-    ###problematic if I change order of database_tables tables. need to make it independent of that using table_names list
+    ###problematic if I change order of database_tables tables. need to 
+    #make it independent of that using table_names list
     cats=[database_tables[table_names.index('star_basic')],
-      database_tables[table_names.index('disk_basic')],
-      database_tables[table_names.index('mes_mass_pl')]]
+        database_tables[table_names.index('disk_basic')],
+        database_tables[table_names.index('mes_mass_pl')]]
     colnames=[['coo_ra','coo_dec','coo_err_angle',
-           'coo_err_maj','coo_err_min','coo_qual',
-           'mag_i_value','mag_j_value',
-           'mag_k_value',
-           'plx_value','plx_err','plx_qual'],
+               'coo_err_maj','coo_err_min','coo_qual',
+               'mag_i_value','mag_j_value',
+               'mag_k_value',
+               'plx_value','plx_err','plx_qual'],
               ['rad_value','rad_err'],
-               ['mass_pl_value','mass_pl_err']]
+              ['mass_pl_value','mass_pl_err']]
     for i in [0,1,2]:
         cat=cats[i]
         for colname in colnames[i]:
             sanitytest(cat,colname)
 
-    disthist(database_tables[5]['dist_st_value'],['star_basic'],'test',distance_cut_in_pc,'dist_st_value')
+    disthist(database_tables[5]['dist_st_value'],['star_basic'],'test',
+            distance_cut_in_pc,'dist_st_value')
+    
+    table=database_tables[5]['class_temp','dist_st_value',
+                                'binary_flag'][np.where(
+                                    database_tables[5]['class_temp']!='?')]
+    table=table['class_temp','dist_st_value'][np.where(
+            table['binary_flag']=='False')]
+            
+    if StarCat3:
+        ltc3=ap.io.ascii.read("../../data/additional_data/LIFE-StarCat3.csv")
+        ltc3=hf.stringtoobject(ltc3,3000)
+        print(ltc3['distance'])
+        ltc3['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(ltc3))
+        for i in range(len(ltc3)):
+            #sorting out entries like '', DA2.9, T1V
+            if len(ltc3['sim_sptype'][i])>0 and ltc3['sim_sptype'][i][0] in \
+                     ['O','B','A','F','G','K','M']:
+                ltc3['class_temp'][i]=ltc3['sim_sptype'][i][0]
+            else:
+                ltc3['class_temp'][i]='?'
+                
+        final_plot([table,ltc3['class_temp','distance'][np.where(
+                ltc3['class_temp']!='?')]],
+                ['LTC4_singles','LTC3'],distance_cut_in_pc)
+    else:
+        final_plot([table],['single_stars'],distance_cut_in_pc)
 
-    ltc3=ap.io.ascii.read("../data/additional_data/LIFE-StarCat3.csv")
-    ltc3=hf.stringtoobject(ltc3,3000)
-    print(ltc3['distance'])
-    ltc3['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(ltc3))
-    for i in range(len(ltc3)):
-        #sorting out entries like '', DA2.9, T1V
-        if len(ltc3['sim_sptype'][i])>0 and ltc3['sim_sptype'][i][0] in ['O','B','A','F','G','K','M']:
-            ltc3['class_temp'][i]=ltc3['sim_sptype'][i][0]
-        else:
-            ltc3['class_temp'][i]='?'
-    table=database_tables[5]['class_temp','dist_st_value','binary_flag'][np.where(database_tables[5]['class_temp']!='?')]
-    table=table['class_temp','dist_st_value'][np.where(table['binary_flag']=='False')]
-    final_plot([table,
-            ltc3['class_temp','distance'][np.where(ltc3['class_temp']!='?')]],['LTC4_singles','LTC3'],distance_cut_in_pc)
 
-
-
-    table=database_tables[5]['class_temp','dist_st_value','binary_flag'][np.where(database_tables[5]['class_temp']!='?')]
+    table=database_tables[5]['class_temp','dist_st_value',
+            'binary_flag'][np.where(
+                database_tables[5]['class_temp']!='?')]
     singles=table['class_temp'][np.where(table['binary_flag']=='False')]
     multiples=table['class_temp'][np.where(table['binary_flag']=='True')]
     total=table['class_temp']

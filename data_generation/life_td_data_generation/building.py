@@ -163,8 +163,8 @@ def best_para(para,mes_table):
         grouped_mes_table=mes_table.group_by('id_ref')
         mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W'
         best_para=grouped_mes_table.groups[mask]
-        print("""TBD: use id_ref as variable from provider_bibcode 
-                instad of constant""")
+        # TBD: use id_ref as variable from provider_bibcode 
+        #        instad of constant""")
         for ref in ['2022A&A...664A..21Q','2016A&A...595A...1G','priv. comm.',
                     '2020A&C....3100370A','2001AJ....122.3466M']:
             mask = grouped_mes_table.groups.keys['id_ref'] == ref
@@ -490,8 +490,8 @@ def building(prov_tables_list,table_names,list_of_tables):
             tables[i]=p.replace_value(tables[i],col,'N','?')
             tables[i]=p.replace_value(tables[i],col,'N/A','?')
             
-    print("""TBD: Add exact object distance cut. So far for correct treatment
-          of boundary objects 10% additional distance cut used""")
+    # TBD: Add exact object distance cut. So far for correct treatment
+    #       of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
     hf.save(cat,table_names,location='../../data/')
