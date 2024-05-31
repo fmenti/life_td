@@ -882,6 +882,23 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
         hf.save([exo_list_of_tables[i][:]],['exo_'+table_names[i]])
     return exo_list_of_tables
 
+def lum_class(nr,sptype):
+    """
+    Extracts luminocity class.
+    
+    :param int nr: index number
+    :param str sptype: spectral type
+    :returns: luminocity class
+    :rtype: str
+    """
+    
+    lum_class=sptype[nr]
+    if len(sptype)>nr+1 and sptype[nr+1] in ['I','V']:
+        lum_class=sptype[nr:nr+2]
+        if len(sptype)>nr+2 and sptype[nr+2] in ['I','V']:
+            lum_class=sptype[nr:nr+3]
+    return lum_class
+
 def sptype_string_to_class(temp,ref):
     """
     Extracts stellar parameters from spectral type string one.
@@ -911,45 +928,42 @@ def sptype_string_to_class(temp,ref):
     for i in range(len(temp)):
         #sorting out objects like M5V+K7V
         #strip d for spectral types starting with small d because it is an old annotation for dwarf star
+        if len(temp['sptype_string'][i])>0:
+            if temp['sptype_string'][i][0]=='d':
+                temp['class_lum'][i]='V'
         sptype=temp['sptype_string'][i].strip('d')
+        
         if (len(sptype.split('+'))==1 and
-        #sorting out entries like '', DA2.9, T1V
+                #sorting out entries like ''
                 len(sptype)>0 and 
+                # sorting out brown dwarfs i.e. T1V
                 sptype[0] in ['O','B','A','F','G','K','M']):
+            #assigning temperature class and reference
             temp['class_temp'][i]=sptype[0]
             temp['class_ref'][i]=ref
-            #sorting out objects like DA2.9
             if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
                 temp['class_temp_nr'][i]=sptype[1]
                 #distinguishing between objects like K5V and K5.5V
                 if len(sptype)>2 and sptype[2]=='.':
                     temp['class_temp_nr'][i]=sptype[1:4]
                     if len(sptype)>4 and sptype[4] in ['I','V']:
-                        temp['class_lum'][i]=sptype[4]
-                        if len(sptype)>5 and sptype[5] in ['I','V']:
-                            temp['class_lum'][i]=sptype[4:6]
-                            if len(sptype)>6 and sptype[6] in ['I','V']:
-                                temp['class_lum'][i]=sptype[4:7]
+                        temp['class_lum'][i]=lum_class(4,sptype)
+                    #make sure sptypes starting with d don't get class_lum overwritten
                     else:
-                        temp['class_lum'][i]='?'
+                        temp['class_lum'][i]='V'
                 elif len(sptype)>2 and sptype[2] in ['I','V']:
-                    temp['class_lum'][i]=sptype[2]
-                    if len(sptype)>3 and sptype[3] in ['I','V']:
-                        temp['class_lum'][i]=sptype[2:4]
-                        if len(sptype)>4 and sptype[4] in ['I','V']:
-                            temp['class_lum'][i]=sptype[2:5]
+                    temp['class_lum'][i]=lum_class(2,sptype)
+                #tbd add assumption of V if nothing given. valid because V is longest 
+                #evolution stage so most stars will be in V
                 else:
-                    temp['class_lum'][i]='?'
+                    temp['class_lum'][i]='V'
             else:
-                temp['class_lum'][i]='?'
+                temp['class_lum'][i]='V'
         else:
             temp['class_temp'][i]='?'
             temp['class_temp_nr'][i]='?'
             temp['class_lum'][i]='?'
             temp['class_ref'][i]='?'
-        if len(temp['sptype_string'][i])>0:
-            if temp['sptype_string'][i][0]=='d':
-                temp['class_lum'][i]='V'
     return temp
 
 def realspectype(cat):
@@ -965,15 +979,13 @@ def realspectype(cat):
     :returns: Table, param cat with undesired rows removed
     :rtype: astropy.table.table.Table
     """
-
-    index=[]
-    for j in range(len(cat['sptype_string'])):
-        if cat['sptype_string'][j] in ['','nan']:
-            index.append(j)
-        elif cat['sptype_string'][j][0] not in ['O','B','A','F','G','K','M']:
-            index.append(j)
-    cat.remove_rows(index)
-    return cat
+    ms_tempclass=np.array(['O','B','A','F','G','K','M'])
+    ms_temp=cat[np.where(np.in1d(cat['class_temp'],ms_tempclass))]
+    
+    ms_lumclass=np.array(['V'])
+    ms=ms_temp[np.where(np.in1d(ms_temp['class_lum'],ms_lumclass))]
+    
+    return ms
 
 def model_param():
     """
@@ -1022,7 +1034,7 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
     """
 
     #initiating columns with right units
-
+    
     arr=np.zeros(len(cat))
     cat[teffstring]=arr*np.nan*ap.units.K
     cat[teffstring]=ap.table.MaskedColumn(mask=np.full(len(cat),True), \
@@ -1033,6 +1045,8 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
     for j in range(len(cat[sptypestring])): 
         # for all the entries that are not empty
         if cat[sptypestring][j]!='':
+            #remove first d coming from old notation for dwarf meaning main sequence star
+            cat[sptypestring][j]=cat[sptypestring][j].strip('d')
             #go through the model spectral types of Mamajek 
             for i in range(len(model_param['SpT'])): 
                 #match first two letters
@@ -1074,6 +1088,7 @@ def spec(cat):
         #f"catalogs/model_param.xml").to_table()
     mp=model_param()#create model table as votable
     cat=match_sptype(cat,mp,sptypestring='sptype_string')
+    print(cat['class_lum','mod_M'][np.where(cat['main_id']=='FBS 1415+456')])
     cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
     cat=ap.table.unique(cat, keys='main_id')
@@ -1154,7 +1169,7 @@ def provider_life(table_names,life_list_of_tables):
     
     stars=sim_objects[np.where(sim_objects['type']=='st')]
     cat=ap.table.join(stars,life_star_basic)
-    cat=spec(cat['main_id','sptype_string'])
+    cat=spec(cat['main_id','sptype_string','class_lum','class_temp'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
     life_mes_teff_st=cat['main_id','mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff','teff_st_value')

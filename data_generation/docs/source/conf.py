@@ -5,6 +5,7 @@ import os
 import sys
 #sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 sys.path.insert(0, os.path.abspath('../../life_td_data_generation'))
+sys.path.insert(0, os.path.abspath('tutorials'))
 
 
 # Configuration file for the Sphinx documentation builder.
@@ -31,7 +32,8 @@ release = version
 
 extensions = [
         'sphinx.ext.autodoc', # Core library for html generation from docstrings
-        'sphinx.ext.autosummary'] # Create neat summary tables
+        'sphinx.ext.autosummary', # Create neat summary tables
+        'nbsphinx'] # jupyter notebooks
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
