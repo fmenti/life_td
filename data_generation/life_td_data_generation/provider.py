@@ -596,13 +596,16 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=ap.io.votable.parse_single_table(
-        "../../data/additional_data/Grant_absil_2013_.xml").to_table()
+        "../../data/additional_data/sdb_30pc_09_02_2024.xml").to_table()
     #transforming from string type into object to have variable length
     gk_disks=hf.stringtoobject(gk_disks,212)
     #removing objects with plx_value=='None' or masked entries
-    gk_disks['plx_value']=gk_disks['plx_value'].filled('None')
-    gk_disks=gk_disks[np.where(gk_disks['plx_value']!='None')]
-    gk_disks['plx_value']=gk_disks['plx_value'].astype(float)
+    if len(gk_disks['plx_value'].mask.nonzero()[0])>0:
+        print('careful, masked entries in plx_value')
+    #gk_disks['plx_value']=gk_disks['plx_value'].filled('None')
+    #gk_disks=gk_disks[np.where(gk_disks['plx_value']!='None')]
+    #gk_disks['plx_value']=gk_disks['plx_value'].astype(float)
+    
     #sorting out everything with plx_value too big
     gk_disks=gk_disks[np.where(gk_disks['plx_value']>plx_in_mas_cut)]
     #adds the column for object type
@@ -647,13 +650,16 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     #--------------creating output table gk_disk_basic------------------
     gk_disk_basic=gk_disks['id','rdisk_bb','e_rdisk_bb','disks_ref']
     #converting from string to float
+    
     for column in ['rdisk_bb','e_rdisk_bb']:
+        if len(gk_disks[column].mask.nonzero()[0])>0:
+            print('careful, masked entries in ', column)
         #replacing 'None' with 'nan' as the first one is not float convertible
-        gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
-        gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
+        #gk_disk_basic=replace_value(gk_disk_basic,column,'None','nan')
+        #gk_disk_basic[column].fill_value='nan' #because defeault is None and not float convertible
         #though this poses the issue that the float default float fill_value is 1e20
-        gk_disk_basic[column].filled()
-        gk_disk_basic[column]=gk_disk_basic[column].astype(float)
+        #gk_disk_basic[column].filled()
+        #gk_disk_basic[column]=gk_disk_basic[column].astype(float)
     gk_disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
                                  ['main_id','rad_value','rad_err','rad_ref'])
     gk_disk_basic=gk_disk_basic[np.where(np.isfinite(
