@@ -23,7 +23,7 @@ We have tried our best to follow best practices for software development and doc
 
 This applies, of course, also if you find any bugs or problems (either in the code or the docs)!
 
-Check out the :doc:`usage` section for further information on how to use the database.
+Check out the :doc:`tutorials` section for further information on how to use the database.
 
 
 
@@ -37,7 +37,7 @@ Check out the :doc:`usage` section for further information on how to use the dat
    :hidden:
 
    installation
-..   tutorials/first_example.ipynb
+   tutorials/first_example.ipynb
 
 .. toctree::
    :maxdepth: 2
@@ -46,7 +46,7 @@ Check out the :doc:`usage` section for further information on how to use the dat
    
    introduction
    architecture
-   usage
+   tutorials
    doc_modules
    generated/api
 

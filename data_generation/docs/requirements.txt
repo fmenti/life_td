@@ -1,2 +1,4 @@
 jupyter
+nbsphinx
+pandoc
 furo

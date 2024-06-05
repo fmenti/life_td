@@ -64,7 +64,7 @@ def load_life_td():
     :rtype: list(astropy.table.table.Table)
     """    
     
-    print(f'Loading life_td generated data with distance cut of {distance_cut_in_pc} pc')
+    print(f'Loading life_td generated data')
     
     sim=hf.load(['sim_' + direction for direction in table_names])
     gk=hf.load(['gk_' + direction for direction in table_names])

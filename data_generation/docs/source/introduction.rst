@@ -22,7 +22,7 @@ the data describes.
 through `GitHub <https://github.com/fmenti/life_td>`_. Once run the 
 code produces all the data that goes into the database. The database 
 itself can be accessed through topcat or python (Check out the 
-:ref:`LIFE Target Database Tutorial <tutorial>`).
+:ref:`LIFE Target Database Tutorial <tutorials>`).
 
 **Interoperability** Independent of operating system. To access the 
 database either python or Topcat is needed. Following the 
