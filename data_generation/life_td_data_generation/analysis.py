@@ -254,7 +254,7 @@ def objecthistplot(cat,name,path=''):
     plt.show()
     return
 
-def sanity_tests(database_tables, distance_cut_in_pc,StarCat3=False):
+def sanity_tests(database_tables, distance_cut_in_pc=30.,StarCat3=False):
     """
     Performs some sanity tests.
     

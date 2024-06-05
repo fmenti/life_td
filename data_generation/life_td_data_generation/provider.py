@@ -591,7 +591,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     gk_provider['provider_name']=['Grant Kennedy Disks']
     gk_provider['provider_url']=['http://drgmk.com/sdb/']
     gk_provider['provider_bibcode']=['priv. comm.']
-    gk_provider['provider_access']=['2022-12-06']
+    gk_provider['provider_access']=['2024-02-09']
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
