@@ -11,6 +11,8 @@ from datetime import datetime
 import utils as hf
 import sdata as sdc
 
+additional_data_path='../../additional_data/'
+
 #------------------------------provider helper functions----------------
 def query(link,query,catalogs=[],no_description=True):
     """
@@ -596,7 +598,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=ap.io.votable.parse_single_table(
-        "../../data/additional_data/sdb_30pc_09_02_2024.xml").to_table()
+        additional_data_path+"sdb_30pc_09_02_2024.xml").to_table()
     #transforming from string type into object to have variable length
     gk_disks=hf.stringtoobject(gk_disks,212)
     #removing objects with plx_value=='None' or masked entries
@@ -713,7 +715,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #---------------obtain data-----------------------------------------
     if temp:
         exomercat=ap.io.ascii.read(
-                "../../data/additional_data/exo-mercat05-02-2023_v2.0.csv")
+                additional_data_path+"exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
         exo_provider['provider_access']=['2023-02-05']
 
@@ -1005,7 +1007,7 @@ def model_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=ap.io.ascii.read("../../data/additional_data/Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table=ap.io.ascii.read(additional_data_path+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
     EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
     EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
@@ -1014,7 +1016,7 @@ def model_param():
     EEM_table['Radius'].unit=ap.units.R_sun
     EEM_table['Mass'].unit=ap.units.M_sun       
     ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
-                          f'../../data/model_param.xml')#saving votable
+                          f'{additional_data_path}model_param.xml')#saving votable
     return EEM_table
 
 def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\

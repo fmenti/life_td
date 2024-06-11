@@ -7,8 +7,10 @@ import numpy as np #arrays
 import astropy as ap #votables
 import matplotlib.pyplot as plt
 
+additional_data_path='../../additional_data/'
+
 #-------------------global helper functions----------------------------
-def save(cats,names,location='../../data/additional_data/'):
+def save(cats,names,location=additional_data_path):
     """
     This functions saves the tables given as list in the cats parameter.
     
@@ -17,7 +19,7 @@ def save(cats,names,location='../../data/additional_data/'):
     :param names: Contains names for saving location
         of tables in cats.
     :type names: list(str)
-    :param str location: Defaults to '../../data/'
+    :param str location: Defaults to ../../data/additional_data/
     """
     
     #go through all the elements in both lists
@@ -58,7 +60,7 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
-def load(paths,stringtoobjects=True,location='../../data/additional_data/'):
+def load(paths,stringtoobjects=True,location=additional_data_path):
     """    
     This function loads xml tables. 
     
@@ -67,7 +69,7 @@ def load(paths,stringtoobjects=True,location='../../data/additional_data/'):
     :param stringtoobjects: Wheter stringtoobject function should be 
         called.
     :type stringtoobjects: bool
-    :param location: Folder to save the file in, default is ../data/.
+    :param location: Folder to save the file in, default is ../../data/additional_data/
     :type location: str
     :returns: Loaded tables.
     :rtype: list(astropy.table.table.Table)
