@@ -9,6 +9,7 @@ import utils as hf
 import provider as p
 import sdata as sdc
 
+data_path='../../data/'
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -494,5 +495,5 @@ def building(prov_tables_list,table_names,list_of_tables):
     #       of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
-    hf.save(cat,table_names,location='../../data/')
+    hf.save(cat,table_names,location=data_path)
     return cat

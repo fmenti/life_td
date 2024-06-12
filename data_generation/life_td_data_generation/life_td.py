@@ -14,6 +14,7 @@ import utils as hf
 import provider as p
 import building as b
 
+data_path='../../data/'
 
 empty=sdc.provider('empty')
 table_names=empty.table_names
@@ -72,7 +73,7 @@ def load_life_td():
     exo=hf.load(['exo_' + direction for direction in table_names])
     life=hf.load(['life_' + direction for direction in table_names])
     gaia=hf.load(['gaia_' + direction for direction in table_names])
-    database_tables=hf.load(table_names,location='../../data/')
+    database_tables=hf.load(table_names,location=data_path)
     
     for i in range(len(sim)):
         sim[i]=hf.stringtoobject(sim[i])
