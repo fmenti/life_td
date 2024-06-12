@@ -1096,7 +1096,6 @@ def spec(cat):
         #f"catalogs/model_param.xml").to_table()
     mp=model_param()#create model table as votable
     cat=match_sptype(cat,mp,sptypestring='sptype_string')
-    print(cat['class_lum','mod_M'][np.where(cat['main_id']=='FBS 1415+456')])
     cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
     cat=ap.table.unique(cat, keys='main_id')
