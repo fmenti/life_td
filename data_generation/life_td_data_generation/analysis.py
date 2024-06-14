@@ -138,7 +138,13 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
     :param path: location to save the plot
     """
     
-    steps=int(distance_cut_in_pc/5)
+    if distance_cut_in_pc<=30.:
+        xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
+        stepsize=5.
+    else:
+        xticks_total=['0-10','10-20','20-30','30-40','40-50']
+        stepsize=10.
+    steps=int(distance_cut_in_pc/stepsize)    
 
     n_legend=len(stars)
     spec=np.array(['O','B','A','F','G','K','M'])
@@ -178,12 +184,12 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
     for i in range(n_legend):
         for j in range(steps):
             #here have an error because lifestarcat only goes up to 20pc
-            if j*5.> max(stars[i][1][:]):
+            if j*stepsize> max(stars[i][1][:]):
                 sub_specdist[i][j]=[0.]*7
             else: 
                 sub_specdist[i][j]=spechist(
-                        stars[i][np.where((stars[i][1][:] >j*5.)*\
-                        (stars[i][1][:] < (j+1)*5.))][0][:],mute=True)[1]
+                        stars[i][np.where((stars[i][1][:] >j*stepsize)*\
+                        (stars[i][1][:] < (j+1)*stepsize))][0][:],mute=True)[1]
         for l in np.arange(n_temp_class)[2:]:
             #print(sub_specdist[i][:,l],
             #5*index-((n+(n+2)*(s-2))*width)+((n+2)*l+i)*width) 
@@ -194,9 +200,7 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
          
     ax2.set_xlabel('Distance [pc]')
     plt.sca(ax2)
-    xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
-    num_dist_bin=int(distance_cut_in_pc/5.)
-    xticks_name= xticks_total[0:num_dist_bin][:steps]
+    xticks_name= xticks_total[0:steps][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
     plt.savefig(path, dpi=300)
