@@ -5,8 +5,8 @@ import pyvo as vo #catalog query
 import astropy as ap #votables
 
 #self created modules
-import utils as hf
-import provider as p
+from utils.utils import save
+from provider.utils import nullvalues, replace_value
 import sdata as sdc
 
 data_path='../../data/'
@@ -29,7 +29,7 @@ def idsjoin(cat,column_ids1,column_ids2):
     
     cat['ids']=ap.table.Column(dtype=object, length=len(cat))
     for column in [column_ids1,column_ids2]:
-        cat=p.nullvalues(cat,column,'')
+        cat=nullvalues(cat,column,'')
     for i in range(len(cat)):
         # splitting object into list of elements
         ids1=cat[column_ids1][i].split('|')
@@ -101,7 +101,7 @@ def match(cat,sources,paras,provider):
         #if they have reference columns
         if para+'_ref' in cat.colnames:
             #if those reference columns are masked
-            cat=p.nullvalues(cat,para+'_ref','None')
+            cat=nullvalues(cat,para+'_ref','None')
             #join to each reference parameter its source_id
             cat=ap.table.join(cat,sources['ref','source_id'][np.where(
                             sources['provider_name']==provider)],
@@ -488,12 +488,12 @@ def building(prov_tables_list,table_names,list_of_tables):
              ['binary_qual']]
     for i in range(len(tables)):
         for col in columns[i]:
-            tables[i]=p.replace_value(tables[i],col,'N','?')
-            tables[i]=p.replace_value(tables[i],col,'N/A','?')
+            tables[i]=replace_value(tables[i],col,'N','?')
+            tables[i]=replace_value(tables[i],col,'N/A','?')
             
     # TBD: Add exact object distance cut. So far for correct treatment
     #       of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
-    hf.save(cat,table_names,location=data_path)
+    save(cat,table_names,location=data_path)
     return cat
