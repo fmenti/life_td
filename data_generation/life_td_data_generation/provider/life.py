@@ -3,11 +3,12 @@ Generates the data for the database for each of the data providers separately.
 """
 
 import numpy as np #arrays
-import astropy as ap #votables
+from astropy import units, io, coordinates
+from astropy.table import Table, unique, join, MaskedColumn, Column
 from datetime import datetime
 
 #self created modules
-from utils.utils import save
+from utils.utils import save, load
 from provider.utils import sources_table, replace_value
 import sdata as sdc
 
@@ -51,10 +52,10 @@ def sptype_string_to_class(temp,ref):
     :rtype: astropy.table.table.Table
     """
 
-    temp['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-    temp['class_temp_nr']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-    temp['class_lum']=ap.table.MaskedColumn(dtype=object,length=len(temp))
-    temp['class_ref']=ap.table.MaskedColumn(dtype=object,length=len(temp))
+    temp['class_temp']=MaskedColumn(dtype=object,length=len(temp))
+    temp['class_temp_nr']=MaskedColumn(dtype=object,length=len(temp))
+    temp['class_lum']=MaskedColumn(dtype=object,length=len(temp))
+    temp['class_ref']=MaskedColumn(dtype=object,length=len(temp))
     #tbd: rewrite code using recoursive function
 
     for i in range(len(temp)):
@@ -131,15 +132,15 @@ def model_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=ap.io.ascii.read(additional_data_path+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table=io.ascii.read(additional_data_path+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
     EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
     EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ....','nan')
-    EEM_table['Teff'].unit=ap.units.K
-    EEM_table['Radius'].unit=ap.units.R_sun
-    EEM_table['Mass'].unit=ap.units.M_sun       
-    ap.io.votable.writeto(ap.io.votable.from_table(EEM_table), \
+    EEM_table['Teff'].unit=units.K
+    EEM_table['Radius'].unit=units.R_sun
+    EEM_table['Mass'].unit=units.M_sun       
+    io.votable.writeto(io.votable.from_table(EEM_table), \
                           f'{additional_data_path}model_param.xml')#saving votable
     return EEM_table
 
@@ -168,11 +169,11 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
     #initiating columns with right units
     
     arr=np.zeros(len(cat))
-    cat[teffstring]=arr*np.nan*ap.units.K
-    cat[teffstring]=ap.table.MaskedColumn(mask=np.full(len(cat),True), \
-                                         length=len(cat),unit=ap.units.K)
-    cat[rstring]=arr*np.nan*ap.units.R_sun
-    cat[mstring]=arr*np.nan*ap.units.M_sun
+    cat[teffstring]=arr*np.nan*units.K
+    cat[teffstring]=MaskedColumn(mask=np.full(len(cat),True), \
+                                         length=len(cat),unit=units.K)
+    cat[rstring]=arr*np.nan*units.R_sun
+    cat[mstring]=arr*np.nan*units.M_sun
     #go through all spectral types in cat
     for j in range(len(cat[sptypestring])): 
         # for all the entries that are not empty
@@ -216,13 +217,13 @@ def spec(cat):
 
     #Do I even need realspectype function? I can just take cat where class_temp not empty
     cat=realspectype(cat)
-    #model_param=ap.io.votable.parse_single_table(\
+    #model_param=io.votable.parse_single_table(\
         #f"catalogs/model_param.xml").to_table()
     mp=model_param()#create model table as votable
     cat=match_sptype(cat,mp,sptypestring='sptype_string')
     cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
-    cat=ap.table.unique(cat, keys='main_id')
+    cat=unique(cat, keys='main_id')
     return cat
 
 def provider_life(table_names,life_list_of_tables):
@@ -245,7 +246,7 @@ def provider_life(table_names,life_list_of_tables):
     """
     
     #---------------define provider-------------------------------------
-    life_provider=ap.table.Table()
+    life_provider=Table()
     life_provider['provider_name']=['LIFE']
     life_provider['provider_url']=['www.life-space-mission.com']
     life_provider['provider_bibcode']=['2022A&A...664A..21Q']
@@ -254,17 +255,17 @@ def provider_life(table_names,life_list_of_tables):
     print('Creating ',life_provider['provider_name'][0],' tables ...')
     #---------------------star_basic----------------
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
-    [life_star_basic]=hf.load(['sim_star_basic'])
-    ircs_coord=ap.coordinates.SkyCoord(\
+    [life_star_basic]=load(['sim_star_basic'])
+    ircs_coord=coordinates.SkyCoord(\
             ra=life_star_basic['coo_ra'],dec=life_star_basic['coo_dec'],frame='icrs')
     gal_coord=ircs_coord.galactic
-    life_star_basic['coo_gal_l']=gal_coord.l.deg*ap.units.degree
-    life_star_basic['coo_gal_b']=gal_coord.b.deg*ap.units.degree
+    life_star_basic['coo_gal_l']=gal_coord.l.deg*units.degree
+    life_star_basic['coo_gal_b']=gal_coord.b.deg*units.degree
     life_star_basic['dist_st_value']=1000./life_star_basic['plx_value'] 
     life_star_basic['dist_st_value']=np.round(life_star_basic['dist_st_value'],2)
     #null value treatment: plx_value has masked entries therefore distance_values too
     #ref:
-    life_star_basic['dist_st_ref']=ap.table.MaskedColumn(dtype=object,length=len(life_star_basic),
+    life_star_basic['dist_st_ref']=MaskedColumn(dtype=object,length=len(life_star_basic),
                                     mask=[True for j in range(len(life_star_basic))])
     life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask==False)]= \
             [life_provider['provider_name'][0] for j in range(len(
@@ -281,7 +282,7 @@ def provider_life(table_names,life_list_of_tables):
     life_star_basic['main_id']=life_star_basic['main_id'].astype(str)
     # source
     # transformed from simbad ircs coordinates using astropy
-    life_star_basic['coo_gal_ref']=ap.table.Column(dtype=object,length=len(life_star_basic))
+    life_star_basic['coo_gal_ref']=Column(dtype=object,length=len(life_star_basic))
     life_star_basic['coo_gal_ref']=life_provider['provider_name'][0] 
     #for all entries since coo_gal column not masked column
              
@@ -296,10 +297,10 @@ def provider_life(table_names,life_list_of_tables):
     #-----------measurement tables -------------------------------------
     #applying model from E. E. Mamajek on SIMBAD spectral type
 
-    [sim_objects]=hf.load(['sim_objects'],stringtoobjects=False)
+    [sim_objects]=load(['sim_objects'],stringtoobjects=False)
     
     stars=sim_objects[np.where(sim_objects['type']=='st')]
-    cat=ap.table.join(stars,life_star_basic)
+    cat=join(stars,life_star_basic)
     cat=spec(cat['main_id','sptype_string','class_lum','class_temp'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
     life_mes_teff_st=cat['main_id','mod_Teff']
@@ -322,7 +323,7 @@ def provider_life(table_names,life_list_of_tables):
     #Interacting binaries and close CPM systems: **, **?
     
     #-----------------sources table-------------------------------------
-    life_sources=ap.table.Table()
+    life_sources=Table()
     tables=[life_provider,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
     ref_columns=[['provider_bibcode'],['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
     for cat,ref in zip(tables,ref_columns):

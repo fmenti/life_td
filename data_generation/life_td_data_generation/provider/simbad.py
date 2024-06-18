@@ -3,7 +3,7 @@ Generates the data for the database for each of the data providers separately.
 """
 
 import numpy as np #arrays
-import astropy as ap #votables
+from astropy.table import setdiff, Table, join, vstack, unique, MaskedColumn
 from datetime import datetime
 
 #self created modules
@@ -42,17 +42,17 @@ def stars_in_multiple_system(cat,sim_h_link,all_objects):
     parents=sim_h_link['parent_main_id','main_id','h_link_ref'][:]
     parents.rename_column('main_id','child_main_id')
     parents.rename_column('parent_main_id','main_id')
-    sy_wo_child=ap.table.setdiff(cat['main_id','type','sptype_string'][:],
+    sy_wo_child=setdiff(cat['main_id','type','sptype_string'][:],
                                  parents[:],keys=['main_id'])
     #that don t have children: sy_wo_child['main_id','type']
     #list of those with children
-    sy_w_child=ap.table.join(parents[:],
+    sy_w_child=join(parents[:],
                             cat['main_id','type','sptype_string'][:],
                             keys=['main_id'])
     #list of those with children joined with type of child
     all_objects.rename_columns(['type','main_id'],
                                 ['child_type','child_main_id'])
-    sy_w_child=ap.table.join(sy_w_child[:],
+    sy_w_child=join(sy_w_child[:],
                             all_objects['child_type','child_main_id'][:],
                              keys=['child_main_id'],join_type='left')
     #remove all where type child is not pl
@@ -62,7 +62,7 @@ def stars_in_multiple_system(cat,sim_h_link,all_objects):
         sy_wo_child_st=sy_wo_child
     else:
         #join with list of sy that dont habe children
-        sy_wo_child_st=ap.table.vstack([sy_wo_child[:],sy_w_child_pl[:]])
+        sy_wo_child_st=vstack([sy_wo_child[:],sy_w_child_pl[:]])
         sy_wo_child_st.remove_column('child_type')
     #systems that don t have children except planets: sy_wo_child_st
     #no + in sptype_string because that is another indication of binarity
@@ -184,8 +184,8 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     
     #adding of no_parallax objects to rest of simbad query objects
     
-    simbad=ap.table.vstack([simbad,parents_without_plx])
-    simbad=ap.table.vstack([simbad,children_without_plx])
+    simbad=vstack([simbad,parents_without_plx])
+    simbad=vstack([simbad,children_without_plx])
     
     print(' sorting object types...')
 
@@ -227,7 +227,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     #creating helpter table stars
     temp_stars=simbad[np.where(simbad['type']!='pl')]
     #removing double objects (in there due to multiple parents)
-    stars=ap.table.Table(ap.table.unique(temp_stars,keys='main_id'),copy=True)
+    stars=Table(unique(temp_stars,keys='main_id'),copy=True)
     
     print(' creating output tables...')
     #-----------------creating output table sim_ident-------------------
@@ -258,7 +258,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     sim_h_link=nullvalues(sim_h_link,'membership',999999)
     sim_h_link=replace_value(sim_h_link,'h_link_ref','',
                              sim_provider['provider_bibcode'][0])
-    sim_h_link=ap.table.unique(sim_h_link)
+    sim_h_link=unique(sim_h_link)
                 
     #--------------------creating helper table sim_stars----------------
     #updating multiplicity object type
@@ -283,7 +283,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     
     for band in ['i','j','k']:
         #initiate some of the ref columns
-        stars[f'mag_{band}_ref']=ap.table.MaskedColumn(dtype=object,
+        stars[f'mag_{band}_ref']=MaskedColumn(dtype=object,
                                     length=len(stars),
                                     mask=[True for j in range(len(stars))])
         #add simbad reference where no other is given
@@ -305,15 +305,15 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     #-----------------creating output table sim_planets-----------------
     temp_sim_planets=simbad['main_id','ids',
                             'type'][np.where(simbad['type']=='pl')]
-    sim_planets=ap.table.Table(ap.table.unique(
+    sim_planets=Table(unique(
                     temp_sim_planets,keys='main_id'),copy=True)
     #-----------------creating output table sim_objects-----------------
-    sim_objects=ap.table.vstack([sim_planets['main_id','ids','type'],
+    sim_objects=vstack([sim_planets['main_id','ids','type'],
                              stars['main_id','ids','type']])
     sim_objects['ids']=sim_objects['ids'].astype(object)
     #tbd: add identifier simbad main_id without leading * and whitespaces
     #--------------creating output table sim_sources -------------------
-    sim_sources=ap.table.Table()
+    sim_sources=Table()
     tables=[sim_provider,stars, sim_h_link,sim_ident]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['coo_ref','plx_ref','mag_i_ref',

@@ -3,8 +3,8 @@ Generates the data for the database for each of the data providers separately.
 """
 
 import numpy as np #arrays
-import pyvo as vo #catalog query
-import astropy as ap #votables
+from astropy import io
+from astropy.table import Table, Column, MaskedColumn, join, setdiff
 from datetime import datetime
 
 #self created modules
@@ -39,7 +39,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     """
     
     #---------------define provider-------------------------------------
-    exo_provider=ap.table.Table()
+    exo_provider=Table()
     exo_provider['provider_name']=['Exo-MerCat']
     exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
     exo_provider['provider_bibcode']=['2020A&C....3100370A']
@@ -51,7 +51,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
                   FROM exomercat.exomercat"""
     #---------------obtain data-----------------------------------------
     if temp:
-        exomercat=ap.io.ascii.read(
+        exomercat=io.ascii.read(
                 additional_data_path+"exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
         exo_provider['provider_access']=['2023-02-05']
@@ -62,7 +62,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #----------------putting object main identifiers together-----------
     
     # initializing column
-    exomercat['planet_main_id']=ap.table.Column(dtype=object,
+    exomercat['planet_main_id']=Column(dtype=object,
                                                 length=len(exomercat))
     exomercat['host_main_id']=exomercat['main_id']
 
@@ -109,17 +109,17 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
             exomercat['planet_main_id'],exomercat2['planet_main_id'],
             invert=True))]
     #I use a left join as otherwise I would loose some objects that are not in simbad
-    exomercat=ap.table.join(exomercat,
+    exomercat=join(exomercat,
                             exomercat2['sim_planet_main_id','planet_main_id'],
                             keys='planet_main_id',join_type='left')
 
     #show which elements from exomercat were not found in sim_objects
     exo['name']=exo['name'].astype(object)
-    removed_objects=ap.table.setdiff(exo,exomercat,keys=['name'])
+    removed_objects=setdiff(exo,exomercat,keys=['name'])
     save([removed_objects],['exomercat_removed_objects'])
 
     #-------------exo_ident---------------
-    exo_ident=ap.table.Table(names=['main_id','id'],dtype=[object,object])
+    exo_ident=Table(names=['main_id','id'],dtype=[object,object])
     exomercat['old_planet_main_id']=exomercat['planet_main_id']
     #why not found??
     for i in range(len(exomercat)):
@@ -150,7 +150,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     
     #-------------exo_objects-------------------------------------------
     # tbd at one point: I think I want to add hosts to object
-    exo_objects=ap.table.Table(names=['main_id','ids'],dtype=[object,object])
+    exo_objects=Table(names=['main_id','ids'],dtype=[object,object])
     exo_objects=ids_from_ident(exo_ident['main_id','id'],exo_objects)
     #grouped_exo_ident=exo_ident.group_by('main_id')
     #ind=grouped_exo_ident.groups.indices
@@ -165,9 +165,9 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     
     #-------------------exo_mes_mass_pl---------------------
     #initialize columns exomercat['mass_pl_rel'] and exomercat['mass_pl_err']
-    exomercat['mass_pl_err']=ap.table.Column(dtype=float,length=len(exomercat))
-    exomercat['mass_pl_rel']=ap.table.Column(dtype=object,length=len(exomercat))
-    exomercat['mass_pl_qual']=ap.table.MaskedColumn(dtype=object,length=len(exomercat))
+    exomercat['mass_pl_err']=Column(dtype=float,length=len(exomercat))
+    exomercat['mass_pl_rel']=Column(dtype=object,length=len(exomercat))
+    exomercat['mass_pl_qual']=MaskedColumn(dtype=object,length=len(exomercat))
     exomercat['mass_pl_qual']=['?' for j in range(len(exomercat))]
     #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_pl_rel)
@@ -212,7 +212,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     exo_h_link['h_link_ref']=[exo_provider['provider_bibcode'][0] for j in range(len(exo_h_link))]
     #-------------exo_sources---------------
     ref_columns=[['provider_bibcode'],['h_link_ref'],['id_ref'],['mass_pl_ref']]
-    exo_sources=ap.table.Table()
+    exo_sources=Table()
     tables=[exo_provider,exo_h_link,exo_ident,exo_mes_mass_pl]
     for cat,ref in zip(tables,ref_columns):
         exo_sources=sources_table(cat,ref,exo_provider['provider_name'][0],exo_sources)

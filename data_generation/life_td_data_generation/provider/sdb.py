@@ -3,7 +3,8 @@ Generates the data for the database for each of the data providers separately.
 """
 
 import numpy as np #arrays
-import astropy as ap #votables
+from astropy import io
+from astropy.table import Table
 from datetime import datetime
 
 #self created modules
@@ -31,7 +32,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     
     plx_in_mas_cut=1000./distance_cut_in_pc
     #---------------define provider-------------------------------------
-    gk_provider=ap.table.Table()
+    gk_provider=Table()
     gk_provider['provider_name']=['Grant Kennedy Disks']
     gk_provider['provider_url']=['http://drgmk.com/sdb/']
     gk_provider['provider_bibcode']=['priv. comm.']
@@ -39,7 +40,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
-    gk_disks=ap.io.votable.parse_single_table(
+    gk_disks=io.votable.parse_single_table(
         additional_data_path+"sdb_30pc_09_02_2024.xml").to_table()
     #transforming from string type into object to have variable length
     gk_disks=stringtoobject(gk_disks,212)
@@ -84,7 +85,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     # so I use ids which has the same content as id
     gk_ident.rename_columns(['ids','disks_ref'],['main_id','id_ref'])
     #--------------creating output table gk_sources --------------------
-    gk_sources=ap.table.Table()
+    gk_sources=Table()
     tables=[gk_provider,gk_disks]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['disks_ref']]

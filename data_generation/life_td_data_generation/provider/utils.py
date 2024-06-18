@@ -3,8 +3,8 @@ Generates the data for the database for each of the data providers separately.
 """
 
 import numpy as np #arrays
-import pyvo as vo #catalog query
-import astropy as ap #votables
+from pyvo.dal import TAPService
+from astropy.table import Table, column, unique, vstack, join
 from datetime import datetime
 
 #self created modules
@@ -13,7 +13,7 @@ from utils.utils import load
 additional_data_path='../../additional_data/'
 
 #------------------------------provider helper functions----------------
-def query(link,query,catalogs=[],no_description=True):
+def query(link,adql_query,catalogs=[],no_description=True):
     """
     Performs a query via TAP on the service given in the link parameter.
     
@@ -21,7 +21,7 @@ def query(link,query,catalogs=[],no_description=True):
     those are uploaded to the service beforehand.
     
     :param str link: Service access URL.
-    :param str query: Query to be asked of the external database service
+    :param str adql_query: Query to be asked of the external database service
          in ADQL.
     :param catalogs: List of astropy tables to be uploaded to the 
         service.
@@ -32,16 +32,16 @@ def query(link,query,catalogs=[],no_description=True):
     """
     
     #defining the vo service using the given link
-    service = vo.dal.TAPService(link)
+    service = TAPService(link)
     #without upload tables
     if catalogs==[]:
-        result=service.run_async(query.format(**locals()), maxrec=1600000)
+        result=service.run_async(adql_query.format(**locals()), maxrec=1600000)
     #with upload tables
     else:
         tables={}
         for i in range(len(catalogs)):
             tables.update({f"t{i+1}":catalogs[i]})
-        result = service.run_async(query,uploads=tables,timeout=None,
+        result = service.run_async(adql_query,uploads=tables,timeout=None,
                                    maxrec=1600000)
     cat=result.to_table()
     
@@ -52,7 +52,7 @@ def query(link,query,catalogs=[],no_description=True):
     
     return cat
 
-def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
+def sources_table(cat,ref_columns,provider,old_sources=Table()):
     """
     Creates or updates the source table out of the given references.
     
@@ -74,13 +74,13 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
     if len(cat)>0:
         # table initialization to prevent error messages when assigning 
         # columns
-        cat_sources=ap.table.Table() 
+        cat_sources=Table() 
         #initialization of list to store reference information
         cat_reflist=[] 
         #for all the columns given add reference information 
         for k in range(len(ref_columns)):
             #In case the column has elements that are masked skip those
-            if type(cat[ref_columns[k]])==ap.table.column.MaskedColumn:
+            if type(cat[ref_columns[k]])==column.MaskedColumn:
                 cat_reflist.extend(
                     cat[ref_columns[k]][np.where(
                             cat[ref_columns[k]].mask==False)])
@@ -89,13 +89,13 @@ def sources_table(cat,ref_columns,provider,old_sources=ap.table.Table()):
         # add list of collected references to the table and call the 
         # column ref
         cat_sources['ref']=cat_reflist
-        cat_sources=ap.table.unique(cat_sources)
+        cat_sources=unique(cat_sources)
         #attaches service information
         cat_sources['provider_name']=[provider for j in range(
                 len(cat_sources))]
         #combine old and new sources into one table
-        sources=ap.table.vstack([old_sources,cat_sources])
-        sources=ap.table.unique(sources) #remove double entries
+        sources=vstack([old_sources,cat_sources])
+        sources=unique(sources) #remove double entries
     else:
         sources=old_sources
     return sources
@@ -154,13 +154,13 @@ def distance_cut(cat,colname,main_id=True):
     if main_id:
         [sim]=load(['sim_objects'])
         sim.rename_columns(['main_id','ids'],['temp1','temp2'])
-        cat=ap.table.join(cat,sim['temp1','temp2'],
+        cat=join(cat,sim['temp1','temp2'],
                       keys_left=colname,keys_right='temp1')
         cat.remove_columns(['temp1','temp2'])
     else:
         [sim]=load(['sim_ident'])
         sim.rename_columns(['id'],['temp1'])
-        cat=ap.table.join(cat,sim['temp1','main_id'],
+        cat=join(cat,sim['temp1','main_id'],
                       keys_left=colname,keys_right='temp1')
         cat.remove_columns(['temp1'])
     return cat
@@ -182,7 +182,7 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
     :rtype: astropy.table.table.Table
     """
     
-    if type(cat[colname])==ap.table.column.MaskedColumn:
+    if type(cat[colname])==column.MaskedColumn:
                 cat[colname].fill_value=nullvalue
                 cat[colname]=cat[colname].filled()
     elif verbose:
