@@ -7,11 +7,9 @@ from astropy.table import setdiff, Table, join, vstack, unique, MaskedColumn
 from datetime import datetime
 
 #self created modules
-from utils.utils import save
-from provider.utils import fetch_main_id, sources_table, query, nullvalues, replace_value
+from utils.io import save
+from provider.utils import fetch_main_id, OidCreator, sources_table, query, nullvalues, replace_value
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
 
 
 def stars_in_multiple_system(cat,sim_h_link,all_objects):
@@ -251,7 +249,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
                                             stars['oid']))]
     
     
-    sim_h_link=fetch_main_id(sim_h_link,'parent_oid','parent_main_id')
+    sim_h_link=fetch_main_id(sim_h_link,OidCreator(name='parent_main_id',colname='parent_oid'))
     sim_h_link.remove_column('parent_oid')
     #typeconversion needed as smallint fill value != int null value
     sim_h_link['membership']=sim_h_link['membership'].astype(int)

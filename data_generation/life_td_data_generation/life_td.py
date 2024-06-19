@@ -3,14 +3,11 @@ Generates the data for the LIFE Target Database.
 
 """
 
-
-import numpy as np #arrays
-import pyvo as vo #catalog query
-import astropy as ap #votables
+from astropy.table import Table
 
 #self created modules
 import sdata as sdc
-from utils.utils import stringtoobject, load
+from utils.io import stringtoobject, load, Path
 from provider.exo import provider_exo
 from provider.gaia import provider_gaia
 from provider.life import provider_life
@@ -18,8 +15,6 @@ from provider.sdb import provider_gk
 from provider.simbad import provider_simbad
 from provider.wds import provider_wds
 from building import building
-
-data_path='../../data/'
 
 empty=sdc.provider('empty')
 table_names=empty.table_names
@@ -40,7 +35,7 @@ def create_life_td(distance_cut_in_pc):
     
     print(f'Generating life_td data with distance cut of {distance_cut_in_pc} pc')
     #------------------------obtain data from external sources---------------------
-    empty_provider=[ap.table.Table() for i in range(len(table_names))]
+    empty_provider=[Table() for i in range(len(table_names))]
     
     sim=provider_simbad(empty_provider[:],distance_cut_in_pc)
     gk=provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
@@ -78,7 +73,7 @@ def load_life_td():
     exo=load(['exo_' + direction for direction in table_names])
     life=load(['life_' + direction for direction in table_names])
     gaia=load(['gaia_' + direction for direction in table_names])
-    database_tables=load(table_names,location=data_path)
+    database_tables=load(table_names,location=Path().data)
     
     for i in range(len(sim)):
         sim[i]=stringtoobject(sim[i])
@@ -109,7 +104,7 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
     
     print(f'Building life_td data with distance cut of {distance_cut_in_pc} pc')
     
-    empty_provider=[ap.table.Table() for i in range(len(table_names))]
+    empty_provider=[Table() for i in range(len(table_names))]
     
     if 'sim' in create:
         sim=provider_simbad(empty_provider[:],distance_cut_in_pc)

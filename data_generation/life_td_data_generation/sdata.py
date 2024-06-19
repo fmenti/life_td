@@ -4,7 +4,7 @@ Structured data class
 
 import astropy as ap
 
-import utils as hf
+from utils.io import save, Path
 
 #now create a class that returns an astropy table
 class structured_data:
@@ -89,10 +89,10 @@ class structured_data:
             ../../data/
         """
         
-        hf.save(self.list_of_tables,self.table_names,
+        save(self.list_of_tables,self.table_names,
                 location=path+self.name+'_')
         
-    def load(self,path='../../data/'):
+    def load(self,path=Path().data):
         """
         Loads the individual tables.
         

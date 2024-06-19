@@ -8,3 +8,5 @@ additional_data/*.txt
 !additional_data/sdb_30pc_09_02_2024.xml
 plots/
 data_generation/docs/build/
+**/.ipynb_checkpoints/
+**/__pycache__/

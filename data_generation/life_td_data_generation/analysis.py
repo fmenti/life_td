@@ -1,15 +1,12 @@
 import numpy as np #arrays
-import pyvo as vo #catalog query
-import astropy as ap #votables
+from astropy import io
+from astropy.table import MaskedColumn
 from datetime import datetime
 import matplotlib.pyplot as plt
 
 #self created modules
-import utils as hf
+from utils.io import stringtoobject, Path
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
-plots_path='../../plots/'
 
 
 ###############################################################################
@@ -123,7 +120,7 @@ def spechist(spectypes,mute=False):
     specdist=specdist.astype(int)
     return spec, specdist
 
-def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png', \
+def final_plot(stars,labels,distance_cut_in_pc,path=Path().plot+'final_plot.png', \
                 color=['tab:blue','tab:orange','tab:green']):
     """
     Plots spectral distribution in two subplots.
@@ -237,7 +234,7 @@ def spechistplot(stars,name,path=''):
     ax.set_xticklabels(spec[2:])
     ax.legend()
     fig.tight_layout()
-    plt.savefig(plots_path+path, dpi=300)
+    plt.savefig(Path().plot+path, dpi=300)
     plt.show()
     return
 
@@ -258,7 +255,7 @@ def objecthistplot(cat,name,path=''):
     plt.xlabel('Number of objects')
     plt.hist(cat,histtype='bar',log=True,orientation='horizontal')
     plt.yticks(np.arange(4),spec)
-    plt.savefig(plots_path+path, dpi=300)
+    plt.savefig(Path().plot+path, dpi=300)
     plt.show()
     return
 
@@ -311,10 +308,10 @@ def sanity_tests(database_tables, distance_cut_in_pc=30.,StarCat3=False):
             table['binary_flag']=='False')]
             
     if StarCat3:
-        ltc3=ap.io.ascii.read(additional_data_path+"LIFE-StarCat3.csv")
-        ltc3=hf.stringtoobject(ltc3,3000)
+        ltc3=io.ascii.read(additional_data_path+"LIFE-StarCat3.csv")
+        ltc3=stringtoobject(ltc3,3000)
         print(ltc3['distance'])
-        ltc3['class_temp']=ap.table.MaskedColumn(dtype=object,length=len(ltc3))
+        ltc3['class_temp']=MaskedColumn(dtype=object,length=len(ltc3))
         for i in range(len(ltc3)):
             #sorting out entries like '', DA2.9, T1V
             if len(ltc3['sim_sptype'][i])>0 and ltc3['sim_sptype'][i][0] in \

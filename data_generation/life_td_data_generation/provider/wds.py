@@ -7,12 +7,9 @@ from astropy.table import Table, unique, vstack, join
 from datetime import datetime
 
 #self created modules
-from utils.utils import save, load
+from utils.io import save, load
 from provider.utils import sources_table, query, ids_from_ident, distance_cut
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
-
 
 
 def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):

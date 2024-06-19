@@ -8,12 +8,9 @@ from astropy.table import Table, Column, MaskedColumn, join, setdiff
 from datetime import datetime
 
 #self created modules
-from utils.utils import save
-from provider.utils import fetch_main_id, sources_table, query, distance_cut, ids_from_ident
+from utils.io import save, Path
+from provider.utils import fetch_main_id, IdentifierCreator, sources_table, query, distance_cut, ids_from_ident
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
-
 
 
 def provider_exo(table_names,exo_list_of_tables,temp=False):
@@ -52,7 +49,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #---------------obtain data-----------------------------------------
     if temp:
         exomercat=io.ascii.read(
-                additional_data_path+"exo-mercat05-02-2023_v2.0.csv")
+                Path().additional_data+"exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
         exo_provider['provider_access']=['2023-02-05']
 
@@ -101,8 +98,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     #fetching simbad main_id for planet since sometimes exomercat planet main id is not the same
     exomercat2=fetch_main_id(exomercat['planet_main_id','host_main_id'],
                              #host_main_id just present to create table in contrast to column
-                             colname='planet_main_id',
-                             name='sim_planet_main_id',oid=False)
+                             IdentifierCreator(name='sim_planet_main_id',colname='planet_main_id'))
 
     
     notinsimbad=exomercat['planet_main_id'][np.where(np.in1d(

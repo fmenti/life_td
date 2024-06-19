@@ -4,16 +4,15 @@ Generates the data for the database for each of the data providers separately.
 
 import numpy as np #arrays
 from pyvo.dal import TAPService
-from astropy.table import Table, column, unique, vstack, join
+from astropy.table import Table, column, unique, vstack, join, table
 from datetime import datetime
+from typing import List
 
 #self created modules
-from utils.utils import load
-
-additional_data_path='../../additional_data/'
+from utils.io import load
 
 #------------------------------provider helper functions----------------
-def query(link,adql_query,catalogs=[],no_description=True):
+def query(link: str,adql_query: str,catalogs: List[str]=[],no_description: bool =True) -> table.Table:
     """
     Performs a query via TAP on the service given in the link parameter.
     
@@ -52,7 +51,7 @@ def query(link,adql_query,catalogs=[],no_description=True):
     
     return cat
 
-def sources_table(cat,ref_columns,provider,old_sources=Table()):
+def sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sources: table.Table=Table()) -> table.Table:
     """
     Creates or updates the source table out of the given references.
     
@@ -63,10 +62,10 @@ def sources_table(cat,ref_columns,provider,old_sources=Table()):
     :type cat: astropy.table.table.Table
     :param ref_columns: Header of the columns containing reference 
         information.
-    :type ref_columns:
+    :type ref_columns: list(str)
     :param str provider: Provider name.
     :param old_sources: Previously created reference table.
-    :type old_sources:
+    :type old_sources: astropy.table.table.Table
     :return: Table containing references and provider information.
     :rtype: astropy.table.table.Table
     """
@@ -100,7 +99,30 @@ def sources_table(cat,ref_columns,provider,old_sources=Table()):
         sources=old_sources
     return sources
 
-def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
+class OidCreator:
+    def __init__(self,name,colname):
+        self.name=name
+        self.colname=colname
+        
+    def create_main_id_query(self):
+        return 'SELECT b.main_id AS '+self.name+""",t1.*
+                FROM basic AS b
+                JOIN TAP_UPLOAD.t1 ON b.oid=t1."""+self.colname
+    
+class IdentifierCreator:
+    def __init__(self,name,colname):
+        self.name=name
+        self.colname=colname
+        
+    def create_main_id_query(self):
+        return 'SELECT b.main_id AS '+self.name+""",t1.*
+                    FROM basic AS b
+                    JOIN ident ON ident.oidref=b.oid
+                        JOIN TAP_UPLOAD.t1 ON ident.id=t1."""+self.colname
+    
+#looks better but don't think this will run. issue is that I pass variables to a class that doesn't take any
+
+def fetch_main_id(cat,id_creator=OidCreator(name='main_id',colname='oid')):
     """
     Joins main_id from simbad to the column colname. 
     
@@ -123,19 +145,9 @@ def fetch_main_id(cat,colname='oid',name='main_id',oid=True):
     #improvement idea to be performed at one point
     # tbd option to match on position instead of main_id or oid
     #SIMBAD TAP service
-    TAP_service="http://simbad.u-strasbg.fr:80/simbad/sim-tap"
-    #creating oid query
-    if oid:
-        main_id_query='SELECT b.main_id AS '+name+""",t1.*
-                    FROM basic AS b
-                    JOIN TAP_UPLOAD.t1 ON b.oid=t1."""+colname
-    #creating identifier query
-    else:
-        main_id_query='SELECT b.main_id AS '+name+""",t1.*
-                    FROM basic AS b
-                    JOIN ident ON ident.oidref=b.oid
-                        JOIN TAP_UPLOAD.t1 ON ident.id=t1."""+colname
+    TAP_service="http://simbad.u-strasbg.fr:80/simbad/sim-tap"    
     #performing query using external function
+    main_id_query=id_creator.create_main_id_query()
     cat=query(TAP_service,main_id_query,[cat])
     return cat
 

@@ -8,11 +8,9 @@ from astropy.table import Table, unique, join, MaskedColumn, Column
 from datetime import datetime
 
 #self created modules
-from utils.utils import save, load
+from utils.io import save, load, Path
 from provider.utils import sources_table, replace_value
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
 
 
 def lum_class(nr,sptype):
@@ -132,7 +130,7 @@ def model_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=io.ascii.read(additional_data_path+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table=io.ascii.read(Path().additional_data+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
     EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
     EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
@@ -141,7 +139,7 @@ def model_param():
     EEM_table['Radius'].unit=units.R_sun
     EEM_table['Mass'].unit=units.M_sun       
     io.votable.writeto(io.votable.from_table(EEM_table), \
-                          f'{additional_data_path}model_param.xml')#saving votable
+                          f'{Path().additional_data}model_param.xml')#saving votable
     return EEM_table
 
 def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\

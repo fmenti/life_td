@@ -1,15 +1,12 @@
 """ Combines the data from the individual data providers. """
 
 import numpy as np #arrays
-import pyvo as vo #catalog query
-import astropy as ap #votables
+from astropy.table import Column, join, column, vstack, Table, unique
 
 #self created modules
-from utils.utils import save
+from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
 import sdata as sdc
-
-data_path='../../data/'
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -27,7 +24,7 @@ def idsjoin(cat,column_ids1,column_ids2):
     :rtype: astropy.table.table.Table
     """
     
-    cat['ids']=ap.table.Column(dtype=object, length=len(cat))
+    cat['ids']=Column(dtype=object, length=len(cat))
     for column in [column_ids1,column_ids2]:
         cat=nullvalues(cat,column,'')
     for i in range(len(cat)):
@@ -69,7 +66,7 @@ def objectmerging(cat):
     #merging types
     #initializing column
     if 'type' not in cat.colnames:#----------
-        cat['type']=ap.table.Column(dtype=object, length=len(cat))
+        cat['type']=Column(dtype=object, length=len(cat))
         cat['type_1']=cat['type_1'].astype(object)
         cat['type_2']=cat['type_2'].astype(object)
         for i in range(len(cat)):
@@ -103,7 +100,7 @@ def match(cat,sources,paras,provider):
             #if those reference columns are masked
             cat=nullvalues(cat,para+'_ref','None')
             #join to each reference parameter its source_id
-            cat=ap.table.join(cat,sources['ref','source_id'][np.where(
+            cat=join(cat,sources['ref','source_id'][np.where(
                             sources['provider_name']==provider)],
                             keys_left=para+'_ref',keys_right='ref',
                             join_type='left')
@@ -115,7 +112,7 @@ def match(cat,sources,paras,provider):
             #in case the para_value entry is masked this if environment
             # will put the source_id entry to null
             if para+'_value' in cat.colnames:
-                if type(cat[para+'_value'])==ap.table.column.MaskedColumn:
+                if type(cat[para+'_value'])==column.MaskedColumn:
                     for i in cat[para+'_value'].mask.nonzero()[0]:
                         cat[f'{para}_source_idref'][i]=999999
     return cat
@@ -133,13 +130,13 @@ def merge_table(cat1,cat2):
     """
     
     if len(cat1)==0 or len(cat2)==0:
-        #in this case ap join function wouldn't work
-        merged_cat=ap.table.vstack([cat1,cat2])
+        #in this case astropy join function wouldn't work
+        merged_cat=vstack([cat1,cat2])
     #elif #some columns being empty, others not:
         #remove empty columns
         #make sure merged_cat has all colnames it needs
     else:
-        merged_cat=ap.table.join(cat1,cat2)
+        merged_cat=join(cat1,cat2)
     
     return merged_cat
 
@@ -172,7 +169,7 @@ def best_para(para,mes_table):
             new_ids=grouped_mes_table.groups[mask][np.where(np.invert(np.in1d(
                                         grouped_mes_table.groups[mask]['id'],
                                         best_para['id'])))]
-        best_para=ap.table.vstack([best_para,new_ids])
+        best_para=vstack([best_para,new_ids])
         best_para.remove_column('id_ref')
         return best_para
     elif para=='membership':
@@ -247,7 +244,7 @@ def best_parameters_ingestion(cat_mes,cat_basic,para,columns=[]):
     best_para_cat_mes=best_para(para,cat_mes)
     if columns!=[]:
         cat_basic.remove_columns(columns)
-    cat_basic=ap.table.join(cat_basic,best_para_cat_mes,join_type='left')
+    cat_basic=join(cat_basic,best_para_cat_mes,join_type='left')
     return cat_basic
 
 def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=False,para_match=False):
@@ -291,11 +288,11 @@ def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=
             #joining data from different providers (simbad,...,wds)
             if len(prov_tables_list[j][n])>0:
                 if o_merging:
-                    cat[n]=ap.table.join(cat[n],prov_tables_list[j][n],
+                    cat[n]=join(cat[n],prov_tables_list[j][n],
                                          keys='main_id',join_type='outer')
                     cat[n]=objectmerging(cat[n])
                 else:
-                    cat[n]=ap.table.join(cat[n],prov_tables_list[j][n],join_type='outer')
+                    cat[n]=join(cat[n],prov_tables_list[j][n],join_type='outer')
                 
         else:
             cat[n]=prov_tables_list[j][n]
@@ -324,7 +321,7 @@ def building(prov_tables_list,table_names,list_of_tables):
     # Creates empty tables as needed for final database ingestion
     empty=sdc.provider('empty')
     n_tables=len(empty.list_of_tables)
-    cat=[ap.table.Table() for i in range(n_tables)]
+    cat=[Table() for i in range(n_tables)]
     
     #for the sources and objects joins tables from different prov_tables_list
     cat[0]=provider_data_merging(cat,table_names,'sources',prov_tables_list)
@@ -332,11 +329,11 @@ def building(prov_tables_list,table_names,list_of_tables):
     #I do this to get those columns that are empty in the data
     #but do I need to do that here, need to remove quite some of them again later
     #to work with the join function
-    cat[0]=ap.table.vstack([cat[0],empty.table('sources')])
+    cat[0]=vstack([cat[0],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
     if len(cat[0])>0:
-        cat[0]=ap.table.unique(cat[0],silent=True)
+        cat[0]=unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
     
     cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
@@ -352,7 +349,7 @@ def building(prov_tables_list,table_names,list_of_tables):
     cat[2]=provider_data_merging(cat,table_names,'provider',prov_tables_list)
     
     #I do this to get those columns that are empty in the data
-    cat[2]=ap.table.vstack([cat[2],empty.table('provider')])
+    cat[2]=vstack([cat[2],empty.table('provider')])
        
     
     for i in range(3,n_tables): 
@@ -361,7 +358,7 @@ def building(prov_tables_list,table_names,list_of_tables):
                                      prov_tables_list,para_match=True)
 
         #I do this to get those columns that are empty in the data
-        cat[i]=ap.table.vstack([cat[i],empty.table(table_names[i])])
+        cat[i]=vstack([cat[i],empty.table(table_names[i])])
         cat[i]=cat[i].filled() 
         # because otherwise unique does neglect masked columns
 
@@ -371,7 +368,7 @@ def building(prov_tables_list,table_names,list_of_tables):
             # initialization though I would prefer a more elegant way 
             # to do this. Is needed as empty columns don't work for join
             cat[i].remove_column('object_idref') 
-            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
                                  join_type='left')
             cat[i].rename_column('object_id','object_idref')
         if table_names[i]=='ident':
@@ -381,7 +378,7 @@ def building(prov_tables_list,table_names,list_of_tables):
             #first remove the child_object_idref we got from empty
             # initialization. Would prefer a more elegant way to do this
             cat[i].remove_column('child_object_idref')
-            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
                                  keys='main_id',join_type='left')
             cat[i].rename_columns(['object_id','main_id'],
                                   ['child_object_idref','child_main_id'])
@@ -390,7 +387,7 @@ def building(prov_tables_list,table_names,list_of_tables):
             cat[i].remove_column('parent_object_idref')
             #kick out any h_link rows where parent_main_id not in
             # objects (e.g. clusters)
-            cat[i]=ap.table.join(cat[i],cat[1]['object_id','main_id'],
+            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
                    keys_left='parent_main_id',keys_right='main_id')
             #removing because same as parent_main_id
             cat[i].remove_column('main_id')
@@ -407,20 +404,18 @@ def building(prov_tables_list,table_names,list_of_tables):
                             cat[1]['type']=='st')]
             systems=cat[1]['object_id','main_id'][np.where(
                             cat[1]['type']=='sy')]
-            temp=ap.table.vstack([stars,systems])
+            temp=vstack([stars,systems])
             temp.rename_column('object_id','object_idref')
             # cat[i] are all the star_cat tables from prov_tables_list where 
             # those are given the new objects are needed to join the 
             # best parameters from mes_ tables later on
-            cat[i]=ap.table.join(cat[i],temp,join_type='outer',
+            cat[i]=join(cat[i],temp,join_type='outer',
                                  keys=['object_idref','main_id'])
         if table_names[i]=='planet_basic':
             planets=cat[1]['object_id','main_id'][np.where(
                             cat[1]['type']=='pl')]
             planets.rename_column('object_id','object_idref')
-            cat[i]=planets #can't use line below because cat[i] has no rows
-            #cat[i]=ap.table.join(cat[i],temp,join_type='outer',
-            #                     keys=['object_idref'])
+            cat[i]=planets #can't use join below because cat[i] has no rows
         if table_names[i]=='mes_teff_st':
             cat[table_names.index('star_basic')]=best_parameters_ingestion(
                     cat[i], cat[table_names.index('star_basic')],
@@ -462,13 +457,13 @@ def building(prov_tables_list,table_names,list_of_tables):
             print('warning: empty table',i,table_names[i])
         else:
             #only keeping unique entries
-            cat[i]=ap.table.unique(cat[i],silent=True)
+            cat[i]=unique(cat[i],silent=True)
             
     #next line is needed as multimeasurement adaptions lead to potentially masked entries
     cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
     
     print('Unifying null values...')
-    # unify null values (had 'N' and '?' because of ap default 
+    # unify null values (had 'N' and '?' because of astropy default 
     # fill_value and type conversion string vs object)
     tables=[cat[table_names.index('star_basic')],
             cat[table_names.index('planet_basic')],
@@ -495,5 +490,5 @@ def building(prov_tables_list,table_names,list_of_tables):
     #       of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
-    save(cat,table_names,location=data_path)
+    save(cat,table_names,location=Path().data)
     return cat

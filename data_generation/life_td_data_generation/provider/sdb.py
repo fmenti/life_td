@@ -8,11 +8,9 @@ from astropy.table import Table
 from datetime import datetime
 
 #self created modules
-from utils.utils import stringtoobject, save
+from utils.io import stringtoobject, save, Path
 import sdata as sdc
-from provider.utils import fetch_main_id, sources_table
-
-additional_data_path='../../additional_data/'
+from provider.utils import fetch_main_id, IdentifierCreator, sources_table
 
 
 def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
@@ -41,7 +39,7 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
     print('Creating ',gk_provider['provider_name'][0],' tables ...')
     #loading table obtained via direct communication from Grant Kennedy
     gk_disks=io.votable.parse_single_table(
-        additional_data_path+"sdb_30pc_09_02_2024.xml").to_table()
+        Path().additional_data+"sdb_30pc_09_02_2024.xml").to_table()
     #transforming from string type into object to have variable length
     gk_disks=stringtoobject(gk_disks,212)
     #removing objects with plx_value=='None' or masked entries
@@ -68,8 +66,8 @@ def provider_gk(table_names,gk_list_of_tables,distance_cut_in_pc):
             print('more than two disks with same name')
     #fetching updated main identifier of host star from simbad
     gk_disks.rename_column('main_id','gk_host_main_id')
-    gk_disks=fetch_main_id(gk_disks,colname='gk_host_main_id',name='main_id',
-                           oid=False)
+    gk_disks=fetch_main_id(gk_disks,
+                           IdentifierCreator(name='main_id',colname='gk_host_main_id'))
     #--------------creating output table gk_h_link ---------------------
     gk_h_link=gk_disks['id','main_id','disks_ref']
     gk_h_link.rename_columns(['main_id','disks_ref'],

@@ -8,11 +8,9 @@ from astropy.table import Table, vstack, setdiff, join
 from datetime import datetime
 
 #self created modules
-from utils.utils import save
-from provider.utils import fetch_main_id, sources_table, ids_from_ident, replace_value
+from utils.io import save
+from provider.utils import fetch_main_id, IdentifierCreator, sources_table, ids_from_ident, replace_value
 import sdata as sdc
-
-additional_data_path='../../additional_data/'
 
 
 def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
@@ -70,8 +68,8 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     gaia['ref']=['2022arXiv220800211G' for j in range(len(gaia))]#dr3 paper
     
     #---------------gaia_ident-----------------------
-    gaia_sim_idmatch=fetch_main_id(gaia['gaia_id','ref'],colname='gaia_id',
-                           oid=False) 
+    gaia_sim_idmatch=fetch_main_id(gaia['gaia_id','ref'],
+                           IdentifierCreator(name='main_id',colname='gaia_id')) 
     #should be gaia_id, main_id, ref minus 40 objects that have only gaia_id
     gaia_ident=gaia_sim_idmatch.copy()
     gaia_ident.rename_columns(['gaia_id','ref'],['id','id_ref'])
