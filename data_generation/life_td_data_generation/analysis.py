@@ -19,6 +19,7 @@ plots_path='../../plots/'
 empty=sdc.provider('empty')
 table_names=empty.table_names
 
+# this function has quite a lot of arguments. Maybe it's not worth writing this function as it doesn't simplify anything.
 def show(provider,
          table='objects',
          columns=[],
@@ -41,9 +42,10 @@ def show(provider,
     else:
         print(cat[columns][np.where(cat[wherecol]==whereobj)])
     return
-    
-    
+
+
 def sanitytest(cat,colname):
+    # this could be replaced with a unit test
     """
     Prints histogram of parameter for quick sanity test.
     
@@ -54,12 +56,16 @@ def sanitytest(cat,colname):
     
     arr=cat[colname]
     # because python and np disagree on arr!=1e20 result
+    # write this code in a dedicated function. And did you file a bug report somewhere?
     if type(arr[0])==np.str_:
         pass
     else:
         if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
             print(colname,'is empty')
             return
+        # is this the correct check? should you not check if
+        # if 1e20 in arr
+        # ? Or is there nothing bigger than that?
         if max(arr)==1e20:
             arr=arr[np.where(arr!=1e20)]
     plt.figure()
@@ -72,6 +78,8 @@ def sanitytest(cat,colname):
 
 
 def disthist(arr,names,path,max_dist,xaxis):
+    # maybe rename this function to "stellar_distance_histogram"?
+    # And if you have so many arguments in a function, it may be not worth writing this function.
     '''
     Makes a histogram of the stellar distance distribution.
     
@@ -95,6 +103,7 @@ def disthist(arr,names,path,max_dist,xaxis):
 
 
 def spechist(spectypes,mute=False):
+    # maybe rename the function to "spectral_type_histogram"?
     '''
     Makes a histogram of the spectral type distribution.
     
@@ -107,15 +116,30 @@ def spechist(spectypes,mute=False):
         each spectral type in spec.
     :rtype: touple(np.array)
     '''
-    
+
+    # use an enum instead
+    # from enum import Enum
+    # class SpectralType(Enum):
+    #     O = 'O' 
+    #     etc.
     spec=np.array(['O','B','A','F','G','K','M'])
     s=len(spec)
+    # you don't gain anything by this additional line. Just write:
+    # specdist = np.zeros(len(spec))
     specdist =np.zeros(s)
+    # better use a range based for loop:
+    # for spectype in spectypes:
     for i in range(len(spectypes)):
         if spectypes[i] not in ['','nan']:
+            # if spectype in spec:
             for j in range(0,s):
                 if spec[j] == spectypes[i][0]: 
                     specdist[j] += 1
+    # again: use depenedency injection instead of passing a boolean.
+    # class DebugPrinter:
+    #     def print_spectral_distribution(...):
+    #         # ...
+    # and pass this object as an argument. But once again: the better solution would be to write unit tests
     if mute==False:
         print('total stars:',np.shape(spectypes)[0],\
               'total spectral types:',int(np.sum(specdist)+1))
@@ -123,6 +147,7 @@ def spechist(spectypes,mute=False):
     specdist=specdist.astype(int)
     return spec, specdist
 
+# This function is too long. You should split it up.
 def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png', \
                 color=['tab:blue','tab:orange','tab:green']):
     """
@@ -137,10 +162,13 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
     :param labels: list containing the labels for the plot
     :param path: location to save the plot
     """
-    
+
+    # define variables where they are used (in the second subfigure)
     steps=int(distance_cut_in_pc/5)
 
+    # call this n_stars ? Though I'm not sure that it's worth defining this variable at all. Just use len(stars)
     n_legend=len(stars)
+    # reuse the Enum defined above instead of this array. You can also take the length of an enum in python.
     spec=np.array(['O','B','A','F','G','K','M'])
     n_temp_class=len(spec)
     specdist=np.zeros((n_legend,n_temp_class))
@@ -155,9 +183,15 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
     width = 0.15
     
     #first subfigure
+    # make a function out of this code
+    # use 
+    # for star in stars:
     for i in range(n_legend):
+        # always pay attention with [0] or [1], etc. This is a sign that you store different things
+        # in one list. This is bad practice. Use dataclasses instead.
         specdist[i]=spechist(stars[i][0][:],mute=True)[1]
         #print(specdist[i])
+        # again: where does this [2:] come from? this looks odd.
         ax1.bar(x[2:]-n_legend*width/2+i*width,specdist[i][2:],
                 width, align='center',label=labels[i],color=color[i])#,color=color[i])
 
@@ -171,17 +205,26 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
     ax1.legend(loc='upper left')
 
     #second subfigure 
+    # make this a dedicated function. I hope it doesn't have too many arguments.
+    # rename index to bars_per_label (?)
     index = np.arange(steps) #wie viele bars pro label es haben wird
     #n = np.arange(7)#wieviele labels
     sub_specdist=np.zeros((n_legend,steps,n_temp_class))
-           
+
+    # n_legend = len(stars) and then you use stars[i] -> use 
+    # for star in stars
     for i in range(n_legend):
         for j in range(steps):
+            # where is the fix for the error you mention here?
             #here have an error because lifestarcat only goes up to 20pc
-            if j*5.> max(stars[i][1][:]):
+            # this code with [][][] is hard to follow. the stars fix above helps a little.
+            # and what does `star[1]` mean? You should never access a single element in a list. 
+            # Always iterate the entire list or search for a different solution (data classes)
+            # Also the *5. and the *7 in the following line look like magic numbers to me.
+            if j*5.> max(stars[i][1][:]): # Do you need the [:] ?
                 sub_specdist[i][j]=[0.]*7
             else: 
-                sub_specdist[i][j]=spechist(
+                sub_specdist[i][j]=spechist( # this code here is barely readable...
                         stars[i][np.where((stars[i][1][:] >j*5.)*\
                         (stars[i][1][:] < (j+1)*5.))][0][:],mute=True)[1]
         for l in np.arange(n_temp_class)[2:]:
@@ -189,12 +232,15 @@ def final_plot(stars,labels,distance_cut_in_pc,path=plots_path+'final_plot.png',
             #5*index-((n+(n+2)*(s-2))*width)+((n+2)*l+i)*width) 
             #problem if in one bin all 0
             #make if clause for it
+            # do the calculation for this expression here in a separate function. How did you get to these numbers?
             ax2.bar((steps+1)*index-((n_legend+(n_legend+2)*(n_temp_class-2))*width)+((n_legend+2)*l+i)*width,\
                     tuple(sub_specdist[i][:,l]),width,color=color[i])
          
     ax2.set_xlabel('Distance [pc]')
     plt.sca(ax2)
     xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
+    # don't use abreviations here. This makes the code hard to read.
+    # should this be number_bins?
     num_dist_bin=int(distance_cut_in_pc/5.)
     xticks_name= xticks_total[0:num_dist_bin][:steps]
     plt.xticks((steps+1)*index, (xticks_name))
