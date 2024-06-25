@@ -12,7 +12,8 @@ from typing import List
 from utils.io import load
 
 #------------------------------provider helper functions----------------
-def query(link: str,adql_query: str,catalogs: List[str]=[],no_description: bool =True) -> table.Table:
+
+def query(link: str,adql_query: str,catalogs: List[table.Table]=[]) -> table.Table:
     """
     Performs a query via TAP on the service given in the link parameter.
     
@@ -25,7 +26,6 @@ def query(link: str,adql_query: str,catalogs: List[str]=[],no_description: bool 
     :param catalogs: List of astropy tables to be uploaded to the 
         service.
     :type catalogs: list(astropy.table.table.Table)
-    :param bool no_description: Defaults to True, wether description gets removed
     :returns: Result of the query.
     :rtype: astropy.table.table.Table
     """
@@ -41,14 +41,25 @@ def query(link: str,adql_query: str,catalogs: List[str]=[],no_description: bool 
         for i in range(len(catalogs)):
             tables.update({f"t{i+1}":catalogs[i]})
         result = service.run_async(adql_query,uploads=tables,timeout=None,
-                                   maxrec=1600000)
-    cat=result.to_table()
+                                   maxrec=1600000)   
+    return result.to_table()
+
+def remove_catalog_description(cat: table.Table) -> table.Table: 
+    """
+    Removes description meta data of catalog columns.
     
-    # removing descriptions because merging of data leaves wrong description 
+    This is useful if by merging different catalogs the description of the 
+    resulting catalog is not correct any longer. 
+    
+    :param cat: Catalog
+    :type cat: astropy.table.table.Table
+    :returns: Catalog with no description of columns.
+    :rtype: astropy.table.table.Table
+    """
+    
     for col in cat.colnames:
         if no_description:
-            cat[col].description=''
-    
+            cat[col].description=''     
     return cat
 
 def sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sources: table.Table=Table()) -> table.Table:
@@ -100,6 +111,9 @@ def sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sour
     return sources
 
 class OidCreator:
+    """
+    Create adql query for fetch_main_id function using oid column.
+    """
     def __init__(self,name,colname):
         self.name=name
         self.colname=colname
@@ -110,6 +124,9 @@ class OidCreator:
                 JOIN TAP_UPLOAD.t1 ON b.oid=t1."""+self.colname
     
 class IdentifierCreator:
+    """
+    Create adql query for fetch_main_id function using identifier column.
+    """
     def __init__(self,name,colname):
         self.name=name
         self.colname=colname
@@ -122,7 +139,7 @@ class IdentifierCreator:
     
 #looks better but don't think this will run. issue is that I pass variables to a class that doesn't take any
 
-def fetch_main_id(cat,id_creator=OidCreator(name='main_id',colname='oid')):
+def fetch_main_id(cat: table.Table, id_creator=OidCreator(name='main_id',colname='oid')) -> table.Table:
     """
     Joins main_id from simbad to the column colname. 
     
@@ -131,12 +148,7 @@ def fetch_main_id(cat,id_creator=OidCreator(name='main_id',colname='oid')):
     
     :param cat: Astropy table containing column colname.
     :type cat: astropy.table.table.Table
-    :param str colname: Column header of the identifiers that should be 
-        searched in SIMBAD.
-    :param str name: Column header for the SIMBAD main identifiers, 
-        default is main_id.
-    :param bool oid: Specifies wether colname is a SIMBAD oid or normal
-         identifier.
+    :param id_creator: OidCreator or IdentifierCreator object.
     :return: Table with all main SIMBAD identifiers that could be found 
         in column "name".
     :rtype: astropy.table.table.Table
@@ -151,7 +163,7 @@ def fetch_main_id(cat,id_creator=OidCreator(name='main_id',colname='oid')):
     cat=query(TAP_service,main_id_query,[cat])
     return cat
 
-def distance_cut(cat,colname,main_id=True):
+def distance_cut(cat: table.Table, colname: str, main_id: bool=True):
     """
     Sorts out objects not within the provider_simbad distance cut. 
     
