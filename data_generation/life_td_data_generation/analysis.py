@@ -3,6 +3,8 @@ from astropy import io
 from astropy.table import MaskedColumn
 from datetime import datetime
 import matplotlib.pyplot as plt
+from enum import Enum
+
 
 #self created modules
 from utils.io import stringtoobject, Path
@@ -15,6 +17,15 @@ import sdata as sdc
     
 empty=sdc.provider('empty')
 table_names=empty.table_names
+
+class SpectralType(Enum):
+    O = 'O'
+    B = 'B'
+    A = 'A'
+    F = 'F'
+    G = 'G'
+    K = 'K'
+    M = 'M'
 
 def show(provider,
          table='objects',
@@ -68,7 +79,7 @@ def sanitytest(cat,colname):
 
 
 
-def disthist(arr,names,path,max_dist,xaxis):
+def stellar_distance_histogram(arr,names,path,max_dist,xaxis):
     '''
     Makes a histogram of the stellar distance distribution.
     
@@ -90,41 +101,131 @@ def disthist(arr,names,path,max_dist,xaxis):
     plt.show()
     return
 
-
-def spechist(spectypes,mute=False):
+def spectral_type_histogram(spectypes):
     '''
     Makes a histogram of the spectral type distribution.
     
     :param spectypes: array containing a spectral type for each star
     :type spectypes: 
-    :param bool mute: if true prints the number of total stars, total 
-        spectral types and spec and specdist
-    :returns: array containig the spectral type abreviations 
-        O B A F G K M. array containing the number of stars for
+    :returns: array containig the number of stars for
         each spectral type in spec.
-    :rtype: touple(np.array)
+    :rtype: np.array
     '''
     
-    spec=np.array(['O','B','A','F','G','K','M'])
-    s=len(spec)
-    specdist =np.zeros(s)
-    for i in range(len(spectypes)):
-        if spectypes[i] not in ['','nan']:
-            for j in range(0,s):
-                if spec[j] == spectypes[i][0]: 
+    specdist =np.zeros(len(SpectralType))
+    for spectype in spectypes:
+        if spectype not in ['','nan']:
+            for j,spectraltype in enumerate(SpectralType):
+                if spectype[0] == spectraltype.name:
                     specdist[j] += 1
-    if mute==False:
-        print('total stars:',np.shape(spectypes)[0],\
-              'total spectral types:',int(np.sum(specdist)+1))
-        print('spectral type distribution:\n',spec,specdist)
     specdist=specdist.astype(int)
-    return spec, specdist
+    return specdist
 
-def final_plot(stars,labels,distance_cut_in_pc,path=Path().plot+'final_plot.png', \
-                color=['tab:blue','tab:orange','tab:green']):
+def myround(x, base=5):
+    return base * round(x/base)
+
+def get_distance_cut(distance_samples):
+    """
+    Gets the maximum distance of the sample of catalogs.
+    """
+    distance_cut=0
+    for i in range(len(distance_samples)):
+        if max(distance_samples[i])> distance_cut:
+            distance_cut=max(distance_samples[i])
+    return distance_cut
+
+def define_xticks(distance_cut: float):
+    """
+    Prepares the xticks of the second subfigure in the final_plot.
+    
+    :param float distance_cut: Max distance of sample in parsec.
+    :returns:
+    :rtype: 
+    """
+    
+    if distance_cut<=35.:
+        xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
+        stepsize=5.
+    elif distance_cut<=50.:
+        xticks_total=['0-10','10-20','20-30','30-40','40-50']
+        stepsize=10.
+    else:
+        print('Error: distance bigger than 50pc not programmed.')
+    
+    xticks=xticks_total[:int(distance_cut/stepsize)]   
+    return xticks, stepsize
+
+def x_position(x,n_samples,bar_width,sample_index):
+    """
+    Calculates x position for plots so that not all samples plotted over each other.
+    """
+    width_of_samples=n_samples*bar_width
+    sample_location=sample_index*bar_width
+    # if I change sign in front of sample_location result is that catalogs get shown in order backwards
+    return x-width_of_samples/2+sample_location
+
+def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path().plot+'sthcc.png'):
+    """
+    Creates the figure for the RNAAS article.
+    
+    Spectral type distribution of catalogs with shading for amount below 20pc.
+    """
+    spectral_type_samples=[stellar_cat['spec'] for stellar_cat in stellar_catalogs]
+        
+    width = 0.15 #with of the bars
+    color=['tab:blue','tab:orange','tab:green']
+    
+    #ititializes the data containers
+    spec=[spectraltype.name for spectraltype in SpectralType]
+    #initializes array to contain spectral distribution of total samples
+    specdist_total=np.zeros((len(spectral_type_samples),len(spec)))
+    #initializes array to contain spectral distribution of sub samples
+    specdist_sub=np.empty_like(specdist_total)
+    
+    plt.figure()
+    x=np.arange(len(spec))
+    
+    for i in range(len(spectral_type_samples)):
+        sample_total=stellar_catalogs[i]['spec']
+        specdist_total[i]=spectral_type_histogram(sample_total)
+        
+        #remove spectraltypes that are not present (O and B) for tighter plot
+        # tbd: have function doing this instead of hardcoded stuff
+        x_tight = x[2:]
+        specdist_total_tight = specdist_total[i][2:]
+        
+        x_pos=x_position(x_tight,len(spectral_type_samples),width,i)
+        
+        plt.bar(x_pos,specdist_total_tight,width, align='center',
+                color=color[i],log=True, edgecolor='black',
+                label=labels[i])
+        #now make same for only within 20pc sample
+        sample_sub=sample_total[np.where(stellar_catalogs[i]['dist']<20.)]
+        specdist_sub[i]=spectral_type_histogram(sample_sub)
+        
+        specdist_sub_tight = specdist_sub[i][2:]
+
+        plt.bar(x_pos,specdist_sub_tight,width, align='center',
+                color=color[i],log=True, edgecolor='black',
+                hatch='//')
+        
+    #creating a single label for the tree hatch barplots  
+    plt.bar([1],[0],log=True,edgecolor='black',hatch='//',label=['Distance < 20pc'],facecolor="none")   
+    
+    plt.xticks(x[2:], spec[2:])
+    plt.title(f"Spectral type distribution")
+    plt.ylabel('Number of stars')
+    plt.xlabel('Spectral types')
+    plt.legend(loc='upper left')
+    plt.savefig(path, dpi=300)
+    return
+
+def final_plot(stars,labels,path=Path().plot+'final_plot.png'):
     """
     Plots spectral distribution in two subplots.
     
+    This plot is a bit of a mess, in the future use the function
+    spectral_type_histogram_catalog_comparison instead.
     Makes plot with two subfigures, first a histogram of spectral 
     type and then one of spectral type for each distance sample of 
     0-5, 5-10, 10-15 and 15-20pc.
@@ -134,35 +235,45 @@ def final_plot(stars,labels,distance_cut_in_pc,path=Path().plot+'final_plot.png'
     :param labels: list containing the labels for the plot
     :param path: location to save the plot
     """
+    #tbd: replace stars with two variables to prevent having [0] hardcoded stuff
+    # list of arrays of spectral type info: spectral_type_samples
+    # list of arrays of spectral type info: distance_samples
     
-    if distance_cut_in_pc<=30.:
-        xticks_total=['0-5','5-10','10-15','15-20','20-25','25-30']
-        stepsize=5.
-    else:
-        xticks_total=['0-10','10-20','20-30','30-40','40-50']
-        stepsize=10.
-    steps=int(distance_cut_in_pc/stepsize)    
-
-    n_legend=len(stars)
-    spec=np.array(['O','B','A','F','G','K','M'])
-    n_temp_class=len(spec)
-    specdist=np.zeros((n_legend,n_temp_class))
+    spectral_type_samples=[stellar_cat[stellar_cat.colnames[0]] for stellar_cat in stars]
+    distance_samples=[stellar_cat[stellar_cat.colnames[1]] for stellar_cat in stars]
+    
+    
+    distance_cut_in_pc=myround(get_distance_cut(distance_samples))
+    xticks, stepsize=define_xticks(distance_cut_in_pc)
+    
+    #variables for both subfigures
+    width = 0.15 #with of the bars
+    color=['tab:blue','tab:orange','tab:green']
+    
+    #ititializes the data containers
+    spec=[spectraltype.name for spectraltype in SpectralType]
+    specdist=np.zeros((len(spectral_type_samples),len(spec)))
     
     #prepares subfigure display
     fig, ((ax1,ax2)) = plt.subplots(1,2,sharey='row',\
                        figsize = [16, 5],\
-                       gridspec_kw={'hspace': 0, 'wspace': 0})   
+                       gridspec_kw={'hspace': 0, 'wspace': 0})  
     
-    x=np.arange(n_temp_class)
-    #['r','b','yellow']
-    width = 0.15
+    #variables for first subfigure
+    x=np.arange(len(spec))
+    
     
     #first subfigure
-    for i in range(n_legend):
-        specdist[i]=spechist(stars[i][0][:],mute=True)[1]
-        #print(specdist[i])
-        ax1.bar(x[2:]-n_legend*width/2+i*width,specdist[i][2:],
-                width, align='center',label=labels[i],color=color[i])#,color=color[i])
+    #remove spectraltypes that are not present (O and B) for tighter plot
+    # => x -> x[2:], specdist[i] -> specdist[i][2:]
+    
+    #first_sub_figure(ax1)
+    for i in range(len(spectral_type_samples)):
+        specdist[i]=spectral_type_histogram(spectral_type_samples[i])
+        #shift x so that not all samples plotted over each other
+        ax1.bar(x_position(x[2:],len(spectral_type_samples),width,i),
+                specdist[i][2:],
+                width, align='center',label=labels[i],color=color[i])
 
     ax1.set_yscale('log') 
     #problem beim zweiten plot: min() arg is an empty sequence
@@ -174,31 +285,36 @@ def final_plot(stars,labels,distance_cut_in_pc,path=Path().plot+'final_plot.png'
     ax1.legend(loc='upper left')
 
     #second subfigure 
-    index = np.arange(steps) #wie viele bars pro label es haben wird
+    index = np.arange(len(xticks)) #wie viele bars pro label es haben wird
     #n = np.arange(7)#wieviele labels
-    sub_specdist=np.zeros((n_legend,steps,n_temp_class))
+    sub_specdist=np.zeros((len(spectral_type_samples),len(xticks),len(spec)))
+    #def distance_binned_spectral_distributions(spectral_type_samples,distance_samples):
+        
+        #return sub_specdist
            
-    for i in range(n_legend):
-        for j in range(steps):
+    for i, spectral_type_sample in enumerate(spectral_type_samples):
+        #what am I doing here? I create the distance binned spectral distributions
+        for j in range(len(xticks)):
             #here have an error because lifestarcat only goes up to 20pc
             if j*stepsize> max(stars[i][1][:]):
                 sub_specdist[i][j]=[0.]*7
             else: 
-                sub_specdist[i][j]=spechist(
+                sub_specdist[i][j]=spectral_type_histogram(
                         stars[i][np.where((stars[i][1][:] >j*stepsize)*\
-                        (stars[i][1][:] < (j+1)*stepsize))][0][:],mute=True)[1]
-        for l in np.arange(n_temp_class)[2:]:
+                        (stars[i][1][:] < (j+1)*stepsize))][0][:])
+        #here I put in the axis bars
+        for l in np.arange(len(spec))[2:]:
             #print(sub_specdist[i][:,l],
             #5*index-((n+(n+2)*(s-2))*width)+((n+2)*l+i)*width) 
             #problem if in one bin all 0
             #make if clause for it
-            ax2.bar((steps+1)*index-((n_legend+(n_legend+2)*(n_temp_class-2))*width)+((n_legend+2)*l+i)*width,\
+            
+            ax2.bar(x_position((len(xticks)+1)*index,len(stars)+ (len(stars)+2) * (len(spec)-2),width, (len(stars)+2)*l+i),\
                     tuple(sub_specdist[i][:,l]),width,color=color[i])
          
     ax2.set_xlabel('Distance [pc]')
     plt.sca(ax2)
-    xticks_name= xticks_total[0:steps][:steps]
-    plt.xticks((steps+1)*index, (xticks_name))
+    plt.xticks((len(xticks)+1)*index, (xticks))#(xticks_name))
     ax2.set_title(f"Spectral type and distance distribution")  
     plt.savefig(path, dpi=300)
     return
@@ -214,7 +330,7 @@ def spechistplot(stars,name,path=''):
     """
     
     n=len(stars)
-    spec=np.array(['O','B','A','F','G','K','M'])
+    spec=[spectraltype.name for spectraltype in SpectralType]
     s=len(spec)
     specdist=np.zeros((n,s))
     
@@ -223,7 +339,7 @@ def spechistplot(stars,name,path=''):
     width = 0.15
 
     for i in range(n):
-        specdist[i]=spechist(stars[i],mute=True)[1]
+        specdist[i]=spectral_type_histogram(stars[i])
         ax.bar(x[2:]-n*width/2+i*width,specdist[i][2:],
                width,label=name[i])
     
@@ -298,7 +414,7 @@ def sanity_tests(database_tables, distance_cut_in_pc=30.,StarCat3=False):
         for colname in colnames[i]:
             sanitytest(cat,colname)
 
-    disthist(database_tables[5]['dist_st_value'],['star_basic'],'test',
+    stellar_distance_histogram(database_tables[5]['dist_st_value'],['star_basic'],'test',
             distance_cut_in_pc,'dist_st_value')
     
     table=database_tables[5]['class_temp','dist_st_value',
