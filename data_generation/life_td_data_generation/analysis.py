@@ -171,7 +171,7 @@ def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path
     Spectral type distribution of catalogs with shading for amount below 20pc.
     """
     spectral_type_samples=[stellar_cat['spec'] for stellar_cat in stellar_catalogs]
-        
+    
     width = 0.15 #with of the bars
     color=['tab:blue','tab:orange','tab:green']
     
@@ -182,37 +182,30 @@ def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path
     #initializes array to contain spectral distribution of sub samples
     specdist_sub=np.empty_like(specdist_total)
     
-    plt.figure()
+    plt.figure(figsize=(8, 4))
     x=np.arange(len(spec))
     
     for i in range(len(spectral_type_samples)):
         sample_total=stellar_catalogs[i]['spec']
         specdist_total[i]=spectral_type_histogram(sample_total)
+                
+        x_pos=x_position(x,len(spectral_type_samples),width,i)
         
-        #remove spectraltypes that are not present (O and B) for tighter plot
-        # tbd: have function doing this instead of hardcoded stuff
-        x_tight = x[2:]
-        specdist_total_tight = specdist_total[i][2:]
-        
-        x_pos=x_position(x_tight,len(spectral_type_samples),width,i)
-        
-        plt.bar(x_pos,specdist_total_tight,width, align='center',
+        plt.bar(x_pos,specdist_total[i],width, align='center',
                 color=color[i],log=True, edgecolor='black',
                 label=labels[i])
         #now make same for only within 20pc sample
         sample_sub=sample_total[np.where(stellar_catalogs[i]['dist']<20.)]
         specdist_sub[i]=spectral_type_histogram(sample_sub)
-        
-        specdist_sub_tight = specdist_sub[i][2:]
 
-        plt.bar(x_pos,specdist_sub_tight,width, align='center',
+        plt.bar(x_pos,specdist_sub[i],width, align='center',
                 color=color[i],log=True, edgecolor='black',
                 hatch='//')
         
     #creating a single label for the tree hatch barplots  
     plt.bar([1],[0],log=True,edgecolor='black',hatch='//',label=['Distance < 20pc'],facecolor="none")   
     
-    plt.xticks(x[2:], spec[2:])
+    plt.xticks(x, spec)
     plt.title(f"Spectral type distribution")
     plt.ylabel('Number of stars')
     plt.xlabel('Spectral types')
