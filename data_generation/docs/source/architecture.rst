@@ -8,7 +8,7 @@ Architecture
 Introduction
 ------------
 
-Let's start with a bit of terminology used when dealing with databases. A `database` is a collection of data. They support electronic storage and maniputlation of data. `Data` itself are facts related to any object in consideration. For example name, age, temperature. A picture, image, file, etc. can also be considered data. The LIFE Target Database is a `relational database`. That means the data is stored in tables linked to each other with relations. Those tables and relations can be visualized using a `data model`. The one for `life_td` is explained in the section below. 
+Let's start with a bit of terminology used when dealing with databases. A `database` is a collection of data. They support electronic storage and maniputlation of data. `Data` itself are facts related to any object in consideration. For example name, age, temperature. A picture, image, file, etc. can also be considered data. There are different ways in which people can interact with the database. In database terminology those are called use cases and describe what a user wants to get out of that interaction. They have consequences on the database design. One of the outcomes whas that we needed the LIFE Target Database to be a `relational database`. That means the data is stored in tables linked to each other with relations. Those tables and relations can be visualized using a `data model`. The use cases and data model for `life_td` are explained in the sections below. 
 
 
 Use Cases
@@ -57,11 +57,28 @@ We used the Unified Modeling Language (UML) to create our data model. Each table
 
 .. image:: classdiagramexplanation.png
 
-.. image:: db_data_providers.png
+The figure below is the general structure of the current data model. It went through many iterations to reach this point. We started with what kind of data we wanted to have in the database and normalized the model as much as possible. Normalization is the concept in database design on how to reduce data redundancey (e.g. having the same information save multiple times in the database)
+and improve data integrity (e.g. accumulations of errors occurring during data maintenance). Higher
+normalizations have the benefit of write performance (minimized redesign when extending the database structure, and anomaly resistance) at the cost of read performance (e.g. querying). However, it turned out that due to the high normalization our database became too complex with manifested in the way that our queries got too complicated. We therefore looked at example data we wanted to ingest into the database and how to extract it again. It turned out, that our database would have many similarities with the SIMBAD database. We drafted a new data model inspired by the one from SIMBAD and aspects of our older complex data model. Compared to SIMBAD we included additional classes for disks and planets and leaft out classes that were irrelevant for us (e.g. bibliography, flux).
+
 
 .. image:: data_model_2024.png
 
-TBD: insert example measurement tables
+TBD: Elaborate on keys as well as value, err, quality,...
 
-TBD insert image from input over package to database
+Ingestion Pipeline
+------------------
+
+.. image:: IngestionPipeline.png
+
+Content
+-------
+
+TBD: list providers and measurements.
+
+.. image:: db_data_providers.png
+
+.. image:: basictables.png
+
+TBD: insert example measurement tables
 
