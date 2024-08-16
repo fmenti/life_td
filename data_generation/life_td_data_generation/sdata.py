@@ -1,10 +1,53 @@
 """
 Structured data class
 """
+from dataclasses import dataclass
 
 import astropy as ap
+from astropy.table import Table
 
 from utils.io import save, Path
+
+    
+@dataclass
+class Data():
+    sources = Table()
+    objects = Table()
+    provider = Table()
+    ident = Table()
+    best_h_link = Table()
+    star_basic = Table()
+    planet_basic = Table()
+    disk_basic = Table()
+    mes_mass_pl = Table()
+    mes_teff_st = Table()
+    mes_radius_st = Table()
+    mes_mass_st = Table()
+    mes_binary = Table()
+    mes_sep_ang = Table()
+    h_link = Table() 
+
+@dataclass
+class Names():
+    sources = 'sources'
+    objects = 'objects'
+    provider = 'provider'
+    ident = 'ident'
+    best_h_link = 'best_h_link'
+    star_basic = 'star_basic'
+    planet_basic = 'planet_basic'
+    disk_basic = 'disk_basic'
+    mes_mass_pl = 'mes_mass_pl'
+    mes_teff_st = 'mes_teff_st'
+    mes_radius_st = 'mes_radius_st'
+    mes_mass_st = 'mes_mass_st'
+    mes_binary = 'mes_binary'
+    mes_sep_ang = 'mes_sep_ang'
+    h_link = 'h_link'
+
+class Cat():
+    data=Data()
+    names=Names()
 
 #now create a class that returns an astropy table
 class structured_data:

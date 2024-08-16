@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import numpy as np #arrays
 from astropy import io
 from astropy.table import MaskedColumn
@@ -49,8 +50,25 @@ def show(provider,
     else:
         print(cat[columns][np.where(cat[wherecol]==whereobj)])
     return
+
+def is_starnames(arr):
+    return type(arr[0])==np.str_
+def array_only_fill_values(arr):
+    return len(arr[np.where(arr!=1e20)])==0
+def remove_fill_values(arr):
+    return arr[np.where(arr!=1e20)]
+
+def different_data(arr):
+    if is_starnames(arr):
+        pass   
+    else:
+        if len(arr)==0 or array_only_fill_values(arr):
+            pass
+        if max(arr)==1e20:
+            arr=remove_fill_values(arr)
+    return arr
     
-    
+#TBD: durch funktionalen test ersetzen    
 def sanitytest(cat,colname):
     """
     Prints histogram of parameter for quick sanity test.
@@ -62,14 +80,9 @@ def sanitytest(cat,colname):
     
     arr=cat[colname]
     # because python and np disagree on arr!=1e20 result
-    if type(arr[0])==np.str_:
-        pass
-    else:
-        if len(arr)==0 or len(arr[np.where(arr!=1e20)])==0:
-            print(colname,'is empty')
-            return
-        if max(arr)==1e20:
-            arr=arr[np.where(arr!=1e20)]
+    
+    different_data(arr)
+
     plt.figure()
     plt.xlabel(f'{colname}')
     plt.ylabel('Number of objects')
@@ -155,14 +168,36 @@ def define_xticks(distance_cut: float):
     xticks=xticks_total[:int(distance_cut/stepsize)]   
     return xticks, stepsize
 
-def x_position(x,n_samples,bar_width,sample_index):
+@dataclass
+class Plotparas:
+    width = 0.15
+    color = ['tab:blue','tab:green','tab:olive']
+
+def x_position(x,n_samples,sample_index):
     """
     Calculates x position for plots so that not all samples plotted over each other.
     """
-    width_of_samples=n_samples*bar_width
-    sample_location=sample_index*bar_width
+    width_of_samples=n_samples*Plotparas.width
+    sample_location=sample_index*Plotparas.width
     # if I change sign in front of sample_location result is that catalogs get shown in order backwards
     return x-width_of_samples/2+sample_location
+
+def tight_plot(x,spec):
+    return x[1:],spec[1:]
+
+def full_subplot(x,spec,i,labels):
+    x1,y1=tight_plot(x,spec)
+    plt.bar(x1,y1,Plotparas.width, align='center',
+                color=Plotparas.color[i],log=True, edgecolor='black',
+                label=labels[i])
+    return
+
+def distancecut_subplot(x,spec,i,hatch):
+    x1,y1=tight_plot(x,spec)
+    plt.bar(x1,y1,Plotparas.width, align='center',
+                color=Plotparas.color[i],log=True, edgecolor='black',
+                hatch=hatch)
+    return
 
 def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path().plot+'sthcc.png'):
     """
@@ -171,10 +206,7 @@ def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path
     Spectral type distribution of catalogs with shading for amount below 20pc.
     """
     spectral_type_samples=[stellar_cat['spec'] for stellar_cat in stellar_catalogs]
-    
-    width = 0.15 #with of the bars
-    color=['tab:blue','tab:orange','tab:green']
-    
+        
     #ititializes the data containers
     spec=[spectraltype.name for spectraltype in SpectralType]
     #initializes array to contain spectral distribution of total samples
@@ -185,27 +217,33 @@ def spectral_type_histogram_catalog_comparison(stellar_catalogs,labels,path=Path
     plt.figure(figsize=(8, 4))
     x=np.arange(len(spec))
     
+    
     for i in range(len(spectral_type_samples)):
         sample_total=stellar_catalogs[i]['spec']
         specdist_total[i]=spectral_type_histogram(sample_total)
                 
-        x_pos=x_position(x,len(spectral_type_samples),width,i)
+        x_pos=x_position(x,len(spectral_type_samples),i)
         
-        plt.bar(x_pos,specdist_total[i],width, align='center',
-                color=color[i],log=True, edgecolor='black',
-                label=labels[i])
+        full_subplot(x_pos,specdist_total[i],i,labels)
+
         #now make same for only within 20pc sample
         sample_sub=sample_total[np.where(stellar_catalogs[i]['dist']<20.)]
         specdist_sub[i]=spectral_type_histogram(sample_sub)
+        
+        distancecut_subplot(x_pos,specdist_sub[i],i,'//')
+        
+        sample_sub=sample_total[np.where(stellar_catalogs[i]['dist']<10.)]
+        specdist_sub[i]=spectral_type_histogram(sample_sub)
+        
+        distancecut_subplot(x_pos,specdist_sub[i],i,'////')
 
-        plt.bar(x_pos,specdist_sub[i],width, align='center',
-                color=color[i],log=True, edgecolor='black',
-                hatch='//')
         
     #creating a single label for the tree hatch barplots  
-    plt.bar([1],[0],log=True,edgecolor='black',hatch='//',label=['Distance < 20pc'],facecolor="none")   
+    plt.bar([1],[0],log=True,edgecolor='black',hatch='//',label=['d < 20pc'],facecolor="none")  
+    plt.bar([1],[0],log=True,edgecolor='black',hatch='////',label=['d < 10pc'],facecolor="none") 
     
-    plt.xticks(x, spec)
+    xt,yt=tight_plot(x,spec)
+    plt.xticks(xt,yt)
     plt.title(f"Spectral type distribution")
     plt.ylabel('Number of stars')
     plt.xlabel('Spectral types')

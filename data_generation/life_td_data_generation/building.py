@@ -6,7 +6,7 @@ from astropy.table import Column, join, column, vstack, Table, unique
 #self created modules
 from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
-import sdata as sdc
+import sdata as sdc, Cat
 
 def idsjoin(cat,column_ids1,column_ids2):
     """

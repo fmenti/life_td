@@ -13,6 +13,9 @@ from utils.io import load
 
 #------------------------------provider helper functions----------------
 
+    
+#issue with saving tables and doing for loops only over some of them
+    
 def query(link: str,adql_query: str,catalogs: List[table.Table]=[]) -> table.Table:
     """
     Performs a query via TAP on the service given in the link parameter.
