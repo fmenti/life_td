@@ -6,26 +6,19 @@ Introduction
 Documentation Motivation
 ------------------------
 
-The main goal of this documentation is to make both the code used to 
-create the LIFE Target Database as well as the database itself follow 
-the FAIR Principle.
+The main goal of this documentation is to make both the code used to create the LIFE Target Database as well as the database itself follow the FAIR principles `<https://www.nature.com/articles/sdata201618>`_. Theyr goal is that data  are Findable, Accessible, Interoperable and Reusable (FAIR) for machines. The same principle can be translated to `research software <https://www.nature.com/articles/s41597-022-01710-x>`_.
+FAIR has become a global norm for good data / software stewardship and a prerequisite for reproducibility.
 
-FAIR
-^^^^
-
-TBD distinguish between FAIR data and FAIR software
-
-**Findability** Contains richly annotated metadata to make clear what 
-the data describes.
+**Findability** Data and metadata as well as software, and its associated metadata, are easy for both humans and machines to find. 
 
 **Accessibility** Free and open source. The whole code can be accessed 
 through `GitHub <https://github.com/fmenti/life_td>`_. Once run the 
 code produces all the data that goes into the database. The database 
-itself can be accessed through topcat or python (Check out the 
+itself can be accessed through TOPCAT or python (Check out the 
 :ref:`LIFE Target Database Tutorial <tutorials>`).
 
 **Interoperability** Independent of operating system. To access the 
-database either python or Topcat is needed. Following the 
+database either python or TOPCAT is needed. Following the 
 `Virtual Observatory <https://ivoa.net/>`_ standards.
 
 **Reuse** Provenance in form of sources and code provided to enable 
@@ -68,7 +61,7 @@ LIFE samples
 | Final Targets         | best stars for LIFE mission                                                                                                                                      | golden targets + some of LIFEsim output sample                                                      | Stars                          | ~10² |
 +-----------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+--------------------------------+------+
 
-In order to prevent confusion between terminology used by other missions here a short overview of the different LIFE samples. The target database contains as much data as possible on potential targets. It consists of stars (no single brown or white dwarfs), systems, planets and disks within 30 pc of the Sun and contains of order $10^4$ objects. The Star-Cat (also sometimes called input target catalog) is extracted from the database and contains as much data as needed for LIFEsim. It consists of mature single stars and wide binaries (with stable planet orbits in the habitable zone) and contains of order $10^3$ stars. LIFEsim shows for which mission parameters (e.g. S/N) what stellar objects (e.g. amount, to what distance) would be retrieved. This output sample consists of $\sim 10^2$ stars with the highest simulated observation yield. For targets that allow detailed characterization in relatively short observation times for oportunity of potential "time-resolved" experiments e.g. seasonal changes we have the golden targets sample. It consists of ~10¹ of best a priori known stars (e.g. Proxima, stars also observed with HWO). The sample of the final targets are the $\sim 10^2$ best stars for the LIFE mission. They consist of the golden targets together with some of the LIFEsim output sample.
+In order to prevent confusion between terminology used by other missions here a short overview of the different LIFE samples. The target database contains as much data as possible on potential targets. It consists of stars (no single brown or white dwarfs), systems, planets and disks within 30 pc of the Sun and contains of order 10⁴ objects. The Star-Cat (also sometimes called input target catalog) is extracted from the database and contains as much data as needed for LIFEsim. It consists of mature single stars and wide binaries (with stable planet orbits in the habitable zone) and contains of order 10³ stars. LIFEsim shows for which mission parameters (e.g. S/N) what stellar objects (e.g. amount, to what distance) would be retrieved. This output sample consists of ~10² stars with the highest simulated observation yield. For targets that allow detailed characterization in relatively short observation times for oportunity of potential "time-resolved" experiments e.g. seasonal changes we have the golden targets sample. It consists of ~10¹ of best a priori known stars (e.g. Proxima, stars also observed with HWO). The sample of the final targets are the ~10² best stars for the LIFE mission. They consist of the golden targets together with some of the LIFEsim output sample.
 
 
 Complementary databases and catalogs

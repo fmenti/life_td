@@ -18,32 +18,39 @@ Use Cases
 
 We considered the following five use cases:
 
-A: Catalog extraction for main science objective of LIFE
-B: Easy access for fellow scientists
-C: Low maintenace for database administrator to save costs.
-D: Identify important missing data for future observation proposals.
-E: Flexible database design enabling easy expansion in form of adding parameters (e.g. metalicity), providers (e.g. TESS) or adapt to other use cases that might come up in the future (e.g. planned non detection information).
-F: Provide context for analysis of data obtained by LIFE.
+* A: Catalog extraction for main science objective of LIFE
+* B: Easy access for fellow scientists
+* C: Low maintenace for database administrator to save costs.
+* D: Identify important missing data for future observation proposals.
+* E: Provide context for analysis of data obtained by LIFE.
+
 
 Which have the following consequences on the database features:
 
-A1: 30pc cut -> max distance at which we can in reasonable time observe desired planet
-A2: Main stellar parameters (name, position, distance, spectral type, effective temperature, mass, radius)
-A3: Multiplicity information to predict stable planetary orbits as well as take into account lower planet occurence rates in multiples.
-A4: Disk information to predict observability. Exozodi as noise source.
-A5: Planet information to reduce detection time where planets already known or ruled out from nondetection or Hot Jupiter relation to habitable zone planets.
-A6: Best parameters of data collected from different providers.
+A
 
-B1: VO compatibility
-B2: Example queries to mitigate ADQL knowledge deficites.
-B3: tutorials to help create catalog for own science project
+* A1: 30pc cut -> max distance at which we can in reasonable time observe desired planet
+* A2: Main stellar parameters (name, position, distance, spectral type, effective temperature, mass, radius)
+* A3: Multiplicity information to predict stable planetary orbits as well as take into account lower planet occurence rates in multiples.
+* A4: Disk information to predict observability. Exozodi as noise source.
+* A5: Planet information to reduce detection time where planets already known or ruled out from nondetection or Hot Jupiter relation to habitable zone planets.
+* A6: Best parameters of data collected from different providers.
 
-C1: Data ingestion as automated as possible. This is achieved by prefering VO compatible data providers over other databases. Those are in turn prefered over modeled data and as a last resort literature data is collected.
-C2: GAVO published, they take case that server runs smoothly.
-C3: Everything public and documented to have good knowledge transfer in case of administrator change.
+B
 
-E1: Careful analysis of not only short term use cases but also mid and long term ones. 
-E2: Designing and reiterating of the data model. 
+* B1: VO compatibility
+* B2: Example queries to mitigate ADQL knowledge deficites.
+* B3: tutorials to help create catalog for own science project
+
+C
+
+* C1: Data ingestion as automated as possible. This is achieved by prefering VO compatible data providers over other databases. Those are in turn prefered over modeled data and as a last resort literature data is collected.
+* C2: GAVO published, they take case that server runs smoothly.
+* C3: Everything public and documented to have good knowledge transfer in case of administrator change.
+
+E
+
+* E1: Flexible database design enabling easy expansion in form of adding parameters (e.g. metalicity), providers (e.g. TESS) or adapt to other use cases that might come up in the future (e.g. planned non detection information).
 
 
 
@@ -73,6 +80,8 @@ Ingestion Pipeline
 
 Content
 -------
+
+The target database contains as much useful information on the potential target stars for LIFE as possible. That means the stars within 30 pc and their properties such as position, proper motion, spectral type, etc. Those will be used to determine if the star is a suitable target for LIFE. But not only the star also its environment is important in that regard meaning if the star hosts planets or disks but also if it is part of a multiple star system. Not only the presence of those other objects but also detailed information on them (e.g. planetary mass, binary separation) is part of the database.
 
 TBD: list providers and measurements.
 
