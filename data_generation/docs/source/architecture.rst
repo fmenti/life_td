@@ -14,15 +14,13 @@ Let's start with a bit of terminology used when dealing with databases. A `datab
 Use Cases
 ---------
 
-(TBD add tree for use cases and implementation consequences)
-
 We considered the following five use cases:
 
 * A: Catalog extraction for main science objective of LIFE
 * B: Easy access for fellow scientists
-* C: Low maintenace for database administrator to save costs.
-* D: Identify important missing data for future observation proposals.
-* E: Provide context for analysis of data obtained by LIFE.
+* C: Low maintenace for database administrator to save costs
+* D: Identify important missing data for future observation proposals
+* E: Provide context for analysis of data obtained by LIFE
 
 
 Which have the following consequences on the database features:
@@ -60,7 +58,9 @@ E
 Data Model
 ----------
 
-We used the Unified Modeling Language (UML) to create our data model. Each table in the database is represented as a box called a class. The columns of the table are called attributes. 
+We used the Unified Modeling Language (UML) to create our data model. Each table in the database is represented as a box called a class. The columns of the table are represented by attributes. A relation between two tables is represented by a line. 
+
+TBD: add small example data model from book beginning database design.
 
 .. image:: classdiagramexplanation.png
 
@@ -76,20 +76,25 @@ TBD: Elaborate on keys as well as value, err, quality,...
 Ingestion Pipeline
 ------------------
 
+The image below visualizes the different steps required for the data to get ingested into the database before it can be extracted by users.
+
 .. image:: IngestionPipeline.png
+
+TBD: explain individual steps
 
 Content
 -------
 
 The target database contains as much useful information on the potential target stars for LIFE as possible. That means the stars within 30 pc and their properties such as position, proper motion, spectral type, etc. Those will be used to determine if the star is a suitable target for LIFE. But not only the star also its environment is important in that regard meaning if the star hosts planets or disks but also if it is part of a multiple star system. Not only the presence of those other objects but also detailed information on them (e.g. planetary mass, binary separation) is part of the database.
 
-TBD: list providers and measurements.
+.. .. image:: db_data_providers.png
 
-.. image:: db_data_providers.png
+The table below shows the different tables within the life_td, which parameters they contain, the columns and finally the sources of the data. 
 
 .. image:: basictables.png
 
+For some parameters it is useful to look at more than one measurement. For example, we store information about the stellar mass from GAIA as well as estimates using the spectral type from SIMBAD and the relation used in Pecaut & Mamajek (2013). We call those tables multiple measurement ones and they all start with `mes_`. We add quality estimations to the individual measurements and only the best quality one is shown in the general tables e.g. star_basic. If a user is interested in a homogeneous sample he can access the measurements in the `mes_` table and the desired source.
+
 .. image:: multimestables.png
 
-TBD: insert example measurement tables
 
