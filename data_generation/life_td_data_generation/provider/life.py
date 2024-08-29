@@ -30,6 +30,33 @@ def lum_class(nr,sptype):
             lum_class=sptype[nr:nr+3]
     return lum_class
 
+def assign_lum_class_V(table,index):
+    """
+    Assignes luminocity class 'V' to specified entry of table.
+    
+    :param table: Table containing column 'class_lum'.
+    :type table: astropy.table.table.Table
+    :param int index: Index of entry.
+    """
+    table['class_lum'][index]='V'
+    return
+
+def assign_null_values(table,index):
+    table['class_temp'][index]='?'
+    table['class_temp_nr'][index]='?'
+    table['class_lum'][index]='?'
+    table['class_ref'][index]='?'
+    return
+
+def deal_with_leading_d_sptype(table,index):
+    """
+    Deals with old annotation of leading d in spectraltype representing dwarf star.
+    """
+    if len(table['sptype_string'][index])>0:
+        if table['sptype_string'][index][0]=='d':
+            assign_lum_class_V(table,index)      
+    return table['sptype_string'][index].strip('d')
+
 def sptype_string_to_class(temp,ref):
     """
     Extracts stellar parameters from spectral type string one.
@@ -54,15 +81,10 @@ def sptype_string_to_class(temp,ref):
     temp['class_temp_nr']=MaskedColumn(dtype=object,length=len(temp))
     temp['class_lum']=MaskedColumn(dtype=object,length=len(temp))
     temp['class_ref']=MaskedColumn(dtype=object,length=len(temp))
-    #tbd: rewrite code using recoursive function
 
     for i in range(len(temp)):
         #sorting out objects like M5V+K7V
-        #strip d for spectral types starting with small d because it is an old annotation for dwarf star
-        if len(temp['sptype_string'][i])>0:
-            if temp['sptype_string'][i][0]=='d':
-                temp['class_lum'][i]='V'
-        sptype=temp['sptype_string'][i].strip('d')
+        sptype=deal_with_leading_d_sptype(temp,i)
         
         if (len(sptype.split('+'))==1 and
                 #sorting out entries like ''
@@ -79,22 +101,16 @@ def sptype_string_to_class(temp,ref):
                     temp['class_temp_nr'][i]=sptype[1:4]
                     if len(sptype)>4 and sptype[4] in ['I','V']:
                         temp['class_lum'][i]=lum_class(4,sptype)
-                    #make sure sptypes starting with d don't get class_lum overwritten
                     else:
-                        temp['class_lum'][i]='V'
+                        assign_lum_class_V(temp,i) # assumption
                 elif len(sptype)>2 and sptype[2] in ['I','V']:
                     temp['class_lum'][i]=lum_class(2,sptype)
-                #tbd add assumption of V if nothing given. valid because V is longest 
-                #evolution stage so most stars will be in V
                 else:
-                    temp['class_lum'][i]='V'
+                    assign_lum_class_V(temp,i) # assumption
             else:
-                temp['class_lum'][i]='V'
+                assign_lum_class_V(temp,i) # assumption
         else:
-            temp['class_temp'][i]='?'
-            temp['class_temp_nr'][i]='?'
-            temp['class_lum'][i]='?'
-            temp['class_ref'][i]='?'
+            assign_null_values(temp,i)
     return temp
 
 def realspectype(cat):
