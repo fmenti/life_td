@@ -62,14 +62,14 @@ We used the Unified Modeling Language (UML) to create our data model. Each table
 
 TBD: add small example data model from book beginning database design.
 
-.. image:: classdiagramexplanation.png
+.. image:: images/classdiagramexplanation.png
 
 The figure below is the general structure of the current data model. It went through many iterations to reach this point. We started with what kind of data we wanted to have in the database and normalized the model as much as possible. Normalization is the concept in database design on how to reduce data redundancey (e.g. having the same information save multiple times in the database)
 and improve data integrity (e.g. accumulations of errors occurring during data maintenance). Higher
 normalizations have the benefit of write performance (minimized redesign when extending the database structure, and anomaly resistance) at the cost of read performance (e.g. querying). However, it turned out that due to the high normalization our database became too complex with manifested in the way that our queries got too complicated. We therefore looked at example data we wanted to ingest into the database and how to extract it again. It turned out, that our database would have many similarities with the SIMBAD database. We drafted a new data model inspired by the one from SIMBAD and aspects of our older complex data model. Compared to SIMBAD we included additional classes for disks and planets and leaft out classes that were irrelevant for us (e.g. bibliography, flux).
 
 
-.. image:: data_model_2024.png
+.. image:: images/data_model_2024.png
 
 TBD: Elaborate on keys as well as value, err, quality,...
 
@@ -78,7 +78,7 @@ Ingestion Pipeline
 
 The image below visualizes the different steps required for the data to get ingested into the database before it can be extracted by users.
 
-.. image:: IngestionPipeline.png
+.. image:: images/IngestionPipeline.png
 
 TBD: explain individual steps
 
@@ -91,10 +91,10 @@ The target database contains as much useful information on the potential target 
 
 The table below shows the different tables within the life_td, which parameters they contain, the columns and finally the sources of the data. 
 
-.. image:: basictables.png
+.. image:: images/basic_tables29_08_24.png
 
 For some parameters it is useful to look at more than one measurement. For example, we store information about the stellar mass from GAIA as well as estimates using the spectral type from SIMBAD and the relation used in Pecaut & Mamajek (2013). We call those tables multiple measurement ones and they all start with `mes_`. We add quality estimations to the individual measurements and only the best quality one is shown in the general tables e.g. star_basic. If a user is interested in a homogeneous sample he can access the measurements in the `mes_` table and the desired source.
 
-.. image:: multimestables.png
+.. image:: images/multimes_tables29_08_24.png
 
 
