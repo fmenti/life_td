@@ -6,7 +6,7 @@ from astropy.table import Column, join, column, vstack, Table, unique
 #self created modules
 from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
-import sdata as sdc, Cat
+import sdata as sdc
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -140,6 +140,53 @@ def merge_table(cat1,cat2):
     
     return merged_cat
 
+def best_para_id(mes_table):
+    para='id'
+    best_para_table=mes_table[:0].copy()
+    grouped_mes_table=mes_table.group_by('id_ref')
+    #making simbad default best para
+    mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W' 
+    best_para_table=grouped_mes_table.groups[mask]
+    # TBD: use id_ref as variable from provider_bibcode 
+    #        instad of constant""")
+    for ref in ['2022A&A...664A..21Q','2016A&A...595A...1G','priv. comm.',
+                '2020A&C....3100370A','2001AJ....122.3466M']:
+        #priority of id best para: 
+        mask = grouped_mes_table.groups.keys['id_ref'] == ref
+        new_ids=grouped_mes_table.groups[mask][np.where(np.invert(np.in1d(
+                                    grouped_mes_table.groups[mask]['id'],
+                                    best_para_table['id'])))]
+    best_para_table=vstack([best_para_table,new_ids])
+    best_para_table.remove_column('id_ref')
+    return best_para_table
+
+def best_para_membership(mes_table):
+    para='membership'
+    best_para_table=mes_table[:0].copy()
+    grouped_mes_table=mes_table.group_by(['child_object_idref',
+                                          'parent_object_idref'])
+    ind=grouped_mes_table.groups.indices
+    for i in range(len(ind)-1):
+        l=ind[i+1]-ind[i]
+        if l==1:
+            best_para_table.add_row(grouped_mes_table[ind[i]])
+        else:
+            temp=grouped_mes_table[ind[i]:ind[i+1]]
+            not_nan_temp=temp[np.where(temp[para]!=999999)]
+            if len(not_nan_temp)>0:
+                max_row=not_nan_temp[np.where(
+                        not_nan_temp[para]==max(not_nan_temp[para]))]
+                for j in range(ind[i],ind[i+1]):
+                    if grouped_mes_table[para][j]==max(not_nan_temp[para]):
+                        best_para_table.add_row(grouped_mes_table[j])
+                        break # make sure not multiple of same max 
+                               # value are added
+            else:
+                #if none of the objects has a membership entry 
+                # then pick just first one
+                best_para_table.add_row(grouped_mes_table[ind[i]])
+    return best_para_table
+
 def best_para(para,mes_table):
     """
     This function keeps only highest quality row for each object. 
@@ -157,46 +204,9 @@ def best_para(para,mes_table):
     """
     
     if para=='id':
-        best_para=mes_table[:0].copy()
-        grouped_mes_table=mes_table.group_by('id_ref')
-        mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W'
-        best_para=grouped_mes_table.groups[mask]
-        # TBD: use id_ref as variable from provider_bibcode 
-        #        instad of constant""")
-        for ref in ['2022A&A...664A..21Q','2016A&A...595A...1G','priv. comm.',
-                    '2020A&C....3100370A','2001AJ....122.3466M']:
-            mask = grouped_mes_table.groups.keys['id_ref'] == ref
-            new_ids=grouped_mes_table.groups[mask][np.where(np.invert(np.in1d(
-                                        grouped_mes_table.groups[mask]['id'],
-                                        best_para['id'])))]
-        best_para=vstack([best_para,new_ids])
-        best_para.remove_column('id_ref')
-        return best_para
+        best_para_id(mes_table)
     elif para=='membership':
-        best_para=mes_table[:0].copy()
-        grouped_mes_table=mes_table.group_by(['child_object_idref',
-                                              'parent_object_idref'])
-        ind=grouped_mes_table.groups.indices
-        for i in range(len(ind)-1):
-            l=ind[i+1]-ind[i]
-            if l==1:
-                best_para.add_row(grouped_mes_table[ind[i]])
-            else:
-                temp=grouped_mes_table[ind[i]:ind[i+1]]
-                not_nan_temp=temp[np.where(temp[para]!=999999)]
-                if len(not_nan_temp)>0:
-                    max_row=not_nan_temp[np.where(
-                            not_nan_temp[para]==max(not_nan_temp[para]))]
-                    for j in range(ind[i],ind[i+1]):
-                        if grouped_mes_table[para][j]==max(not_nan_temp[para]):
-                            best_para.add_row(grouped_mes_table[j])
-                            break # make sure not multiple of same max 
-                                   # value are added
-                else:
-                    #if none of the objects has a membership entry 
-                    # then pick just first one
-                    best_para.add_row(grouped_mes_table[ind[i]])
-        return best_para
+        best_para_membership(mes_table)
     elif para=='binary':
         columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
     elif para=='mass_pl':
@@ -209,7 +219,7 @@ def best_para(para,mes_table):
         columns=['main_id',para+'_value',para+'_err',para+'_qual',
                 para+'_source_idref']
     mes_table=mes_table[columns[0:]]
-    best_para=mes_table[columns[0:]][:0].copy()
+    best_para_table=mes_table[columns[0:]][:0].copy()
     #group mes_table by object (=main_id)
     grouped_mes_table=mes_table.group_by('main_id')
     #take highest quality
@@ -220,12 +230,12 @@ def best_para(para,mes_table):
         for qual in ['A','B','C','D','E','?']:
             for i in range(len(grouped_mes_table.groups[j])):
                 if grouped_mes_table.groups[j][i][para+'_qual']==qual:
-                    best_para.add_row(grouped_mes_table.groups[j][i])
+                    best_para_table.add_row(grouped_mes_table.groups[j][i])
                     break # if best para found go to next main_id group
             else:
                 continue # only executed if the inner loop did NOT break
             break  # only executed if the inner loop DID break 
-    return best_para
+    return best_para_table
 
 def best_parameters_ingestion(cat_mes,cat_basic,para,columns=[]):
     """

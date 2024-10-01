@@ -1,5 +1,5 @@
-# from building import *
-# from astropy.table import Table, MaskedColumn
+from building import *
+from astropy.table import Table, MaskedColumn
 
 # def test_idsjoin_no_mask():
 #     cat = Table(data=[['* 61 Cyg b|61 Cyg b', '', 'GCRV 13273|LTT 16180'],
@@ -31,3 +31,12 @@
 #     assert cat['ids'][0].split('|').count('61 Cyg b')==1
 #     assert cat['ids'][0].split('|').count('markmuster')==1
 
+def test_best_para_id():
+    mes_table=Table(data=[[1,2,3],
+                          ['* 61 Cyg b', '61 Cyg b', 'GCRV 13273'],
+                       ['2000A&AS..143....9W', '1925AnHar.100...17C','2001AJ....122.3466M' ]],
+                 names=['object_idref','id','id_source_idref'], 
+                 dtype=[int,object,int])
+    best_para_table=best_para_id(mes_table)
+    
+    assert False
