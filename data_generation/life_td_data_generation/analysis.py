@@ -28,11 +28,24 @@ class SpectralType(Enum):
     K = 'K'
     M = 'M'
 
+def prepare_table(cat,columns):
+    if columns==[]:
+        table=cat
+    else:
+        table=cat[columns]
+    return table
+
+def match_table(table,wherecol,whereobj):
+    if wherecol!='' or whereobj!='':
+        table=table[np.where(table[wherecol]==whereobj)]        
+    return table
+
 def show(provider,
          table='objects',
          columns=[],
-         wherecol='main_id',
-         whereobj='* zet02 Ret'):
+         wherecol='',
+         whereobj='',
+         notobjs=[]):
     """
     This function prints the specified columns of a table.
     
@@ -44,11 +57,14 @@ def show(provider,
     """
     
     cat=provider[table_names.index(table)]
-
-    if columns==[]:
-        print(cat[np.where(cat[wherecol]==whereobj)])
-    else:
-        print(cat[columns][np.where(cat[wherecol]==whereobj)])
+    table=prepare_table(cat,columns)
+    
+    table=match_table(table,wherecol,whereobj)
+    #at one point also excluding some  
+    #if notobjs!=[]:
+    #    for element in notobjs:
+    #        table=match_table(table,wherecol,whereobj)
+    print(table)    
     return
 
 def is_starnames(arr):
@@ -171,7 +187,7 @@ def define_xticks(distance_cut: float):
 @dataclass
 class Plotparas:
     width = 0.15
-    color = ['tab:blue','tab:green','tab:olive']
+    color = ['tab:blue','tab:cyan','tab:green','tab:olive']
 
 def x_position(x,n_samples,sample_index):
     """
