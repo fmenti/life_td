@@ -348,32 +348,39 @@ def initialize_empty_tables(list_of_tables):
 
 def build_sources_table(cat,table_names,prov_tables_list,empty):
     #for the sources and objects joins tables from different prov_tables_list
-    cat[0]=provider_data_merging(cat,table_names,'sources',prov_tables_list)
+    cat[table_names.index('sources')]=provider_data_merging(
+            cat,table_names,'sources',prov_tables_list)
     
     #adding empty columns for later being able to join tables
-    cat[0]=vstack([cat[0],empty.table('sources')])
+    cat[table_names.index('sources')]=vstack(
+            [cat[table_names.index('sources')],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
-    cat[0]=unique(cat[0],silent=True)
-    cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]    
+    cat[table_names.index('sources')]=unique(
+            cat[table_names.index('sources')],silent=True)
+    cat[table_names.index('sources')]['source_id']=[j+1 for j \
+            in range(len(cat[table_names.index('sources')]))]    
     return cat
 
 def build_objects_table(cat,table_names,prov_tables_list):
-    cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
+    cat[table_names.index('objects')]=provider_data_merging(
+            cat,table_names,'objects',prov_tables_list,o_merging=True)
                     
     #assigning object_id
-    cat[1]['object_id']=[j+1 for j in range(len(cat[1]))]
+    cat[table_names.index('objects')]['object_id']=[j+1 for j \
+            in range(len(cat[table_names.index('objects')]))]
     
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
-    
     return cat
 
 def build_provider_table(cat,table_names,prov_tables_list,empty):
-    cat[2]=provider_data_merging(cat,table_names,'provider',prov_tables_list)
+    cat[table_names.index('provider')]=provider_data_merging(
+            cat,table_names,'provider',prov_tables_list)
     
     #I do this to get those columns that are empty in the data
-    cat[2]=vstack([cat[2],empty.table('provider')])    
+    cat[table_names.index('provider')]=vstack(
+            [cat[table_names.index('provider')],empty.table('provider')])    
     return cat
 
 def build_rest_of_tables(cat,n_tables,table_names,prov_tables_list,empty):
