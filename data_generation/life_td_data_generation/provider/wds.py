@@ -37,10 +37,10 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     
     # define queries
     adql_query=["""SELECT
-                    wds.WDS as wds_name, wds.Comp as wds_comp,
-                    wds.sep1 as wds_sep1, wds.sep2 as wds_sep2, 
-                    wds.Obs1 as wds_obs1, wds.Obs2 as wds_obs2
-                    FROM "B/wds/wds" as wds """]
+                    WDS as wds_name, Comp as wds_comp,
+                    sep1 as wds_sep1, sep2 as wds_sep2, 
+                    Obs1 as wds_obs1, Obs2 as wds_obs2
+                    FROM "B/wds/wds" """]
     
     print('Creating ',wds_provider['provider_name'][0],' tables ...')
     #perform query for objects with parallax >50mas

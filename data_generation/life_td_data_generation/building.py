@@ -153,10 +153,12 @@ def best_para_id(mes_table):
                 '2020A&C....3100370A','2001AJ....122.3466M']:
         #priority of id best para: 
         mask = grouped_mes_table.groups.keys['id_ref'] == ref
-        new_ids=grouped_mes_table.groups[mask][np.where(np.invert(np.in1d(
-                                    grouped_mes_table.groups[mask]['id'],
+        all_ref_ids=grouped_mes_table.groups[mask]
+        #removing those already in best_para_table
+        new_ids=all_ref_ids[np.where(np.invert(np.in1d(
+                                    all_ref_ids['id'],
                                     best_para_table['id'])))]
-    best_para_table=vstack([best_para_table,new_ids])
+        best_para_table=vstack([best_para_table,new_ids])
     best_para_table.remove_column('id_ref')
     return best_para_table
 
@@ -204,9 +206,9 @@ def best_para(para,mes_table):
     """
     
     if para=='id':
-        best_para_id(mes_table)
+        return best_para_id(mes_table)
     elif para=='membership':
-        best_para_membership(mes_table)
+        return best_para_membership(mes_table)
     elif para=='binary':
         columns=['main_id',para+'_flag',para+'_qual',para+'_source_idref']
     elif para=='mass_pl':
@@ -472,6 +474,16 @@ def building(prov_tables_list,table_names,list_of_tables):
     #next line is needed as multimeasurement adaptions lead to potentially masked entries
     cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
     
+    cat=unify_null_values(cat,table_names)
+            
+    # TBD: Add exact object distance cut. So far for correct treatment
+    #       of boundary objects 10% additional distance cut used""")
+    
+    print('Saving data...')
+    save(cat,table_names,location=Path().data)
+    return cat
+
+def unify_null_values(cat,table_names):
     print('Unifying null values...')
     # unify null values (had 'N' and '?' because of astropy default 
     # fill_value and type conversion string vs object)
@@ -495,10 +507,4 @@ def building(prov_tables_list,table_names,list_of_tables):
         for col in columns[i]:
             tables[i]=replace_value(tables[i],col,'N','?')
             tables[i]=replace_value(tables[i],col,'N/A','?')
-            
-    # TBD: Add exact object distance cut. So far for correct treatment
-    #       of boundary objects 10% additional distance cut used""")
-    
-    print('Saving data...')
-    save(cat,table_names,location=Path().data)
     return cat

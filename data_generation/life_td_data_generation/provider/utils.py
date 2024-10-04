@@ -16,7 +16,7 @@ from utils.io import load
     
 #issue with saving tables and doing for loops only over some of them
     
-def query(link: str,adql_query: str,catalogs: List[table.Table]=[]) -> table.Table:
+def query(link: str,adql_query: str,upload_tables: List[table.Table]=[]) -> table.Table:
     """
     Performs a query via TAP on the service given in the link parameter.
     
@@ -26,23 +26,20 @@ def query(link: str,adql_query: str,catalogs: List[table.Table]=[]) -> table.Tab
     :param str link: Service access URL.
     :param str adql_query: Query to be asked of the external database service
          in ADQL.
-    :param catalogs: List of astropy tables to be uploaded to the 
+    :param upload_tables: List of astropy tables to be uploaded to the 
         service.
-    :type catalogs: list(astropy.table.table.Table)
+    :type upload_tables: list(astropy.table.table.Table)
     :returns: Result of the query.
     :rtype: astropy.table.table.Table
     """
     
-    #defining the vo service using the given link
     service = TAPService(link)
-    #without upload tables
-    if catalogs==[]:
+    if upload_tables==[]:
         result=service.run_async(adql_query.format(**locals()), maxrec=1600000)
-    #with upload tables
     else:
         tables={}
-        for i in range(len(catalogs)):
-            tables.update({f"t{i+1}":catalogs[i]})
+        for i in range(len(upload_tables)):
+            tables.update({f"t{i+1}":upload_tables[i]})
         result = service.run_async(adql_query,uploads=tables,timeout=None,
                                    maxrec=1600000)   
     return result.to_table()

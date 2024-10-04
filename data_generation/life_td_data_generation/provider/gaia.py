@@ -48,7 +48,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     #query
     adql_query="""
     SELECT s.source_id ,p.mass_flame, p.radius_flame,
-        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type 
+        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame
     FROM gaiadr3.gaia_source as s
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
