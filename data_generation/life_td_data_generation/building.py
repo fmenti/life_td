@@ -310,7 +310,41 @@ def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=
             cat[n]=prov_tables_list[j][n]
     return cat[n]
 
+def unify_null_values(cat,table_names):
+    print('Unifying null values...')
+    # unify null values (had 'N' and '?' because of astropy default 
+    # fill_value and type conversion string vs object)
+    tables=[cat[table_names.index('star_basic')],
+            cat[table_names.index('planet_basic')],
+            cat[table_names.index('disk_basic')],
+            cat[table_names.index('mes_mass_pl')],
+            cat[table_names.index('mes_teff_st')],
+            cat[table_names.index('mes_radius_st')],
+            cat[table_names.index('mes_mass_st')],
+            cat[table_names.index('mes_binary')]]
+    columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
+              'sep_ang_qual','teff_st_qual','radius_st_qual','binary_flag',
+              'binary_qual','mass_st_qual','sptype_qual','class_temp',
+              'class_temp_nr'],
+             ['mass_pl_qual','mass_pl_rel'],
+             ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
+             ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],
+             ['binary_qual']]
+    for i in range(len(tables)):
+        for col in columns[i]:
+            tables[i]=replace_value(tables[i],col,'N','?')
+            tables[i]=replace_value(tables[i],col,'N/A','?')
+    return cat
 
+def initialize_empty_tables(list_of_tables):
+    """
+    Creates empty tables as needed for final database ingestion
+    """
+    
+    empty=sdc.provider('empty')
+    n_tables=len(empty.list_of_tables)
+    cat=[Table() for i in range(n_tables)]    
+    return empty, n_tables, cat
 
 #------------------------provider combining----------------------------
 def building(prov_tables_list,table_names,list_of_tables):
@@ -330,28 +364,21 @@ def building(prov_tables_list,table_names,list_of_tables):
     :rtype: list containing objects of type astropy.table.table.Table
     """
     
-    # Creates empty tables as needed for final database ingestion
-    empty=sdc.provider('empty')
-    n_tables=len(empty.list_of_tables)
-    cat=[Table() for i in range(n_tables)]
+    empty, n_tables, cat = initialize_empty_tables(list_of_tables)
     
     #for the sources and objects joins tables from different prov_tables_list
     cat[0]=provider_data_merging(cat,table_names,'sources',prov_tables_list)
     
-    #I do this to get those columns that are empty in the data
-    #but do I need to do that here, need to remove quite some of them again later
-    #to work with the join function
+    #adding empty columns for later being able to join tables
     cat[0]=vstack([cat[0],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
-    if len(cat[0])>0:
+    if len(cat[0])>0:#not needed as never no sources given
         cat[0]=unique(cat[0],silent=True)
         cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
     
     cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
-                
-    #removed vstack with init to not have object_id as is empty anyways
-    
+                    
     #assigning object_id
     cat[1]['object_id']=[j+1 for j in range(len(cat[1]))]
 
@@ -481,30 +508,4 @@ def building(prov_tables_list,table_names,list_of_tables):
     
     print('Saving data...')
     save(cat,table_names,location=Path().data)
-    return cat
-
-def unify_null_values(cat,table_names):
-    print('Unifying null values...')
-    # unify null values (had 'N' and '?' because of astropy default 
-    # fill_value and type conversion string vs object)
-    tables=[cat[table_names.index('star_basic')],
-            cat[table_names.index('planet_basic')],
-            cat[table_names.index('disk_basic')],
-            cat[table_names.index('mes_mass_pl')],
-            cat[table_names.index('mes_teff_st')],
-            cat[table_names.index('mes_radius_st')],
-            cat[table_names.index('mes_mass_st')],
-            cat[table_names.index('mes_binary')]]
-    columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
-              'sep_ang_qual','teff_st_qual','radius_st_qual','binary_flag',
-              'binary_qual','mass_st_qual','sptype_qual','class_temp',
-              'class_temp_nr'],
-             ['mass_pl_qual','mass_pl_rel'],
-             ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
-             ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],
-             ['binary_qual']]
-    for i in range(len(tables)):
-        for col in columns[i]:
-            tables[i]=replace_value(tables[i],col,'N','?')
-            tables[i]=replace_value(tables[i],col,'N/A','?')
     return cat
