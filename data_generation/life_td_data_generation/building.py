@@ -346,26 +346,7 @@ def initialize_empty_tables(list_of_tables):
     cat=[Table() for i in range(n_tables)]    
     return empty, n_tables, cat
 
-#------------------------provider combining----------------------------
-def building(prov_tables_list,table_names,list_of_tables):
-    """
-    This function builds the tables for the LIFE database.
-    
-    :param prov_tables_list: Containing simbad, grant kennedy, exomercat, gaia 
-        and wds data.
-    :type prov_tables_list: list(astropy.table.table.Table)
-    :param table_names: Objects correspond to the names of the 
-        astropy tables contained in prov_tables_list and the return list.
-    :type table_names: list of objects of type str
-    :param list_of_tables: Empty astropy tables to be filled
-        in and returned.
-    :type list_of_tables: list(astropy.table.table.Table)
-    :returns: Containing data combined from the different prov_tables_list.
-    :rtype: list containing objects of type astropy.table.table.Table
-    """
-    
-    empty, n_tables, cat = initialize_empty_tables(list_of_tables)
-    
+def build_sources_table(cat,table_names,prov_tables_list,empty):
     #for the sources and objects joins tables from different prov_tables_list
     cat[0]=provider_data_merging(cat,table_names,'sources',prov_tables_list)
     
@@ -374,22 +355,28 @@ def building(prov_tables_list,table_names,list_of_tables):
     
     # keeping only unique values then create identifiers for the tables
     cat[0]=unique(cat[0],silent=True)
-    cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
-    
+    cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]    
+    return cat
+
+def build_objects_table(cat,table_names,prov_tables_list):
     cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
                     
     #assigning object_id
     cat[1]['object_id']=[j+1 for j in range(len(cat[1]))]
-
+    
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
+    
+    return cat
 
+def build_provider_table(cat,table_names,prov_tables_list,empty):
     cat[2]=provider_data_merging(cat,table_names,'provider',prov_tables_list)
     
     #I do this to get those columns that are empty in the data
-    cat[2]=vstack([cat[2],empty.table('provider')])
-       
-    
+    cat[2]=vstack([cat[2],empty.table('provider')])    
+    return cat
+
+def build_rest_of_tables(cat,n_tables,table_names,prov_tables_list,empty):
     for i in range(3,n_tables): 
     # for the tables star_basic,...,mes_mass_st
         cat[i]=provider_data_merging(cat,table_names,table_names[i],
@@ -397,8 +384,8 @@ def building(prov_tables_list,table_names,list_of_tables):
 
         #I do this to get those columns that are empty in the data
         cat[i]=vstack([cat[i],empty.table(table_names[i])])
+        #filling so when I run unique it doesn't neglect previously masked columns
         cat[i]=cat[i].filled() 
-        # because otherwise unique does neglect masked columns
 
         if 'object_idref' in cat[i].colnames and len(cat[i])>0: 
             # add object_idref
@@ -496,6 +483,39 @@ def building(prov_tables_list,table_names,list_of_tables):
         else:
             #only keeping unique entries
             cat[i]=unique(cat[i],silent=True)
+    return cat
+
+def build_tables(list_of_tables,table_names,prov_tables_list):
+    empty, n_tables, cat = initialize_empty_tables(list_of_tables)
+    
+    cat=build_sources_table(cat,table_names,prov_tables_list,empty)
+    
+    cat=build_objects_table(cat,table_names,prov_tables_list)
+    
+    cat=build_provider_table(cat,table_names,prov_tables_list,empty)     
+    
+    cat=build_rest_of_tables(cat,n_tables,table_names,prov_tables_list,empty)
+    return cat
+
+#------------------------provider combining----------------------------
+def building(prov_tables_list,table_names,list_of_tables):
+    """
+    This function builds the tables for the LIFE database.
+    
+    :param prov_tables_list: Containing simbad, grant kennedy, exomercat, gaia 
+        and wds data.
+    :type prov_tables_list: list(astropy.table.table.Table)
+    :param table_names: Objects correspond to the names of the 
+        astropy tables contained in prov_tables_list and the return list.
+    :type table_names: list of objects of type str
+    :param list_of_tables: Empty astropy tables to be filled
+        in and returned.
+    :type list_of_tables: list(astropy.table.table.Table)
+    :returns: Containing data combined from the different prov_tables_list.
+    :rtype: list containing objects of type astropy.table.table.Table
+    """
+    
+    cat=build_tables(list_of_tables,table_names,prov_tables_list)
             
     #next line is needed as multimeasurement adaptions lead to potentially masked entries
     cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
