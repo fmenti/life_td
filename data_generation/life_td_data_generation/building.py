@@ -373,9 +373,8 @@ def building(prov_tables_list,table_names,list_of_tables):
     cat[0]=vstack([cat[0],empty.table('sources')])
     
     # keeping only unique values then create identifiers for the tables
-    if len(cat[0])>0:#not needed as never no sources given
-        cat[0]=unique(cat[0],silent=True)
-        cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
+    cat[0]=unique(cat[0],silent=True)
+    cat[0]['source_id']=[j+1 for j in range(len(cat[0]))]
     
     cat[1]=provider_data_merging(cat,table_names,'objects',prov_tables_list,o_merging=True)
                     
