@@ -259,14 +259,9 @@ def provider_life(table_names,life_list_of_tables):
     :rtype: list(astropy.table.table.Table)
     """
     
-    #---------------define provider-------------------------------------
-    life_provider=Table()
-    life_provider['provider_name']=['LIFE']
-    life_provider['provider_url']=['www.life-space-mission.com']
-    life_provider['provider_bibcode']=['2022A&A...664A..21Q']
-    life_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
-    
-    print('Creating ',life_provider['provider_name'][0],' tables ...')
+    life_provider = create_provider_table('LIFE',
+                                        'www.life-space-mission.com',
+                                        '2022A&A...664A..21Q')
     #---------------------star_basic----------------
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])

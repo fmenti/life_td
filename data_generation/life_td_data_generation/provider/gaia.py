@@ -36,14 +36,10 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
-    #---------------define provider-------------------------------------
-    gaia_provider=Table()
-    gaia_provider['provider_name']=['Gaia']
-    gaia_provider['provider_url']=["https://gea.esac.esa.int/tap-server/tap"]
-    gaia_provider['provider_bibcode']=['2016A&A...595A...1G']
-    gaia_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
     
-    print('Creating ',gaia_provider['provider_name'][0],' tables ...')
+    gaia_provider = create_provider_table('Gaia',
+                                  "https://gea.esac.esa.int/tap-server/tap",
+                                  '2016A&A...595A...1G')
     
     #query
     adql_query="""

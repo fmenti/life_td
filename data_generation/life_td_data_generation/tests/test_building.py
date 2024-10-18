@@ -1,5 +1,5 @@
 from building import *
-from astropy.table import Table, MaskedColumn
+from astropy.table import Table, MaskedColumn, setdiff
 
 def test_idsjoin_no_mask():
     cat = Table(data=[['* 61 Cyg b|61 Cyg b', '', 'GCRV 13273|LTT 16180'],
@@ -99,7 +99,7 @@ def test_best_para():
                  dtype=[object,float,object,float,int])
     assert len(setdiff(wanted_table,mes_table)) == 0
     
-def test_building():
+#def test_building():
     #input_data=
     #building(prov_tables_list,table_names,list_of_tables)
-    assert False
+#    assert False

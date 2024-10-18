@@ -96,18 +96,16 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
-    #---------------define provider-------------------------------------
+    
+    
+
     sdc_simbad=sdc.provider('simbad')
     table_names=sdc_simbad.table_names
-    sdc_simbad.table('provider').add_row()
-    sdc_simbad.table('provider')['provider_name']='SIMBAD',
-    sdc_simbad.table('provider')['provider_url']=\
-            "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
-    sdc_simbad.table('provider')['provider_bibcode']='2000A&AS..143....9W'
-    sdc_simbad.table('provider')['provider_access']= \
-            datetime.now().strftime('%Y-%m-%d')
     
-    sim_provider=sdc_simbad.table('provider')
+    sim_provider = create_provider_table('SIMBAD',
+                       "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
+                       '2000A&AS..143....9W')
+    
     #---------------define queries--------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
         b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
@@ -158,8 +156,8 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
         """SELECT id, t1.*
         FROM ident
         JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""]
+    
     #------------------querrying----------------------------------------
-    print('Creating ',sim_provider['provider_name'][0],' tables ...')
     #perform query for objects with in distance given
     simbad=query(sim_provider['provider_url'][0],adql_query[0])
     #querries parent and children objects with no parallax value

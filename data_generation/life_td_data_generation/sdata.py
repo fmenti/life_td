@@ -8,6 +8,23 @@ from astropy.table import Table
 
 from utils.io import save, Path
 
+empty_cat = {
+    'sources' : Table(),
+    'objects': Table(),
+    'provider': Table(),
+    'ident': Table(),
+    'best_h_link': Table(),
+    'star_basic': Table(),
+    'planet_basic': Table(),
+    'disk_basic': Table(),
+    'mes_mass_pl': Table(),
+    'mes_teff_st': Table(),
+    'mes_radius_st': Table(),
+    'mes_mass_st': Table(),
+    'mes_binary': Table(),
+    'mes_sep_ang': Table(),
+    'h_link': Table()
+}
     
 @dataclass
 class Data():

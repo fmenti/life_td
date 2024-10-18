@@ -38,7 +38,7 @@ def create_life_td(distance_cut_in_pc):
     empty_provider=[Table() for i in range(len(table_names))]
     
     sim=provider_simbad(empty_provider[:],distance_cut_in_pc)
-    gk=provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
+    gk=list(provider_gk(distance_cut_in_pc).values())
     wds=provider_wds(table_names,empty_provider[:],False)
     exo=provider_exo(table_names,empty_provider[:],temp=False)
     life=provider_life(table_names,empty_provider[:])
@@ -114,7 +114,7 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
         sim[i]=stringtoobject(sim[i])
     
     if 'gk' in create:
-        gk=provider_gk(table_names,empty_provider[:],distance_cut_in_pc)
+        gk=list(provider_gk(distance_cut_in_pc).values())
     else:
         gk=load(['gk_' + direction for direction in table_names])
     for i in range(len(gk)):

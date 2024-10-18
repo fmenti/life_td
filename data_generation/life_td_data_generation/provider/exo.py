@@ -35,27 +35,26 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     :rtype: list(astropy.table.table.Table)
     """
     
-    #---------------define provider-------------------------------------
-    exo_provider=Table()
-    exo_provider['provider_name']=['Exo-MerCat']
-    exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
-    exo_provider['provider_bibcode']=['2020A&C....3100370A']
-    
-    
-    print('Creating ',exo_provider['provider_name'][0],' tables ...')
     #---------------define query----------------------------------------
     adql_query="""SELECT *
                   FROM exomercat.exomercat"""
     #---------------obtain data-----------------------------------------
     if temp:
+        
+        exo_provider = create_provider_table('Exo-MerCat',
+                                        "http://archives.ia2.inaf.it/vo/tap/projects",
+                                        '2020A&C....3100370A','2023-02-05')        
         exomercat=io.ascii.read(
                 Path().additional_data+"exo-mercat05-02-2023_v2.0.csv")
         exomercat=stringtoobject(exomercat,3000)
         exo_provider['provider_access']=['2023-02-05']
 
     else:
+        exo_provider = create_provider_table('Exo-MerCat',
+                                        "http://archives.ia2.inaf.it/vo/tap/projects",
+                                        '2020A&C....3100370A')
         exomercat=query(exo_provider['provider_url'][0],adql_query)
-        exo_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
+        
     #----------------putting object main identifiers together-----------
     
     # initializing column

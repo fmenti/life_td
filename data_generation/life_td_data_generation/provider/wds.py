@@ -28,12 +28,9 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     :rtype:  list(astropy.table.table.Table)
     """
     
-    # define provider
-    wds_provider=Table()
-    wds_provider['provider_name']=['WDS']
-    wds_provider['provider_url']=["http://tapvizier.u-strasbg.fr/TAPVizieR/tap"]
-    wds_provider['provider_bibcode']=['2001AJ....122.3466M']
-    wds_provider['provider_access']=datetime.now().strftime('%Y-%m-%d')
+    wds_provider = create_provider_table('WDS',
+                                        'http://tapvizier.u-strasbg.fr/TAPVizieR/tap',
+                                        '2001AJ....122.3466M')
     
     # define queries
     adql_query=["""SELECT

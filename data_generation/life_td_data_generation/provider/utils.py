@@ -11,10 +11,15 @@ from typing import List
 #self created modules
 from utils.io import load
 
-#------------------------------provider helper functions----------------
 
-    
-#issue with saving tables and doing for loops only over some of them
+def create_provider_table(provider_name,provider_url,provider_bibcode,provider_access = datetime.now().strftime('%Y-%m-%d')):
+    print(f'Creating {provider_name} tables ...')
+    provider_table = Table()
+    provider_table['provider_name']=[provider_name]
+    provider_table['provider_url']=[provider_url]
+    provider_table['provider_bibcode']=[provider_bibcode]
+    provider_table['provider_access']=[provider_access]
+    return provider_table
     
 def query(link: str,adql_query: str,upload_tables: List[table.Table]=[]) -> table.Table:
     """
