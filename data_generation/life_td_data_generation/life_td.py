@@ -11,7 +11,7 @@ from utils.io import stringtoobject, load, Path
 from provider.exo import provider_exo
 from provider.gaia import provider_gaia
 from provider.life import provider_life
-from provider.sdb import provider_gk
+from provider.sdb import provider_sdb
 from provider.simbad import provider_simbad
 from provider.wds import provider_wds
 from building import building
@@ -38,7 +38,7 @@ def create_life_td(distance_cut_in_pc):
     empty_provider=[Table() for i in range(len(table_names))]
     
     sim=provider_simbad(empty_provider[:],distance_cut_in_pc)
-    gk=list(provider_gk(distance_cut_in_pc).values())
+    sdb=list(provider_sdb(distance_cut_in_pc).values())
     wds=provider_wds(table_names,empty_provider[:],False)
     exo=provider_exo(table_names,empty_provider[:],temp=False)
     life=provider_life(table_names,empty_provider[:])
@@ -46,15 +46,15 @@ def create_life_td(distance_cut_in_pc):
     
     for i in range(len(sim)):
         sim[i]=stringtoobject(sim[i])
-        gk[i]=stringtoobject(gk[i])
+        sdb[i]=stringtoobject(sdb[i])
         wds[i]=stringtoobject(wds[i])
         exo[i]=stringtoobject(exo[i])
         life[i]=stringtoobject(life[i])
         gaia[i]=stringtoobject(gaia[i])
 
     #------------------------combine data from external sources---------
-    database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
-    return sim, gk, wds, exo, life, gaia, database_tables
+    database_tables=building([sim[:],sdb[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
+    return sim, sdb, wds, exo, life, gaia, database_tables
 
 
 def load_life_td():
@@ -68,7 +68,7 @@ def load_life_td():
     print(f'Loading life_td generated data')
     
     sim=load(['sim_' + direction for direction in table_names])
-    gk=load(['gk_' + direction for direction in table_names])
+    sdb=load(['sdb_' + direction for direction in table_names])
     wds=load(['wds_' + direction for direction in table_names])
     exo=load(['exo_' + direction for direction in table_names])
     life=load(['life_' + direction for direction in table_names])
@@ -77,15 +77,15 @@ def load_life_td():
     
     for i in range(len(sim)):
         sim[i]=stringtoobject(sim[i])
-        gk[i]=stringtoobject(gk[i])
+        sdb[i]=stringtoobject(sdb[i])
         wds[i]=stringtoobject(wds[i])
         exo[i]=stringtoobject(exo[i])
         life[i]=stringtoobject(life[i])
         gaia[i]=stringtoobject(gaia[i])
         database_tables[i]=stringtoobject(database_tables[i])
-    return sim, gk, wds, exo, life, gaia, database_tables
+    return sim, sdb, wds, exo, life, gaia, database_tables
 
-def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life', 'gaia']):
+def partial_create(distance_cut_in_pc,create=['sim', 'sdb', 'wds', 'exo', 'life', 'gaia']):
     """
     Partially generates, partially loads life_td data.
     
@@ -94,7 +94,7 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
     
     :param distance_cut_in_pc: Distance cut of the objects in parsec.
     :type distance_cut_in_pc: float
-    :param create: If one or more of 'sim', 'gk', 'wds', 'exo', 'life',
+    :param create: If one or more of 'sim', 'sdb', 'wds', 'exo', 'life',
         and 'gaia'  are present, generates those tables, the missing 
         ones are loaded.
     :type create: list(str)
@@ -113,12 +113,12 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
     for i in range(len(sim)):
         sim[i]=stringtoobject(sim[i])
     
-    if 'gk' in create:
-        gk=list(provider_gk(distance_cut_in_pc).values())
+    if 'sdb' in create:
+        sdb=list(provider_sdb(distance_cut_in_pc).values())
     else:
-        gk=load(['gk_' + direction for direction in table_names])
-    for i in range(len(gk)):
-        gk[i]=stringtoobject(gk[i])
+        sdb=load(['sdb_' + direction for direction in table_names])
+    for i in range(len(sdb)):
+        sdb[i]=stringtoobject(sdb[i])
     
     if 'wds' in create:
         wds=provider_wds(table_names,empty_provider[:],False)
@@ -149,8 +149,8 @@ def partial_create(distance_cut_in_pc,create=['sim', 'gk', 'wds', 'exo', 'life',
         gaia[i]=stringtoobject(gaia[i])
             
     #------------------------combine data from external sources---------
-    database_tables=building([sim[:],gk[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
-    return sim, gk, wds, exo, life, gaia, database_tables
+    database_tables=building([sim[:],sdb[:],exo[:],life[:],gaia[:],wds[:]],table_names,empty_provider[:])
+    return sim, sdb, wds, exo, life, gaia, database_tables
     
 if (__name__ == '__main__'):
     print('Executing as standalone script')
