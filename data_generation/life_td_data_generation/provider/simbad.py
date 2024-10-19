@@ -8,7 +8,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save
-from provider.utils import fetch_main_id, OidCreator, sources_table, query, nullvalues, replace_value
+from provider.utils import fetch_main_id, OidCreator, fill_sources_table, query, nullvalues, replace_value
 import sdata as sdc
 
 
@@ -316,7 +316,7 @@ def provider_simbad(sim_list_of_tables,distance_cut_in_pc,
                     'mag_j_ref','mag_k_ref','binary_ref','sptype_ref'],
                     ['h_link_ref'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
-        sim_sources=sources_table(cat,ref,sim_provider['provider_name'][0],
+        sim_sources=fill_sources_table(cat,ref,sim_provider['provider_name'][0],
                                 sim_sources)
     #------------------------creating output table sim_star_basic-------
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',

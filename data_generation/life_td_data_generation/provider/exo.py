@@ -9,7 +9,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save, Path
-from provider.utils import fetch_main_id, IdentifierCreator, sources_table, query, distance_cut, ids_from_ident
+from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, query, distance_cut, ids_from_ident
 import sdata as sdc
 
 
@@ -210,7 +210,7 @@ def provider_exo(table_names,exo_list_of_tables,temp=False):
     exo_sources=Table()
     tables=[exo_provider,exo_h_link,exo_ident,exo_mes_mass_pl]
     for cat,ref in zip(tables,ref_columns):
-        exo_sources=sources_table(cat,ref,exo_provider['provider_name'][0],exo_sources)
+        exo_sources=fill_sources_table(cat,ref,exo_provider['provider_name'][0],exo_sources)
   
     for i in range(len(table_names)):
         if table_names[i]=='sources': exo_list_of_tables[i]=exo_sources

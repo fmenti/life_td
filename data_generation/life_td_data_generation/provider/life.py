@@ -9,7 +9,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import sources_table, replace_value
+from provider.utils import fill_sources_table, replace_value
 import sdata as sdc
 
 
@@ -336,7 +336,7 @@ def provider_life(table_names,life_list_of_tables):
     tables=[life_provider,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
     ref_columns=[['provider_bibcode'],['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
     for cat,ref in zip(tables,ref_columns):
-        life_sources=sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
+        life_sources=fill_sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
     
     #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
     #life parameter creation

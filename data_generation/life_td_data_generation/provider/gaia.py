@@ -9,7 +9,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save
-from provider.utils import fetch_main_id, IdentifierCreator, sources_table, ids_from_ident, replace_value
+from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, ids_from_ident, replace_value
 import sdata as sdc
 
 
@@ -167,7 +167,7 @@ def provider_gaia(table_names,gaia_list_of_tables,distance_cut_in_pc,temp=True):
     ref_columns=[['provider_bibcode'],['id_ref'],['teff_st_ref'],['radius_st_ref'],
                  ['mass_st_ref'],['binary_ref']]
     for cat,ref in zip(tables,ref_columns):
-        gaia_sources=sources_table(cat,ref,gaia_provider['provider_name'][0],gaia_sources)
+        gaia_sources=fill_sources_table(cat,ref,gaia_provider['provider_name'][0],gaia_sources)
     
     for i in range(len(table_names)):
         if table_names[i]=='sources': gaia_list_of_tables[i]=gaia_sources

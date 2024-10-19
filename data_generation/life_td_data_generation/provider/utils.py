@@ -67,7 +67,7 @@ def remove_catalog_description(cat: table.Table) -> table.Table:
             cat[col].description=''     
     return cat
 
-def sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sources: table.Table=Table()) -> table.Table:
+def fill_sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sources: table.Table=Table()) -> table.Table:
     """
     Creates or updates the source table out of the given references.
     

@@ -8,7 +8,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save, load
-from provider.utils import sources_table, query, ids_from_ident, distance_cut
+from provider.utils import fill_sources_table, query, ids_from_ident, distance_cut
 import sdata as sdc
 
 
@@ -313,7 +313,7 @@ def provider_wds(table_names,wds_list_of_tables,temp=False,test_objects=[]):
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['id_ref']]
     for cat,ref in zip(tables,ref_columns):
-        wds_sources=sources_table(cat,ref,wds_provider['provider_name'][0],wds_sources)
+        wds_sources=fill_sources_table(cat,ref,wds_provider['provider_name'][0],wds_sources)
 
     #saving tables
     for i in range(len(table_names)):
