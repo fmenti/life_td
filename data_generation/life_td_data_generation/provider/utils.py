@@ -115,6 +115,13 @@ def fill_sources_table(cat: table.Table,ref_columns: List[str],provider: str,old
         sources=old_sources
     return sources
 
+def create_sources_table(tables,ref_columns,provider_name):
+    #--------------creating output table sim_sources -------------------
+    sources=Table()
+    for cat,ref in zip(tables,ref_columns):
+        sources=fill_sources_table(cat,ref,provider_name,sources)
+    return sources
+
 class OidCreator:
     """
     Create adql query for fetch_main_id function using oid column.
