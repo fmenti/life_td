@@ -75,54 +75,19 @@ def partial_create(distance_cut_in_pc,create=[]):
     
     provider_tables_dict=empty_provider_tables_dict.copy()
       
-    #functions = [provider_simbad,provider_sdb,provider_wds,provider_exo,provider_life,provider_gaia]
-    #arguments = [[distance_cut_in_pc],[distance_cut_in_pc],[False],[temp=False],[],[distance_cut_in_pc]]
+    functions = [provider_simbad,provider_sdb,provider_wds,provider_exo,provider_life,provider_gaia]
+    arguments = [(distance_cut_in_pc),(distance_cut_in_pc),(False),(True),(),(distance_cut_in_pc)]
     
-    if 'sim' in create:
-        cat=provider_simbad(distance_cut_in_pc)
-    else: 
-        cat = load_cat('sim')
-    provider_tables_dict['sim']=cat
-
-    if 'sdb' in create:
-        cat=provider_sdb(distance_cut_in_pc)
-    else: 
-        cat = load_cat('sdb')
-    provider_tables_dict['sdb']=cat
-
-    if 'wds' in create:
-        cat=provider_wds(False)
-    else: 
-        cat = load_cat('wds')
-    provider_tables_dict['wds']=cat
-  
-    if 'exo' in create:
-        cat=provider_exo(temp=True)
-    else: 
-        cat = load_cat('exo')
-    provider_tables_dict['exo']=cat
-  
-    if 'life' in create:
-        cat=provider_life()
-    else: 
-        cat = load_cat('life')
-    provider_tables_dict['life']=cat
-    
-   
-    if 'gaia' in create:
-        cat=provider_gaia(distance_cut_in_pc)
-    else: 
-        cat = load_cat('gaia')
-    provider_tables_dict['gaia']=cat
-    
-    #need to do a string to objects for all
     for i,prov in enumerate(list(provider_tables_dict.keys())):
-        provider_tables_dict[prov]=string_to_object_whole_dict(provider_tables_dict[prov])
-        #if prov in create:
-            #cat=functions[i](arguments[i])
-        #else:
-            #cat = load_cat(prov,cat)
-        #provider_tables_dict[prov]=cat
+        #provider_tables_dict[prov]=string_to_object_whole_dict(provider_tables_dict[prov])
+        if prov in create:
+            if arguments[i]!=():
+                cat=functions[i](arguments[i])
+            else:
+                cat=functions[i]()
+        else:
+            cat = load_cat(prov)
+        provider_tables_dict[prov]=string_to_object_whole_dict(cat)
     
             
     #------------------------combine data from external sources---------
