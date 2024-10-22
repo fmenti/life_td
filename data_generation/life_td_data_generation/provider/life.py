@@ -9,8 +9,9 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import fill_sources_table, replace_value
-import sdata as sdc
+from provider.utils import fill_sources_table, create_sources_table, replace_value, create_provider_table
+from sdata import empty_cat
+
 
 
 def lum_class(nr,sptype):
@@ -240,29 +241,7 @@ def spec(cat):
     cat=unique(cat, keys='main_id')
     return cat
 
-def provider_life(table_names,life_list_of_tables):
-    """
-    Loads SIMBAD data and postprocesses it. 
-    
-    Postprocessing enables to provide more useful information. It uses a model
-    from Eric E. Mamajek to predict temperature, mass and radius from the simbad 
-    spectral type data.
-    
-    :param table_names: Contains the names for the output tables.
-    :type table_names: list(str)
-    :param life_list_of_tables: List of same length as table_names containing
-        empty astropy tables.
-    :type life_list_of_tables: list(astropy.table.table.Table)
-    :returns: List of astropy table containing
-        reference data, provider data, basic stellar data, stellar effective
-        temperature data, stellar radius data and stellar mass data.
-    :rtype: list(astropy.table.table.Table)
-    """
-    
-    life_provider = create_provider_table('LIFE',
-                                        'www.life-space-mission.com',
-                                        '2022A&A...664A..21Q')
-    #---------------------star_basic----------------
+def create_star_basic_table(life):  
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])
     ircs_coord=coordinates.SkyCoord(\
@@ -277,7 +256,7 @@ def provider_life(table_names,life_list_of_tables):
     life_star_basic['dist_st_ref']=MaskedColumn(dtype=object,length=len(life_star_basic),
                                     mask=[True for j in range(len(life_star_basic))])
     life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask==False)]= \
-            [life_provider['provider_name'][0] for j in range(len(
+            [life['provider']['provider_name'][0] for j in range(len(
                 life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask==False)]))]
     # can I do the same transformation with the errors? -> try on some examples and compare to simbad ones
     life_star_basic['coo_gal_err_angle']=[-1
@@ -292,7 +271,7 @@ def provider_life(table_names,life_list_of_tables):
     # source
     # transformed from simbad ircs coordinates using astropy
     life_star_basic['coo_gal_ref']=Column(dtype=object,length=len(life_star_basic))
-    life_star_basic['coo_gal_ref']=life_provider['provider_name'][0] 
+    life_star_basic['coo_gal_ref']=life['provider']['provider_name'][0] 
     #for all entries since coo_gal column not masked column
              
     life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
@@ -301,28 +280,37 @@ def provider_life(table_names,life_list_of_tables):
                                    'coo_gal_ref','dist_st_value','dist_st_ref','sptype_string']
     
 
-    life_star_basic=sptype_string_to_class(life_star_basic,life_provider['provider_name'][0])
-    
-    #-----------measurement tables -------------------------------------
+    life_star_basic=sptype_string_to_class(life_star_basic,
+                                           life['provider']['provider_name'][0])
+    return life_star_basic
+
+def create_life_helpertable(life):    
     #applying model from E. E. Mamajek on SIMBAD spectral type
 
     [sim_objects]=load(['sim_objects'],stringtoobjects=False)
     
     stars=sim_objects[np.where(sim_objects['type']=='st')]
-    cat=join(stars,life_star_basic)
-    cat=spec(cat['main_id','sptype_string','class_lum','class_temp'])
+    life_helptab=join(stars,life['star_basic'])
+    life_helptab=spec(life_helptab['main_id','sptype_string','class_lum','class_temp'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
-    life_mes_teff_st=cat['main_id','mod_Teff']
+    return life_helptab
+
+def create_mes_teff_st_table(life_helptab,life):
+    life_mes_teff_st=life_helptab['main_id','mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff','teff_st_value')
     life_mes_teff_st['teff_st_qual']=['D' for i in range(len(life_mes_teff_st))]
     life_mes_teff_st['teff_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
-    
-    life_mes_radius_st=cat['main_id','mod_R']
+    return life_mes_teff_st
+
+def create_mes_radius_st_table(life_helptab,life):
+    life_mes_radius_st=life_helptab['main_id','mod_R']
     life_mes_radius_st.rename_column('mod_R','radius_st_value')
     life_mes_radius_st['radius_st_qual']=['D' for i in range(len(life_mes_radius_st))]
     life_mes_radius_st['radius_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
-    
-    life_mes_mass_st=cat['main_id','mod_M']
+    return life_mes_radius_st
+
+def create_mes_mass_st_table(life_helptab,life):
+    life_mes_mass_st=life_helptab['main_id','mod_M']
     life_mes_mass_st.rename_column('mod_M','mass_st_value')
     life_mes_mass_st['mass_st_qual']=['D' for i in range(len(life_mes_mass_st))]
     life_mes_mass_st['mass_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
@@ -330,24 +318,44 @@ def provider_life(table_names,life_list_of_tables):
     #specifying stars cocerning multiplicity
     #main sequence simbad object type: MS*, MS? -> luminocity class
     #Interacting binaries and close CPM systems: **, **?
+    return life_mes_mass_st
+
+def create_life_sources_table(life):
+    tables=[life['provider'],life['star_basic'],life['mes_teff_st'],
+            life['mes_radius_st'],life['mes_mass_st']]
+    #define header name of columns containing references data
+    ref_columns=[['provider_bibcode'],['coo_gal_ref'],
+                 ['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
+    life_sources=create_sources_table(tables,ref_columns,life['provider']['provider_name'][0])
+    return life_sources  
+
+def provider_life():
+    """
+    Loads SIMBAD data and postprocesses it. 
     
-    #-----------------sources table-------------------------------------
-    life_sources=Table()
-    tables=[life_provider,life_star_basic,life_mes_teff_st,life_mes_radius_st,life_mes_mass_st]
-    ref_columns=[['provider_bibcode'],['coo_gal_ref'],['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
-    for cat,ref in zip(tables,ref_columns):
-        life_sources=fill_sources_table(cat,ref,life_provider['provider_name'][0],life_sources)
+    Postprocessing enables to provide more useful information. It uses a model
+    from Eric E. Mamajek to predict temperature, mass and radius from the simbad 
+    spectral type data.
     
+    :returns: List of astropy table containing
+        reference data, provider data, basic stellar data, stellar effective
+        temperature data, stellar radius data and stellar mass data.
+    :rtype: list(astropy.table.table.Table)
+    """
+    life = empty_cat.copy()
+    life['provider'] = create_provider_table('LIFE',
+                                        'www.life-space-mission.com',
+                                        '2022A&A...664A..21Q')
+
+    life['star_basic'] = create_star_basic_table(life)
+    life_helptab = create_life_helpertable(life)
     #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
     #life parameter creation
-    life_star_basic.remove_column('sptype_string')
+    life['star_basic'].remove_column('sptype_string')
+    life['mes_teff_st']=create_mes_teff_st_table(life_helptab,life)
+    life['mes_radius_st']=create_mes_radius_st_table(life_helptab,life)
+    life['mes_mass_st']=create_mes_mass_st_table(life_helptab,life)
+    life['sources'] = create_life_sources_table(life)
     
-    for i in range(len(table_names)):
-        if table_names[i]=='sources': life_list_of_tables[i]=life_sources
-        if table_names[i]=='provider': life_list_of_tables[i]=life_provider
-        if table_names[i]=='star_basic': life_list_of_tables[i]=life_star_basic
-        if table_names[i]=='mes_teff_st': life_list_of_tables[i]=life_mes_teff_st
-        if table_names[i]=='mes_radius_st': life_list_of_tables[i]=life_mes_radius_st
-        if table_names[i]=='mes_mass_st': life_list_of_tables[i]=life_mes_mass_st
-        save([life_list_of_tables[i][:]],['life_'+table_names[i]])
-    return life_list_of_tables
+    save(list(life.values()),['life_'+ element for element in list(life.keys())])
+    return life
