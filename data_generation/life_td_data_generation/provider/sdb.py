@@ -1,5 +1,6 @@
 """ 
 Generates the data for the database for each of the data providers separately. 
+Requires server connection to SIMBAD.
 """
 
 import numpy as np #arrays
@@ -10,7 +11,7 @@ from datetime import datetime
 #self created modules
 from utils.io import stringtoobject, save, Path
 from sdata import empty_cat
-from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_provider_table
+from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, create_provider_table
 
 def create_sdb_helpertable(distance_cut_in_pc,sdb_ref):
     plx_in_mas_cut=1000./distance_cut_in_pc
@@ -64,24 +65,31 @@ def create_ident_table(sdb_helptab):
     ident_table.rename_columns(['ids','disks_ref'],['main_id','id_ref'])
     return ident_table
 
-def create_sources_table(sdb_helptab,provider_table):
-    tables=[provider_table,sdb_helptab]
-    sources_table=Table()
-    #define header name of columns containing references data
+def create_sdb_sources_table(sdb_helptab,sdb):
+    tables=[sdb['provider'],sdb_helptab]
     ref_columns=[['provider_bibcode'],['disks_ref']]
-    for cat,ref in zip(tables,ref_columns):
-        sources_table=fill_sources_table(cat,ref,provider_table['provider_name'][0],
-                                sources_table)
+    sources_table=create_sources_table(tables,ref_columns,
+                                       sdb['provider']['provider_name'][0])
     return sources_table
+
+def create_disk_basic_table(sdb_helptab):
+    disk_basic=sdb_helptab['id','rdisk_bb','e_rdisk_bb','disks_ref']    
+    for column in ['rdisk_bb','e_rdisk_bb']:
+        if len(sdb_helptab[column].mask.nonzero()[0])>0:
+            print('careful, masked entries in ', column)
+    disk_basic.rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
+                                 ['main_id','rad_value','rad_err','rad_ref'])
+    disk_basic=disk_basic[np.where(np.isfinite(disk_basic['rad_value']))]
+    return disk_basic
 
 def provider_sdb(distance_cut_in_pc):
     """
     Optains and arranges disk data.
 
-    :returns: List of astropy tables containing
+    :returnss: Dictionary with names and astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data and basic disk data.
-    :rtype: list(astropy.table.table.Table)
+    :rtype: dict(str,astropy.table.table.Table)
     """
     
     sdb = empty_cat.copy()
@@ -96,18 +104,8 @@ def provider_sdb(distance_cut_in_pc):
     sdb_helptab['ids']=sdb_helptab['id']#because only single id per source given
     sdb['objects']=create_objects_table(sdb_helptab)
     sdb['ident']=create_ident_table(sdb_helptab)
-    sdb['sources']=create_sources_table(sdb_helptab,sdb['provider'])
-    #--------------creating disk_basic table ------------------
-    sdb['disk_basic']=sdb_helptab['id','rdisk_bb','e_rdisk_bb','disks_ref']
-    #converting from string to float
+    sdb['sources']=create_sdb_sources_table(sdb_helptab,sdb)
+    sdb['disk_basic']=create_disk_basic_table(sdb_helptab)
     
-    for column in ['rdisk_bb','e_rdisk_bb']:
-        if len(sdb_helptab[column].mask.nonzero()[0])>0:
-            print('careful, masked entries in ', column)
-    sdb['disk_basic'].rename_columns(['id','rdisk_bb','e_rdisk_bb','disks_ref'],
-                                 ['main_id','rad_value','rad_err','rad_ref'])
-    sdb['disk_basic']=sdb['disk_basic'][np.where(np.isfinite(
-                                                sdb['disk_basic']['rad_value']))]
-
     save(list(sdb.values()),['sdb_'+ element for element in list(sdb.keys())])
     return sdb
