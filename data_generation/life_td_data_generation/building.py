@@ -2,11 +2,13 @@
 
 import numpy as np #arrays
 from astropy.table import Column, join, column, vstack, Table, unique
+from itertools import islice
+
 
 #self created modules
 from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
-import sdata as sdc
+from sdata import empty_cat, empty_provider_tables_dict,empty_cat_wit_columns,paras_dict
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -78,7 +80,7 @@ def objectmerging(cat):
         cat.remove_columns(['type_1','type_2'])
     return cat
 
-def match(cat,sources,paras,provider):
+def assign_source_idref(cat,sources,paras,provider):
     """
     This function joins the source identifiers of parameters of cat.
     
@@ -97,6 +99,9 @@ def match(cat,sources,paras,provider):
     for para in paras:
         #if they have reference columns
         if para+'_ref' in cat.colnames:
+            if f'{para}_source_idref' in cat.colnames:
+                print(f'warning, {para}_source_idref already in table. something went wrong with loading')
+                cat.remove_column(f'{para}_source_idref')
             #if those reference columns are masked
             cat=nullvalues(cat,para+'_ref','None')
             #join to each reference parameter its source_id
@@ -259,7 +264,7 @@ def best_parameters_ingestion(cat_mes,cat_basic,para,columns=[]):
     cat_basic=join(cat_basic,best_para_cat_mes,join_type='left')
     return cat_basic
 
-def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=False,para_match=False):
+def provider_data_merging(cat,table_name,prov_tables_dict,o_merging=False,para_match=False):
     """
     Merges the data from the different providers.
     
@@ -277,51 +282,48 @@ def provider_data_merging(cat,table_names,table_name,prov_tables_list,o_merging=
     :rtype: astropy.table.table.Table
     """
     print(f'Building {table_name} table ...')#sources
-    n=table_names.index(table_name)
     
-    for j in range(len(prov_tables_list)):
+    for prov_table in list(prov_tables_dict.keys()):
         if para_match:
             # redefining of paras multiple times is not optimal but easier to 
             # read the code if I don't have to define them globally or pass
             # them to the function.
             #print('careful, I have here hardcoded parameter and table order')
-            paras=[['id'],['h_link'],['coo','plx','dist_st','coo_gal','mag_i',
-                                      'mag_j','mag_k','class','sptype'],
-                   ['mass_pl'],['rad'],['mass_pl'],['teff_st'],
-                   ['radius_st'],['mass_st'],['binary'],['sep_ang'],['h_link']]
-            if len(prov_tables_list[j][n])>0:
+            paras=paras_dict.copy()
+            if len(prov_tables_dict[prov_table][table_name])>0:
                 #prov_tables_list[j] is a table containing the two columns ref 
                 # and provider name. replacing ref columns with 
                 # corresponding source_idref one. issue is that order 
                 # prov_tables_list and provider_name not the same
-                prov_tables_list[j][n]=match(prov_tables_list[j][n],cat[0],paras[n-3],
-                                        prov_tables_list[j][2]['provider_name'][0])
-        if len(cat[n])>0:
+                prov_tables_dict[prov_table][table_name]=assign_source_idref(prov_tables_dict[prov_table][table_name],
+                                        cat['sources'],paras[table_name],
+                                        prov_tables_dict[prov_table]['provider']['provider_name'][0])
+        if len(cat[table_name])>0:
             #joining data from different providers (simbad,...,wds)
-            if len(prov_tables_list[j][n])>0:
+            if len(prov_tables_dict[prov_table][table_name])>0:
                 if o_merging:
-                    cat[n]=join(cat[n],prov_tables_list[j][n],
+                    cat[table_name]=join(cat[table_name],prov_tables_dict[prov_table][table_name],
                                          keys='main_id',join_type='outer')
-                    cat[n]=objectmerging(cat[n])
+                    cat[table_name]=objectmerging(cat[table_name])
                 else:
-                    cat[n]=join(cat[n],prov_tables_list[j][n],join_type='outer')
+                    cat[table_name]=join(cat[table_name],prov_tables_dict[prov_table][table_name],join_type='outer')
                 
         else:
-            cat[n]=prov_tables_list[j][n]
-    return cat[n]
+            cat[table_name]=prov_tables_dict[prov_table][table_name]
+    return cat
 
-def unify_null_values(cat,table_names):
+def unify_null_values(cat):
     print('Unifying null values...')
     # unify null values (had 'N' and '?' because of astropy default 
     # fill_value and type conversion string vs object)
-    tables=[cat[table_names.index('star_basic')],
-            cat[table_names.index('planet_basic')],
-            cat[table_names.index('disk_basic')],
-            cat[table_names.index('mes_mass_pl')],
-            cat[table_names.index('mes_teff_st')],
-            cat[table_names.index('mes_radius_st')],
-            cat[table_names.index('mes_mass_st')],
-            cat[table_names.index('mes_binary')]]
+    tables=[cat['star_basic'],
+            cat['planet_basic'],
+            cat['disk_basic'],
+            cat['mes_mass_pl'],
+            cat['mes_teff_st'],
+            cat['mes_radius_st'],
+            cat['mes_mass_st'],
+            cat['mes_binary']]
     columns=[['coo_qual','coo_gal_qual','plx_qual','dist_st_qual',
               'sep_ang_qual','teff_st_qual','radius_st_qual','binary_flag',
               'binary_qual','mass_st_qual','sptype_qual','class_temp',
@@ -336,176 +338,165 @@ def unify_null_values(cat,table_names):
             tables[i]=replace_value(tables[i],col,'N/A','?')
     return cat
 
-def initialize_empty_tables(list_of_tables):
-    """
-    Creates empty tables as needed for final database ingestion
-    """
-    
-    empty=sdc.provider('empty')
-    n_tables=len(empty.list_of_tables)
-    cat=[Table() for i in range(n_tables)]    
-    return empty, n_tables, cat
-
-def build_sources_table(cat,table_names,prov_tables_list,empty):
+def build_sources_table(cat,prov_tables_dict,empty):
     #for the sources and objects joins tables from different prov_tables_list
-    cat[table_names.index('sources')]=provider_data_merging(
-            cat,table_names,'sources',prov_tables_list)
+    cat=provider_data_merging(
+            cat,'sources',prov_tables_dict)
     
     #adding empty columns for later being able to join tables
-    cat[table_names.index('sources')]=vstack(
-            [cat[table_names.index('sources')],empty.table('sources')])
-    
+    cat['sources']=vstack(
+            [cat['sources'],empty['sources']])
     # keeping only unique values then create identifiers for the tables
-    cat[table_names.index('sources')]=unique(
-            cat[table_names.index('sources')],silent=True)
-    cat[table_names.index('sources')]['source_id']=[j+1 for j \
-            in range(len(cat[table_names.index('sources')]))]    
+    cat['sources']=unique(
+            cat['sources'],silent=True)
+    cat['sources']['source_id']=[j+1 for j \
+            in range(len(cat['sources']))]    
     return cat
 
-def build_objects_table(cat,table_names,prov_tables_list):
-    cat[table_names.index('objects')]=provider_data_merging(
-            cat,table_names,'objects',prov_tables_list,o_merging=True)
+def build_objects_table(cat,prov_tables_dict):
+    cat=provider_data_merging(
+            cat,'objects',prov_tables_dict,o_merging=True)
                     
     #assigning object_id
-    cat[table_names.index('objects')]['object_id']=[j+1 for j \
-            in range(len(cat[table_names.index('objects')]))]
+    cat['objects']['object_id']=[j+1 for j \
+            in range(len(cat['objects']))]
     
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
     return cat
 
-def build_provider_table(cat,table_names,prov_tables_list,empty):
-    cat[table_names.index('provider')]=provider_data_merging(
-            cat,table_names,'provider',prov_tables_list)
+def build_provider_table(cat,prov_tables_dict,empty):
+    cat=provider_data_merging(
+            cat,'provider',prov_tables_dict)
     
     #I do this to get those columns that are empty in the data
-    cat[table_names.index('provider')]=vstack(
-            [cat[table_names.index('provider')],empty.table('provider')])    
+    cat['provider']=vstack(
+            [cat['provider'],empty['provider']])    
     return cat
 
-def build_rest_of_tables(cat,n_tables,table_names,prov_tables_list,empty):
-    for i in range(3,n_tables): 
+def build_rest_of_tables(cat,prov_tables_dict,empty):
+    for table_name in islice(cat,3,None): 
     # for the tables star_basic,...,mes_mass_st
-        cat[i]=provider_data_merging(cat,table_names,table_names[i],
-                                     prov_tables_list,para_match=True)
+        cat=provider_data_merging(cat,table_name,
+                                     prov_tables_dict,para_match=True)
 
         #I do this to get those columns that are empty in the data
-        cat[i]=vstack([cat[i],empty.table(table_names[i])])
+        
+        
+        cat[table_name]=vstack([cat[table_name],empty[table_name]])
         #filling so when I run unique it doesn't neglect previously masked columns
-        cat[i]=cat[i].filled() 
+        cat[table_name]=cat[table_name].filled() 
 
-        if 'object_idref' in cat[i].colnames and len(cat[i])>0: 
+        if 'object_idref' in cat[table_name].colnames and len(cat[table_name])>0: 
             # add object_idref
             # first remove the object_idref we got from empty 
             # initialization though I would prefer a more elegant way 
             # to do this. Is needed as empty columns don't work for join
-            cat[i].remove_column('object_idref') 
-            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
+            cat[table_name].remove_column('object_idref') 
+            cat[table_name]=join(cat[table_name],cat['objects']['object_id','main_id'],
                                  join_type='left')
-            cat[i].rename_column('object_id','object_idref')
-        if table_names[i]=='ident':
-            cat[i]=best_para('id',cat[i])
-        if table_names[i]=='h_link':
+            cat[table_name].rename_column('object_id','object_idref')
+        if table_name=='ident':
+            cat[table_name]=best_para('id',cat[table_name])
+        if table_name=='h_link':
             #expanding from child_main_id to object_idref
             #first remove the child_object_idref we got from empty
             # initialization. Would prefer a more elegant way to do this
-            cat[i].remove_column('child_object_idref')
-            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
+            cat[table_name].remove_column('child_object_idref')
+            cat[table_name]=join(cat[table_name],cat['objects']['object_id','main_id'],
                                  keys='main_id',join_type='left')
-            cat[i].rename_columns(['object_id','main_id'],
+            cat[table_name].rename_columns(['object_id','main_id'],
                                   ['child_object_idref','child_main_id'])
             
             #expanding from parent_main_id to parent_object_idref
-            cat[i].remove_column('parent_object_idref')
+            cat[table_name].remove_column('parent_object_idref')
             #kick out any h_link rows where parent_main_id not in
             # objects (e.g. clusters)
-            cat[i]=join(cat[i],cat[1]['object_id','main_id'],
+            cat[table_name]=join(cat[table_name],cat['objects']['object_id','main_id'],
                    keys_left='parent_main_id',keys_right='main_id')
             #removing because same as parent_main_id
-            cat[i].remove_column('main_id')
-            cat[i].rename_column('object_id','parent_object_idref')
-            cat[table_names.index('best_h_link')]=best_para('membership',cat[table_names.index('h_link')])
-        if table_names[i]=='star_basic':
+            cat[table_name].remove_column('main_id')
+            cat[table_name].rename_column('object_id','parent_object_idref')
+            cat['best_h_link']=best_para('membership',cat['h_link'])
+        if table_name=='star_basic':
             #choosing all objects with type star or system. this I use 
             # to join the object_id parameter from objects table to 
             # star_basic. what about gaia stuff where I don't know 
             # this? there I also don't have star_basic info.
             # Note: main_id was only added because I have not found out 
             # how to do join with just one column of a table
-            stars=cat[1]['object_id','main_id'][np.where(
-                            cat[1]['type']=='st')]
-            systems=cat[1]['object_id','main_id'][np.where(
-                            cat[1]['type']=='sy')]
+            stars=cat['objects']['object_id','main_id'][np.where(
+                            cat['objects']['type']=='st')]
+            systems=cat['objects']['object_id','main_id'][np.where(
+                            cat['objects']['type']=='sy')]
             temp=vstack([stars,systems])
             temp.rename_column('object_id','object_idref')
+            
             # cat[i] are all the star_cat tables from prov_tables_list where 
             # those are given the new objects are needed to join the 
             # best parameters from mes_ tables later on
-            cat[i]=join(cat[i],temp,join_type='outer',
+            cat[table_name]=join(cat[table_name],temp,join_type='outer',
                                  keys=['object_idref','main_id'])
-        if table_names[i]=='planet_basic':
-            planets=cat[1]['object_id','main_id'][np.where(
-                            cat[1]['type']=='pl')]
+        if table_name=='planet_basic':
+            planets=cat['objects']['object_id','main_id'][np.where(
+                            cat['objects']['type']=='pl')]
             planets.rename_column('object_id','object_idref')
-            cat[i]=planets #can't use join below because cat[i] has no rows
-        if table_names[i]=='mes_teff_st':
-            cat[table_names.index('star_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('star_basic')],
+            cat[table_name]=planets #can't use join below because cat[i] has no rows
+        if table_name=='mes_teff_st':
+            cat['star_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['star_basic'],
                     'teff_st',['teff_st_value','teff_st_err',
                                'teff_st_qual','teff_st_source_idref',
                                'teff_st_ref'])
-        if table_names[i]=='mes_radius_st':
-            cat[table_names.index('star_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('star_basic')],
+        if table_name=='mes_radius_st':
+            cat['star_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['star_basic'],
                     'radius_st',['radius_st_value','radius_st_err',
                                  'radius_st_qual','radius_st_source_idref',
                                  'radius_st_ref'])
-        if table_names[i]=='mes_mass_st':
-            cat[table_names.index('star_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('star_basic')],
+        if table_name=='mes_mass_st':
+            cat['star_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['star_basic'],
                     'mass_st',['mass_st_value','mass_st_err',
                                'mass_st_qual','mass_st_source_idref',
                                'mass_st_ref'])
-        if table_names[i]=='mes_mass_pl':
-            cat[table_names.index('planet_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('planet_basic')],
+        if table_name=='mes_mass_pl':
+            cat['planet_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['planet_basic'],
                     'mass_pl')
-        if table_names[i]=='mes_binary':
-            cat[table_names.index('star_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('star_basic')],
+        if table_name=='mes_binary':
+            cat['star_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['star_basic'],
                     'binary',['binary_flag',
                               'binary_qual','binary_source_idref',
                                'binary_ref'])
-        if table_names[i]=='mes_sep_ang':
-            cat[table_names.index('star_basic')]=best_parameters_ingestion(
-                    cat[i], cat[table_names.index('star_basic')],
+        if table_name=='mes_sep_ang':
+            cat['star_basic']=best_parameters_ingestion(
+                    cat[table_name], cat['star_basic'],
                     'sep_ang',['sep_ang_value','sep_ang_err',
                                'sep_ang_obs_date','sep_ang_qual',
                                'sep_ang_source_idref','sep_ang_ref'])
             
-        cat[i]=cat[i].filled()
+        cat[table_name]=cat[table_name].filled()
         
-        if len(cat[i])==0:
-            print('warning: empty table',i,table_names[i])
+        if len(cat[table_name])==0:
+            print('warning: empty table',table_name)
         else:
             #only keeping unique entries
-            cat[i]=unique(cat[i],silent=True)
+            cat[table_name]=unique(cat[table_name],silent=True)
     return cat
 
-def build_tables(list_of_tables,table_names,prov_tables_list):
-    empty, n_tables, cat = initialize_empty_tables(list_of_tables)
-    
-    cat=build_sources_table(cat,table_names,prov_tables_list,empty)
-    
-    cat=build_objects_table(cat,table_names,prov_tables_list)
-    
-    cat=build_provider_table(cat,table_names,prov_tables_list,empty)     
-    
-    cat=build_rest_of_tables(cat,n_tables,table_names,prov_tables_list,empty)
+def build_tables(prov_tables_dict):
+    cat=empty_cat.copy()
+    empty=empty_cat_wit_columns.copy()
+    cat=build_sources_table(cat,prov_tables_dict,empty)
+    cat=build_objects_table(cat,prov_tables_dict)
+    cat=build_provider_table(cat,prov_tables_dict,empty)  
+    cat=build_rest_of_tables(cat,prov_tables_dict,empty)
     return cat
 
 #------------------------provider combining----------------------------
-def building(prov_tables_list,table_names,list_of_tables):
+def building(prov_tables_dict):
     """
     This function builds the tables for the LIFE database.
     
@@ -521,17 +512,16 @@ def building(prov_tables_list,table_names,list_of_tables):
     :returns: Containing data combined from the different prov_tables_list.
     :rtype: list containing objects of type astropy.table.table.Table
     """
-    
-    cat=build_tables(list_of_tables,table_names,prov_tables_list)
+    cat=build_tables(prov_tables_dict)
             
     #next line is needed as multimeasurement adaptions lead to potentially masked entries
-    cat[table_names.index('star_basic')]=cat[table_names.index('star_basic')].filled()
+    cat['star_basic']=cat['star_basic'].filled()
     
-    cat=unify_null_values(cat,table_names)
+    cat=unify_null_values(cat)
             
     # TBD: Add exact object distance cut. So far for correct treatment
     #       of boundary objects 10% additional distance cut used""")
     
     print('Saving data...')
-    save(cat,table_names,location=Path().data)
+    save(list(cat.values()),[element for element in list(cat.keys())],location=Path().data)
     return cat
