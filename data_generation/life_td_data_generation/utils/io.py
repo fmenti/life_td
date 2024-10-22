@@ -65,6 +65,11 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
+def string_to_object_whole_dict(dictionary):
+    for table_name in list(dictionary.keys()):
+        dictionary[table_name] = stringtoobject(dictionary[table_name])
+    return dictionary
+
 def load(paths,stringtoobjects=True,location=Path().additional_data):
     """    
     This function loads xml tables. 
