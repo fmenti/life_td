@@ -1,5 +1,5 @@
 """ 
-Generates the data for the database for each of the data providers separately. 
+Generates the data for the database for the provider Exo-Mercat. 
 """
 
 import numpy as np #arrays
@@ -12,12 +12,28 @@ from utils.io import save, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
 from sdata import empty_cat
 
-def create_exo_helpertable(exo,temp):
+def create_exo_helpertable(exo):
+    """
+    Creates helper table.
+    
+    If the exomercat server is not online a temporary method to 
+    ingest old exomercat data is used.
+    
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Helper table and dictionary of database table names and tables.
+    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
+    """
     #---------------define query----------------------------------------
     adql_query="""SELECT *
                   FROM exomercat.exomercat"""
     #---------------obtain data-----------------------------------------
-    if temp:   
+    try:
+        exo['provider'] = create_provider_table('Exo-MerCat',
+                                        "http://archives.ia2.inaf.it/vo/tap/projects",
+                                        '2020A&C....3100370A')
+        exo_helptab=query(exo['provider']['provider_url'][0],adql_query)
+    except:   
         exo['provider'] = create_provider_table('Exo-MerCat',
                                         "http://archives.ia2.inaf.it/vo/tap/projects",
                                         '2020A&C....3100370A','2023-02-05')        
@@ -27,11 +43,7 @@ def create_exo_helpertable(exo,temp):
         exo['provider']['provider_access']=['2023-02-05']
         print('loading exomercat version from',exo['provider']['provider_access'])
 
-    else:
-        exo['provider'] = create_provider_table('Exo-MerCat',
-                                        "http://archives.ia2.inaf.it/vo/tap/projects",
-                                        '2020A&C....3100370A')
-        exo_helptab=query(exo['provider']['provider_url'][0],adql_query)
+    
         
     #----------------putting object main identifiers together-----------
     
@@ -93,6 +105,16 @@ def create_exo_helpertable(exo,temp):
     return exo_helptab,exo
 
 def create_ident_table(exo_helptab,exo):
+    """
+    Creates identifier table.
+    
+    :param exo_helptab: Exo-Mercat helper table.
+    :type exo_helptab: astropy.table.table.Table
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Identifier table.
+    :rtype: astropy.table.table.Table
+    """
     exo_ident=Table(names=['main_id','id'],dtype=[object,object])
     exo_helptab['old_planet_main_id']=exo_helptab['planet_main_id']
     #why not found??
@@ -124,6 +146,14 @@ def create_ident_table(exo_helptab,exo):
     return exo_ident
 
 def create_objects_table(exo):
+    """
+    Creates objects table.
+    
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Objects table.
+    :rtype: astropy.table.table.Table
+    """
     # tbd at one point: I think I want to add hosts to object
     exo_objects=Table(names=['main_id','ids'],dtype=[object,object])
     exo_objects=ids_from_ident(exo['ident']['main_id','id'],exo_objects)
@@ -140,6 +170,16 @@ def create_objects_table(exo):
     return exo_objects
 
 def create_mes_mass_pl_table(exo_helptab,exo):
+    """
+    Creates planetary mass measurement table.
+    
+    :param exo_helptab: Exo-Mercat helper table.
+    :type exo_helptab: astropy.table.table.Table
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Planetary mass measurement table.
+    :rtype: astropy.table.table.Table
+    """
     #initialize columns exo_helptab['mass_pl_rel'] and exo_helptab['mass_pl_err']
     exo_helptab['mass_pl_err']=Column(dtype=float,length=len(exo_helptab))
     exo_helptab['mass_pl_rel']=Column(dtype=object,length=len(exo_helptab))
@@ -183,6 +223,16 @@ def create_mes_mass_pl_table(exo_helptab,exo):
     return exo_mes_mass_pl
 
 def create_h_link_table(exo_helptab,exo):
+    """
+    Creates hierarchical link table.
+    
+    :param exo_helptab: Exo-Mercat helper table.
+    :type exo_helptab: astropy.table.table.Table
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Hierarchical link table.
+    :rtype: astropy.table.table.Table
+    """
     exo_h_link=exo_helptab['planet_main_id', 'host_main_id']
     exo_h_link.rename_columns(['planet_main_id','host_main_id'],
                               ['main_id','parent_main_id'])
@@ -190,6 +240,14 @@ def create_h_link_table(exo_helptab,exo):
     return exo_h_link
 
 def create_exo_sources_table(exo):
+    """
+    Creates sources table.
+    
+    :param exo: Dictionary of database table names and tables.
+    :type exo: dict(str,astropy.table.table.Table)
+    :returns: Sources table.
+    :rtype: astropy.table.table.Table
+    """
     tables=[exo['provider'],exo['h_link'],exo['ident'],exo['mes_mass_pl']]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['h_link_ref'],['id_ref'],['mass_pl_ref']]
@@ -197,17 +255,11 @@ def create_exo_sources_table(exo):
                               exo['provider']['provider_name'][0])
     return exo_sources  
 
-def provider_exo(temp=False):
+def provider_exo():
     """
     This function obtains and arranges exomercat data.
     
-    If the exomercat server is not online a temporary method to 
-    ingest old exomercat data was implemented and can be accessed by 
-    setting temp=True as argument.
-    
-    :param bool temp: Defaults to True.  Determines if the exomercat
-        data gets queried (False) or loaded from an old version (True).
-    :returnss: Dictionary with names and astropy tables containing
+    :returns: Dictionary with names and astropy tables containing
         reference data, object data, identifier data, object to object
         relation data, basic planetary data and planetary mass measurement 
         data.
@@ -217,7 +269,7 @@ def provider_exo(temp=False):
     
     #wait, how do I do the distance cut if I don't have that in here?
     #there is a distance cut function using simbad objects
-    exo_helptab,exo=create_exo_helpertable(exo,temp)
+    exo_helptab,exo=create_exo_helpertable(exo)
 
     exo['ident']=create_ident_table(exo_helptab,exo)
     exo['objects']=create_objects_table(exo)
