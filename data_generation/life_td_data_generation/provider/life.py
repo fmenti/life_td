@@ -1,5 +1,5 @@
 """ 
-Generates the data for the database for each of the data providers separately. 
+Generates the data for the database for the provider LIFE. 
 """
 
 import numpy as np #arrays
@@ -43,6 +43,14 @@ def assign_lum_class_V(table,index):
     return
 
 def assign_null_values(table,index):
+    """
+    Sets table entry to '?' for given index in specific columns.
+    
+    :param table: Table containing columns class_temp, class_temp_nr, 
+        class_lum and class_ref.
+    :type table: astropy.table.table.Table
+    :param int index: Index of entry.
+    """
     table['class_temp'][index]='?'
     table['class_temp_nr'][index]='?'
     table['class_lum'][index]='?'
@@ -52,6 +60,12 @@ def assign_null_values(table,index):
 def deal_with_leading_d_sptype(table,index):
     """
     Deals with old annotation of leading d in spectraltype representing dwarf star.
+    
+    :param table: Table containing column 'sptype_string'.
+    :type table: astropy.table.table.Table
+    :param int index: Index of entry.  
+    :returns: Entry with leading d removed.
+    :rtype: str
     """
     if len(table['sptype_string'][index])>0:
         if table['sptype_string'][index][0]=='d':
@@ -242,6 +256,14 @@ def spec(cat):
     return cat
 
 def create_star_basic_table(life):  
+    """
+    Creates basic stellar data table.
+    
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Basic stellar data table.
+    :rtype: astropy.table.table.Table
+    """
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])
     ircs_coord=coordinates.SkyCoord(\
@@ -284,7 +306,15 @@ def create_star_basic_table(life):
                                            life['provider']['provider_name'][0])
     return life_star_basic
 
-def create_life_helpertable(life):    
+def create_life_helpertable(life):  
+    """
+    Creates helper table.
+    
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Helper table.
+    :rtype: astropy.table.table.Table
+    """
     #applying model from E. E. Mamajek on SIMBAD spectral type
 
     [sim_objects]=load(['sim_objects'],stringtoobjects=False)
@@ -296,6 +326,16 @@ def create_life_helpertable(life):
     return life_helptab
 
 def create_mes_teff_st_table(life_helptab,life):
+    """
+    Creates stellar effective temperature table.
+    
+    :param life_helptab: Life helper table.
+    :type life_helptab: astropy.table.table.Table
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Stellar effective temperature table.
+    :rtype: astropy.table.table.Table
+    """
     life_mes_teff_st=life_helptab['main_id','mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff','teff_st_value')
     life_mes_teff_st['teff_st_qual']=['D' for i in range(len(life_mes_teff_st))]
@@ -303,6 +343,16 @@ def create_mes_teff_st_table(life_helptab,life):
     return life_mes_teff_st
 
 def create_mes_radius_st_table(life_helptab,life):
+    """
+    Creates stellar radius table.
+    
+    :param life_helptab: Life helper table.
+    :type life_helptab: astropy.table.table.Table
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Stellar radius table.
+    :rtype: astropy.table.table.Table
+    """
     life_mes_radius_st=life_helptab['main_id','mod_R']
     life_mes_radius_st.rename_column('mod_R','radius_st_value')
     life_mes_radius_st['radius_st_qual']=['D' for i in range(len(life_mes_radius_st))]
@@ -310,6 +360,16 @@ def create_mes_radius_st_table(life_helptab,life):
     return life_mes_radius_st
 
 def create_mes_mass_st_table(life_helptab,life):
+    """
+    Creates stellar mass table.
+    
+    :param life_helptab: Life helper table.
+    :type life_helptab: astropy.table.table.Table
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Stellar mass table.
+    :rtype: astropy.table.table.Table
+    """
     life_mes_mass_st=life_helptab['main_id','mod_M']
     life_mes_mass_st.rename_column('mod_M','mass_st_value')
     life_mes_mass_st['mass_st_qual']=['D' for i in range(len(life_mes_mass_st))]
@@ -321,6 +381,14 @@ def create_mes_mass_st_table(life_helptab,life):
     return life_mes_mass_st
 
 def create_life_sources_table(life):
+    """
+    Creates sources table.
+    
+    :param life: Dictionary of database table names and tables.
+    :type life: dict(str,astropy.table.table.Table)
+    :returns: Sources table.
+    :rtype: astropy.table.table.Table
+    """
     tables=[life['provider'],life['star_basic'],life['mes_teff_st'],
             life['mes_radius_st'],life['mes_mass_st']]
     #define header name of columns containing references data
@@ -337,10 +405,10 @@ def provider_life():
     from Eric E. Mamajek to predict temperature, mass and radius from the simbad 
     spectral type data.
     
-    :returns: List of astropy table containing
+    :returns: Dictionary with names and astropy tables containing
         reference data, provider data, basic stellar data, stellar effective
         temperature data, stellar radius data and stellar mass data.
-    :rtype: list(astropy.table.table.Table)
+    :rtype: dict(str,astropy.table.table.Table)
     """
     life = empty_cat.copy()
     life['provider'] = create_provider_table('LIFE',
