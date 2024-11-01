@@ -1,5 +1,5 @@
 """ 
-Generates the data for the database for each of the data providers separately. 
+Generates the data for the database for the provider gaia. 
 """
 
 import numpy as np #arrays
@@ -12,7 +12,19 @@ from utils.io import save
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, ids_from_ident, replace_value, create_provider_table
 from sdata import empty_cat
 
-def create_gaia_helpertable(distance_cut_in_pc,gaia,temp):
+def create_gaia_helpertable(distance_cut_in_pc,gaia):
+    """
+    Creates helper table.
+    
+    If the gaia server asynchronous query is not working a temporary method to 
+    use the synchronous query is used.
+    
+    :param float distance_cut_in_pc: Distance up to which stars are included.
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Helper table.
+    :rtype: astropy.table.table.Table
+    """
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
@@ -26,21 +38,33 @@ def create_gaia_helpertable(distance_cut_in_pc,gaia,temp):
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
     WHERE s.parallax >="""+str(plx_in_mas_cut)
     
-    if temp: #because of bug in gaia server where async not working currently
+    try: 
+        gaia_helptab=query(gaia['provider']['provider_url'][0],adql_query) 
+
+    except:
+        #because of bug in gaia server where async not working currently
         service = TAPService(gaia['provider']['provider_url'][0])
         result=service.run_sync(adql_query.format(**locals()), maxrec=160000)
         gaia_helptab=result.to_table()
-
-    else:
-        gaia_helptab=query(gaia['provider']['provider_url'][0],adql_query) 
         
     gaia_helptab.rename_columns(['mass_flame','radius_flame'],
                         ['mass_st_value','radius_st_value'])
-    gaia_helptab['gaia_id']=['Gaia DR3 '+str(gaia_helptab['source_id'][j]) for j in range(len(gaia_helptab))]
-    gaia_helptab['ref']=['2022arXiv220800211G' for j in range(len(gaia_helptab))]#dr3 paper
+    gaia_helptab['gaia_id']=['Gaia DR3 '+
+            str(gaia_helptab['source_id'][j]) for j in range(len(gaia_helptab))]
+    gaia_helptab['ref']=['2022arXiv220800211G' for j in range(len(gaia_helptab))]
     return gaia_helptab
 
-def create_ident_table(gaia_helptab,gaia):    
+def create_ident_table(gaia_helptab,gaia):  
+    """
+    Creates identifier table.
+    
+    :param gaia_helptab: Gaia helper table.
+    :type gaia_helptab: astropy.table.table.Table
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Identifier table and gaia helper table.
+    :rtype: astropy.table.table.Table, astropy.table.table.Table
+    """
     #---------------gaia_ident-----------------------
     gaia_sim_idmatch=fetch_main_id(gaia_helptab['gaia_id','ref'],
                            IdentifierCreator(name='main_id',colname='gaia_id')) 
@@ -71,28 +95,38 @@ def create_ident_table(gaia_helptab,gaia):
     gaia_helptab.remove_column('id')
     return gaia_ident,gaia_helptab
 
-def create_objects_table(gaia_helptab,gaia):    
+def create_objects_table(gaia_helptab,gaia): 
+    """
+    Creates objects table.
+    
+    :param gaia_helptab: Gaia helper table.
+    :type gaia_helptab: astropy.table.table.Table
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Objects table.
+    :rtype: astropy.table.table.Table
+    """
     #-----------------gaia_objects------------------
     gaia_objects=Table(names=['main_id','ids'],dtype=[object,object])
     gaia_objects=ids_from_ident(gaia['ident']['main_id','id'],gaia_objects)
-    #grouped_gaia_ident=gaia_ident.group_by('main_id')
-    #ind=grouped_gaia_ident.groups.indices
-    #for i in range(len(ind)-1):
-    # -1 is needed because else ind[i+1] is out of bonds
-     #   ids=[]
-      #  for j in range(ind[i],ind[i+1]):
-       #     ids.append(grouped_gaia_ident['id'][j])
-       # ids="|".join(ids)
-        #gaia_objects.add_row([grouped_gaia_ident['main_id'][ind[i]],ids])
     gaia_objects['type']=['st' for j in range(len(gaia_objects))]
     gaia_objects['main_id']=gaia_objects['main_id'].astype(str)
-    gaia_objects=join(gaia_objects,gaia_helptab['main_id','nss_solution_type'],join_type='left')
+    gaia_objects=join(gaia_objects,gaia_helptab['main_id','nss_solution_type'],
+                      join_type='left')
     gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]=['sy' for j in range(len(
             gaia_objects['type'][np.where(gaia_objects['nss_solution_type']!='')]))]
     gaia_objects.remove_column('nss_solution_type')
     return gaia_objects
 
-def create_mes_binary_table(gaia):    
+def create_mes_binary_table(gaia): 
+    """
+    Creates binarity measurement table.
+    
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Binarity measurement table.
+    :rtype: astropy.table.table.Table
+    """
     gaia_mes_binary=gaia['objects']['main_id','type']
     # tbd add binary flag True to children of system objects once I get h_link 
     # info from gaia')
@@ -106,7 +140,17 @@ def create_mes_binary_table(gaia):
     #if necessary lower binary_qual for binary_flag = False to level of simbad.
     return gaia_mes_binary
 
-def create_mes_teff_st_table(gaia_helptab,gaia):    
+def create_mes_teff_st_table(gaia_helptab,gaia): 
+    """
+    Creates stellar effective temperature table.
+    
+    :param gaia_helptab: Gaia helper table.
+    :type gaia_helptab: astropy.table.table.Table
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Stellar effective temperature table.
+    :rtype: astropy.table.table.Table
+    """
     gaia_mes_teff_st=gaia_helptab['main_id','teff_gspphot']
     gaia_mes_teff_st['ref']=[gaia_helptab['ref'][j]+ ' GSP-Phot'
                          for j in range(len(gaia_helptab))]
@@ -127,7 +171,17 @@ def create_mes_teff_st_table(gaia_helptab,gaia):
                                       'teff_st_qual','teff_st_ref']
     return gaia_mes_teff_st
 
-def create_mes_radius_st_table(gaia_helptab,gaia):    
+def create_mes_radius_st_table(gaia_helptab,gaia):  
+    """
+    Creates stellar radius table.
+    
+    :param gaia_helptab: Gaia helper table.
+    :type gaia_helptab: astropy.table.table.Table
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Stellar radius table.
+    :rtype: astropy.table.table.Table
+    """
     gaia_mes_radius_st=gaia_helptab['main_id','radius_st_value','ref']
     gaia_mes_radius_st.remove_rows(gaia_mes_radius_st['radius_st_value'].mask.nonzero()[0])
     gaia_mes_radius_st['radius_st_qual']=['B' for j in range(len(gaia_mes_radius_st))]
@@ -137,6 +191,16 @@ def create_mes_radius_st_table(gaia_helptab,gaia):
     return gaia_mes_radius_st
 
 def create_mes_mass_st_table(gaia_helptab,gaia):
+    """
+    Creates stellar mass table.
+    
+    :param gaia_helptab: Gaia helper table.
+    :type gaia_helptab: astropy.table.table.Table
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Stellar masse table.
+    :rtype: astropy.table.table.Table
+    """
     gaia_mes_mass_st=gaia_helptab['main_id','mass_st_value','ref']
     gaia_mes_mass_st.remove_rows(gaia_mes_mass_st['mass_st_value'].mask.nonzero()[0])
     gaia_mes_mass_st['mass_st_qual']=['B' for j in range(len(gaia_mes_mass_st))]
@@ -146,6 +210,14 @@ def create_mes_mass_st_table(gaia_helptab,gaia):
     return gaia_mes_mass_st
 
 def create_gaia_sources_table(gaia):
+    """
+    Creates sources table.
+    
+    :param gaia: Dictionary of database table names and tables.
+    :type gaia: dict(str,astropy.table.table.Table)
+    :returns: Sources table.
+    :rtype: astropy.table.table.Table
+    """
     tables=[gaia['provider'],gaia['ident'],gaia['mes_teff_st'],gaia['mes_radius_st'],
             gaia['mes_mass_st'],gaia['mes_binary']]
     #define header name of columns containing references data
@@ -155,17 +227,12 @@ def create_gaia_sources_table(gaia):
                                       gaia['provider']['provider_name'][0])
     return gaia_sources     
 
-def provider_gaia(distance_cut_in_pc,temp=True):
+def provider_gaia(distance_cut_in_pc):
     """
     Obtains and arranges gaia data.
     
-    Currently there is a provlem in obtaining the data through pyvo.
-    A temporary method to ingest old gaia data was implemented and can be
-    accessed by setting temp=True as argument.
-    
-    :param distance_cut_in_pc:
-    :param bool temp: 
-    :returnss: Dictionary with names and astropy tables containing
+    :param float distance_cut_in_pc: Distance up to which stars are included.
+    :returns: Dictionary with names and astropy tables containing
         reference data, provider data, object data, identifier data,  
         stellar effective temperature, radius, mass and binarity data.
     :rtype: dict(str,astropy.table.table.Table)
@@ -175,7 +242,7 @@ def provider_gaia(distance_cut_in_pc,temp=True):
     gaia['provider'] = create_provider_table('Gaia',
                                   "https://gea.esac.esa.int/tap-server/tap",
                                   '2016A&A...595A...1G')
-    gaia_helptab=create_gaia_helpertable(distance_cut_in_pc,gaia,temp)
+    gaia_helptab=create_gaia_helpertable(distance_cut_in_pc,gaia)
     gaia['ident'],gaia_helptab=create_ident_table(gaia_helptab,gaia)  
     gaia['objects']=create_objects_table(gaia_helptab,gaia)    
     gaia['mes_binary']=create_mes_binary_table(gaia)
