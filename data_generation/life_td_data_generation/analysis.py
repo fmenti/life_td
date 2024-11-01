@@ -9,15 +9,15 @@ from enum import Enum
 
 #self created modules
 from utils.io import stringtoobject, Path
-import sdata as sdc
+from sdata import empty_cat
 
 
 ###############################################################################
 #-------------------------Sanity tests--------------------------------------------
 ###############################################################################
     
-empty=sdc.provider('empty')
-table_names=empty.table_names
+empty=empty_cat.copy()
+table_names=list(empty.keys())
 
 class SpectralType(Enum):
     O = 'O'
