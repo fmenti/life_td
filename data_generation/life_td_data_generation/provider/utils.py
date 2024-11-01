@@ -13,7 +13,7 @@ from utils.io import load
 
 
 def create_provider_table(provider_name,provider_url,provider_bibcode,provider_access = datetime.now().strftime('%Y-%m-%d')):
-    print(f'Creating {provider_name} tables ...')
+    print(f'Trying to create {provider_name} tables from {provider_access}...')
     provider_table = Table()
     provider_table['provider_name']=[provider_name]
     provider_table['provider_url']=[provider_url]
