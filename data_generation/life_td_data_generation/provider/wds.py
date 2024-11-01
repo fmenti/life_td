@@ -11,7 +11,21 @@ from utils.io import save, load
 from provider.utils import fill_sources_table, create_sources_table, query, ids_from_ident, distance_cut, create_provider_table
 from sdata import empty_cat
 
-def create_wds_helpertable(wds,temp,test_objects):    
+def create_wds_helpertable(wds,temp,test_objects): 
+    """
+    Creates helper table.
+    
+    If temp is True load instead of query data to save time.
+    
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :param bool temp: Wether to load or query WDS.
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Helper table.
+    :rtype: astropy.table.table.Table
+    """
     # define queries
     adql_query=["""SELECT
                     WDS as wds_name, Comp as wds_comp,
@@ -122,7 +136,19 @@ def create_wds_helpertable(wds,temp,test_objects):
     return wds_helptab
 
 def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
+    """
+    Creates identifier and hierarchical link tables.
     
+    :param wds_helptab: WDS helper table.
+    :type wds_helptab: astropy.table.table.Table
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Identifier and hierarchical link tables.
+    :rtype: astropy.table.table.Table, astropy.table.table.Table
+    """
     #-----------------creating output table wds_ident and wds_h_link------------
     wds_ident=Table(names=['main_id','id'],dtype=[object,object],masked=True)
     # create wds_h_link (for systems)
@@ -225,6 +251,19 @@ def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
     return wds_ident,wds_h_link
 
 def create_objects_table(wds_helptab,wds,test_objects):
+    """
+    Creates object table.
+    
+    :param wds_helptab: WDS helper table.
+    :type wds_helptab: astropy.table.table.Table
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Object table.
+    :rtype: astropy.table.table.Table
+    """
     #create ids
     wds_objects=Table(names=['main_id','ids'],dtype=[object,object])
     wds_objects=ids_from_ident(wds['ident']['main_id','id'],wds_objects)
@@ -241,6 +280,19 @@ def create_objects_table(wds_helptab,wds,test_objects):
     return wds_objects
 
 def create_mes_binary_table(wds_helptab,wds,test_objects):
+    """
+    Creates binarity table.
+    
+    :param wds_helptab: WDS helper table.
+    :type wds_helptab: astropy.table.table.Table
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Binarity table.
+    :rtype: astropy.table.table.Table
+    """
     wds_mes_binary=wds['objects']['main_id','type']#[np.where(wds_objects['type']=='sy')]
     wds_mes_binary.rename_column('type','binary_flag')
     wds_mes_binary['binary_flag']=wds_mes_binary['binary_flag'].astype(object)
@@ -254,8 +306,19 @@ def create_mes_binary_table(wds_helptab,wds,test_objects):
     return wds_mes_binary
 
 def create_mes_sep_ang_table(wds_helptab,wds,test_objects):
-    #-----------------creating output table wds_mes_sep_ang------------------------
-    #better join them
+    """
+    Creates angular separation table.
+    
+    :param wds_helptab: WDS helper table.
+    :type wds_helptab: astropy.table.table.Table
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Angular separation table.
+    :rtype: astropy.table.table.Table
+    """
     wds_mes_sep_ang0=join(wds_helptab['system_name','wds_sep1','wds_obs1','wds_sep2','wds_obs2'],
                                   wds['ident']['main_id','id'],keys_left='system_name', keys_right='id')
     #replacing empty system_main_id with main_id from ident using system_name column
@@ -298,6 +361,14 @@ def create_mes_sep_ang_table(wds_helptab,wds,test_objects):
     return wds_mes_sep_ang
 
 def create_wds_sources_table(wds):
+    """
+    Creates sources table.
+    
+    :param wds: Dictionary of database table names and tables.
+    :type wds: dict(str,astropy.table.table.Table)
+    :returns: Sources table.
+    :rtype: astropy.table.table.Table
+    """
     tables=[wds['provider'],wds['ident']]
     #define header name of columns containing references data
     ref_columns=[['provider_bibcode'],['id_ref']]
@@ -310,6 +381,9 @@ def provider_wds(temp=False,test_objects=[]):
     This function obtains and arranges wds data.
     
     :param bool temp: Defaults to False. Used for debugging. saves querrying time.
+    :param test_objects: Objects to be tested where they drop out of the 
+        criteria or make it till the end.
+    :type test_objects: list(str) 
     :returns: List of astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.

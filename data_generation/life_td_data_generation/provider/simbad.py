@@ -12,6 +12,17 @@ from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create
 from sdata import empty_cat
 
 def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
+    """
+    Creates helper table.
+    
+    :param float distance_cut_in_pc: Distance up to which stars are included.
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :param test_objects: Objects to be tested where they drop out of the criteria or make it till the end.
+    :type test_objects: list(str) 
+    :returns: Helper table.
+    :rtype: astropy.table.table.Table
+    """
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
@@ -131,8 +142,6 @@ def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
                   test_objects[np.where(np.in1d(test_objects,
                                                 sim_helptab['main_id']))])
 
-    
-    
     return sim_helptab
 
 def stars_in_multiple_system(cat,sim_h_link,all_objects):
@@ -201,12 +210,34 @@ def stars_in_multiple_system(cat,sim_h_link,all_objects):
     return cat
 
 def creating_helpertable_stars(sim_helptab,sim):
+    """
+    Creates another helper table.
+    
+    :param sim_helptab: Main SIMBAD helper table.
+    :type sim_helptab: astropy.table.table.Table
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :returns: Helper table.
+    :rtype: astropy.table.table.Table
+    """    
     temp_stars=sim_helptab[np.where(sim_helptab['type']!='pl')]
     #removing double objects (in there due to multiple parents)
     stars=Table(unique(temp_stars,keys='main_id'),copy=True)
     return stars
 
 def expanding_helpertable_stars(sim_helptab,sim,stars):
+    """
+    Adds data to helper table stars.
+    
+    :param sim_helptab: Main SIMBAD helper table.
+    :type sim_helptab: astropy.table.table.Table
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :param stars: Secondary SIMBAD helper table.
+    :type stars: astropy.table.table.Table
+    :returns: Helper table stars.
+    :rtype: astropy.table.table.Table
+    """
     #--------------------creating helper table sim_stars----------------
     #updating multiplicity object type
     #no children and sptype does not contain + -> type needs to be st
@@ -251,6 +282,16 @@ def expanding_helpertable_stars(sim_helptab,sim,stars):
     return stars
 
 def create_ident_table(sim_helptab,sim):
+    """
+    Creates identifier table.
+    
+    :param sim_helptab: Main SIMBAD helper table.
+    :type sim_helptab: astropy.table.table.Table
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :returns: Identifier table.
+    :rtype: astropy.table.table.Table
+    """
     # query all identifiers for objects in TAP_UPLOAD.t1 table
     upload_query="""SELECT id, t1.*
                     FROM ident
@@ -263,6 +304,18 @@ def create_ident_table(sim_helptab,sim):
     return sim_ident
 
 def create_h_link_table(sim_helptab,sim,stars):
+    """
+    Creates hierarchical link table.
+    
+    :param sim_helptab: Main SIMBAD helper table.
+    :type sim_helptab: astropy.table.table.Table
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :param stars: Secondary SIMBAD helper table.
+    :type stars: astropy.table.table.Table
+    :returns: Hierarchical link table.
+    :rtype: astropy.table.table.Table
+    """
     sim_h_link=sim_helptab['main_id','parent_oid','h_link_ref','membership']
     #sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
     ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
@@ -285,6 +338,16 @@ def create_h_link_table(sim_helptab,sim,stars):
     return sim_h_link
 
 def create_objects_table(sim_helptab,stars):
+    """
+    Creates objects table.
+    
+    :param sim_helptab: Main SIMBAD helper table.
+    :type sim_helptab: astropy.table.table.Table
+    :param stars: Secondary SIMBAD helper table.
+    :type stars: astropy.table.table.Table
+    :returns: Objects table.
+    :rtype: astropy.table.table.Table
+    """
     #-----------------creating output table sim_planets-----------------
     temp_sim_planets=sim_helptab['main_id','ids',
                             'type'][np.where(sim_helptab['type']=='pl')]
@@ -298,6 +361,16 @@ def create_objects_table(sim_helptab,stars):
     return sim_objects
 
 def create_sim_sources_table(stars,sim):
+    """
+    Creates sources table.
+    
+    :param sim: Dictionary of database table names and tables.
+    :type sim: dict(str,astropy.table.table.Table)
+    :param stars: Secondary SIMBAD helper table.
+    :type stars: astropy.table.table.Table
+    :returns: Sources table.
+    :rtype: astropy.table.table.Table
+    """
     #--------------creating output table sim_sources -------------------
     tables=[sim['provider'],stars, sim['h_link'],sim['ident']]
     #define header name of columns containing references data
@@ -309,6 +382,14 @@ def create_sim_sources_table(stars,sim):
     return sim_sources
 
 def create_star_basic_table(stars):
+    """
+    Creates basic stellar data table.
+    
+    :param stars: Secondary SIMBAD helper table.
+    :type stars: astropy.table.table.Table
+    :returns: Basic stellar data table.
+    :rtype: astropy.table.table.Table
+    """
     sim_star_basic=stars['main_id','coo_ra','coo_dec','coo_err_angle',
                          'coo_err_maj','coo_err_min','coo_qual','coo_ref',
                          'mag_i_value','mag_i_ref','mag_j_value','mag_j_ref',
@@ -325,7 +406,10 @@ def provider_simbad(distance_cut_in_pc,test_objects=[]):
     """
     Optains and arranges SIMBAD data.
     
-    :returnss: Dictionary with names and astropy tables containing
+    :param float distance_cut_in_pc: Distance up to which stars are included.
+    :param test_objects: Objects to be tested where they drop out of the criteria or make it till the end.
+    :type test_objects: list(str)
+    :returns: Dictionary with names and astropy tables containing
         reference data, provider data, object data, identifier data, object to 
         object relation data, basic stellar data and binarity data.
     :rtype: dict(str,astropy.table.table.Table)
