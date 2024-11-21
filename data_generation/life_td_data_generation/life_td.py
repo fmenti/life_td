@@ -84,7 +84,10 @@ def partial_create(distance_cut_in_pc,create=[]):
         #provider_tables_dict[prov]=string_to_object_whole_dict(provider_tables_dict[prov])
         if prov in create:
             if arguments[i]!=():
-                cat=functions[i](arguments[i])
+                try:
+                    cat=functions[i](arguments[i])
+                except:
+                    cat=functions[i](*arguments[i])
             else:
                 cat=functions[i]()
         else:
