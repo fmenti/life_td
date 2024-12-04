@@ -26,7 +26,7 @@ def create_exo_helpertable(exo):
     """
     #---------------define query----------------------------------------
     adql_query="""SELECT *
-                  FROM exomercat.exomercat"""
+                  FROM exomercat.exomercat_legacy"""
     #---------------obtain data-----------------------------------------
     try:
         exo['provider'] = create_provider_table('Exo-MerCat',
