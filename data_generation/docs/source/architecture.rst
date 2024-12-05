@@ -14,12 +14,15 @@ Let's start with a bit of terminology used when dealing with databases. A `datab
 Use Cases
 ---------
 
-We considered the following five use cases:
+In database terminology, “use cases” are the different ways in which a user can interact with a database. 
+The output desired by the user drives the database design. 
+We elaborate below on the most relevant LIFE target database use
+cases.
 
-* A: Catalog extraction for main science objective of LIFE
-* B: Easy access for fellow scientists
-* C: Low maintenace for database administrator to save costs
-* D: Identify important missing data for future observation proposals
+* A: Exploration of Selection Criteria for Target Catalogs
+* B: Easy Access for Fellow Scientists
+* C: Low Maintenance for Administrator
+* D: Identify essential missing data for future observation proposals
 * E: Provide context for analysis of data obtained by LIFE
 
 
@@ -36,14 +39,14 @@ A
 
 B
 
-* B1: VO compatibility
-* B2: Example queries to mitigate ADQL knowledge deficites.
-* B3: tutorials to help create catalog for own science project
+* B1: `VO <www.ivoa.net>`_ compatibility 
+* B2: `Example queries <https://dc.zah.uni-heidelberg.de/life/q/ex/examples>`_ to mitigate ADQL knowledge deficites.
+* B3: Tutorials to help create catalog for own science project
 
 C
 
 * C1: Data ingestion as automated as possible. This is achieved by prefering VO compatible data providers over other databases. Those are in turn prefered over modeled data and as a last resort literature data is collected.
-* C2: GAVO published, they take case that server runs smoothly.
+* C2: GAVO published, they take care that server runs smoothly.
 * C3: Everything public and documented to have good knowledge transfer in case of administrator change.
 
 E
@@ -80,7 +83,7 @@ The image below visualizes the different steps required for the data to get inge
 
 .. image:: images/IngestionPipeline.png
 
-TBD: explain individual steps
+First data considered interesting for our database gets queried from different providers. That data then gets postprocessed and arranged in data tables ready to be ingested into the Data Center Helper Suite (DaCHS) software provided by GAVO. For DaCHS to know how to ingest from the data tables this information is incoded in the resource descriptor file. Once DaCHS created the database we let it be published by GAVO. It is then accessible through VO tools like PyVO or TOPCAT.
 
 Content
 -------
