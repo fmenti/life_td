@@ -1,5 +1,6 @@
 data_generation/life_td_data_generation/life_td_Testbench.ipynb
 data/*.xml
+data/*.csv
 additional_data/*.xml
 additional_data/*.csv
 additional_data/*.txt
@@ -8,3 +9,6 @@ additional_data/*.txt
 !additional_data/sdb_30pc_09_02_2024.xml
 plots/
 data_generation/docs/build/
+**/.ipynb_checkpoints/
+**/__pycache__/
+
