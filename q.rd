@@ -1328,7 +1328,8 @@ tables may change at any time without prior warning.
             to find (direct) children of a star, you would run:
 
             .. tapquery::
-                SELECT main_id as Child_main_id, object_id as child_object_id
+                SELECT DISTINCT main_id as Child_main_id, object_id as
+                child_object_id
                 FROM life_td.h_link
                 JOIN life_td.ident as p on p.object_idref=parent_object_idref
                 JOIN life_td.object on object_id=child_object_idref
