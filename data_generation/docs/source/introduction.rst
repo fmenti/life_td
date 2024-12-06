@@ -47,11 +47,5 @@ In order to prevent confusion between terminology used by other missions here a 
 The target database contains as much data as possible on potential targets. It consists of stars (no single brown or white dwarfs), systems, planets and disks within 30 pc of the Sun and contains of order 10⁴ objects. The Star-Cat (also sometimes called input target catalog) is extracted from the database and contains as much data as needed for `LIFEsim <https://lifesim.readthedocs.io/en/latest/>`_. It consists of main-sequence single stars and wide binaries (with stable planet orbits in the habitable zone) and contains of order 10³ stars. LIFEsim shows for which mission parameters (e.g. S/N) what stellar objects (e.g. amount, to what distance) would be retrieved. This output sample consists of ~10² stars with the highest simulated observation yield. For targets that allow detailed characterization in relatively short observation times for oportunity of potential "time-resolved" experiments e.g. seasonal changes we have the golden targets sample. It consists of ~10¹ of best a priori known stars (e.g. Proxima, stars also observed with HWO). The sample of the final targets are the ~10² best stars for the LIFE mission. They consist of the golden targets together with some of the LIFEsim output sample.
 
 
-.. Complementary databases and catalogs
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. NASA Exoplanet Exploration Program (ExEP) Mission Star List for the HWO (Mamajek & Stapelfeldt 2024)
-.. SPORES System Properties & Observational Reconnaissance for Exoplanet Studies (SPORES, Harada et al. 2024)
-.. HWO Preliminary Input Catalog (HPIC, Tuchow et al. 2024)
-.., Starchive, HOSTS
+.. Complementary databases and catalogs: NASA Exoplanet Exploration Program (ExEP) Mission Star List for the HWO (Mamajek & Stapelfeldt 2024). SPORES System Properties & Observational Reconnaissance for Exoplanet Studies (SPORES, Harada et al. 2024). HWO Preliminary Input Catalog (HPIC, Tuchow et al. 2024). Starchive, HOSTS
 
