@@ -23,7 +23,7 @@ LIFE Target Database
 
 The Target Database for LIFE and ancillary observations is a repository for relevant data about potential stellar target systems. 
 Our primary objectives include offering easy database access and extracting input target catalogs to predict exoplanet detection yields.
-Simultaneously, we aim to determine important missing observations, offer data to derive mission design decisions, and provide context for the analysis of data obtained by LIFE.
+Simultaneously, we aim to determine important missing observations, offer data to derive mission design decisions, and provide context for the analysis of data obtained by LIFE. We presented the database in our Research Note "Database of Candidate Targets for the LIFE Mission" (`NASA/ADS <https://ui.adsabs.harvard.edu/abs/2024RNAAS...8..267M/abstract>`_).
 
 LIFE samples
 ^^^^^^^^^^^^
