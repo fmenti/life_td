@@ -49,6 +49,9 @@ Once you have set up a suitable virtualenv, clone this repository and install `l
     cd life_td ;
     pip install .
     
+.. Note::
+   If the installation does not work try installing all modules from the requirements.txt individually e.g. pip install numpy.
+    
 Once a local copy of the repository exists, new commits can be pulled from Github with:
 
 .. code-block:: console

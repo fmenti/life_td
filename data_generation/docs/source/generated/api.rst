@@ -4,7 +4,7 @@ API Documentation
 =================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    life_td_data_generation.life_td
    life_td_data_generation.utils

@@ -1381,13 +1381,14 @@ tables may change at any time without prior warning.
             star '* bet Cas' you would run:
 
             .. tapquery::
-                SELECT main_id disk_main_id, object_id as disk_object_id, db.*
+                SELECT DISTINCT main_id disk_main_id, object_id as 
+                disk_object_id, db.*
                 FROM life_td.h_link
                 JOIN life_td.disk_basic as db ON 
                  db.object_idref=child_object_idref
                 JOIN life_td.ident as p on p.object_idref=parent_object_idref
                 JOIN life_td.object on object_id=child_object_idref
-                WHERE p.id = '* bet Cas' and type='di'
+                WHERE p.id = '* bet Pic' and type='di'
                 </meta>
         <meta name="_example" title="Missing reliable measurements">
             In LIFE we keep information about the quality of a measurement.
