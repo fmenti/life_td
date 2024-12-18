@@ -20,7 +20,7 @@ def test_create_provider_table_no_date_given():
 def test_query():
     link='http://dc.zah.uni-heidelberg.de/tap'
     adql_query="""
-    SELECT main_id as Child_main_id, object_id as child_object_id
+    SELECT TOP 10 main_id as Child_main_id, object_id as child_object_id
     FROM life_td.h_link
     JOIN life_td.ident as p on p.object_idref=parent_object_idref
     JOIN life_td.object on object_id=child_object_idref
@@ -31,7 +31,7 @@ def test_query():
     assert '* alf Cen A' in table['child_main_id']
     
     adql_query2="""
-        SELECT *
+        SELECT TOP 10 *
         FROM TAP_UPLOAD.t1 
         WHERE child_main_id= '* alf Cen A'
         """
