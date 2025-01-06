@@ -17,9 +17,9 @@ The data for the LIFE database is generated using the function :py:func:`life_td
 
 It is also the one being called when the module is run as a script. 
 
-During development it can happen that one runs the data generation multiple times e.g. when one is debugging a particular provider. As running the whole data generation takes time especially with larger distance cuts I implemented the function :py:func:`life_td.partial_create`. Because one can specify which provider data is generated and which one loaded from the previously generated files one can potentially save a lot of time.
+During development it can happen that one runs the data generation multiple times e.g. when one is debugging a particular provider. As running the whole data generation takes time especially with larger distance cuts I implemented the function :py:func:`life_td.partial_create`. There one can specify which provider data is generated and which one loaded from the previously generated files and can potentially save a lot of time.
 
-If one only wants to load the data e.g. for analysis reasons one can use the function :py:func:`life_td.load_life_td`.
+If one only wants to load the data e.g. for analysis reasons the function :py:func:`life_td.load_life_td` can be used.
 
 utils module
 ------------
