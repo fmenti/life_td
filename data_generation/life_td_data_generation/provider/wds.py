@@ -76,13 +76,13 @@ def create_wds_helpertable(wds,temp,test_objects):
                 
         if len(test_objects)>0:
             print('in wds as system_name', 
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['system_name']))])
             print('in wds as primary',
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['primary']))])
             print('in wds as secondary',
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['secondary']))])
 
 
@@ -119,13 +119,13 @@ def create_wds_helpertable(wds,temp,test_objects):
         if len(test_objects)>0:
             print(wds_helptab['system_main_id','primary_main_id','secondary_main_id'])
             print('in wds as system_main_id',
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['system_main_id']))])
             print('in wds as primary_main_id',
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['primary_main_id']))])
             print('in wds as secondary_main_id',
-                    test_objects[np.where(np.in1d(test_objects,
+                    test_objects[np.where(np.isin(test_objects,
                                                     wds_helptab['secondary_main_id']))])
         
         save([wds_helptab],['wds_helptab'])
@@ -190,7 +190,7 @@ def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
 
     #delete entries where id instead of main_id used
     not_identical_rows_id=wds_ident['id'][np.where(wds_ident['main_id']!=wds_ident['id'])]
-    remove=np.in1d(wds_ident['main_id'],not_identical_rows_id)
+    remove=np.isin(wds_ident['main_id'],not_identical_rows_id)
     wds_ident.remove_rows(remove)
 
     #for h_link replacing instead of deleting because there can be cases where the information I need is only available this way
@@ -199,17 +199,17 @@ def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
     #would want to have [primary_main_id,system_main_id]
 
     #where h_link main_id not in ident_main_id
-    not_main_id=np.invert(np.in1d(wds_h_link['main_id'],wds_ident['main_id']))
+    not_main_id=np.invert(np.isin(wds_h_link['main_id'],wds_ident['main_id']))
     
     if len(test_objects)>0:
         print('number of test objects that are in h_link main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_h_link['main_id']))])
         print('number of test objects that are in h_link parent_main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_h_link['parent_main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_h_link['parent_main_id']))])
         print('number of test objects that are in main_id of ident table \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_ident['main_id']))])
         print('number of test objects that are in main_id of h_link but not ident table \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id'][not_main_id]))])
+              test_objects[np.where(np.isin(test_objects,wds_h_link['main_id'][not_main_id]))])
 
     #replace it with the corresponding  ident main_id
     for j in range(len(wds_h_link['main_id'][not_main_id])):
@@ -220,12 +220,12 @@ def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
     
     if len(test_objects)>0:
         print('number of test objects that are in h_link main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_h_link['main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_h_link['main_id']))])
         print('number of test objects that are in main_id of ident table \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_ident['main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_ident['main_id']))])
     
     #where h_link parent_main_id not in ident_main_id
-    not_parent_main_id=np.invert(np.in1d(wds_h_link['parent_main_id'],wds_ident['main_id']))
+    not_parent_main_id=np.invert(np.isin(wds_h_link['parent_main_id'],wds_ident['main_id']))
 
     #replace it with the corresponding  ident main_id
     for j in range(len(wds_h_link['parent_main_id'][not_parent_main_id])):
@@ -271,12 +271,12 @@ def create_objects_table(wds_helptab,wds,test_objects):
     #if it has no children it can either be star or close in system
     wds_objects['type']=['sy' for j in range(len(wds_objects))]
     #change to st for those that have no children
-    wds_objects['type'][np.invert(np.in1d(wds_objects['main_id'],wds['h_link']['parent_main_id']))]=['st' for j in range(len(
-            [np.invert(np.in1d(wds_objects['main_id'],wds['h_link']['parent_main_id']))]))] 
+    wds_objects['type'][np.invert(np.isin(wds_objects['main_id'],wds['h_link']['parent_main_id']))]=['st' for j in range(len(
+            [np.invert(np.isin(wds_objects['main_id'],wds['h_link']['parent_main_id']))]))] 
     
     if len(test_objects)>0:
         print('number of test objects that are in objects main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_objects['main_id']))])    
+              test_objects[np.where(np.isin(test_objects,wds_objects['main_id']))])    
     return wds_objects
 
 def create_mes_binary_table(wds_helptab,wds,test_objects):
@@ -302,7 +302,7 @@ def create_mes_binary_table(wds_helptab,wds,test_objects):
     
     if len(test_objects)>0:
         print('number of test objects that are in mes_binary main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_mes_binary['main_id']))])    
+              test_objects[np.where(np.isin(test_objects,wds_mes_binary['main_id']))])    
     return wds_mes_binary
 
 def create_mes_sep_ang_table(wds_helptab,wds,test_objects):
@@ -356,7 +356,7 @@ def create_mes_sep_ang_table(wds_helptab,wds,test_objects):
         
     if len(test_objects)>0:
         print('number of test objects that are in mes_sep_ang main_id \n', \
-              test_objects[np.where(np.in1d(test_objects,wds_mes_sep_ang['main_id']))])
+              test_objects[np.where(np.isin(test_objects,wds_mes_sep_ang['main_id']))])
 
     return wds_mes_sep_ang
 

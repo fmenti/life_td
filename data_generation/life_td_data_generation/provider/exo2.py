@@ -99,7 +99,7 @@ def create_exo_helpertable():
                              IdentifierCreator(name='sim_planet_main_id',colname='planet_main_id'))
 
     
-    notinsimbad=exo_helptab['planet_main_id'][np.where(np.in1d(
+    notinsimbad=exo_helptab['planet_main_id'][np.where(np.isin(
             exo_helptab['planet_main_id'],exo_helptab2['planet_main_id'],
             invert=True))]
     #I use a left join as otherwise I would loose some objects that are not in simbad

@@ -142,10 +142,10 @@ def realspectype(cat):
     :rtype: astropy.table.table.Table
     """
     ms_tempclass=np.array(['O','B','A','F','G','K','M'])
-    ms_temp=cat[np.where(np.in1d(cat['class_temp'],ms_tempclass))]
+    ms_temp=cat[np.where(np.isin(cat['class_temp'],ms_tempclass))]
     
     ms_lumclass=np.array(['V'])
-    ms=ms_temp[np.where(np.in1d(ms_temp['class_lum'],ms_lumclass))]
+    ms=ms_temp[np.where(np.isin(ms_temp['class_lum'],ms_lumclass))]
     
     return ms
 

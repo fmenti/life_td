@@ -160,7 +160,7 @@ def best_para_id(mes_table):
         mask = grouped_mes_table.groups.keys['id_ref'] == ref
         all_ref_ids=grouped_mes_table.groups[mask]
         #removing those already in best_para_table
-        new_ids=all_ref_ids[np.where(np.invert(np.in1d(
+        new_ids=all_ref_ids[np.where(np.invert(np.isin(
                                     all_ref_ids['id'],
                                     best_para_table['id'])))]
         best_para_table=vstack([best_para_table,new_ids])
@@ -231,7 +231,7 @@ def best_para(para,mes_table):
     grouped_mes_table=mes_table.group_by('main_id')
     #take highest quality
     #quite time intensive (few minutes) could maybe be optimized using 
-    # np.in1d function
+    # np.isin function
     for j in range(len(grouped_mes_table.groups.keys)):
     # go through all objects
         for qual in ['A','B','C','D','E','?']:

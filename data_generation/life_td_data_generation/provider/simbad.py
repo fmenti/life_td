@@ -91,13 +91,13 @@ def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
     test_objects=np.array(test_objects)
     if len(test_objects)>0:
         print('in sim through plx query', 
-                  test_objects[np.where(np.in1d(test_objects,
+                  test_objects[np.where(np.isin(test_objects,
                                                 sim_helptab['main_id']))])
         print('in sim through child plx query', 
-                test_objects[np.where(np.in1d(test_objects,
+                test_objects[np.where(np.isin(test_objects,
                                             parents_without_plx['main_id']))])
         print('in sim through parent plx query', 
-                  test_objects[np.where(np.in1d(test_objects,
+                  test_objects[np.where(np.isin(test_objects,
                                             children_without_plx['main_id']))])
     
     #adding of no_parallax objects to rest of simbad query objects
@@ -139,7 +139,7 @@ def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
         
     if len(test_objects)>0:
         print('in sim through otype criteria', 
-                  test_objects[np.where(np.in1d(test_objects,
+                  test_objects[np.where(np.isin(test_objects,
                                                 sim_helptab['main_id']))])
 
     return sim_helptab
@@ -203,9 +203,9 @@ def stars_in_multiple_system(cat,sim_h_link,all_objects):
     temp=list(np.where(temp==True)[0])
     single_sptype=sy_wo_child_st[:][temp]
     #and no + in spectral type: single_sptype['main_id','type']      
-    cat['type'][np.where(np.in1d(cat['main_id'],
+    cat['type'][np.where(np.isin(cat['main_id'],
                                 single_sptype['main_id']))]=\
-              ['st' for j in range(len(cat[np.where(np.in1d(cat['main_id'],
+              ['st' for j in range(len(cat[np.where(np.isin(cat['main_id'],
                                         single_sptype['main_id']))]))]        
     return cat
 
@@ -250,10 +250,10 @@ def expanding_helpertable_stars(sim_helptab,sim,stars):
     # binary_flag 'True' for all stars with parents
     # meaning stars[main_id] in sim_h_link[child_main_id] 
     #-> stars[binary_flag]=='True'    
-    stars['binary_flag'][np.where(np.in1d(stars['main_id'],
+    stars['binary_flag'][np.where(np.isin(stars['main_id'],
                                         sim['h_link']['main_id']))]=\
                     ['True' for j in range(len(stars[np.where(
-                    np.in1d(stars['main_id'],sim['h_link']['main_id']))]))]   
+                    np.isin(stars['main_id'],sim['h_link']['main_id']))]))]   
                 
     #change null value of plx_qual
     stars['plx_qual']=stars['plx_qual'].astype(object)
@@ -323,7 +323,7 @@ def create_h_link_table(sim_helptab,sim,stars):
     # removing entries in h_link where parent objects are clusters or 
     # associations as we are 
     #only interested in hierarchical multiples. 
-    sim_h_link=sim_h_link[np.where(np.in1d(sim_h_link['parent_oid'],
+    sim_h_link=sim_h_link[np.where(np.isin(sim_h_link['parent_oid'],
                                             stars['oid']))]
     
     
