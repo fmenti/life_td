@@ -36,7 +36,6 @@ def test_exo_main_object_ids():
     cat=create_object_main_id(cat)
     assert list(cat['host_main_id'])==['*   3 Cnc','*   4 Mon B','6 Lyn']
     assert list(cat['planet_main_id'])==['*   3 Cnc b','*   4 Mon B .01','6 Lyn b']
-    
 
 def test_exo_create_ident_table():
     # data
@@ -45,7 +44,7 @@ def test_exo_create_ident_table():
                      ['*   3 Cnc b','*   4 Mon B .01','muster_exoname']],
                  names=['planet_main_id','sim_planet_main_id','exomercat_name'], 
                  dtype=[object, object,object])
-    exo = empty_cat
+    exo = empty_cat.copy()
     exo['provider'] = Table(data = [['2020A&C....3100370A']],
                             names = ['provider_bibcode'],
                             dtype=[object])

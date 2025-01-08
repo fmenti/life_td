@@ -1,5 +1,6 @@
 """ 
 Generates the data for the database for the provider Exo-Mercat. 
+Distance cut is performed by joining on life_db simbad objects.
 """
 
 import numpy as np #arrays
@@ -11,6 +12,36 @@ from datetime import datetime
 from utils.io import save, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
 from sdata import empty_cat
+
+def query_or_load_exomercat():
+    """
+    Queries or loads exomercat table.
+    
+    If the exomercat server is not online a temporary method to 
+    ingest old exomercat data is used.
+    
+    :returns: Dictionary of database table names and tables.
+    :rtype: dict(str,astropy.table.table.Table)
+    """
+    exo = empty_cat.copy()
+    adql_query="""SELECT *
+                  FROM exomercat.exomercat"""
+    
+    try:
+        exo['provider'] = create_provider_table('Exo-MerCat',
+                                        "http://archives.ia2.inaf.it/vo/tap/projects",
+                                        '2020A&C....3100370A')#change bibcode once paper on ads
+        exo_helptab=query(exo['provider']['provider_url'][0],adql_query)
+    except:   
+        exo['provider'] = create_provider_table('Exo-MerCat',
+                                        "http://archives.ia2.inaf.it/vo/tap/projects",
+                                        '2020A&C....3100370A','2024-12-13')        
+        exo_helptab=io.ascii.read(
+                Path().additional_data+"exo-mercat13-12-2024_v2.0.csv")
+        exo_helptab=stringtoobject(exo_helptab,3000)
+        exo['provider']['provider_access']=['2024-12-13']
+        print('loading exomercat version from',exo['provider']['provider_access'])
+    return exo, exo_helptab
 
 def create_object_main_id(exo_helptab):
     # initializing column
@@ -32,53 +63,26 @@ def create_object_main_id(exo_helptab):
             exo_helptab['host_main_id'][i]=hostname
         exo_helptab['planet_main_id'][i]=exo_helptab[
                     'host_main_id'][i]+' '+exo_helptab['letter'][i]
-#join exo_helptab on host_main_id and sim_objects main_id
-# Unfortunately exomercat does not provide distance measurements so we
-# relie on matching it to simbad for enforcing the database cutoff of 20 pc.
-# The downside is, that the match does not work so well due to different
-# identifier notation which means we loose some objects. That is, however,
-# preferrable to having to do the work of checking the literature.
-# A compromise is to keep the list of objects I lost for later improvement.
     return exo_helptab
 
-def create_exo_helpertable(exo):
+def create_exo_helpertable():
     """
     Creates helper table.
     
-    If the exomercat server is not online a temporary method to 
-    ingest old exomercat data is used.
-    
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
     :returns: Helper table and dictionary of database table names and tables.
     :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
     """
-    #---------------define query----------------------------------------
-    adql_query="""SELECT *
-                  FROM exomercat.exomercat"""
-    #---------------obtain data-----------------------------------------
-    try:
-        exo['provider'] = create_provider_table('Exo-MerCat',
-                                        "http://archives.ia2.inaf.it/vo/tap/projects",
-                                        '2020A&C....3100370A')#change bibcode once paper on ads
-        exo_helptab=query(exo['provider']['provider_url'][0],adql_query)
-    except:   
-        exo['provider'] = create_provider_table('Exo-MerCat',
-                                        "http://archives.ia2.inaf.it/vo/tap/projects",
-                                        '2020A&C....3100370A','2024-12-13')        
-        exo_helptab=io.ascii.read(
-                Path().additional_data+"exo-mercat13-12-2024_v2.0.csv")
-        exo_helptab=stringtoobject(exo_helptab,3000)
-        exo['provider']['provider_access']=['2024-12-13']
-        print('loading exomercat version from',exo['provider']['provider_access'])
 
-    
-        
-    #----------------putting object main identifiers together-----------
- 
+    exo, exo_helptab = query_or_load_exomercat() 
         
     exo_helptab=create_object_main_id(exo_helptab)
-    
+    #join exo_helptab on host_main_id and sim_objects main_id
+    # Unfortunately exomercat does not provide distance measurements so we
+    #   relie on matching it to simbad for enforcing the database cutoff of 20 pc.
+    #   The downside is, that the match does not work so well due to different
+    #   identifier notation which means we loose some objects. That is, however,
+    #   preferrable to having to do the work of checking the literature.
+    #   A compromise is to keep the list of objects I lost for later improvement.
     exo_helptab_before_distance_cut=exo_helptab
     exo_helptab=distance_cut(exo_helptab,'main_id')
 
@@ -107,7 +111,7 @@ def create_exo_helpertable(exo):
     exo_helptab_before_distance_cut['exomercat_name']=exo_helptab_before_distance_cut['exomercat_name'].astype(object)
     removed_objects=setdiff(exo_helptab_before_distance_cut,exo_helptab,keys=['exomercat_name'])
     save([removed_objects],['exomercat_removed_objects'])
-    return exo_helptab,exo
+    return exo, exo_helptab
 
 def create_ident_table(exo_helptab,exo):
     """
@@ -178,6 +182,8 @@ def create_mes_mass_pl_table(exo_helptab,exo):
     exo_helptab['mass_pl_qual']=['?' for j in range(len(exo_helptab))]
     #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_pl_rel)
+    # tbd change that back into only having what my provider gives me. This was goood
+    #   to show possible usecases but none we need right now.
     for i in range(len(exo_helptab)):
         if type(exo_helptab['mass_max'][i])==np.ma.core.MaskedConstant or \
                   exo_helptab['mass_max'][i]==np.inf:
@@ -256,11 +262,8 @@ def provider_exo():
         data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    exo = empty_cat.copy()
     
-    #wait, how do I do the distance cut if I don't have that in here?
-    #there is a distance cut function using simbad objects
-    exo_helptab,exo=create_exo_helpertable(exo)
+    exo,exo_helptab=create_exo_helpertable()
 
     exo['ident'],exo_helptab=create_ident_table(exo_helptab,exo)
     exo['objects']=create_objects_table(exo)
