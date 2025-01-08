@@ -10,7 +10,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save, load, Path
 from provider.utils import fill_sources_table, create_sources_table, replace_value, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 
 
@@ -410,7 +410,7 @@ def provider_life():
         temperature data, stellar radius data and stellar mass data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    life = empty_cat.copy()
+    life = empty_dict.copy()
     life['provider'] = create_provider_table('LIFE',
                                         'www.life-space-mission.com',
                                         '2022A&A...664A..21Q')

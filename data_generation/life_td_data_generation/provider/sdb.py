@@ -9,7 +9,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import stringtoobject, save, Path
-from sdata import empty_cat
+from sdata import empty_dict
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, create_provider_table
 
 
@@ -146,7 +146,7 @@ def provider_sdb(distance_cut_in_pc,data):
     :rtype: dict(str,astropy.table.table.Table)
     """
     
-    sdb = empty_cat.copy()
+    sdb = empty_dict.copy()
     sdb['provider'] = create_provider_table('Grant Kennedy Disks',
                                         'http://drgmk.com/sdb/',
                                         'priv. comm.','2024-02-09')    

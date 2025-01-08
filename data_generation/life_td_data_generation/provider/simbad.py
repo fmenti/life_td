@@ -9,7 +9,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create_sources_table, query, nullvalues, replace_value, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
     """
@@ -415,7 +415,7 @@ def provider_simbad(distance_cut_in_pc,test_objects=[]):
     :rtype: dict(str,astropy.table.table.Table)
     """   
     
-    sim = empty_cat.copy()
+    sim = empty_dict.copy()
     
     sim['provider'] = create_provider_table('SIMBAD',
                        "http://simbad.u-strasbg.fr:80/simbad/sim-tap",

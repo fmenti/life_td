@@ -10,7 +10,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, ids_from_ident, replace_value, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 def create_gaia_helpertable(distance_cut_in_pc,gaia):
     """
@@ -237,7 +237,7 @@ def provider_gaia(distance_cut_in_pc):
         stellar effective temperature, radius, mass and binarity data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    gaia = empty_cat.copy()
+    gaia = empty_dict.copy()
 
     gaia['provider'] = create_provider_table('Gaia',
                                   "https://gea.esac.esa.int/tap-server/tap",

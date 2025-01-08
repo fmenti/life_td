@@ -1,7 +1,7 @@
 from provider.exo2 import *
 from astropy.table import Table,join,setdiff
 from provider.utils import query
-from sdata import empty_cat
+from sdata import empty_dict
 import numpy as np
 
 
@@ -44,7 +44,7 @@ def test_exo_create_ident_table():
                      ['*   3 Cnc b','*   4 Mon B .01','muster_exoname']],
                  names=['planet_main_id','sim_planet_main_id','exomercat_name'], 
                  dtype=[object, object,object])
-    exo = empty_cat.copy()
+    exo = empty_dict.copy()
     exo['provider'] = Table(data = [['2020A&C....3100370A']],
                             names = ['provider_bibcode'],
                             dtype=[object])

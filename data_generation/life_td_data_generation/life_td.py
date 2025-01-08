@@ -7,7 +7,7 @@ from astropy.table import Table
 from astropy import io
 
 #self created modules
-from sdata import empty_cat, empty_provider_tables_dict
+from sdata import empty_dict, empty_provider_tables_dict
 from utils.io import stringtoobject, load, Path, string_to_object_whole_dict
 from provider.exo import provider_exo
 from provider.gaia import provider_gaia
@@ -49,7 +49,7 @@ def load_life_td():
     return sim, sdb, wds, exo, life, gaia, database_tables
 
 def load_cat(provider_name):
-    cat=empty_cat.copy()
+    cat=empty_dict.copy()
     prov=load([provider_name+'_' + direction for direction in list(cat.keys())])  
     for i,table in enumerate(list(cat.keys())):
         cat[table] = prov[i] 

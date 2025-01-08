@@ -8,7 +8,7 @@ from itertools import islice
 #self created modules
 from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
-from sdata import empty_cat, empty_provider_tables_dict,empty_cat_wit_columns,paras_dict
+from sdata import empty_dict, empty_provider_tables_dict,empty_dict_wit_columns,paras_dict
 
 def idsjoin(cat,column_ids1,column_ids2):
     """
@@ -487,8 +487,8 @@ def build_rest_of_tables(cat,prov_tables_dict,empty):
     return cat
 
 def build_tables(prov_tables_dict):
-    cat=empty_cat.copy()
-    empty=empty_cat_wit_columns.copy()
+    cat=empty_dict.copy()
+    empty=empty_dict_wit_columns.copy()
     cat=build_sources_table(cat,prov_tables_dict,empty)
     cat=build_objects_table(cat,prov_tables_dict)
     cat=build_provider_table(cat,prov_tables_dict,empty)  

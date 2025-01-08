@@ -22,7 +22,7 @@ paras_dict = {
     'h_link': ['h_link']    
 }
 
-empty_cat = {
+empty_dict = {
     'sources' : Table(),
     'objects': Table(),
     'provider': Table(),
@@ -40,7 +40,7 @@ empty_cat = {
     'h_link': Table()
 }
 
-empty_cat_wit_columns = {
+empty_dict_wit_columns = {
     'sources' : Table(names=['ref','provider_name','source_id'],
                         dtype=[object,object,int]),
     'objects': Table(names=['type','ids','main_id'],
@@ -150,12 +150,12 @@ empty_cat_wit_columns = {
 }
 
 empty_provider_tables_dict = {
-    'sim': empty_cat.copy(),
-    'sdb': empty_cat.copy(),
-    'exo': empty_cat.copy(),
-    'life': empty_cat.copy(),
-    'gaia': empty_cat.copy(),
-    'wds': empty_cat.copy()
+    'sim': empty_dict.copy(),
+    'sdb': empty_dict.copy(),
+    'exo': empty_dict.copy(),
+    'life': empty_dict.copy(),
+    'gaia': empty_dict.copy(),
+    'wds': empty_dict.copy()
 }                 
         
         

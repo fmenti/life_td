@@ -9,7 +9,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save, load
 from provider.utils import fill_sources_table, create_sources_table, query, ids_from_ident, distance_cut, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 def create_wds_helpertable(wds,temp,test_objects): 
     """
@@ -389,7 +389,7 @@ def provider_wds(temp=False,test_objects=[]):
         object relation data, basic stellar data and binarity data.
     :rtype:  list(astropy.table.table.Table)
     """
-    wds = empty_cat.copy()
+    wds = empty_dict.copy()
     wds['provider'] = create_provider_table('WDS',
                             'http://tapvizier.u-strasbg.fr/TAPVizieR/tap',
                              '2001AJ....122.3466M')

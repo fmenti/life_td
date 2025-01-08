@@ -11,7 +11,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 def query_or_load_exomercat():
     """
@@ -23,7 +23,7 @@ def query_or_load_exomercat():
     :returns: Dictionary of database table names and tables.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    exo = empty_cat.copy()
+    exo = empty_dict.copy()
     adql_query="""SELECT *
                   FROM exomercat.exomercat"""
     
