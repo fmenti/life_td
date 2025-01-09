@@ -9,7 +9,7 @@ from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique
 from datetime import datetime
 
 #self created modules
-from utils.io import save, Path, stringtoobject
+from utils.io import save, load, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
 from sdata import empty_dict
 
@@ -124,26 +124,24 @@ def create_ident_table(exo_helptab,exo):
     :returns: Identifier table.
     :rtype: astropy.table.table.Table
     """
-    exo_ident=Table(names=['main_id','id'],dtype=[object,object])
+    exo_ident=Table(names=['main_id','id','id_ref'],dtype=[object,object,object])
     
     for i in range(len(exo_helptab)):
         if exo_helptab['sim_planet_main_id'][i]!='':
             main_id=exo_helptab['sim_planet_main_id'][i]
             exo_helptab['planet_main_id'][i]=exo_helptab['sim_planet_main_id'][i] 
             # issue: changing exo_helptab but not returning it
+            [simbad_ref]=load(['sim_provider'])
+            idref=simbad_ref['provider_bibcode'][0]
         else: 
             main_id = exo_helptab['planet_main_id'][i]
             # in else because otherwise will result in double sim main id 
             # from sim provider in case of sim being main id
-            exo_ident.add_row([main_id,main_id])
-       
-        #exo_ident.add_row([main_id,exo_helptab['planet_main_id'][i]])
-        #since I don't want to have [sim_planet_main_id,sim_planet_main_id,exo_ref] as the sim_id will already be in the simbad provider
-        exo_ident.add_row([main_id,exo_helptab['exomercat_name'][i]])
+            idref=exo['provider']['provider_bibcode'][0]
+        exo_ident.add_row([main_id,main_id,idref])
+        exo_ident.add_row([main_id,exo_helptab['exomercat_name'][i],
+                           exo['provider']['provider_bibcode'][0]])
         
-            
-    exo_ident['id_ref']=[exo['provider']['provider_bibcode'][0] for j in range(len(exo_ident))]
-
     exo_ident=unique(exo_ident)
     
     return exo_ident, exo_helptab

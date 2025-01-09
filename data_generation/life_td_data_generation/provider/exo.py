@@ -10,7 +10,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
-from sdata import empty_cat
+from sdata import empty_dict
 
 def create_exo_helpertable(exo):
     """
@@ -265,7 +265,7 @@ def provider_exo():
         data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    exo = empty_cat.copy()
+    exo = empty_dict.copy()
     
     #wait, how do I do the distance cut if I don't have that in here?
     #there is a distance cut function using simbad objects
