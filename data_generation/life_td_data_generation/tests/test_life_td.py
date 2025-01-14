@@ -1,5 +1,4 @@
 from life_td import *
-from sdata import empty_cat_wit_columns
 from utils.io import save
 from astropy.table import setdiff
 

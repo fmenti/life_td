@@ -9,14 +9,14 @@ from enum import Enum
 
 #self created modules
 from utils.io import stringtoobject, Path
-from sdata import empty_cat
+from sdata import empty_dict
 
 
 ###############################################################################
 #-------------------------Sanity tests--------------------------------------------
 ###############################################################################
     
-empty=empty_cat.copy()
+empty=empty_dict.copy()
 table_names=list(empty.keys())
 
 class SpectralType(Enum):
