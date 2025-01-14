@@ -11,13 +11,11 @@ from utils.io import save
 from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create_sources_table, query, nullvalues, replace_value, create_provider_table
 from sdata import empty_dict
 
-def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
+def create_simbad_helpertable(distance_cut_in_pc,test_objects):
     """
     Creates helper table.
     
     :param float distance_cut_in_pc: Distance up to which stars are included.
-    :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
     :param test_objects: Objects to be tested where they drop out of the criteria or make it till the end.
     :type test_objects: list(str) 
     :returns: Helper table.
@@ -26,7 +24,11 @@ def create_simbad_helpertable(distance_cut_in_pc,sim,test_objects):
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
-
+    
+    sim = empty_dict.copy()
+    sim['provider'] = create_provider_table('SIMBAD',
+                       "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
+                       '2000A&AS..143....9W')
     
     #---------------define queries--------------------------------------
     select="""SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
@@ -415,12 +417,7 @@ def provider_simbad(distance_cut_in_pc,test_objects=[]):
     :rtype: dict(str,astropy.table.table.Table)
     """   
     
-    sim = empty_dict.copy()
-    
-    sim['provider'] = create_provider_table('SIMBAD',
-                       "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
-                       '2000A&AS..143....9W')
-    sim_helptab=create_simbad_helpertable(distance_cut_in_pc,sim,test_objects)
+    sim_helptab=create_simbad_helpertable(distance_cut_in_pc,test_objects)
     stars=creating_helpertable_stars(sim_helptab,sim) 
     sim['ident']=create_ident_table(sim_helptab,sim)
     sim['h_link']=create_h_link_table(sim_helptab,sim,stars)

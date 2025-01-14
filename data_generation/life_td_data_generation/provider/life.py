@@ -255,15 +255,20 @@ def spec(cat):
     cat=unique(cat, keys='main_id')
     return cat
 
-def create_star_basic_table(life):  
+def create_star_basic_table():  
     """
     Creates basic stellar data table.
     
-    :param life: Dictionary of database table names and tables.
-    :type life: dict(str,astropy.table.table.Table)
-    :returns: Basic stellar data table.
-    :rtype: astropy.table.table.Table
+    :returns: Dictionary of database table names and tables with 
+        filled basic stellar data table.
+    :rtype: dict(str,astropy.table.table.Table)
     """
+
+    life = empty_dict.copy()
+    life['provider'] = create_provider_table('LIFE',
+                                        'www.life-space-mission.com',
+                                        '2022A&A...664A..21Q')
+    
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
     [life_star_basic]=load(['sim_star_basic'])
     ircs_coord=coordinates.SkyCoord(\
@@ -304,7 +309,8 @@ def create_star_basic_table(life):
 
     life_star_basic=sptype_string_to_class(life_star_basic,
                                            life['provider']['provider_name'][0])
-    return life_star_basic
+    life['star_basic']= life_star_basic
+    return life
 
 def create_life_helpertable(life):  
     """
@@ -410,12 +416,8 @@ def provider_life():
         temperature data, stellar radius data and stellar mass data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    life = empty_dict.copy()
-    life['provider'] = create_provider_table('LIFE',
-                                        'www.life-space-mission.com',
-                                        '2022A&A...664A..21Q')
 
-    life['star_basic'] = create_star_basic_table(life)
+    life = create_star_basic_table()
     life_helptab = create_life_helpertable(life)
     #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
     #life parameter creation

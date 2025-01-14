@@ -9,10 +9,10 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save
-from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, ids_from_ident, replace_value, create_provider_table
+from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, ids_from_ident, replace_value, create_provider_table, query
 from sdata import empty_dict
 
-def create_gaia_helpertable(distance_cut_in_pc,gaia):
+def create_gaia_helpertable(distance_cut_in_pc):
     """
     Creates helper table.
     
@@ -20,14 +20,17 @@ def create_gaia_helpertable(distance_cut_in_pc,gaia):
     use the synchronous query is used.
     
     :param float distance_cut_in_pc: Distance up to which stars are included.
-    :param gaia: Dictionary of database table names and tables.
-    :type gaia: dict(str,astropy.table.table.Table)
     :returns: Helper table.
     :rtype: astropy.table.table.Table
     """
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
     plx_cut=plx_in_mas_cut-plx_in_mas_cut/10.
+
+    gaia = empty_dict.copy()
+    gaia['provider'] = create_provider_table('Gaia',
+                                  "https://gea.esac.esa.int/tap-server/tap",
+                                  '2016A&A...595A...1G')
     
     #query
     adql_query="""
@@ -237,12 +240,8 @@ def provider_gaia(distance_cut_in_pc):
         stellar effective temperature, radius, mass and binarity data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    gaia = empty_dict.copy()
-
-    gaia['provider'] = create_provider_table('Gaia',
-                                  "https://gea.esac.esa.int/tap-server/tap",
-                                  '2016A&A...595A...1G')
-    gaia_helptab=create_gaia_helpertable(distance_cut_in_pc,gaia)
+    
+    gaia_helptab=create_gaia_helpertable(distance_cut_in_pc)
     gaia['ident'],gaia_helptab=create_ident_table(gaia_helptab,gaia)  
     gaia['objects']=create_objects_table(gaia_helptab,gaia)    
     gaia['mes_binary']=create_mes_binary_table(gaia)

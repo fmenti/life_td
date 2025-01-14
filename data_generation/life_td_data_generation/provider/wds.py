@@ -11,21 +11,24 @@ from utils.io import save, load
 from provider.utils import fill_sources_table, create_sources_table, query, ids_from_ident, distance_cut, create_provider_table
 from sdata import empty_dict
 
-def create_wds_helpertable(wds,temp,test_objects): 
+def create_wds_helpertable(temp,test_objects): 
     """
     Creates helper table.
     
     If temp is True load instead of query data to save time.
     
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
     :param bool temp: Wether to load or query WDS.
     :param test_objects: Objects to be tested where they drop out of the 
         criteria or make it till the end.
     :type test_objects: list(str) 
-    :returns: Helper table.
-    :rtype: astropy.table.table.Table
+    :returns: Helper table and dictionary of database table names and tables.
+    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
     """
+
+    wds = empty_dict.copy()
+    wds['provider'] = create_provider_table('WDS',
+                            'http://tapvizier.u-strasbg.fr/TAPVizieR/tap',
+                             '2001AJ....122.3466M')
     # define queries
     adql_query=["""SELECT
                     WDS as wds_name, Comp as wds_comp,
@@ -133,7 +136,7 @@ def create_wds_helpertable(wds,temp,test_objects):
     wds_helptab['system_main_id']=wds_helptab['system_main_id'].astype(object)
     wds_helptab['system_name']=wds_helptab['system_name'].astype(object)
 
-    return wds_helptab
+    return wds_helptab, wds
 
 def create_ident_and_h_link_table(wds_helptab,wds,test_objects):
     """
@@ -389,12 +392,8 @@ def provider_wds(temp=False,test_objects=[]):
         object relation data, basic stellar data and binarity data.
     :rtype:  list(astropy.table.table.Table)
     """
-    wds = empty_dict.copy()
-    wds['provider'] = create_provider_table('WDS',
-                            'http://tapvizier.u-strasbg.fr/TAPVizieR/tap',
-                             '2001AJ....122.3466M')
 
-    wds_helptab = create_wds_helpertable(wds,temp,test_objects)
+    wds_helptab, wds = create_wds_helpertable(temp,test_objects)
     wds['ident'],wds['h_link']=create_ident_and_h_link_table(wds_helptab,
                                                              wds,test_objects)    
     wds['objects']=create_objects_table(wds_helptab,wds,test_objects)
