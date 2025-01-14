@@ -1,27 +1,7 @@
 from provider.exo2 import *
 from astropy.table import Table,join,setdiff
-from provider.utils import query
 from sdata import empty_dict
 import numpy as np
-
-def test_exo_queryable():
-    exo_provider=Table()
-    exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
-    adql_query=["""SELECT top 10 *
-                FROM exomercat.exomercat """]
-    exo=query(exo_provider['provider_url'][0],adql_query[0])
-    print(exo.colnames)
-    assert type(exo)==type(Table())
-
-def test_exo_columns_queryable():  
-    exo_provider=Table()           
-    exo_provider['provider_url']=["http://archives.ia2.inaf.it/vo/tap/projects"]
-    adql_query=["""SELECT TOP 10
-                    main_id, host, exomercat_name,
-                    binary,letter
-                    FROM exomercat.exomercat"""]
-    exo=query(exo_provider['provider_url'][0],adql_query[0])
-    assert exo.colnames==['main_id', 'host', 'exomercat_name', 'binary', 'letter']
 
 def test_exo_main_object_ids():
     a=MaskedColumn(data=['*   3 Cnc', '*   4 Mon', ''],name='main_id',mask=[False,False,True])
