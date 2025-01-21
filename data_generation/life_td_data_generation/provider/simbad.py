@@ -18,8 +18,8 @@ def create_simbad_helpertable(distance_cut_in_pc,test_objects):
     :param float distance_cut_in_pc: Distance up to which stars are included.
     :param test_objects: Objects to be tested where they drop out of the criteria or make it till the end.
     :type test_objects: list(str) 
-    :returns: Helper table.
-    :rtype: astropy.table.table.Table
+    :returns: Helper table and dictionary of database table names and tables.
+    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
     """
     plx_in_mas_cut=1000./distance_cut_in_pc
     #making cut a bit bigger for correct treatment of objects on boundary
@@ -144,7 +144,7 @@ def create_simbad_helpertable(distance_cut_in_pc,test_objects):
                   test_objects[np.where(np.isin(test_objects,
                                                 sim_helptab['main_id']))])
 
-    return sim_helptab
+    return sim_helptab, sim
 
 def stars_in_multiple_system(cat,sim_h_link,all_objects):
     """
@@ -417,7 +417,7 @@ def provider_simbad(distance_cut_in_pc,test_objects=[]):
     :rtype: dict(str,astropy.table.table.Table)
     """   
     
-    sim_helptab=create_simbad_helpertable(distance_cut_in_pc,test_objects)
+    sim_helptab, sim=create_simbad_helpertable(distance_cut_in_pc,test_objects)
     stars=creating_helpertable_stars(sim_helptab,sim) 
     sim['ident']=create_ident_table(sim_helptab,sim)
     sim['h_link']=create_h_link_table(sim_helptab,sim,stars)

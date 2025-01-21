@@ -55,7 +55,7 @@ def create_gaia_helpertable(distance_cut_in_pc):
     gaia_helptab['gaia_id']=['Gaia DR3 '+
             str(gaia_helptab['source_id'][j]) for j in range(len(gaia_helptab))]
     gaia_helptab['ref']=['2022arXiv220800211G' for j in range(len(gaia_helptab))]
-    return gaia_helptab
+    return gaia_helptab, gaia
 
 def create_ident_table(gaia_helptab,gaia):  
     """
@@ -241,7 +241,7 @@ def provider_gaia(distance_cut_in_pc):
     :rtype: dict(str,astropy.table.table.Table)
     """
     
-    gaia_helptab=create_gaia_helpertable(distance_cut_in_pc)
+    gaia_helptab, gaia=create_gaia_helpertable(distance_cut_in_pc)
     gaia['ident'],gaia_helptab=create_ident_table(gaia_helptab,gaia)  
     gaia['objects']=create_objects_table(gaia_helptab,gaia)    
     gaia['mes_binary']=create_mes_binary_table(gaia)
