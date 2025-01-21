@@ -71,6 +71,10 @@ def partial_create(distance_cut_in_pc,create=[]):
     :return: life_td data in different tables
     :rtype: list(astropy.table.table.Table)
     """
+    with open(Path().data+'distance_cut.txt', 'w') as f:  
+	# Write the floating point number to the file  
+    	f.write(str(distance_cut_in_pc))
+
     
     print(f'Building life_td data with distance cut of {distance_cut_in_pc} pc')
     
@@ -111,7 +115,6 @@ def create_life_td(distance_cut_in_pc):
     :rtype: list(astropy.table.table.Table)
     """
     
-    print(f'Generating life_td data with distance cut of {distance_cut_in_pc} pc')
     #------------------------obtain data from external sources---------------------
     provider_tables_dict, database_tables= partial_create(distance_cut_in_pc,
                                    create=['sim', 'sdb', 'wds', 'exo', 'life', 'gaia'])
