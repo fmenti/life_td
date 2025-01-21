@@ -178,11 +178,19 @@ def create_mes_mass_pl_table(exo_helptab,exo):
     exo_helptab['mass_pl_rel']=Column(dtype=object,length=len(exo_helptab))
     exo_helptab['mass_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
     exo_helptab['mass_pl_qual']=['?' for j in range(len(exo_helptab))]
+    
     #transforming mass errors from upper (mass_max) and lower (mass_min) error
     # into instead error (mass_error) as well as relation (mass_pl_rel)
+    
     # tbd change that back into only having what my provider gives me. This was goood
     #   to show possible usecases but none we need right now.
-    for i in range(len(exo_helptab)):
+
+    # instead of mass_pl_err hav mass_pl_upper_err and mass_pl_lower_err
+    # remove mass_pl_rel
+    # maybe remove mass_pl_qual
+    # include parameters msini, bestmass_provenance (for in building instead of bestpara), r, a, e, i, p, status
+    # 
+    def mass_readin(exo_helptab,i):
         if type(exo_helptab['mass_max'][i])==np.ma.core.MaskedConstant or \
                   exo_helptab['mass_max'][i]==np.inf:
             if type(exo_helptab['mass_min'][i])==np.ma.core.MaskedConstant or \
@@ -206,6 +214,11 @@ def create_mes_mass_pl_table(exo_helptab,exo):
                 exo_helptab['mass_pl_err'][i]=max(exo_helptab['mass_max'][i],
                                         exo_helptab['mass_min'][i])
                 exo_helptab['mass_pl_qual'][i]='B'
+        return exo_helptab['mass_max','mass_min','mass_pl_rel','mass_pl_err','mass_pl_qual'][i]
+    
+    for i in range(len(exo_helptab)):
+        exo_helptab['mass_max','mass_min','mass_pl_rel','mass_pl_err','mass_pl_qual'][i] = mass_readin(exo_helptab,i)
+
     exo_mes_mass_pl=exo_helptab['planet_main_id','mass','mass_pl_err','mass_url',
                             'mass_pl_rel','mass_pl_qual']
     exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url'],
