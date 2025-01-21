@@ -69,8 +69,25 @@ def deal_with_leading_d_sptype(table,index):
     """
     if len(table['sptype_string'][index])>0:
         if table['sptype_string'][index][0]=='d':
-            assign_lum_class_V(table,index)      
-    return table['sptype_string'][index].strip('d')
+            assign_lum_class_V(table,index)
+            table['sptype_string'][index]=table['sptype_string'][index].strip('d')
+    return table
+
+def deal_with_middle_minus(table,index):
+    """
+    Deals with old annotation of leading d in spectraltype representing dwarf star.
+    
+    :param table: Table containing column 'sptype_string'.
+    :type table: astropy.table.table.Table
+    :param int index: Index of entry.  
+    :returns: Entry with middle - removed.
+    :rtype: str
+    """
+    if len(table['sptype_string'][index])>0:
+        sp_type = table['sptype_string'][index].split('-')
+        if len(sp_type)>1:
+            table['sptype_string'][index]=''.join(sp_type)    
+    return table
 
 def sptype_string_to_class(temp,ref):
     """
@@ -99,8 +116,9 @@ def sptype_string_to_class(temp,ref):
 
     for i in range(len(temp)):
         #sorting out objects like M5V+K7V
-        sptype=deal_with_leading_d_sptype(temp,i)
-        
+        temp=deal_with_leading_d_sptype(temp,i)
+        temp=deal_with_middle_minus(temp,i)
+        sptype=temp['sptype_string'][i]
         if (len(sptype.split('+'))==1 and
                 #sorting out entries like ''
                 len(sptype)>0 and 
