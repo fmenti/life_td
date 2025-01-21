@@ -1,6 +1,7 @@
 data_generation/life_td_data_generation/life_td_Testbench.ipynb
 data/*.xml
 data/*.csv
+data/*.txt
 additional_data/*.xml
 additional_data/*.csv
 additional_data/*.txt
