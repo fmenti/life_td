@@ -4,7 +4,7 @@ Helper functions for the creation and analysis of the LIFE Target
 """
 
 from numpy import dtype
-from astropy import io
+from astropy.io import votable
 
 class Path:
     def __init__(self):
@@ -35,8 +35,8 @@ def save(cats,names,location=Path().additional_data):
                 #transform the type into string
                 cat[i] = cat[i].astype(str)
         #save the table
-        io.votable.writeto(
-        	    io.votable.from_table(cat), f'{location}{path}.xml')
+        votable.writeto(
+        	    votable.from_table(cat), f'{location}{path}.xml')
     return
 
 def stringtoobject(cat,number=100):
@@ -90,7 +90,7 @@ def load(paths,stringtoobjects=True,location=Path().additional_data):
     #go through all the elements in the paths list
     for path in paths:
         #read the saved data into the cats lists as astropy votable element
-        to_append=io.votable.parse_single_table(f'{location}{path}.xml')
+        to_append=votable.parse_single_table(f'{location}{path}.xml')
         cats.append(to_append.to_table())
     #go through all the tables in the cats list
     if stringtoobjects:
