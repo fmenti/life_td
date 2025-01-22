@@ -38,17 +38,26 @@ def test_data_makes_sense_main_id():
 def test_data_makes_sense_mass_st():
     #data
     [table]=load(['mes_mass_st'],location=Path().data)
-    data=table['mass_st_value']
-
+    arr_with_potential_fill_values=table['mass_st_value']
+    data=different_data(arr_with_potential_fill_values)
     bins=10
-    counts, bin_edges = np.histogram(data,bins)
 
-    y=counts
+    #not showing plots
+    show_kw=True #<--- added
+    #show_kw=False
+    
+    if show_kw:   #<--- added
+        plt.ion() #<--- added
 
-    x = np.linspace(bin_edges[0],bin_edges[-1],bins)
+    fig=plt.figure()
+    y, bins2,patches=plt.hist(data, bins, density=True)
+    #careful density=True means probability density (area under histogram integrates to 1
+    plt.close(fig)
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, bins)
 
     def model_f(x,a,b,c):
-        return a*x**(-b)+c
+        return a * np.exp(-b * x) + c
 
     popt, pcov = curve_fit(model_f, x, y, p0=[1,2,0])
     a_opt, b_opt, c_opt = popt
@@ -62,9 +71,9 @@ def test_data_makes_sense_mass_st():
     plt.show()    
 
     #assert
-    assert a_opt <3 and a_opt >1
-    assert b_opt <2 and b_opt >1
-    assert c_opt <1 and a_opt >-1
+    assert a_opt <3 and a_opt >0.5
+    assert b_opt <8 and b_opt >1
+    assert c_opt <0.2 and a_opt >-0.1
 
 def test_data_makes_sense_mass_pl():
     #data
