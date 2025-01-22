@@ -11,9 +11,10 @@ from life_td import *
 def integration_test_fake_provider_data():
     #sdb=...
     fake_sdb = {
-    'sources' : Table(data=['priv. comm.','Grant Kennedy Disks'],names=['ref','provider_name'],
+    'sources' : Table(data=['priv. comm.','Grant Kennedy Disks'],
+                      names=['ref','provider_name'],
                         dtype=[object,object]),
-    'objects': Table(data=names=['type','ids','main_id'],
+    'objects': Table(names=['type','ids','main_id'],
                             dtype=[object,object,object]),
     'provider': Table(names=['provider_name','provider_url',
                              'provider_bibcode','provider_access'],

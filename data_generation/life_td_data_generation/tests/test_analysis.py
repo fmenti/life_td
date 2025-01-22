@@ -1,4 +1,4 @@
-from analysis import *
+from utils.analysis import *
 from astropy.table import Table
 
 
