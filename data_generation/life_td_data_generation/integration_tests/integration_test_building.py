@@ -59,6 +59,16 @@ def test_data_makes_sense_main_id():
     [table]=load(['objects'],location=Path().data)
     data=table['main_id','type']
 
+    spec=np.array(['System','Star','Exoplanet','Disk'])
+    
+    plt.figure()
+    plt.title(f'Object type distribution up to {distance_cut} pc')
+    plt.xlabel('Number of objects')
+    plt.hist(data['type'],histtype='bar',log=True,orientation='horizontal')
+    plt.yticks(np.arange(4),spec)
+    #plt.savefig(Path().plot+path, dpi=300)
+    plt.show()
+
     total=len(data)**(1/3)/distance_cut
     st=len(data[np.where(data['type']=='st')])**(1/3)/distance_cut
     sy=len(data[np.where(data['type']=='sy')])**(1/3)/distance_cut
@@ -79,7 +89,6 @@ def test_data_makes_sense_mass_st():
     x,y=get_x_and_y(data)
 
     popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,8,0])
-    print(popt)
     a_opt, b_opt, c_opt = popt
     x_model = np.linspace(min(x), max(x), 100)
     y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
@@ -145,10 +154,7 @@ def test_data_makes_sense_coo_gal():
     assert min(data_b)>-90
     assert max(data_b)<90
 
-def test_data_makes_sense_mag_i():
-    #data
-    data=get_data('star_basic','mag_i_value')
-    
+def norm_fit(data,title):
     bins=10
     y, bins2,patches=plt.hist(data, bins, density=True)#, alpha=0.6, color='g')
     #do I need to keep density=True here or can I use non normalized display?
@@ -161,11 +167,50 @@ def test_data_makes_sense_mag_i():
     y_fit = norm.pdf(np.sort(data), mu, std)
     
     #plt.plot(x, y_fit, color='r')
+    plt.title('mag_i_value')
     plt.plot(np.sort(data), y_fit, color='r')
     plt.show()
+    return mu
 
+def test_data_makes_sense_mag_i():
+    #data
+    data=get_data('star_basic','mag_i_value')
+     
+    mu = norm_fit(data,'mag_i_value')
     
     assert mu <11 and mu > 7
+
+def test_data_makes_sense_mag_j():
+    #data
+    data=get_data('star_basic','mag_j_value')
+    
+    mu = norm_fit(data,'mag_j_value')
+    
+    assert mu <11 and mu > 7
+
+def test_data_makes_sense_mag_k():
+    #data
+    data=get_data('star_basic','mag_k_value')
+    
+    mu = norm_fit(data,'mag_k_value')
+
+    assert mu <11 and mu > 7
+
+def test_data_makes_sense_plx():
+    #data
+    data=get_data('star_basic','plx_value')
+    
+    x,y=get_x_and_y(data)
+    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[0.03,0.01,0.001])
+    a_opt, b_opt, c_opt = popt
+    x_model = np.linspace(min(x), max(x), 100)
+    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
+
+    plot_data_and_fit('plx_value',x,y,x_model,y_model)
+    #assert
+    assert min(data) > 28 # 35 pc equivalent marcsec
+    assert min(data) < 1000 # 1 pc equivalent marcsec
+
 
 
     
