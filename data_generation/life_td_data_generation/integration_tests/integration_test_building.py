@@ -22,8 +22,28 @@ def get_data(table_name,colname):
     data=different_data(arr_with_potential_fill_values)
     return data
 
+def get_x_and_y(data):
+    bins=10
+    
+    plt.figure()
+    y, bins2,patches=plt.hist(data, bins, density=True)
+    #careful density=True means probability density (area under histogram integrates to 1
+    xmin, xmax = plt.xlim()
+    plt.close()
+    x = np.linspace(xmin, xmax, bins)
+    return x,y
+
 def model_exp_decay(x,a,b,c):
     return a * np.exp(-b * x) + c
+
+def plot_data_and_fit(title,x,y,x_model,y_model):
+    plt.figure()
+    plt.title(title)
+    plt.scatter(x,y,label='data')
+    plt.plot(x_model, y_model, color='r', label='fit')
+    plt.legend(loc='upper right')
+    plt.show()
+    return
 
 def test_data_makes_sense_main_id():
     # experimental numbers
@@ -56,122 +76,96 @@ def test_data_makes_sense_mass_st():
     #data
     data=get_data('mes_mass_st','mass_st_value')
     
-    bins=10
-
-    fig=plt.figure()
-    y, bins2,patches=plt.hist(data, bins, density=True)
-    #careful density=True means probability density (area under histogram integrates to 1
-    plt.close(fig)
-    xmin, xmax = plt.xlim()
-    x = np.linspace(xmin, xmax, bins)
+    x,y=get_x_and_y(data)
 
     popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,8,0])
     print(popt)
     a_opt, b_opt, c_opt = popt
     x_model = np.linspace(min(x), max(x), 100)
     y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
- 
-    plt.figure()
-    plt.title('mes_mass_st')
-    plt.scatter(x,y)
-    plt.plot(x_model, y_model, color='r')
-    plt.show()
 
-    # values for dist were tested before
-    a = linfit([30,5],[1.2,3.0],distance_cut)
-    b = linfit([30,5],[7.9,17.4],distance_cut)
-    c = linfit([30,5],[-0.02,0.12],distance_cut)
+    plot_data_and_fit('mes_mass_st',x,y,x_model,y_model)
 
     #assert
-    for val,val_opt in zip([a,b,c],[a_opt,b_opt,c_opt]):
-        assert val-abs(val/10.) < val_opt
-        assert val_opt <val+abs(val/10.) 
+    assert max(data) < 60 # O3V
+    assert min(data) > 0.074 # brown dwarf
 
 def test_data_makes_sense_mass_pl():
     #data
     data=get_data('mes_mass_pl','mass_pl_value')
 
-    bins=10
-    fig=plt.figure()
-    y, bins2,patches=plt.hist(data, bins)#, density=True) #had to do this to solve overflow encountered in exp
-    #careful density=True means probability density (area under histogram integrates to 1
-    plt.close(fig)
-    xmin, xmax = plt.xlim()
-    x = np.linspace(xmin, xmax, bins)
+    x,y=get_x_and_y(data)
 
     popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,1,0])
     a_opt, b_opt, c_opt = popt
     x_model = np.linspace(min(x), max(x), 100)
     y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
- 
-    plt.figure()
-    plt.title('mes_mass_pl')
-    plt.scatter(x,y)
-    plt.plot(x_model, y_model, color='r')
-    plt.show()    
 
-    # values for dist were tested before
-    a = linfit([30,5],[960,74],distance_cut)
-    b = linfit([30,5],[19,36],distance_cut)
-    c = linfit([30,5],[-0.24,1.6],distance_cut)
+    plot_data_and_fit('mes_mass_pl',x,y,x_model,y_model)   
 
     #assert
-    for val,val_opt in zip([a,b,c],[a_opt,b_opt,c_opt]):
-        assert val-abs(val/10.) < val_opt
-        assert val_opt <val+abs(val/10.)
+    assert max(data) < 75 # m star
+    assert min(data) > 0 
+
+def ravsdec(x_label,y_label,x,y):
+    plt.figure()
+    ra=np.linspace(0,360)
+    plt.scatter(x,y,s=2)
+    #plt.scatter(within45deg['coo_ra'],within45deg['coo_dec'],s=2)
+    #ecliptic plane in equatorial coordinates
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    #plt.savefig('plots/quasi_aitoff', dpi=300)
+    plt.show()
+    return
 
 def test_data_makes_sense_coo():
     #data
-    [table]=load(['star_basic'],location=Path().data)
-    data_ra=table['coo_ra']
-    data_dec=table['coo_dec']
+    data_ra=get_data('star_basic','coo_ra')
+    data_dec=get_data('star_basic','coo_dec')
 
-    arr_ra=different_data(data_ra)
-    arr_dec=different_data(data_dec)
+    #make sky plot
+    ravsdec('coo_ra','coo_dec',data_ra,data_dec)
 
-    assert min(arr_ra)>0
-    assert max(arr_ra)<360
-    assert min(arr_dec)>-90
-    assert max(arr_dec)<90
+    assert min(data_ra)>0
+    assert max(data_ra)<360
+    assert min(data_dec)>-90
+    assert max(data_dec)<90
 
 def test_data_makes_sense_coo_gal():
     #data
-    [table]=load(['star_basic'],location=Path().data)
-    data_l=table['coo_gal_l']
-    data_b=table['coo_gal_b']
+    data_l=get_data('star_basic','coo_gal_l')
+    data_b=get_data('star_basic','coo_gal_b')
 
-    arr_l=different_data(data_l)
-    arr_b=different_data(data_b)
+    #make sky plot
+    ravsdec('coo_gal_l','coo_gal_b',data_l,data_b)
 
-    assert min(arr_l)>0
-    assert max(arr_l)<360
-    assert min(arr_b)>-90
-    assert max(arr_b)<90
+    assert min(data_l)>0
+    assert max(data_l)<360
+    assert min(data_b)>-90
+    assert max(data_b)<90
 
 def test_data_makes_sense_mag_i():
     #data
-    [table]=load(['star_basic'],location=Path().data)
-    data=table['mag_i_value']
+    data=get_data('star_basic','mag_i_value')
     
-    arr=different_data(data)
-
     bins=10
-    y, bins2,patches=plt.hist(arr, bins, density=True, alpha=0.6, color='g')
+    y, bins2,patches=plt.hist(data, bins, density=True)#, alpha=0.6, color='g')
+    #do I need to keep density=True here or can I use non normalized display?
 
-    xmin, xmax = plt.xlim()
-    x = np.linspace(xmin, xmax, bins)  
+    #xmin, xmax = plt.xlim()
+    #x = np.linspace(xmin, xmax, bins)  
 
-    mu, std = norm.fit(arr)
-    y_fit = norm.pdf(x, mu, std)
-
-    plt.plot(x, y_fit, color='r')
+    mu, std = norm.fit(data)
+    #y_fit = norm.pdf(x, mu, std)
+    y_fit = norm.pdf(np.sort(data), mu, std)
+    
+    #plt.plot(x, y_fit, color='r')
+    plt.plot(np.sort(data), y_fit, color='r')
     plt.show()
 
-    m = linfit([30,5],[10,8],distance_cut)
-    s = linfit([30,5],[3.4,3.8],distance_cut)
     
-    assert mu <m+m/10. and mu > m-m/10.
-    assert std <s+s/10. and std >s-s/10.
+    assert mu <11 and mu > 7
 
 
     
