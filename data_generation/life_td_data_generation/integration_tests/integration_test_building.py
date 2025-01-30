@@ -22,28 +22,64 @@ def get_data(table_name,colname):
     data=different_data(arr_with_potential_fill_values)
     return data
 
-def get_x_and_y(data):
-    bins=10
-    
-    plt.figure()
-    y, bins2,patches=plt.hist(data, bins, density=True)
-    #careful density=True means probability density (area under histogram integrates to 1
-    xmin, xmax = plt.xlim()
-    plt.close()
-    x = np.linspace(xmin, xmax, bins)
-    return x,y
 
 def model_exp_decay(x,a,b,c):
     return a * np.exp(-b * x) + c
 
-def plot_data_and_fit(title,x,y,x_model,y_model):
+
+def plot_data_and_fit(title,data,p0):
+    #trying to not fit the scatter but the histogram directly
+    #issue, scatter points offset from histogram bars
+    #current issue, not meaningful zoom because y_model too high
+    
     plt.figure()
     plt.title(title)
-    plt.scatter(x,y,label='data')
+    bins=10
+    
+    bin_heights, bin_borders,patches=plt.hist(data, bins, density=True)
+    bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
+    #careful density=True means probability density (area under histogram integrates to 1
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, bins)
+
+    popt, pcov = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)#1,8,0])
+    #print(popt)
+    a_opt, b_opt, c_opt = popt
+    #use here bin_centers[0] instead of min(x) to prevent first y_model value being so high
+    # that one does nearly not see any data
+    x_model = np.linspace(bin_centers[0], max(x), 100)
+    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
+    
     plt.plot(x_model, y_model, color='r', label='fit')
+    plt.ylabel('amount of objects')
     plt.legend(loc='upper right')
     plt.show()
     return
+
+def ravsdec(x_label,y_label,x,y):
+    plt.figure()
+    ra=np.linspace(0,360)
+    plt.scatter(x,y,s=2)
+    #plt.scatter(within45deg['coo_ra'],within45deg['coo_dec'],s=2)
+    #ecliptic plane in equatorial coordinates
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    #plt.savefig('plots/quasi_aitoff', dpi=300)
+    plt.show()
+    return
+
+def norm_fit(data,title):
+    bins=10
+    plt.hist(data, bins, density=True)#, alpha=0.6, color='g')
+    #do I need to keep density=True here or can I use non normalized display?
+
+    mu, std = norm.fit(data)
+    y_fit = norm.pdf(np.sort(data), mu, std)
+    
+    plt.title('mag_i_value')
+    plt.plot(np.sort(data), y_fit, color='r')
+    plt.show()
+    return mu
 
 def test_data_makes_sense_main_id():
     # experimental numbers
@@ -86,14 +122,7 @@ def test_data_makes_sense_mass_st():
     #data
     data=get_data('mes_mass_st','mass_st_value')
     
-    x,y=get_x_and_y(data)
-
-    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,8,0])
-    a_opt, b_opt, c_opt = popt
-    x_model = np.linspace(min(x), max(x), 100)
-    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
-
-    plot_data_and_fit('mes_mass_st',x,y,x_model,y_model)
+    plot_data_and_fit('mes_mass_st',data,[1,8,0])
 
     #assert
     assert max(data) < 60 # O3V
@@ -103,30 +132,13 @@ def test_data_makes_sense_mass_pl():
     #data
     data=get_data('mes_mass_pl','mass_pl_value')
 
-    x,y=get_x_and_y(data)
-
-    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,1,0])
-    a_opt, b_opt, c_opt = popt
-    x_model = np.linspace(min(x), max(x), 100)
-    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
-
-    plot_data_and_fit('mes_mass_pl',x,y,x_model,y_model)   
+    plot_data_and_fit('mes_mass_pl',data,[1,1,0]) 
 
     #assert
     assert max(data) < 75 # m star
     assert min(data) > 0 
 
-def ravsdec(x_label,y_label,x,y):
-    plt.figure()
-    ra=np.linspace(0,360)
-    plt.scatter(x,y,s=2)
-    #plt.scatter(within45deg['coo_ra'],within45deg['coo_dec'],s=2)
-    #ecliptic plane in equatorial coordinates
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    #plt.savefig('plots/quasi_aitoff', dpi=300)
-    plt.show()
-    return
+
 
 def test_data_makes_sense_coo():
     #data
@@ -154,23 +166,7 @@ def test_data_makes_sense_coo_gal():
     assert min(data_b)>-90
     assert max(data_b)<90
 
-def norm_fit(data,title):
-    bins=10
-    y, bins2,patches=plt.hist(data, bins, density=True)#, alpha=0.6, color='g')
-    #do I need to keep density=True here or can I use non normalized display?
 
-    #xmin, xmax = plt.xlim()
-    #x = np.linspace(xmin, xmax, bins)  
-
-    mu, std = norm.fit(data)
-    #y_fit = norm.pdf(x, mu, std)
-    y_fit = norm.pdf(np.sort(data), mu, std)
-    
-    #plt.plot(x, y_fit, color='r')
-    plt.title('mag_i_value')
-    plt.plot(np.sort(data), y_fit, color='r')
-    plt.show()
-    return mu
 
 def test_data_makes_sense_mag_i():
     #data
@@ -199,17 +195,22 @@ def test_data_makes_sense_mag_k():
 def test_data_makes_sense_plx():
     #data
     data=get_data('star_basic','plx_value')
-    
-    x,y=get_x_and_y(data)
-    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[0.03,0.01,0.001])
-    a_opt, b_opt, c_opt = popt
-    x_model = np.linspace(min(x), max(x), 100)
-    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
 
-    plot_data_and_fit('plx_value',x,y,x_model,y_model)
+    plot_data_and_fit('plx_value',data,[0.03,0.01,0.001])
+
     #assert
     assert min(data) > 28 # 35 pc equivalent marcsec
     assert min(data) < 1000 # 1 pc equivalent marcsec
+
+def test_data_makes_sense_dist_st():
+    #data
+    data=get_data('star_basic','dist_st_value')
+
+    plot_data_and_fit('plx_value',data,[1,-1,0])
+
+    #assert
+    assert min(data) <  35 
+    assert min(data) > 1 
 
 
 
