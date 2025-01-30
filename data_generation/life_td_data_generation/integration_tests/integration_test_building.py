@@ -1,5 +1,5 @@
 from utils.io import load, Path
-from utils.analysis import different_data
+from utils.analysis import different_data, linfit
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import norm
@@ -7,18 +7,23 @@ import matplotlib.pyplot as plt
 from astropy.table import Table
 
 #not showing plots
-show_kw=True #<--- added
-#show_kw=False
+#show_kw=True #<--- added
+show_kw=False
     
 if show_kw:   #<--- added
     plt.ion() #<--- added
 
-def approxvalue(dist, val,x):
-    poly = np.polyfit(dist,val,1)
-    return poly[0]*x+poly[1]
-
 with open(Path().data+'distance_cut.txt', 'r') as h:  
     distance_cut=float(h.readlines()[0])
+
+def get_data(table_name,colname):
+    [table]=load([table_name],location=Path().data)
+    arr_with_potential_fill_values=table[colname]
+    data=different_data(arr_with_potential_fill_values)
+    return data
+
+def model_exp_decay(x,a,b,c):
+    return a * np.exp(-b * x) + c
 
 def test_data_makes_sense_main_id():
     # experimental numbers
@@ -49,9 +54,8 @@ def test_data_makes_sense_main_id():
 
 def test_data_makes_sense_mass_st():
     #data
-    [table]=load(['mes_mass_st'],location=Path().data)
-    arr_with_potential_fill_values=table['mass_st_value']
-    data=different_data(arr_with_potential_fill_values)
+    data=get_data('mes_mass_st','mass_st_value')
+    
     bins=10
 
     fig=plt.figure()
@@ -61,13 +65,11 @@ def test_data_makes_sense_mass_st():
     xmin, xmax = plt.xlim()
     x = np.linspace(xmin, xmax, bins)
 
-    def model_f(x,a,b,c):
-        return a * np.exp(-b * x) + c
-
-    popt, pcov = curve_fit(model_f, x, y, p0=[1,2,0])
+    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,8,0])
+    print(popt)
     a_opt, b_opt, c_opt = popt
     x_model = np.linspace(min(x), max(x), 100)
-    y_model = model_f(x_model, a_opt, b_opt, c_opt) 
+    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
  
     plt.figure()
     plt.title('mes_mass_st')
@@ -76,34 +78,31 @@ def test_data_makes_sense_mass_st():
     plt.show()
 
     # values for dist were tested before
-    a = approxvalue([30,5],[0.5,3.0],distance_cut)
-    b = approxvalue([30,5],[1,18],distance_cut)
-    c = approxvalue([30,5],[-0.1,0.2],distance_cut)
+    a = linfit([30,5],[1.2,3.0],distance_cut)
+    b = linfit([30,5],[7.9,17.4],distance_cut)
+    c = linfit([30,5],[-0.02,0.12],distance_cut)
 
     #assert
-    assert a_opt <a+a/10. and a_opt >a-a/10.
-    assert b_opt <b+b/10. and b_opt >b-b/10.
-    assert c_opt <c+c/10. and a_opt >c-c/10.
+    for val,val_opt in zip([a,b,c],[a_opt,b_opt,c_opt]):
+        assert val-abs(val/10.) < val_opt
+        assert val_opt <val+abs(val/10.) 
 
 def test_data_makes_sense_mass_pl():
     #data
-    [table]=load(['mes_mass_pl'],location=Path().data)
-    data=table['mass_pl_value']
+    data=get_data('mes_mass_pl','mass_pl_value')
 
     bins=10
-    counts, bin_edges = np.histogram(data,bins)
+    fig=plt.figure()
+    y, bins2,patches=plt.hist(data, bins)#, density=True) #had to do this to solve overflow encountered in exp
+    #careful density=True means probability density (area under histogram integrates to 1
+    plt.close(fig)
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, bins)
 
-    y=counts
-
-    x = np.linspace(bin_edges[0],bin_edges[-1],bins)
-
-    def model_f(x,a,b,c):
-        return a*x**(-b)+c
-
-    popt, pcov = curve_fit(model_f, x, y, p0=[1.5,0.5,1.5])
+    popt, pcov = curve_fit(model_exp_decay, x, y, p0=[1,1,0])
     a_opt, b_opt, c_opt = popt
     x_model = np.linspace(min(x), max(x), 100)
-    y_model = model_f(x_model, a_opt, b_opt, c_opt) 
+    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
  
     plt.figure()
     plt.title('mes_mass_pl')
@@ -111,10 +110,15 @@ def test_data_makes_sense_mass_pl():
     plt.plot(x_model, y_model, color='r')
     plt.show()    
 
+    # values for dist were tested before
+    a = linfit([30,5],[960,74],distance_cut)
+    b = linfit([30,5],[19,36],distance_cut)
+    c = linfit([30,5],[-0.24,1.6],distance_cut)
+
     #assert
-    assert a_opt <3 and a_opt >1
-    assert b_opt <1 and b_opt >0
-    assert c_opt <2 and a_opt >1
+    for val,val_opt in zip([a,b,c],[a_opt,b_opt,c_opt]):
+        assert val-abs(val/10.) < val_opt
+        assert val_opt <val+abs(val/10.)
 
 def test_data_makes_sense_coo():
     #data
@@ -163,8 +167,8 @@ def test_data_makes_sense_mag_i():
     plt.plot(x, y_fit, color='r')
     plt.show()
 
-    m = approxvalue([30,5],[10,8],distance_cut)
-    s = approxvalue([30,5],[4,3.8],distance_cut)
+    m = linfit([30,5],[10,8],distance_cut)
+    s = linfit([30,5],[3.4,3.8],distance_cut)
     
     assert mu <m+m/10. and mu > m-m/10.
     assert std <s+s/10. and std >s-s/10.
