@@ -188,8 +188,9 @@ def create_mes_mass_pl_table(exo_helptab,exo):
     # instead of mass_pl_err hav mass_pl_upper_err and mass_pl_lower_err
     # remove mass_pl_rel
     # maybe remove mass_pl_qual
-    # include parameters msini, bestmass_provenance (for in building instead of bestpara), r, a, e, i, p, status
-    # 
+    # include parameters msini, bestmass_provenance (for in building instead of bestpara), 
+    # include other parameters r, a, e, i, p, status
+    
     def mass_readin(exo_helptab,i):
         if type(exo_helptab['mass_max'][i])==np.ma.core.MaskedConstant or \
                   exo_helptab['mass_max'][i]==np.inf:

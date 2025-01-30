@@ -36,7 +36,7 @@ def plot_data_and_fit(title,data,p0):
     plt.title(title)
     bins=10
     
-    bin_heights, bin_borders,patches=plt.hist(data, bins, density=True)
+    bin_heights, bin_borders,patches=plt.hist(data, bins, density=True,label='pdf of data')
     bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
     #careful density=True means probability density (area under histogram integrates to 1
     xmin, xmax = plt.xlim()
@@ -64,20 +64,22 @@ def ravsdec(x_label,y_label,x,y):
     #ecliptic plane in equatorial coordinates
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+    plt.title('coordinate distribution')
     #plt.savefig('plots/quasi_aitoff', dpi=300)
     plt.show()
     return
 
 def norm_fit(data,title):
     bins=10
-    plt.hist(data, bins, density=True)#, alpha=0.6, color='g')
+    plt.hist(data, bins, density=True,label='pdf of data')#, alpha=0.6, color='g')
     #do I need to keep density=True here or can I use non normalized display?
 
     mu, std = norm.fit(data)
     y_fit = norm.pdf(np.sort(data), mu, std)
     
     plt.title('mag_i_value')
-    plt.plot(np.sort(data), y_fit, color='r')
+    plt.plot(np.sort(data), y_fit, color='r',label='fit')
+    plt.legend()
     plt.show()
     return mu
 
