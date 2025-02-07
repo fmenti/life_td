@@ -56,14 +56,54 @@ def test_exo_create_ident_table():
 def test_exo_create_objects_table():
     # data
     exo = empty_dict.copy()
-    exo['ident'] = Table(data = [['2020A&C....3100370A']],
-                            names = ['provider_bibcode'],
-                            dtype=[object])
+    exo['ident'] = Table(data = [['*   3 Cnc b','*   6 Lyn b','*   6 Lyn b'],
+                                ['*   3 Cnc b','6 Lyn b','*   6 Lyn b']],
+                            names = ['main_id','id'],
+                            dtype=[object,object])
     
     # function
-    #exo_objects = create_objects_table(exo)
+    exo_objects = create_objects_table(exo)
+    # type got correctly assigned
+    assert exo_objects['type'][np.where(exo_objects['main_id']=='*   3 Cnc b')] == 'pl'
+    # unique main id
+    assert len(exo_objects[np.where(exo_objects['main_id']=='*   6 Lyn b')]) == 1
 
-    # assert
-    #problem, id seem to be unique
-    #assert False
+def test_create_mes_mass_pl_table():
+    #data
+    m=MaskedColumn(data=[20.76,0,5.025,1e+20],name='mass',mask=[False,True,False,False])
+    mmax=MaskedColumn(data=[0.73,0,0.873,1],name='mass_max',mask=[False,True,False,False])
+    mmin=MaskedColumn(data=[0.73,0,1.067,1],name='mass_min',mask=[False,True,False,False])
+    murl=MaskedColumn(data=['eu','','2022ApJS..262...21F','test'],name='mass_url',mask=[False,True,False,False])
+    exo_helptab= Table(data = [['*   3 Cnc b','*   4 Mon B .01','*   6 Lyn b','testname'],
+                               m,murl,mmax,mmin],
+                            names = ['planet_main_id','mass','mass_url','mass_max','mass_min'],
+                            dtype=[object,float,object,float,float])
+    #function
+    exo_mes_mass_pl=create_mes_mass_pl_table(exo_helptab)
 
+    #assert
+    # keep only non masked entries
+    assert len(exo_mes_mass_pl) == 2
+    assert exo_mes_mass_pl['mass_pl_value'][np.where(exo_mes_mass_pl['main_id']=='*   3 Cnc b')] == 20.76
+    assert exo_mes_mass_pl['mass_pl_err'][np.where(exo_mes_mass_pl['main_id']=='*   6 Lyn b')] == 1.067
+
+def test_create_mes_mass_pl_table_new():
+    #data
+    m=MaskedColumn(data=[20.76,0,5.025,1e+20],name='mass',mask=[False,True,False,False])
+    mmax=MaskedColumn(data=[0.73,0,0.873,1],name='mass_max',mask=[False,True,False,False])
+    mmin=MaskedColumn(data=[0.73,0,1.067,1],name='mass_min',mask=[False,True,False,False])
+    murl=MaskedColumn(data=['eu','','2022ApJS..262...21F','test'],name='mass_url',mask=[False,True,False,False])
+    exo_helptab= Table(data = [['*   3 Cnc b','*   4 Mon B .01','*   6 Lyn b','testname'],
+                               m,murl,mmax,mmin],
+                            names = ['planet_main_id','mass','mass_url','mass_max','mass_min'],
+                            dtype=[object,float,object,float,float])
+    #function
+    exo_mes_mass_pl=create_mes_mass_pl_table(exo_helptab)
+
+    #assert
+    # keep only non masked entries
+    assert len(exo_mes_mass_pl) == 2
+    assert exo_mes_mass_pl['mass_pl_value'][np.where(exo_mes_mass_pl['main_id']=='*   3 Cnc b')] == 20.76
+    assert exo_mes_mass_pl['mass_pl_err_max'][np.where(exo_mes_mass_pl['main_id']=='*   6 Lyn b')] == 0.873
+    assert exo_mes_mass_pl['mass_pl_err_main'][np.where(exo_mes_mass_pl['main_id']=='*   6 Lyn b')] == 1.067
+    
