@@ -10,7 +10,7 @@ from datetime import datetime
 
 #self created modules
 from utils.io import save, load, Path, stringtoobject
-from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table
+from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table, nullvalues, replace_value, lower_quality
 from sdata import empty_dict
 
 def query_or_load_exomercat():
@@ -184,40 +184,32 @@ def create_mes_mass_pl_table(exo_helptab):
     # maybe remove mass_pl_qual
     # include parameters msini, bestmass_provenance (for in building instead of bestpara), 
     # include other parameters r, a, e, i, p, status
-    
-    def mass_readin(exo_helptab,i):
-        if type(exo_helptab['mass_max'][i])==np.ma.core.MaskedConstant or \
-                  exo_helptab['mass_max'][i]==np.inf:
-            if type(exo_helptab['mass_min'][i])==np.ma.core.MaskedConstant or \
-                  exo_helptab['mass_min'][i]==np.inf:
-                exo_helptab['mass_pl_err'][i]=1e+20
-            else:
-                exo_helptab['mass_pl_err'][i]=exo_helptab['mass_min'][i]
-                exo_helptab['mass_pl_qual'][i]='C'
-                # tbd: check if relation is correct in case of maximum error 
-                # on a lower limit value')
-        else:
-            if type(exo_helptab['mass_min'][i])==np.ma.core.MaskedConstant or \
-                  exo_helptab['mass_min'][i]==np.inf:
-                exo_helptab['mass_pl_err'][i]=exo_helptab['mass_max'][i]
-                exo_helptab['mass_pl_qual'][i]='C'
-            else:
-                exo_helptab['mass_pl_err'][i]=max(exo_helptab['mass_max'][i],
-                                        exo_helptab['mass_min'][i])
-                exo_helptab['mass_pl_qual'][i]='B'
-        return exo_helptab['mass_max','mass_min','mass_pl_err','mass_pl_qual'][i]
+
+    for colname in ['mass_max','mass_min', 'mass']:
+        exo_helptab=nullvalues(exo_helptab,colname,1e+20,verbose=False)
+        exo_helptab=replace_value(exo_helptab,colname,np.inf,1e+20)
+        
+    def assign_quality(exo_helptab,i):
+        exo_helptab['mass_pl_qual'][i]='B'
+        if exo_helptab['mass_max'][i]==1e+20:
+            exo_helptab['mass_pl_qual'][i]=lower_quality(exo_helptab['mass_pl_qual'][i])
+        if exo_helptab['mass_min'][i]==1e+20:
+            exo_helptab['mass_pl_qual'][i]=lower_quality(exo_helptab['mass_pl_qual'][i])
+        return exo_helptab['mass_pl_qual'][i]
     
     for i in range(len(exo_helptab)):
-        exo_helptab['mass_max','mass_min','mass_pl_err','mass_pl_qual'][i] = mass_readin(exo_helptab,i)
+        exo_helptab['mass_pl_qual'][i] = assign_quality(exo_helptab,i)
+        
 
-    exo_mes_mass_pl=exo_helptab['planet_main_id','mass','mass_pl_err','mass_url',
+    exo_mes_mass_pl=exo_helptab['planet_main_id','mass','mass_max','mass_min','mass_url',
                             'mass_pl_qual']
-    exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url'],
-                                    ['main_id','mass_pl_value','mass_pl_ref'])
-    #remove masked rows
-    exo_mes_mass_pl.remove_rows(exo_mes_mass_pl['mass_pl_value'].mask.nonzero()[0])
+    exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url',
+                                   'mass_max','mass_min'],
+                                    ['main_id','mass_pl_value','mass_pl_ref',
+                                     'mass_pl_err_max','mass_pl_err_min'])
     #remove null values
     exo_mes_mass_pl=exo_mes_mass_pl[np.where(exo_mes_mass_pl['mass_pl_value']!=1e+20)]
+    
     #tbd: include masssini measurements from exomercat
     return exo_mes_mass_pl
 
