@@ -601,21 +601,20 @@ tables may change at any time without prior warning.
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_pl_err" type="double precision"
+        <column name="mass_pl_err_max" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="Err. Mass"
-            description="Mass error"
+            tablehead="Err. Mass max"
+            description="Upper mass error"
+            verbLevel="1" displayHint="sf=3"/>
+        <column name="mass_pl_err_min" type="double precision"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
+            tablehead="Err. Mass min"
+            description="Lower mass error"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="Quality Mass"
             description="Mass quality (A:best, E:worst)"
-            verbLevel="1"/>
-        <column name="mass_pl_rel" type="text"
-            ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel"
-            description="Mass relation defining upper / lower limit or exact
-            measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
@@ -635,10 +634,10 @@ tables may change at any time without prior warning.
         <make table="planet_basic">
             <rowmaker idmaps="*">
                 <map key="mass_pl_value" nullExpr="1e+20" />
-                <map key="mass_pl_err" nullExpr="1e+20" />
+                <map key="mass_pl_err_max" nullExpr="1e+20" />
+                <map key="mass_pl_err_min" nullExpr="1e+20" />
                 <map key="mass_pl_qual" nullExpr="'?'" />
                 <map key="mass_pl_source_idref" nullExpr="999999" />
-                <map key="mass_pl_rel" nullExpr="'?'"/>
             </rowmaker>
         </make>
     </data>
@@ -828,21 +827,20 @@ tables may change at any time without prior warning.
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_pl_err" type="double precision"
+        <column name="mass_pl_err_max" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="Err. Pl. Mass"
-            description="Mass error"
+            tablehead="Err. Mass max"
+            description="Upper mass error"
+            verbLevel="1" displayHint="sf=3"/>
+        <column name="mass_pl_err_min" type="double precision"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
+            tablehead="Err. Mass min"
+            description="Lower mass error"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="Quality mass"
             description="Mass quality (A:best, E:worst)"
-            verbLevel="1"/>
-        <column name="mass_pl_rel" type="text"
-            ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel"
-            description="Mass relation defining upper / lower limit or exact
-            measurement through '&lt;', '>', and '='."
             verbLevel="1"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
@@ -861,10 +859,10 @@ tables may change at any time without prior warning.
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
                  <map key="mass_pl_value" nullExpr="1e+20" />
-                 <map key="mass_pl_err" nullExpr="1e+20" />
+                 <map key="mass_pl_err_max" nullExpr="1e+20" />
+                 <map key="mass_pl_err_min" nullExpr="1e+20" />
                  <map key="mass_pl_qual" nullExpr="'?'" />
                  <map key="mass_pl_source_idref" nullExpr="999999" />
-                 <map key="mass_pl_rel" nullExpr="'?'"/>
              </rowmaker>
         </make>
     </data>
