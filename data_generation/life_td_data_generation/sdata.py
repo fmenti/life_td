@@ -101,7 +101,7 @@ empty_dict_wit_columns = {
                                   object,object,int,object,
                                   float,float,int,object,int,object]),
     'planet_basic': Table(names=['object_idref',
-                                 'mass_pl_value','mass_pl_err','mass_pl_rel',
+                                 'mass_pl_value','mass_pl_err_max','mass_pl_err_min',
                             'mass_pl_qual','mass_pl_source_idref',
                             'mass_pl_ref'],
                           dtype=[int,

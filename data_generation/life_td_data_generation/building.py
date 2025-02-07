@@ -328,8 +328,8 @@ def unify_null_values(cat):
               'sep_ang_qual','teff_st_qual','radius_st_qual','binary_flag',
               'binary_qual','mass_st_qual','sptype_qual','class_temp',
               'class_temp_nr'],
-             ['mass_pl_qual','mass_pl_rel'],
-             ['rad_qual','rad_rel'],['mass_pl_qual','mass_pl_rel'],
+             ['mass_pl_qual'],
+             ['rad_qual','rad_rel'],['mass_pl_qual'],
              ['teff_st_qual'],['radius_st_qual'],['mass_st_qual'],
              ['binary_qual']]
     for i in range(len(tables)):
