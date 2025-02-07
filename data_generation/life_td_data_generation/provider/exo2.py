@@ -162,31 +162,25 @@ def create_objects_table(exo):
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
     return exo_objects
 
-def create_mes_mass_pl_table(exo_helptab,exo):
+def create_mes_mass_pl_table(exo_helptab):
     """
     Creates planetary mass measurement table.
     
     :param exo_helptab: Exo-Mercat helper table.
     :type exo_helptab: astropy.table.table.Table
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
     :returns: Planetary mass measurement table.
     :rtype: astropy.table.table.Table
     """
-    #initialize columns exo_helptab['mass_pl_rel'] and exo_helptab['mass_pl_err']
+    #initialize column exo_helptab['mass_pl_err']
     exo_helptab['mass_pl_err']=Column(dtype=float,length=len(exo_helptab))
-    exo_helptab['mass_pl_rel']=Column(dtype=object,length=len(exo_helptab))
     exo_helptab['mass_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
     exo_helptab['mass_pl_qual']=['?' for j in range(len(exo_helptab))]
     
-    #transforming mass errors from upper (mass_max) and lower (mass_min) error
-    # into instead error (mass_error) as well as relation (mass_pl_rel)
     
     # tbd change that back into only having what my provider gives me. This was goood
     #   to show possible usecases but none we need right now.
 
     # instead of mass_pl_err hav mass_pl_upper_err and mass_pl_lower_err
-    # remove mass_pl_rel
     # maybe remove mass_pl_qual
     # include parameters msini, bestmass_provenance (for in building instead of bestpara), 
     # include other parameters r, a, e, i, p, status
@@ -196,10 +190,8 @@ def create_mes_mass_pl_table(exo_helptab,exo):
                   exo_helptab['mass_max'][i]==np.inf:
             if type(exo_helptab['mass_min'][i])==np.ma.core.MaskedConstant or \
                   exo_helptab['mass_min'][i]==np.inf:
-                exo_helptab['mass_pl_rel'][i]=None
                 exo_helptab['mass_pl_err'][i]=1e+20
             else:
-                exo_helptab['mass_pl_rel'][i]='<'
                 exo_helptab['mass_pl_err'][i]=exo_helptab['mass_min'][i]
                 exo_helptab['mass_pl_qual'][i]='C'
                 # tbd: check if relation is correct in case of maximum error 
@@ -207,21 +199,19 @@ def create_mes_mass_pl_table(exo_helptab,exo):
         else:
             if type(exo_helptab['mass_min'][i])==np.ma.core.MaskedConstant or \
                   exo_helptab['mass_min'][i]==np.inf:
-                exo_helptab['mass_pl_rel'][i]='>'
                 exo_helptab['mass_pl_err'][i]=exo_helptab['mass_max'][i]
                 exo_helptab['mass_pl_qual'][i]='C'
             else:
-                exo_helptab['mass_pl_rel'][i]='='
                 exo_helptab['mass_pl_err'][i]=max(exo_helptab['mass_max'][i],
                                         exo_helptab['mass_min'][i])
                 exo_helptab['mass_pl_qual'][i]='B'
-        return exo_helptab['mass_max','mass_min','mass_pl_rel','mass_pl_err','mass_pl_qual'][i]
+        return exo_helptab['mass_max','mass_min','mass_pl_err','mass_pl_qual'][i]
     
     for i in range(len(exo_helptab)):
-        exo_helptab['mass_max','mass_min','mass_pl_rel','mass_pl_err','mass_pl_qual'][i] = mass_readin(exo_helptab,i)
+        exo_helptab['mass_max','mass_min','mass_pl_err','mass_pl_qual'][i] = mass_readin(exo_helptab,i)
 
     exo_mes_mass_pl=exo_helptab['planet_main_id','mass','mass_pl_err','mass_url',
-                            'mass_pl_rel','mass_pl_qual']
+                            'mass_pl_qual']
     exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url'],
                                     ['main_id','mass_pl_value','mass_pl_ref'])
     #remove masked rows
@@ -279,7 +269,7 @@ def provider_exo():
 
     exo['ident'],exo_helptab=create_ident_table(exo_helptab,exo)
     exo['objects']=create_objects_table(exo)
-    exo['mes_mass_pl']=create_mes_mass_pl_table(exo_helptab,exo)
+    exo['mes_mass_pl']=create_mes_mass_pl_table(exo_helptab)
     exo['h_link']=create_h_link_table(exo_helptab,exo)
     exo['sources']=create_exo_sources_table(exo)
 
