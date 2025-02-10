@@ -167,7 +167,7 @@ def realspectype(cat):
     
     return ms
 
-def model_param():
+def modeled_param():
     """
     Loads and cleans up model file.
 
@@ -191,7 +191,7 @@ def model_param():
                           f'{Path().additional_data}model_param.xml')#saving votable
     return EEM_table
 
-def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
+def match_sptype(cat,sptypestring='sim_sptype',teffstring='mod_Teff',\
                  rstring='mod_R',mstring='mod_M'):
     """
     Assigns modeled parameter values.
@@ -212,7 +212,7 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
         effective temperature, radius and mass filled with model values
     :rtype: astropy.table.table.Table
     """
-
+    model_param=modeled_param()#create model table as votable 
     #initiating columns with right units
     
     arr=np.zeros(len(cat))
@@ -230,7 +230,7 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
             #go through the model spectral types of Mamajek 
             for i in range(len(model_param['SpT'])): 
                 #match first two letters
-                if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
+                if model_param['SpT'][i][:3]==cat[sptypestring][j][:3]: 
                         cat[teffstring][j]=model_param['Teff'][i]
                         cat[rstring][j]=model_param['Radius'][i]
                         cat[mstring][j]=model_param['Mass'][i]
@@ -241,7 +241,7 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
                     if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
                         cat[teffstring][j]=model_param['Teff'][i]
                         cat[rstring][j]=model_param['Radius'][i]
-                        cat[mstring][j]=model_param['Mass'][i] 
+                        cat[mstring][j]=model_param['Mass'][i]
         else:
             cat[sptypestring][j]='None' 
     return cat
@@ -266,8 +266,13 @@ def spec(cat):
     cat=realspectype(cat)
     #model_param=io.votable.parse_single_table(\
         #f"catalogs/model_param.xml").to_table()
-    mp=model_param()#create model table as votable
-    cat=match_sptype(cat,mp,sptypestring='sptype_string')
+    
+    cat['specmatch_temp_nr']=cat['class_temp_nr']
+    for i,temp_nr in enumerate(cat['specmatch_temp_nr']):
+        if temp_nr[1:3]=='.0':
+            cat['specmatch_temp_nr'][i]=temp_nr[0]      
+    cat['mp_specmatch']=cat['class_temp']+cat['specmatch_temp_nr']+cat['class_lum']
+    cat=match_sptype(cat,sptypestring='mp_specmatch')
     cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
     cat=unique(cat, keys='main_id')
@@ -345,7 +350,7 @@ def create_life_helpertable(life):
     
     stars=sim_objects[np.where(sim_objects['type']=='st')]
     life_helptab=join(stars,life['star_basic'])
-    life_helptab=spec(life_helptab['main_id','sptype_string','class_lum','class_temp'])
+    life_helptab=spec(life_helptab['main_id','sptype_string','class_lum','class_temp','class_temp_nr'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
     return life_helptab
 
