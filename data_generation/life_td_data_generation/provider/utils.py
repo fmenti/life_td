@@ -203,7 +203,7 @@ def distance_cut(cat: table.Table, colname: str, main_id: bool=True):
 
 def nullvalues(cat,colname,nullvalue,verbose=False):
     """
-    This function fills masked entries specified column. 
+    This function fills masked entries of specified column. 
     
     :param cat: Astropy table containing the column colname.
     :type cat: astropy.table.table.Table
@@ -273,3 +273,13 @@ def ids_from_ident(ident,objects):
         objects.add_row([grouped_ident['main_id'][ind[i]],ids])
     return objects
 
+def lower_quality(qual):
+    if qual == 'A':
+        qual = 'B'
+    elif qual == 'B':
+        qual = 'C'
+    elif qual == 'C':
+        qual = 'D'
+    elif qual == 'D':
+        qual = 'E'
+    return qual
