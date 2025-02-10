@@ -1,12 +1,28 @@
 from life_td import *
 from utils.io import save
 from astropy.table import setdiff
+from sdata import empty_dict_wit_columns
+import numpy as np
 
-#def test_load_cat():
-#    dictionary=empty_cat_wit_columns.copy()
-#    save(list(dictionary.values()),['test_cat_'+ element for element in list(dictionary.keys())])
- #   provider_name='test_cat'
-#    loaded_dict=load_cat(provider_name)
-#    for cat,loaded_cat in zip(dictionary,loaded_dict):
-#        assert len(setdiff(cat,loaded_cat)) == 0
+def test_load_cat():
+    #data
+    #data
+    sptype=np.array(['dM3.51','dM3:','dM5.0'])
+    main_id=np.array(['G 227-48B','* mu. Dra C','FBS 1415+456'])
+    example_table=Table((main_id,sptype),names=('main_id','sptype_string' ))
+    dictionary=empty_dict_wit_columns.copy()
+    dictionary['star_basic']=example_table
+    dictionary=string_to_object_whole_dict(dictionary,400)
 
+    provider_name='test_cat'
+    save(list(dictionary.values()),[provider_name+'_'+ element for element in list(dictionary.keys())])
+    
+    
+    #function
+    loaded_dict=load_cat(provider_name)
+
+    #assert
+    for tablename in dictionary.keys():
+        if len(dictionary[tablename])>0:#change to more once this works
+            for columnname in dictionary[tablename].colnames:
+                assert len(setdiff(dictionary[tablename],loaded_dict[tablename])) == 0
