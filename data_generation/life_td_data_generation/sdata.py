@@ -3,6 +3,10 @@ Dictionaries
 """
 from astropy.table import Table
 
+table_names=['sources','objects','provider','ident','h_link','star_basic',
+              'planet_basic','disk_basic','mes_mass_pl',
+              'mes_teff_st','mes_radius_st','mes_mass_st','mes_binary','mes_sep_ang','best_h_link']
+
 paras_dict = {
     'sources' : [],
     'objects': [],
