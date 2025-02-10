@@ -162,6 +162,14 @@ def create_objects_table(exo):
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
     return exo_objects
 
+def assign_quality(exo_helptab,i):
+    qual='B'
+    if exo_helptab['mass_max'][i]==1e+20:
+        qual=lower_quality(qual)
+    if exo_helptab['mass_min'][i]==1e+20:
+        qual=lower_quality(qual)
+    return qual
+
 def create_mes_mass_pl_table(exo_helptab):
     """
     Creates planetary mass measurement table.
@@ -189,13 +197,6 @@ def create_mes_mass_pl_table(exo_helptab):
         exo_helptab=nullvalues(exo_helptab,colname,1e+20,verbose=False)
         exo_helptab=replace_value(exo_helptab,colname,np.inf,1e+20)
         
-    def assign_quality(exo_helptab,i):
-        exo_helptab['mass_pl_qual'][i]='B'
-        if exo_helptab['mass_max'][i]==1e+20:
-            exo_helptab['mass_pl_qual'][i]=lower_quality(exo_helptab['mass_pl_qual'][i])
-        if exo_helptab['mass_min'][i]==1e+20:
-            exo_helptab['mass_pl_qual'][i]=lower_quality(exo_helptab['mass_pl_qual'][i])
-        return exo_helptab['mass_pl_qual'][i]
     
     for i in range(len(exo_helptab)):
         exo_helptab['mass_pl_qual'][i] = assign_quality(exo_helptab,i)
