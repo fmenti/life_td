@@ -14,7 +14,13 @@ class Path:
         self.plot='../../plots/'
     
 
-#-------------------global helper functions----------------------------
+def objecttostring(cat):
+    for i in cat.colnames:
+        if cat[i].dtype == object: #object =adaptable length string
+            #transform the type into string
+            cat[i] = cat[i].astype(str)
+    return cat
+    
 def save(cats,names,location=Path().additional_data):
     """
     This functions saves the tables given as list in the cats parameter.
@@ -29,14 +35,12 @@ def save(cats,names,location=Path().additional_data):
     
     #go through all the elements in both lists
     for cat,path in zip(cats,names):
+        temp=cat.copy()
         #for each column header
-        for i in cat.colnames:
-            if cat[i].dtype == object: #object =adaptable length string
-                #transform the type into string
-                cat[i] = cat[i].astype(str)
+        temp = objecttostring(temp)
         #save the table
         votable.writeto(
-        	    votable.from_table(cat), f'{location}{path}.xml')
+        	    votable.from_table(temp), f'{location}{path}.xml')
     return
 
 def stringtoobject(cat,number=100):
@@ -65,9 +69,9 @@ def stringtoobject(cat,number=100):
             cat[i] = cat[i].astype(object)
     return cat
 
-def string_to_object_whole_dict(dictionary):
+def string_to_object_whole_dict(dictionary,number=100):
     for table_name in list(dictionary.keys()):
-        dictionary[table_name] = stringtoobject(dictionary[table_name])
+        dictionary[table_name] = stringtoobject(dictionary[table_name],number)
     return dictionary
 
 def load(paths,stringtoobjects=True,location=Path().additional_data):
