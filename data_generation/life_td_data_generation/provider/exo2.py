@@ -5,7 +5,7 @@ Distance cut is performed by joining on life_db simbad objects.
 
 import numpy as np #arrays
 from astropy import io
-from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique
+from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique, vstack
 from datetime import datetime
 
 #self created modules
@@ -162,13 +162,96 @@ def create_objects_table(exo):
     exo_objects['type']=['pl' for j in range(len(exo_objects))]
     return exo_objects
 
-def assign_quality(exo_helptab,i):
+def assign_quality_elementwise(exo_helptab,para,i):
     qual='B'
-    if exo_helptab['mass_max'][i]==1e+20:
+    if exo_helptab[para+'_max'][i]==1e+20:
         qual=lower_quality(qual)
-    if exo_helptab['mass_min'][i]==1e+20:
+    if exo_helptab[para+'_min'][i]==1e+20:
         qual=lower_quality(qual)
     return qual
+
+def assign_quality(exo_helptab,parameter):
+    for para in parameter:
+        exo_helptab[para+'_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
+        exo_helptab[para+'_pl_qual']=['?' for j in range(len(exo_helptab))]
+        for i in range(len(exo_helptab)):
+            exo_helptab[para+'_pl_qual'][i] = assign_quality_elementwise(exo_helptab,para,i)
+    return exo_helptab
+
+def deal_with_mass_nullvalues(exo_helptab,cols):
+    for colname in cols:
+        exo_helptab=nullvalues(exo_helptab,colname,1e+20,verbose=False)
+        exo_helptab=replace_value(exo_helptab,colname,np.inf,1e+20)
+    return exo_helptab
+
+def create_para_exo_mes_mass_pl(exo_helptab,para,sini_flag):
+    table=exo_helptab['planet_main_id',para,para+'_max',para+'_min',para+'_url',
+                            para+'_pl_qual','bestmass_provenance']
+    table.rename_columns(['planet_main_id',para,para+'_url',
+                              para+'_max',para+'_min'],
+                        ['main_id','mass_pl_value','mass_pl_ref',
+                                'mass_pl_err_max','mass_pl_err_min'])
+    if para=='msini':
+        table.rename_column(para+'_pl_qual','mass_pl_qual')
+    table['mass_pl_sini_flag']=[sini_flag for j in range(len(table))]
+    #remove null values
+    table=table[np.where(table['mass_pl_value']!=1e+20)]
+    return table
+
+def betterthan(qual1,qual2):
+    #is it usefull to do all this work with the quality when I could just assign b for bestmass and c for otherone?
+    #nearly done, finish this then do other one as well. call one exomercatqual other dbqual
+    quals=['A','B','C','D','E','?']
+    for i in [0,1,2,3,4]:
+        if qual1 == quals[i] and qual2 in quals[i+1:]:
+            result=True
+            return result
+        else:
+            result=False 
+    return result
+
+def bestmass_better_qual(bestmass,qual_msini,qual_mass):
+    if bestmass=='Mass':
+        if betterthan(qual_msini,qual_mass) or qual_msini==qual_mass:
+            qual_msini=lower_quality(qual_msini)
+            qual_msini, qual_mass=bestmass_better_qual(bestmass,qual_msini,qual_mass)
+    elif bestmass == 'Msini':
+        if betterthan(qual_mass,qual_msini) or qual_msini==qual_mass:
+            qual_mass=lower_quality(qual_mass)
+            qual_msini, qual_mass=bestmass_better_qual(bestmass,qual_msini,qual_mass)
+    return qual_msini, qual_mass
+
+def assign_new_qual(exo_mes_mass_pl,main_id,flag,new_qual):
+    temp=[np.where(exo_mes_mass_pl['main_id']==main_id)]
+    for i in temp[0][0]:
+        if exo_mes_mass_pl['mass_pl_sini_flag'][i]==flag:
+            exo_mes_mass_pl['mass_pl_qual'][i]=new_qual
+    return exo_mes_mass_pl
+
+def align_quality_with_bestmass(exo_mes_mass_pl):
+    grouped_mass_pl = exo_mes_mass_pl.group_by('main_id')
+    ind=grouped_mass_pl.groups.indices
+    for i in range(len(ind)-1):#range(len(ind)-1):
+        if ind[i+1]-ind[i]==2:
+            bestmass=grouped_mass_pl['bestmass_provenance'][ind[i]]
+            if grouped_mass_pl['mass_pl_sini_flag'][ind[i]]=='True':
+                qual_msini=grouped_mass_pl['mass_pl_qual'][ind[i]]
+                qual_mass=grouped_mass_pl['mass_pl_qual'][ind[i]+1]
+            else:
+                qual_msini=grouped_mass_pl['mass_pl_qual'][ind[i]+1]
+                qual_mass=grouped_mass_pl['mass_pl_qual'][ind[i]]
+            new_qual_msini, new_qual_mass=bestmass_better_qual(bestmass,qual_msini,qual_mass)
+            #assign them the right place
+            #I think I need a where here
+            if new_qual_msini!=qual_msini:
+                main_id=grouped_mass_pl['main_id'][ind[i]]
+                exo_mes_mass_pl=assign_new_qual(exo_mes_mass_pl,main_id,'True',new_qual_msini)
+            if new_qual_mass!=qual_mass:
+                main_id=grouped_mass_pl['main_id'][ind[i]]
+                exo_mes_mass_pl=assign_new_qual(exo_mes_mass_pl,main_id,'False',new_qual_mass)
+                
+    return exo_mes_mass_pl
+    
 
 def create_mes_mass_pl_table(exo_helptab):
     """
@@ -178,40 +261,21 @@ def create_mes_mass_pl_table(exo_helptab):
     :type exo_helptab: astropy.table.table.Table
     :returns: Planetary mass measurement table.
     :rtype: astropy.table.table.Table
-    """
-    #initialize column exo_helptab['mass_pl_err']
-    exo_helptab['mass_pl_err']=Column(dtype=float,length=len(exo_helptab))
-    exo_helptab['mass_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
-    exo_helptab['mass_pl_qual']=['?' for j in range(len(exo_helptab))]
-    
-    
-    # tbd change that back into only having what my provider gives me. This was goood
-    #   to show possible usecases but none we need right now.
+    """    
 
-    # instead of mass_pl_err hav mass_pl_upper_err and mass_pl_lower_err
-    # maybe remove mass_pl_qual
-    # include parameters msini, bestmass_provenance (for in building instead of bestpara), 
     # include other parameters r, a, e, i, p, status
-
-    for colname in ['mass_max','mass_min', 'mass']:
-        exo_helptab=nullvalues(exo_helptab,colname,1e+20,verbose=False)
-        exo_helptab=replace_value(exo_helptab,colname,np.inf,1e+20)
+    cols = ['mass_max','mass_min', 'mass','msini', 'msini_max', 'msini_min']
+    exo_helptab = deal_with_mass_nullvalues(exo_helptab,cols)
         
-    
-    for i in range(len(exo_helptab)):
-        exo_helptab['mass_pl_qual'][i] = assign_quality(exo_helptab,i)
+    exo_helptab=assign_quality(exo_helptab,['mass','msini'])
         
 
-    exo_mes_mass_pl=exo_helptab['planet_main_id','mass','mass_max','mass_min','mass_url',
-                            'mass_pl_qual']
-    exo_mes_mass_pl.rename_columns(['planet_main_id','mass','mass_url',
-                                   'mass_max','mass_min'],
-                                    ['main_id','mass_pl_value','mass_pl_ref',
-                                     'mass_pl_err_max','mass_pl_err_min'])
-    #remove null values
-    exo_mes_mass_pl=exo_mes_mass_pl[np.where(exo_mes_mass_pl['mass_pl_value']!=1e+20)]
-    
-    #tbd: include masssini measurements from exomercat
+    exo_mes_mass_pl1=create_para_exo_mes_mass_pl(exo_helptab,'mass','False')
+    exo_mes_mass_pl2=create_para_exo_mes_mass_pl(exo_helptab,'msini','True')
+        
+    exo_mes_mass_pl=vstack([exo_mes_mass_pl1,exo_mes_mass_pl2])
+    exo_mes_mass_pl=unique(exo_mes_mass_pl)
+    exo_mes_mass_pl=align_quality_with_bestmass(exo_mes_mass_pl)  
     return exo_mes_mass_pl
 
 def create_h_link_table(exo_helptab,exo):

@@ -68,7 +68,7 @@ def test_exo_create_objects_table():
     # unique main id
     assert len(exo_objects[np.where(exo_objects['main_id']=='*   6 Lyn b')]) == 1
 
-def test_assign_quality():
+def test_assign_quality_elementwise():
     #data
     exo_helptab= Table(data = [[ 1e+20,1e+20,1],
                               [1e+20,1,1]],
@@ -77,36 +77,152 @@ def test_assign_quality():
     exo_helptab['mass_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
 
     #function
-    qual_b=assign_quality(exo_helptab,2)
-    qual_c=assign_quality(exo_helptab,1)
-    qual_d=assign_quality(exo_helptab,0)
+    qual_b=assign_quality_elementwise(exo_helptab,'mass',2)
+    qual_c=assign_quality_elementwise(exo_helptab,'mass',1)
+    qual_d=assign_quality_elementwise(exo_helptab,'mass',0)
 
     #assert
     assert qual_b == 'B'
     assert qual_c == 'C'
     assert qual_d == 'D'
+
+def test_assign_quality():
+    # data
+    exo_helptab= Table(data = [[ 1e+20,1e+20,1],
+                              [1e+20,1,1],
+                              [ 1e+20,1e+20,1],
+                              [1e+20,1,1]],
+                            names = ['mass_max','mass_min','msini_max','msini_min'],
+                            dtype=[float,float,float,float])
+    # function
+    exo_helptab=assign_quality(exo_helptab,['mass','msini'])
+    # assert
+    assert exo_helptab['mass_pl_qual'][0] == 'D'
+    assert exo_helptab['mass_pl_qual'][1] == 'C'
+    assert exo_helptab['mass_pl_qual'][2] == 'B'
+    assert exo_helptab['msini_pl_qual'][0] == 'D'
+    assert exo_helptab['msini_pl_qual'][1] == 'C'
+    assert exo_helptab['msini_pl_qual'][2] == 'B'
+
+def test_deal_with_mass_nullvalues():
+    # data
+    m=MaskedColumn(data=[20.76,0.1,0,np.inf,1e+20],
+                   name='mass',mask=[False,False,True,False,False])
+    exo_helptab= Table(data = [['*   3 Cnc b','*   4 Mon B .01','testname1','*   6 Lyn b','testname2'],
+                               m],
+                            names = ['main_id','mass'],
+                            dtype=[object,float])
     
+    # function
+    exo_helptab = deal_with_mass_nullvalues(exo_helptab,['mass'])
+    # assert
+    assert exo_helptab['mass'][np.where(exo_helptab['main_id']=='testname1')]==1e+20
+    assert exo_helptab['mass'][np.where(exo_helptab['main_id']=='*   6 Lyn b')]==1e+20
+
+def test_create_para_exo_mes_mass_pl():
+    # data
+    msini=MaskedColumn(data=[20.76,0.1,0,5.025,1e+20],
+                   name='mass',mask=[False,False,True,False,False])
+    msinimax=MaskedColumn(data=[np.inf,0,0,0.873,1],
+                      name='mass_max',mask=[False,True,True,False,False])
+    msinimin=MaskedColumn(data=[np.inf,1,0,1.067,1],
+                      name='mass_min',mask=[False,False,False,False,False])
+    msiniurl=MaskedColumn(data=['eu','test','','2022ApJS..262...21F','test'],
+                      name='mass_url',mask=[False,False,True,False,False])
+    mprov=MaskedColumn(data=['Msini','Mass','','Mass','Msini'],
+                      name='bestmass_provenance',mask=[False,False,True,False,False])
+    exo_helptab= Table(data = [['*   3 Cnc b','*   4 Mon B .01','testname1','*   6 Lyn b','testname2'],
+                               msini,msinimax,msinimin,msiniurl,mprov],
+                            names = ['planet_main_id','msini','msini_max','msini_min',
+                                    'msini_url','bestmass_provenance'],
+                            dtype=[object,float,float,float,object,object])
+    exo_helptab['msini_pl_qual']=MaskedColumn(dtype=object,length=len(exo_helptab))
+    exo_helptab['msini_pl_qual']=['?' for j in range(len(exo_helptab))]
+    
+    # function
+    sinitable = create_para_exo_mes_mass_pl(exo_helptab,'msini','True')
+    # assert
+    assert sinitable['mass_pl_value'][np.where(sinitable['main_id']=='*   3 Cnc b')] == 20.76
+    assert sinitable['mass_pl_err_max'][np.where(sinitable['main_id']=='*   6 Lyn b')] == 0.873
+    assert sinitable['mass_pl_err_min'][np.where(sinitable['main_id']=='*   6 Lyn b')] == 1.067
+
+def test_betterthan():
+    assert betterthan('A','B') == True
+    assert betterthan('A','?') == True
+    assert betterthan('B','A') == False
+    assert betterthan('A','A') == False
+    assert betterthan('E','?') == True
+
+def test_bestmass_better_qual():
+    bestmass=['Mass','Mass','Mass','Msini','Msini','Msini']
+    qual_msini=['B','A','C','B','A','C']
+    qual_mass=['B','B','B','B','B','B']
+    result_qual_msini=['C','C','C','B','A','C']
+    result_qual_mass=['B','B','B','C','B','D']
+    for i in range(len(bestmass)):
+        msini,mass=bestmass_better_qual(bestmass[i],qual_msini[i],qual_mass[i])
+        if i == 0:
+            assert msini==result_qual_msini[i]
+            assert mass==result_qual_mass[i]
+
+def test_assign_new_qual():
+    exo_mes_mass_pl = Table(data = [['*   3 Cnc b','*   3 Cnc b'],
+                                   ['B','B'],
+                                   ['True','False'],
+                                   ['Mass','Mass']],
+                            names = ['main_id','mass_pl_qual','mass_pl_sini_flag','bestmass_provenance'],
+                            dtype=[object,object,object,object])
+    exo_mes_mass_pl = assign_new_qual(exo_mes_mass_pl,'*   3 Cnc b','True','C')
+    assert exo_mes_mass_pl['mass_pl_qual'][np.where(exo_mes_mass_pl['mass_pl_sini_flag']=='True')]=='C'
+
+def test_align_quality_with_bestmass():
+    exo_mes_mass_pl = Table(data = [['*   3 Cnc b','*   3 Cnc b'],
+                                   ['B','B'],
+                                   ['True','False'],
+                                   ['Mass','Mass']],
+                            names = ['main_id','mass_pl_qual','mass_pl_sini_flag','bestmass_provenance'],
+                            dtype=[object,object,object,object])
+    exo_mes_mass_pl=align_quality_with_bestmass(exo_mes_mass_pl)
+    assert exo_mes_mass_pl['mass_pl_qual'][np.where(exo_mes_mass_pl['mass_pl_sini_flag']=='True')]=='C'
 
 def test_create_mes_mass_pl_table():
     #data
-    m=MaskedColumn(data=[20.76,0.1,0,5.025,1e+20],name='mass',mask=[False,False,True,False,False])
-    mmax=MaskedColumn(data=[np.inf,0,0,0.873,1],name='mass_max',mask=[False,True,True,False,False])
-    mmin=MaskedColumn(data=[np.inf,1,0,1.067,1],name='mass_min',mask=[False,False,False,False,False])
-    murl=MaskedColumn(data=['eu','test','','2022ApJS..262...21F','test'],name='mass_url',mask=[False,False,True,False,False])
+    m=MaskedColumn(data=[20.76,0.1,0,5.025,1e+20],
+                   name='mass',mask=[False,False,True,False,False])
+    mmax=MaskedColumn(data=[np.inf,0,0,0.873,1],
+                      name='mass_max',mask=[False,True,True,False,False])
+    mmin=MaskedColumn(data=[np.inf,1,0,1.067,1],
+                      name='mass_min',mask=[False,False,False,False,False])
+    murl=MaskedColumn(data=['eu','test','','2022ApJS..262...21F','test'],
+                      name='mass_url',mask=[False,False,True,False,False])
+    msini=MaskedColumn(data=[20.76,0.1,0,5.025,1e+20],
+                   name='mass',mask=[False,False,True,False,False])
+    msinimax=MaskedColumn(data=[np.inf,0,0,0.873,1],
+                      name='mass_max',mask=[False,True,True,False,False])
+    msinimin=MaskedColumn(data=[np.inf,1,0,1.067,1],
+                      name='mass_min',mask=[False,False,False,False,False])
+    msiniurl=MaskedColumn(data=['eu','test','','2022ApJS..262...21F','test'],
+                      name='mass_url',mask=[False,False,True,False,False])
+    mprov=MaskedColumn(data=['Msini','Mass','','Mass','Msini'],
+                      name='bestmass_provenance',mask=[False,False,True,False,False])
     exo_helptab= Table(data = [['*   3 Cnc b','*   4 Mon B .01','testname1','*   6 Lyn b','testname2'],
-                               m,murl,mmax,mmin],
-                            names = ['planet_main_id','mass','mass_url','mass_max','mass_min'],
-                            dtype=[object,float,object,float,float])
+                               m,murl,mmax,mmin,msini,msiniurl,msinimax,msinimin,mprov],
+                            names = ['planet_main_id','mass','mass_url','mass_max','mass_min',
+                                    'msini','msini_url','msini_max','msini_min','bestmass_provenance'],
+                            dtype=[object,float,object,float,float,float,object,float,float,object])
     #function
     exo_mes_mass_pl=create_mes_mass_pl_table(exo_helptab)
 
     #assert
     # keep only non masked entries
-    assert len(exo_mes_mass_pl) == 3
-    assert exo_mes_mass_pl['mass_pl_value'][np.where(exo_mes_mass_pl['main_id']=='*   3 Cnc b')] == 20.76
-    assert exo_mes_mass_pl['mass_pl_err_max'][np.where(exo_mes_mass_pl['main_id']=='*   6 Lyn b')] == 0.873
-    assert exo_mes_mass_pl['mass_pl_err_min'][np.where(exo_mes_mass_pl['main_id']=='*   6 Lyn b')] == 1.067
-    assert exo_mes_mass_pl['mass_pl_err_max'][np.where(exo_mes_mass_pl['main_id']=='*   4 Mon B .01')] == 1e+20
+    assert len(exo_mes_mass_pl) == 6
+    table=exo_mes_mass_pl[np.where(exo_mes_mass_pl['mass_pl_sini_flag']=='False')]
+    assert table['mass_pl_value'][np.where(table['main_id']=='*   3 Cnc b')] == 20.76
+    assert table['mass_pl_err_max'][np.where(table['main_id']=='*   6 Lyn b')] == 0.873
+    assert table['mass_pl_err_min'][np.where(table['main_id']=='*   6 Lyn b')] == 1.067
+    assert table['mass_pl_err_max'][np.where(table['main_id']=='*   4 Mon B .01')] == 1e+20
+    assert table['bestmass_provenance'][np.where(table['main_id']=='*   4 Mon B .01')] == 'Mass'
+    
 
     
     
