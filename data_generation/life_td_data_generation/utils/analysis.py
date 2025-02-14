@@ -5,16 +5,44 @@ from astropy.table import MaskedColumn
 from datetime import datetime
 import matplotlib.pyplot as plt
 from enum import Enum
+from scipy.optimize import curve_fit
+from scipy.stats import norm
 
 
 #self created modules
 from utils.io import stringtoobject, Path
 from sdata import empty_dict
 
+def linfit(x_data, y_data,x):
+    poly = np.polyfit(x_data,y_data,1)
+    return poly[0]*x+poly[1]
 
-###############################################################################
-#-------------------------Sanity tests--------------------------------------------
-###############################################################################
+def fitfunction(name,x,y,arr):
+    if name=='model':
+        def model_f(x,a,b,c):
+            #return a*(x-b)**(2)+c
+          return a * np.exp(-b * x) + c
+          #return a*x**(-b)+c
+        popt, pcov = curve_fit(model_f, x, y, p0=[ 2.,   1, 1.])
+        a_opt, b_opt, c_opt = popt
+        x_model = np.linspace(min(x), max(x), 100)
+        y_model = model_f(x_model, a_opt, b_opt, c_opt) 
+        print(popt)
+        #assert a_opt <3 and a_opt >1
+        #assert b_opt <1 and b_opt >0
+        #assert c_opt <2 and a_opt >1
+        return x_model,y_model
+    elif name == 'poly':
+        poly=np.polyfit(x,y,2)
+        y_fit=np.polyval(poly, x)
+        return x,y_fit
+    elif name == 'norm':
+        mu, std = norm.fit(arr)
+        y_fit = norm.pdf(x, mu, std)
+        print(mu,std)
+        #assert mu <10 and mu >9
+        #assert std <4 and std >3
+        return x,y_fit
     
 empty=empty_dict.copy()
 table_names=list(empty.keys())
