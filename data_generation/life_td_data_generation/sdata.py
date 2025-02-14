@@ -156,10 +156,10 @@ empty_dict_wit_columns = {
 empty_provider_tables_dict = {
     'sim': empty_dict.copy(),
     'sdb': empty_dict.copy(),
+    'wds': empty_dict.copy(),
     'exo': empty_dict.copy(),
     'life': empty_dict.copy(),
-    'gaia': empty_dict.copy(),
-    'wds': empty_dict.copy()
+    'gaia': empty_dict.copy()
 }                 
         
         
