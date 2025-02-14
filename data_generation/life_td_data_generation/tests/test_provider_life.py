@@ -95,6 +95,19 @@ def test_assign_teff():
     assert result['mod_Teff'][np.where(result['class_temp_nr']=='5.0')]==3060 #-> uses the ome from 5.5
     assert result['mod_Teff'][np.where(result['class_temp_nr']=='5.5')]==2930
     assert result['mod_Teff'][np.where(result['class_temp_nr']=='6.5')]==2740
+
+def test_spec():
+    main_id=np.array(['test','test2','test3','test4','test5'])
+    temp=np.array(['M','M','M','M','M'])
+    temp_nr=np.array(['0','3.5','5.5','6.5','4'])
+    lum=np.array(['V','V','V','V','V'])
+
+    cat=Table((main_id,temp,temp_nr,lum),names=('main_id','class_temp','class_temp_nr','class_lum'))
+    # somehow within 30 pc I have one element that has int in there
+    cat['class_temp_nr'][np.where(cat['class_temp_nr']=='0')]=int('0')
+    result=spec(cat)
+
+    assert result['mod_Teff'][np.where(result['class_temp_nr']=='6.5')]==2740
     
 
 

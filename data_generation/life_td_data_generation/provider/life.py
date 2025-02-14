@@ -154,7 +154,7 @@ def realspectype(cat):
     either '', 'nan' or start with an other letter than the main sequence
     spectral type classification.
 
-    :param cat: Table containing 'sim_sptype' column
+    :param cat: Table containing class_temp and class_lum column
     :type cat: astropy.table.table.Table
     :returns: Table, param cat with undesired rows removed
     :rtype: astropy.table.table.Table
@@ -191,7 +191,7 @@ def modeled_param():
                           f'{Path().additional_data}model_param.xml')#saving votable
     return EEM_table
 
-def match_sptype(cat,sptypestring='sim_sptype',teffstring='mod_Teff',\
+def match_sptype(cat,sptypestring='mp_specmatch',teffstring='mod_Teff',\
                  rstring='mod_R',mstring='mod_M'):
     """
     Assigns modeled parameter values.
@@ -255,7 +255,7 @@ def spec(cat):
     non unique simbad name.
 
     :param cat: astropy table containing columns named 
-        'sim_sptype','sim_name' and 'sim_otypes'
+        'main_id', class_temp_nr, class_temp and,class_lum 
     :type cat: astropy.table.table.Table
     :returns: Catalog of mainsequence stars with unique 
         simbad names, no binary subtypes and modeled parameters.
@@ -266,13 +266,14 @@ def spec(cat):
     cat=realspectype(cat)
     #model_param=io.votable.parse_single_table(\
         #f"catalogs/model_param.xml").to_table()
-    
+    cat=cat[np.where(cat['class_temp_nr']!=0)]
     cat['specmatch_temp_nr']=cat['class_temp_nr']
     for i,temp_nr in enumerate(cat['specmatch_temp_nr']):
+        print(temp_nr,type(temp_nr))
         if temp_nr[1:3]=='.0':
             cat['specmatch_temp_nr'][i]=temp_nr[0]      
     cat['mp_specmatch']=cat['class_temp']+cat['specmatch_temp_nr']+cat['class_lum']
-    cat=match_sptype(cat,sptypestring='mp_specmatch')
+    cat=match_sptype(cat)
     cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
     cat=unique(cat, keys='main_id')
