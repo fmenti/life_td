@@ -43,6 +43,7 @@ def load_life_td():
     provider_tables_dict=empty_provider_tables_dict.copy()
 
     for i,prov in enumerate(list(provider_tables_dict.keys())):
+        print(f'Loading {prov} data')
         cat = load_cat(prov)
 
     db = load_cat('')
@@ -66,6 +67,9 @@ def partial_create(distance_cut_in_pc,create=[]):
     :return: life_td data in different tables
     :rtype: list(astropy.table.table.Table)
     """
+
+    # to do: solve error: 
+    # ValueError: Unit 'MJup' not supported by the CDS standard. Did you mean Mjup, YMjup, ZMjup, yMjup or zMjup? same for 'ercent'
     with open(Path().data+'distance_cut.txt', 'w') as f:  
 	# Write the floating point number to the file  
     	f.write(str(distance_cut_in_pc))
@@ -90,6 +94,7 @@ def partial_create(distance_cut_in_pc,create=[]):
             else:
                 cat=functions[i]()
         else:
+            print(f'Loading {prov} data')
             cat = load_cat(prov)
         provider_tables_dict[prov]=string_to_object_whole_dict(cat)
     

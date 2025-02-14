@@ -26,3 +26,7 @@ def test_load_cat():
         if len(dictionary[tablename])>0:#change to more once this works
             for columnname in dictionary[tablename].colnames:
                 assert len(setdiff(dictionary[tablename],loaded_dict[tablename])) == 0
+
+# def test_partial_create():
+#     partial_create(distance_cut_in_pc,create=[])
+#     assert

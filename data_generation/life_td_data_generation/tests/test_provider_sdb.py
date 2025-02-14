@@ -1,7 +1,9 @@
 from provider.sdb import *
 from astropy.table import Table
 from astropy import io
+#import pytest
 
+#@pytest.mark.dependency(depends=["test_fetch_main_id"])
 def test_create_sdb_helpertable():
     distance_cut_in_pc = 5.
     data=io.votable.parse_single_table(
