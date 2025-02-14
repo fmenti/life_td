@@ -269,7 +269,6 @@ def spec(cat):
     cat=cat[np.where(cat['class_temp_nr']!=0)]
     cat['specmatch_temp_nr']=cat['class_temp_nr']
     for i,temp_nr in enumerate(cat['specmatch_temp_nr']):
-        print(temp_nr,type(temp_nr))
         if temp_nr[1:3]=='.0':
             cat['specmatch_temp_nr'][i]=temp_nr[0]      
     cat['mp_specmatch']=cat['class_temp']+cat['specmatch_temp_nr']+cat['class_lum']

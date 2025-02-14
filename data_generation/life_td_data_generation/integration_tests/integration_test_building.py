@@ -192,7 +192,7 @@ def test_data_makes_sense_mag_k():
     
     mu = norm_fit(data,'mag_k_value')
 
-    assert mu <11 and mu > 7
+    assert mu <11 and mu > 7#failed at 5pc
 
 def test_data_makes_sense_plx():
     #data
