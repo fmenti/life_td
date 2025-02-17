@@ -1,4 +1,4 @@
-from provider.exo2 import *
+from provider.exo import *
 from astropy.table import Table,join,setdiff
 from sdata import empty_dict
 import numpy as np

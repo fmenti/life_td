@@ -1,4 +1,4 @@
-from provider.exo2 import *
+from provider.exo import *
 from utils.io import load
 from astropy.table import setdiff
 from provider.utils import query
