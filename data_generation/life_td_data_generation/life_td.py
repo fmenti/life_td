@@ -9,7 +9,7 @@ from astropy import io
 #self created modules
 from sdata import empty_dict, empty_provider_tables_dict, table_names
 from utils.io import stringtoobject, load, Path, string_to_object_whole_dict
-from provider.exo2 import provider_exo
+from provider.exo import provider_exo
 from provider.gaia import provider_gaia
 from provider.life import provider_life
 from provider.sdb import provider_sdb
