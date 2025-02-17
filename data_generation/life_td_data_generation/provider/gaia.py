@@ -35,7 +35,8 @@ def create_gaia_helpertable(distance_cut_in_pc):
     #query
     adql_query="""
     SELECT s.source_id ,p.mass_flame, p.radius_flame,
-        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame
+        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame,
+        p.teff_gspspec_lower, p.teff_gspspec_upper, p.flags_gspspec
     FROM gaiadr3.gaia_source as s
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
@@ -143,6 +144,25 @@ def create_mes_binary_table(gaia):
     #if necessary lower binary_qual for binary_flag = False to level of simbad.
     return gaia_mes_binary
 
+def assign_quality(gaia_mes_teff_st_spec):
+    interval=41*9/5
+    for i,flag in enumerate(gaia_mes_teff_st_spec['flags_gspspec']):
+        #is it string or int? string
+        summed=0
+        for i in flag:
+            summed +=int(i)
+        if summed in [0:int(interval)+1]:
+            gaia_mes_teff_st_spec['teff_st_qual'][i]='A'
+        elif summed in [int(interval)+1:int(interval*2)+1]:
+            gaia_mes_teff_st_spec['teff_st_qual'][i]='B'
+        elif summed in [int(interval*2)+1:int(interval*3)+1]:
+            gaia_mes_teff_st_spec['teff_st_qual'][i]='C'
+        elif summed in [int(interval*3)+1:int(interval*4)+1]:
+            gaia_mes_teff_st_spec['teff_st_qual'][i]='D'
+        elif summed in [int(interval*4)+1:int(interval*5)+1]:
+            gaia_mes_teff_st_spec['teff_st_qual'][i]='E'
+    return gaia_mes_teff_st_spec
+
 def create_mes_teff_st_table(gaia_helptab,gaia): 
     """
     Creates stellar effective temperature table.
@@ -161,15 +181,16 @@ def create_mes_teff_st_table(gaia_helptab,gaia):
     #remove masked rows
     gaia_mes_teff_st.remove_rows(gaia_mes_teff_st['teff_gspphot'].mask.nonzero()[0])
     gaia_mes_teff_st.rename_columns(['teff_gspphot','ref'],['teff_st_value','teff_st_ref'])
-    
-    temp=gaia_helptab['main_id','teff_gspspec']
-    temp['ref']=[gaia_helptab['ref'][j]+ ' GSP-Spec'
-                for j in range(len(gaia_helptab))]
-    temp.remove_rows(temp['teff_gspspec'].mask.nonzero()[0])
-    temp.rename_columns(['teff_gspspec','ref'],['teff_st_value','teff_st_ref'])
-    
-    gaia_mes_teff_st=vstack([gaia_mes_teff_st,temp])
     gaia_mes_teff_st['teff_st_qual']=['B' for j in range(len(gaia_mes_teff_st))]
+    
+    gaia_mes_teff_st_spec=gaia_helptab['main_id','teff_gspspec','flags_gspspec']
+    gaia_mes_teff_st_spec['ref']=[gaia_helptab['ref'][j]+ ' GSP-Spec'
+                for j in range(len(gaia_helptab))]
+    gaia_mes_teff_st_spec.remove_rows(gaia_mes_teff_st_spec['teff_gspspec'].mask.nonzero()[0])
+    gaia_mes_teff_st_spec=assign_quality(gaia_mes_teff_st_spec)
+    gaia_mes_teff_st_spec.rename_columns(['teff_gspspec','ref'],['teff_st_value','teff_st_ref'])
+    
+    gaia_mes_teff_st=vstack([gaia_mes_teff_st,gaia_mes_teff_st_spec])
     gaia_mes_teff_st=gaia_mes_teff_st['main_id','teff_st_value',
                                       'teff_st_qual','teff_st_ref']
     return gaia_mes_teff_st
