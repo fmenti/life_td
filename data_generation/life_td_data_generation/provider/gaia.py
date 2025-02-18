@@ -5,11 +5,10 @@ Generates the data for the database for the provider gaia.
 import numpy as np #arrays
 from pyvo.dal import TAPService
 from astropy.table import Table, vstack, setdiff, join
-from datetime import datetime
 
 #self created modules
 from utils.io import save
-from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, ids_from_ident, replace_value, create_provider_table, query
+from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, ids_from_ident, replace_value, create_provider_table, query
 from sdata import empty_dict
 
 def create_gaia_helpertable(distance_cut_in_pc):
@@ -58,14 +57,12 @@ def create_gaia_helpertable(distance_cut_in_pc):
     gaia_helptab['ref']=['2022arXiv220800211G' for j in range(len(gaia_helptab))]
     return gaia_helptab, gaia
 
-def create_ident_table(gaia_helptab,gaia):  
+def create_ident_table(gaia_helptab):
     """
     Creates identifier table.
     
     :param gaia_helptab: Gaia helper table.
     :type gaia_helptab: astropy.table.table.Table
-    :param gaia: Dictionary of database table names and tables.
-    :type gaia: dict(str,astropy.table.table.Table)
     :returns: Identifier table and gaia helper table.
     :rtype: astropy.table.table.Table, astropy.table.table.Table
     """
@@ -133,7 +130,7 @@ def create_mes_binary_table(gaia):
     """
     gaia_mes_binary=gaia['objects']['main_id','type']
     # tbd add binary flag True to children of system objects once I get h_link 
-    # info from gaia')
+    # info from gaia
     gaia_mes_binary.rename_column('type','binary_flag')
     gaia_mes_binary['binary_flag']=gaia_mes_binary['binary_flag'].astype(object)
     gaia_mes_binary=replace_value(gaia_mes_binary,'binary_flag','sy','True')
@@ -163,14 +160,12 @@ def assign_quality(gaia_mes_teff_st_spec):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='E'
     return gaia_mes_teff_st_spec
 
-def create_mes_teff_st_table(gaia_helptab,gaia): 
+def create_mes_teff_st_table(gaia_helptab):
     """
     Creates stellar effective temperature table.
     
     :param gaia_helptab: Gaia helper table.
     :type gaia_helptab: astropy.table.table.Table
-    :param gaia: Dictionary of database table names and tables.
-    :type gaia: dict(str,astropy.table.table.Table)
     :returns: Stellar effective temperature table.
     :rtype: astropy.table.table.Table
     """
@@ -195,14 +190,12 @@ def create_mes_teff_st_table(gaia_helptab,gaia):
                                       'teff_st_qual','teff_st_ref']
     return gaia_mes_teff_st
 
-def create_mes_radius_st_table(gaia_helptab,gaia):  
+def create_mes_radius_st_table(gaia_helptab):
     """
     Creates stellar radius table.
     
     :param gaia_helptab: Gaia helper table.
     :type gaia_helptab: astropy.table.table.Table
-    :param gaia: Dictionary of database table names and tables.
-    :type gaia: dict(str,astropy.table.table.Table)
     :returns: Stellar radius table.
     :rtype: astropy.table.table.Table
     """
@@ -214,14 +207,12 @@ def create_mes_radius_st_table(gaia_helptab,gaia):
     gaia_mes_radius_st.remove_column('ref')
     return gaia_mes_radius_st
 
-def create_mes_mass_st_table(gaia_helptab,gaia):
+def create_mes_mass_st_table(gaia_helptab):
     """
     Creates stellar mass table.
     
     :param gaia_helptab: Gaia helper table.
     :type gaia_helptab: astropy.table.table.Table
-    :param gaia: Dictionary of database table names and tables.
-    :type gaia: dict(str,astropy.table.table.Table)
     :returns: Stellar masse table.
     :rtype: astropy.table.table.Table
     """
@@ -263,12 +254,12 @@ def provider_gaia(distance_cut_in_pc):
     """
     
     gaia_helptab, gaia=create_gaia_helpertable(distance_cut_in_pc)
-    gaia['ident'],gaia_helptab=create_ident_table(gaia_helptab,gaia)  
+    gaia['ident'],gaia_helptab=create_ident_table(gaia_helptab)
     gaia['objects']=create_objects_table(gaia_helptab,gaia)    
     gaia['mes_binary']=create_mes_binary_table(gaia)
-    gaia['mes_teff_st']=create_mes_teff_st_table(gaia_helptab,gaia)
-    gaia['mes_radius_st']=create_mes_radius_st_table(gaia_helptab,gaia)
-    gaia['mes_mass_st']=create_mes_mass_st_table(gaia_helptab,gaia)
+    gaia['mes_teff_st']=create_mes_teff_st_table(gaia_helptab)
+    gaia['mes_radius_st']=create_mes_radius_st_table(gaia_helptab)
+    gaia['mes_mass_st']=create_mes_mass_st_table(gaia_helptab)
     gaia['sources']=create_gaia_sources_table(gaia)
 
     save(list(gaia.values()),['gaia_'+ element for element in list(gaia.keys())])

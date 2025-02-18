@@ -1,6 +1,5 @@
 from provider.gaia import *
 from astropy.table import Table
-import numpy as np
 
 def test_assign_quality():
     gaia_mes_teff_st_spec = Table(data=[

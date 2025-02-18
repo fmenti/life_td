@@ -4,13 +4,12 @@ Distance cut is performed by joining on life_db simbad objects.
 """
 
 import numpy as np #arrays
-from astropy import io
+from astropy.io import ascii
 from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique, vstack
-from datetime import datetime
 
 #self created modules
 from utils.io import save, load, Path, stringtoobject
-from provider.utils import fetch_main_id, IdentifierCreator, fill_sources_table, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table, nullvalues, replace_value, lower_quality
+from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, query, distance_cut, ids_from_ident, create_provider_table, nullvalues, replace_value, lower_quality
 from sdata import empty_dict
 
 def query_or_load_exomercat():
@@ -36,7 +35,7 @@ def query_or_load_exomercat():
         exo['provider'] = create_provider_table('Exo-MerCat',
                                         "http://archives.ia2.inaf.it/vo/tap/projects",
                                         '2020A&C....3100370A','2024-12-13')        
-        exo_helptab=io.ascii.read(
+        exo_helptab=ascii.read(
                 Path().additional_data+"exo-mercat13-12-2024_v2.0.csv")
         exo_helptab=stringtoobject(exo_helptab,3000)
         exo['provider']['provider_access']=['2024-12-13']
@@ -98,10 +97,6 @@ def create_exo_helpertable():
                              #host_main_id just present to create table in contrast to column
                              IdentifierCreator(name='sim_planet_main_id',colname='planet_main_id'))
 
-    
-    notinsimbad=exo_helptab['planet_main_id'][np.where(np.isin(
-            exo_helptab['planet_main_id'],exo_helptab2['planet_main_id'],
-            invert=True))]
     #I use a left join as otherwise I would loose some objects that are not in simbad
     exo_helptab=join(exo_helptab,
                             exo_helptab2['sim_planet_main_id','planet_main_id'],
