@@ -145,22 +145,21 @@ def create_mes_binary_table(gaia):
     return gaia_mes_binary
 
 def assign_quality(gaia_mes_teff_st_spec):
-    interval=41*9/5
+    interval=41*9/5.
     gaia_mes_teff_st_spec['teff_st_qual']=['?' for j in range(len(gaia_mes_teff_st_spec))]
     for i,flag in enumerate(gaia_mes_teff_st_spec['flags_gspspec']):
-        #is it string or int? string
         summed=0
-        for i in flag:
-            summed +=int(i)
-        if summed in [0:int(interval)+1]:
+        for j in flag:
+            summed +=int(j)
+        if summed in range(0,int(interval)+1):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='A'
-        elif summed in [int(interval)+1:int(interval*2)+1]:
+        elif summed in range(int(interval)+1,int(interval*2)+1):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='B'
-        elif summed in [int(interval*2)+1:int(interval*3)+1]:
+        elif summed in range(int(interval*2)+1,int(interval*3)+1):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='C'
-        elif summed in [int(interval*3)+1:int(interval*4)+1]:
+        elif summed in range(int(interval*3)+1,int(interval*4)+1):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='D'
-        elif summed in [int(interval*4)+1:int(interval*5)+1]:
+        elif summed in range(int(interval*4)+1,int(interval*5)+1):
             gaia_mes_teff_st_spec['teff_st_qual'][i]='E'
     return gaia_mes_teff_st_spec
 
