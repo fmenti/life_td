@@ -4,12 +4,12 @@ Generates the data for the database for the provider LIFE.
 
 import numpy as np #arrays
 from astropy import units, io, coordinates
-from astropy.table import Table, unique, join, MaskedColumn, Column
-from datetime import datetime
+from astropy.io import ascii
+from astropy.table import unique, join, MaskedColumn, Column
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import fill_sources_table, create_sources_table, replace_value, create_provider_table
+from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns
 from sdata import empty_dict
 
 
@@ -89,62 +89,68 @@ def deal_with_middle_minus(table,index):
             table['sptype_string'][index]=''.join(sp_type)    
     return table
 
-def sptype_string_to_class(temp,ref):
+def decimal_sptype(i, sptype, table):
+    table['class_temp_nr'][i] = sptype[1:4]
+    if len(sptype) > 4 and sptype[4] in ['I', 'V']:
+        table['class_lum'][i] = lum_class(4, sptype)
+    else:
+        assign_lum_class_V(table, i)  # assumption
+    return table
+
+def assign_diff_lum_classes(i, sptype, table):
+    if len(sptype) > 1 and sptype[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        table['class_temp_nr'][i] = sptype[1]
+        #distinguishing between objects like K5V and K5.5V
+        if len(sptype) > 2 and sptype[2] == '.':
+            table = decimal_sptype(i, sptype, table)
+        elif len(sptype) > 2 and sptype[2] in ['I', 'V']:
+            table['class_lum'][i] = lum_class(2, sptype)
+        else:
+            assign_lum_class_V(table, i)  # assumption
+    else:
+        assign_lum_class_V(table, i)  # assumption
+    return table
+
+def sptype_string_to_class(table, ref):
     """
     Extracts stellar parameters from spectral type string one.
 
     This function extracts the temperature class, temperature class number
-    and luminocity class information from the spectral type string (e.g. 
+    and luminocity class information from the spectral type string (e.g.
     M5V to M, 5 and V). It stores that information in the for this purpose
     generated new columns. Only objects of temperature class O, B, A, F,
     G, K, and M are processed. Only objects of luminocity class IV, V and VI
     are processed.
 
-    :param temp: Table containing spectral type information in
+    :param table: Table containing spectral type information in
         the column sptype_string.
-    :type temp: astropy.table.table.Table
+    :type table: astropy.table.table.Table
     :param str ref: Designates origin of data.
     :returns: Table like temp with additional columns class_temp,
         class_temp_nr, class_lum and class_ref.
     :rtype: astropy.table.table.Table
     """
 
-    temp['class_temp']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_temp_nr']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_lum']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_ref']=MaskedColumn(dtype=object,length=len(temp))
+    table = initiate_columns(table,['class_temp','class_temp_nr','class_lum','class_ref'],
+                 [object,object,object,object],[True,True,True,True])
 
-    for i in range(len(temp)):
+    for i in range(len(table)):
         #sorting out objects like M5V+K7V
-        temp=deal_with_leading_d_sptype(temp,i)
-        temp=deal_with_middle_minus(temp,i)
-        sptype=temp['sptype_string'][i]
+        table=deal_with_leading_d_sptype(table, i)
+        table=deal_with_middle_minus(table, i)
+        sptype=table['sptype_string'][i]
         if (len(sptype.split('+'))==1 and
                 #sorting out entries like ''
-                len(sptype)>0 and 
+                len(sptype)>0 and
                 # sorting out brown dwarfs i.e. T1V
                 sptype[0] in ['O','B','A','F','G','K','M']):
             #assigning temperature class and reference
-            temp['class_temp'][i]=sptype[0]
-            temp['class_ref'][i]=ref
-            if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
-                temp['class_temp_nr'][i]=sptype[1]
-                #distinguishing between objects like K5V and K5.5V
-                if len(sptype)>2 and sptype[2]=='.':
-                    temp['class_temp_nr'][i]=sptype[1:4]
-                    if len(sptype)>4 and sptype[4] in ['I','V']:
-                        temp['class_lum'][i]=lum_class(4,sptype)
-                    else:
-                        assign_lum_class_V(temp,i) # assumption
-                elif len(sptype)>2 and sptype[2] in ['I','V']:
-                    temp['class_lum'][i]=lum_class(2,sptype)
-                else:
-                    assign_lum_class_V(temp,i) # assumption
-            else:
-                assign_lum_class_V(temp,i) # assumption
+            table['class_temp'][i]=sptype[0]
+            table['class_ref'][i]=ref
+            table = assign_diff_lum_classes(i, sptype, table)
         else:
-            assign_null_values(temp,i)
-    return temp
+            assign_null_values(table, i)
+    return table
 
 def realspectype(cat):
     """
@@ -179,7 +185,7 @@ def modeled_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=io.ascii.read(Path().additional_data+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
+    EEM_table=ascii.read(Path().additional_data+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
     EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
     EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
     EEM_table=replace_value(EEM_table,'Mass',' ...','nan')

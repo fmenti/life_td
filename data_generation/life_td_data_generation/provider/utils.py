@@ -4,13 +4,20 @@ Generates the data for the database for each of the data providers separately.
 
 import numpy as np #arrays
 from pyvo.dal import TAPService
-from astropy.table import Table, column, unique, vstack, join, table
+from astropy.table import Table, column, unique, vstack, join, table, MaskedColumn, Column
 from datetime import datetime
 from typing import List
 
 #self created modules
 from utils.io import load
 
+def initiate_columns(table,columns,types,maskc):
+    for i in range(len(columns)):
+        if maskc[i]:
+            table[columns[i]] = MaskedColumn(dtype=types[i], length=len(table))
+        else:
+            table[columns[i]] = Column(dtype=types[i], length=len(table))
+    return table
 
 def create_provider_table(provider_name,provider_url,provider_bibcode,provider_access = datetime.now().strftime('%Y-%m-%d')):
     print(f'Trying to create {provider_name} tables from {provider_access}...')
@@ -49,7 +56,7 @@ def query(link: str,adql_query: str,upload_tables: List[table.Table]=[]) -> tabl
                                    maxrec=1600000)   
     return result.to_table()
 
-def remove_catalog_description(cat: table.Table) -> table.Table: 
+def remove_catalog_description(cat: table.Table,no_description) -> table.Table:
     """
     Removes description meta data of catalog columns.
     
