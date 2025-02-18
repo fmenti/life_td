@@ -146,6 +146,7 @@ def create_mes_binary_table(gaia):
 
 def assign_quality(gaia_mes_teff_st_spec):
     interval=41*9/5
+    gaia_mes_teff_st_spec['teff_st_qual']=['?' for j in range(len(gaia_mes_teff_st_spec))]
     for i,flag in enumerate(gaia_mes_teff_st_spec['flags_gspspec']):
         #is it string or int? string
         summed=0
