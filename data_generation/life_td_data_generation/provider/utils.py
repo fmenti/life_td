@@ -2,7 +2,7 @@
 Generates the data for the database for each of the data providers separately. 
 """
 
-import numpy as np #arrays
+import numpy as np  #arrays
 from pyvo.dal import TAPService
 from astropy.table import Table, column, unique, vstack, join, table, MaskedColumn, Column
 from datetime import datetime
@@ -11,7 +11,8 @@ from typing import List
 #self created modules
 from utils.io import load
 
-def initiate_columns(table,columns,types,maskc):
+
+def initiate_columns(table, columns, types, maskc):
     for i in range(len(columns)):
         if maskc[i]:
             table[columns[i]] = MaskedColumn(dtype=types[i], length=len(table))
@@ -19,16 +20,19 @@ def initiate_columns(table,columns,types,maskc):
             table[columns[i]] = Column(dtype=types[i], length=len(table))
     return table
 
-def create_provider_table(provider_name,provider_url,provider_bibcode,provider_access = datetime.now().strftime('%Y-%m-%d')):
+
+def create_provider_table(provider_name, provider_url, provider_bibcode,
+                          provider_access=datetime.now().strftime('%Y-%m-%d')):
     print(f'Trying to create {provider_name} tables from {provider_access}...')
     provider_table = Table()
-    provider_table['provider_name']=[provider_name]
-    provider_table['provider_url']=[provider_url]
-    provider_table['provider_bibcode']=[provider_bibcode]
-    provider_table['provider_access']=[provider_access]
+    provider_table['provider_name'] = [provider_name]
+    provider_table['provider_url'] = [provider_url]
+    provider_table['provider_bibcode'] = [provider_bibcode]
+    provider_table['provider_access'] = [provider_access]
     return provider_table
-    
-def query(link: str,adql_query: str,upload_tables: List[table.Table]=[]) -> table.Table:
+
+
+def query(link: str, adql_query: str, upload_tables: List[table.Table] = []) -> table.Table:
     """
     Performs a query via TAP on the service given in the link parameter.
     
@@ -44,19 +48,20 @@ def query(link: str,adql_query: str,upload_tables: List[table.Table]=[]) -> tabl
     :returns: Result of the query.
     :rtype: astropy.table.table.Table
     """
-    
+
     service = TAPService(link)
-    if upload_tables==[]:
-        result=service.run_async(adql_query.format(**locals()), maxrec=1600000)
+    if upload_tables == []:
+        result = service.run_async(adql_query.format(**locals()), maxrec=1600000)
     else:
-        tables={}
+        tables = {}
         for i in range(len(upload_tables)):
-            tables.update({f"t{i+1}":upload_tables[i]})
-        result = service.run_async(adql_query,uploads=tables,timeout=None,
-                                   maxrec=1600000)   
+            tables.update({f"t{i + 1}": upload_tables[i]})
+        result = service.run_async(adql_query, uploads=tables, timeout=None,
+                                   maxrec=1600000)
     return result.to_table()
 
-def remove_catalog_description(cat: table.Table,no_description) -> table.Table:
+
+def remove_catalog_description(cat: table.Table, no_description) -> table.Table:
     """
     Removes description meta data of catalog columns.
     
@@ -68,13 +73,15 @@ def remove_catalog_description(cat: table.Table,no_description) -> table.Table:
     :returns: Catalog with no description of columns.
     :rtype: astropy.table.table.Table
     """
-    
+
     for col in cat.colnames:
         if no_description:
-            cat[col].description=''     
+            cat[col].description = ''
     return cat
 
-def fill_sources_table(cat: table.Table,ref_columns: List[str],provider: str,old_sources: table.Table=Table()) -> table.Table:
+
+def fill_sources_table(cat: table.Table, ref_columns: List[str], provider: str,
+                       old_sources: table.Table = Table()) -> table.Table:
     """
     Creates or updates the source table out of the given references.
     
@@ -92,73 +99,79 @@ def fill_sources_table(cat: table.Table,ref_columns: List[str],provider: str,old
     :return: Table containing references and provider information.
     :rtype: astropy.table.table.Table
     """
-    
-    if len(cat)>0:
+
+    if len(cat) > 0:
         # table initialization to prevent error messages when assigning 
         # columns
-        cat_sources=Table() 
+        cat_sources = Table()
         #initialization of list to store reference information
-        cat_reflist=[] 
+        cat_reflist = []
         #for all the columns given add reference information 
         for k in range(len(ref_columns)):
             #In case the column has elements that are masked skip those
-            if type(cat[ref_columns[k]])==column.MaskedColumn:
+            if type(cat[ref_columns[k]]) == column.MaskedColumn:
                 cat_reflist.extend(
                     cat[ref_columns[k]][np.where(
-                            cat[ref_columns[k]].mask==False)])
+                        cat[ref_columns[k]].mask == False)])
             else:
                 cat_reflist.extend(cat[ref_columns[k]])
         # add list of collected references to the table and call the 
         # column ref
-        cat_sources['ref']=cat_reflist
-        cat_sources=unique(cat_sources)
+        cat_sources['ref'] = cat_reflist
+        cat_sources = unique(cat_sources)
         #attaches service information
-        cat_sources['provider_name']=[provider for j in range(
-                len(cat_sources))]
+        cat_sources['provider_name'] = [provider for j in range(
+            len(cat_sources))]
         #combine old and new sources into one table
-        sources=vstack([old_sources,cat_sources])
-        sources=unique(sources) #remove double entries
+        sources = vstack([old_sources, cat_sources])
+        sources = unique(sources)  #remove double entries
     else:
-        sources=old_sources
+        sources = old_sources
     return sources
 
-def create_sources_table(tables,ref_columns,provider_name):
+
+def create_sources_table(tables, ref_columns, provider_name):
     #--------------creating output table sim_sources -------------------
-    sources=Table()
-    for cat,ref in zip(tables,ref_columns):
-        sources=fill_sources_table(cat,ref,provider_name,sources)
+    sources = Table()
+    for cat, ref in zip(tables, ref_columns):
+        sources = fill_sources_table(cat, ref, provider_name, sources)
     return sources
+
 
 class OidCreator:
     """
     Create adql query for fetch_main_id function using oid column.
     """
-    def __init__(self,name,colname):
-        self.name=name
-        self.colname=colname
-        
+
+    def __init__(self, name, colname):
+        self.name = name
+        self.colname = colname
+
     def create_main_id_query(self):
-        return 'SELECT b.main_id AS '+self.name+""",t1.*
+        return 'SELECT b.main_id AS ' + self.name + """,t1.*
                 FROM basic AS b
-                JOIN TAP_UPLOAD.t1 ON b.oid=t1."""+self.colname
-    
+                JOIN TAP_UPLOAD.t1 ON b.oid=t1.""" + self.colname
+
+
 class IdentifierCreator:
     """
     Create adql query for fetch_main_id function using identifier column.
     """
-    def __init__(self,name,colname):
-        self.name=name
-        self.colname=colname
-        
+
+    def __init__(self, name, colname):
+        self.name = name
+        self.colname = colname
+
     def create_main_id_query(self):
-        return 'SELECT b.main_id AS '+self.name+""",t1.*
+        return 'SELECT b.main_id AS ' + self.name + """,t1.*
                     FROM basic AS b
                     JOIN ident ON ident.oidref=b.oid
-                        JOIN TAP_UPLOAD.t1 ON ident.id=t1."""+self.colname
-    
+                        JOIN TAP_UPLOAD.t1 ON ident.id=t1.""" + self.colname
+
+
 #looks better but don't think this will run. issue is that I pass variables to a class that doesn't take any
 
-def fetch_main_id(cat: table.Table, id_creator=OidCreator(name='main_id',colname='oid')) -> table.Table:
+def fetch_main_id(cat: table.Table, id_creator=OidCreator(name='main_id', colname='oid')) -> table.Table:
     """
     Joins main_id from simbad to the column colname. 
     
@@ -172,17 +185,18 @@ def fetch_main_id(cat: table.Table, id_creator=OidCreator(name='main_id',colname
         in column "name".
     :rtype: astropy.table.table.Table
     """
-    
+
     #improvement idea to be performed at one point
     # tbd option to match on position instead of main_id or oid
     #SIMBAD TAP service
-    TAP_service="http://simbad.u-strasbg.fr:80/simbad/sim-tap"    
+    TAP_service = "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
     #performing query using external function
-    main_id_query=id_creator.create_main_id_query()
-    cat=query(TAP_service,main_id_query,[cat])
+    main_id_query = id_creator.create_main_id_query()
+    cat = query(TAP_service, main_id_query, [cat])
     return cat
 
-def distance_cut(cat: table.Table, colname: str, main_id: bool=True):
+
+def distance_cut(cat: table.Table, colname: str, main_id: bool = True):
     """
     Sorts out objects not within the provider_simbad distance cut. 
     
@@ -193,22 +207,23 @@ def distance_cut(cat: table.Table, colname: str, main_id: bool=True):
         sim_objects.
     :rtype: astropy.table.table.Table
     """
-    
+
     if main_id:
-        [sim]=load(['sim_objects'])
-        sim.rename_columns(['main_id','ids'],['temp1','temp2'])
-        cat=join(cat,sim['temp1','temp2'],
-                      keys_left=colname,keys_right='temp1')
-        cat.remove_columns(['temp1','temp2'])
+        [sim] = load(['sim_objects'])
+        sim.rename_columns(['main_id', 'ids'], ['temp1', 'temp2'])
+        cat = join(cat, sim['temp1', 'temp2'],
+                   keys_left=colname, keys_right='temp1')
+        cat.remove_columns(['temp1', 'temp2'])
     else:
-        [sim]=load(['sim_ident'])
-        sim.rename_columns(['id'],['temp1'])
-        cat=join(cat,sim['temp1','main_id'],
-                      keys_left=colname,keys_right='temp1')
+        [sim] = load(['sim_ident'])
+        sim.rename_columns(['id'], ['temp1'])
+        cat = join(cat, sim['temp1', 'main_id'],
+                   keys_left=colname, keys_right='temp1')
         cat.remove_columns(['temp1'])
     return cat
 
-def nullvalues(cat,colname,nullvalue,verbose=False):
+
+def nullvalues(cat, colname, nullvalue, verbose=False):
     """
     This function fills masked entries of specified column. 
     
@@ -224,15 +239,16 @@ def nullvalues(cat,colname,nullvalue,verbose=False):
         by nullvalue.
     :rtype: astropy.table.table.Table
     """
-    
-    if type(cat[colname])==column.MaskedColumn:
-                cat[colname].fill_value=nullvalue
-                cat[colname]=cat[colname].filled()
+
+    if type(cat[colname]) == column.MaskedColumn:
+        cat[colname].fill_value = nullvalue
+        cat[colname] = cat[colname].filled()
     elif verbose:
-        print(colname,'is no masked column')
+        print(colname, 'is no masked column')
     return cat
 
-def replace_value(cat,column,value,replace_by):
+
+def replace_value(cat, column, value, replace_by):
     """
     This function replaces values.
     
@@ -247,13 +263,14 @@ def replace_value(cat,column,value,replace_by):
     :return: Table with replaced entries.
     :rtype: astropy.table.table.Table
     """
-    
-    cat[column][np.where(cat[column]==value)]= \
-            [replace_by for i in range(
-        len(cat[column][np.where(cat[column]==value)]))]
+
+    cat[column][np.where(cat[column] == value)] = \
+        [replace_by for i in range(
+            len(cat[column][np.where(cat[column] == value)]))]
     return cat
 
-def ids_from_ident(ident,objects):
+
+def ids_from_ident(ident, objects):
     """
     Concatenates identifier entries of same main_id object.
     
@@ -268,17 +285,18 @@ def ids_from_ident(ident,objects):
     :returns: Filled out table objects.
     :rtype: astropy.table.table.Table
     """
-    
-    grouped_ident=ident.group_by('main_id')
-    ind=grouped_ident.groups.indices
-    for i in range(len(ind)-1):
-    # -1 is needed because else ind[i+1] is out of bonds
-        ids=[]
-        for j in range(ind[i],ind[i+1]):
+
+    grouped_ident = ident.group_by('main_id')
+    ind = grouped_ident.groups.indices
+    for i in range(len(ind) - 1):
+        # -1 is needed because else ind[i+1] is out of bonds
+        ids = []
+        for j in range(ind[i], ind[i + 1]):
             ids.append(grouped_ident['id'][j])
-        ids="|".join(ids)
-        objects.add_row([grouped_ident['main_id'][ind[i]],ids])
+        ids = "|".join(ids)
+        objects.add_row([grouped_ident['main_id'][ind[i]], ids])
     return objects
+
 
 def lower_quality(qual):
     if qual == 'A':
