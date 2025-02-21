@@ -3,8 +3,8 @@ Generates the data for the database for the provider LIFE.
 """
 
 import numpy as np  #arrays
-from astropy import units, io, coordinates
-from astropy.io import ascii
+from astropy import units, coordinates
+from astropy.io import ascii, votable
 from astropy.table import unique, join, MaskedColumn, Column
 
 #self created modules
@@ -29,18 +29,6 @@ def extract_lum_class(nr, sptype):
         if len(sptype) > nr + 2 and sptype[nr + 2] in ['I', 'V']:
             lum_class = sptype[nr:nr + 3]
     return lum_class
-
-
-def assign_lum_class_v(table, index):
-    """
-    Assignes luminocity class 'V' to specified entry of table.
-    
-    :param table: Table containing column 'class_lum'.
-    :type table: astropy.table.table.Table
-    :param int index: Index of entry.
-    """
-    table['class_lum'][index] = 'V'
-    return
 
 
 def assign_null_values(table, index):
@@ -69,28 +57,27 @@ def deal_with_leading_d_sptype(table, index):
     :returns: Entry with leading d removed.
     :rtype: str
     """
-    if len(table['sptype_string'][index]) > 0:
-        if table['sptype_string'][index][0] == 'd':
-            assign_lum_class_v(table, index)
-            table['sptype_string'][index] = table['sptype_string'][index].strip('d')
-    return table
+    sptype = table['sptype_string'][index]
+    if len(sptype) > 0:
+        if sptype[0] == 'd':
+            table['class_lum'][index] = 'V'
+            sptype = sptype.strip('d')
+    return sptype
 
 
-def deal_with_middle_minus(table, index):
+def deal_with_middle_minus(sptype_string):
     """
-    Deals with old annotation of leading d in spectraltype representing dwarf star.
+    Removes intermediate minus sign from sptype_string.
     
-    :param table: Table containing column 'sptype_string'.
-    :type table: astropy.table.table.Table
-    :param int index: Index of entry.  
+    :param str sptype_string:
     :returns: Entry with middle - removed.
     :rtype: str
     """
-    if len(table['sptype_string'][index]) > 0:
-        sp_type = table['sptype_string'][index].split('-')
+    if len(sptype_string) > 0:
+        sp_type = sptype_string.split('-')
         if len(sp_type) > 1:
-            table['sptype_string'][index] = ''.join(sp_type)
-    return table['sptype_string'][index]
+            sptype_string = ''.join(sp_type)
+    return sptype_string
 
 
 def decimal_sptype(i, sptype, table):
@@ -98,7 +85,7 @@ def decimal_sptype(i, sptype, table):
     if len(sptype) > 4 and sptype[4] in ['I', 'V']:
         table['class_lum'][i] = extract_lum_class(4, sptype)
     else:
-        assign_lum_class_v(table, i)  # assumption
+        table['class_lum'][i] = 'V' # assumption
     return table
 
 
@@ -111,9 +98,9 @@ def assign_diff_lum_classes(i, sptype, table):
         elif len(sptype) > 2 and sptype[2] in ['I', 'V']:
             table['class_lum'][i] = extract_lum_class(2, sptype)
         else:
-            assign_lum_class_v(table, i)  # assumption
+            table['class_lum'][i] = 'V' # assumption
     else:
-        assign_lum_class_v(table, i)  # assumption
+        table['class_lum'][i] = 'V'  # assumption
     return table
 
 
@@ -142,9 +129,9 @@ def sptype_string_to_class(table, ref):
 
     for i in range(len(table)):
         #sorting out objects like M5V+K7V
-        table['sptype_string'][i] = deal_with_leading_d_sptype(table, i)
-        table = deal_with_middle_minus(table, i)
-        sptype = table['sptype_string'][i]
+        sptype = deal_with_leading_d_sptype(table, i)
+        sptype = deal_with_middle_minus(sptype)
+
         if (len(sptype.split('+')) == 1 and
                 #sorting out entries like ''
                 len(sptype) > 0 and
@@ -156,6 +143,7 @@ def sptype_string_to_class(table, ref):
             table = assign_diff_lum_classes(i, sptype, table)
         else:
             table = assign_null_values(table, i)
+        table['sptype_string'][i] =sptype
     return table
 
 
@@ -202,7 +190,7 @@ def modeled_param():
     eem_table['Teff'].unit = units.K
     eem_table['Radius'].unit = units.R_sun
     eem_table['Mass'].unit = units.M_sun
-    io.votable.writeto(io.votable.from_table(eem_table), \
+    votable.writeto(votable.from_table(eem_table), \
                        f'{Path().additional_data}model_param.xml')  #saving votable
     return eem_table
 
@@ -281,7 +269,7 @@ def spec(cat):
 
     #Do I even need realspectype function? I can just take cat where class_temp not empty
     cat = realspectype(cat)
-    #model_param=io.votable.parse_single_table(\
+    #model_param=votable.parse_single_table(\
     #f"catalogs/model_param.xml").to_table()
     cat = cat[np.where(cat['class_temp_nr'] != 0)]
     cat['specmatch_temp_nr'] = cat['class_temp_nr']

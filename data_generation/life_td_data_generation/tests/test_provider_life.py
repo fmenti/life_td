@@ -8,6 +8,40 @@ def test_extract_lum_class():
     assert extract_lum_class(4, sptype[0]) == 'IV'
     assert extract_lum_class(2, sptype[1]) == 'VI'
 
+def test_assign_null_values():
+    sptype = np.array(['', 'D2.3V'])
+    main_id = np.array(['test', 'test2'])
+    table = Table([main_id, sptype],
+                          names=['main_id', 'sptype_string'],
+                          dtype=[object, object])
+    example_table = initiate_columns(table, ['class_temp', 'class_temp_nr', 'class_lum', 'class_ref'],
+                             [object, object, object, object], [True, True, True, True])
+
+    result = assign_null_values(example_table, 0)
+
+    #empty entry gets '?' assigned
+    assert result['class_temp'][0] == '?'
+    assert result['class_temp_nr'][0] == '?'
+    assert result['class_lum'][0] == '?'
+    assert result['class_ref'][0] == '?'
+
+def test_deal_with_leading_d_sptype():
+    sptype = np.array(['M3.51', 'dM3:', 'dM5.0'])
+    main_id = np.array(['G 227-48B', '* mu. Dra C', 'FBS 1415+456'])
+    table = Table((main_id, sptype), names=('main_id', 'sptype_string'),
+                          dtype=[object, object])
+    example_table = initiate_columns(table, ['class_temp', 'class_temp_nr', 'class_lum', 'class_ref'],
+                                     [object, object, object, object], [True, True, True, True])
+
+    #no lum class given main sequence gets V assigned
+    assert deal_with_leading_d_sptype(example_table,0) == 'M3.51'
+    assert example_table['class_lum'][0] != 'V' #because no d
+
+    assert deal_with_leading_d_sptype(example_table, 1) == 'M3:'
+    assert example_table['class_lum'][1] == 'V'
+
+    assert deal_with_leading_d_sptype(example_table, 2) == 'M5.0'
+    assert example_table['class_lum'][2] == 'V'
 
 def test_assign_lum_type():
     sptype = np.array(['M5.0IV', 'G2VI'])
@@ -53,43 +87,6 @@ def test_deal_with_minus_in_sptype():
     assert result['class_temp'][4] == 'K'
     assert result['class_lum'][4] == 'V'
     assert result['class_temp_nr'][4] == '2'
-
-
-def test_deal_with_leading_d_sptype():
-    sptype = np.array(['dM3.51', 'dM3:', 'dM5.0'])
-    main_id = np.array(['G 227-48B', '* mu. Dra C', 'FBS 1415+456'])
-    example_table = Table((main_id, sptype), names=('main_id', 'sptype_string'),
-                          dtype=[object, object])
-
-    result = sptype_string_to_class(example_table, 'fake_ref')
-
-    #no lum class given main sequence gets V assigned
-    assert result['class_lum'][0] == 'V'
-    assert result['class_lum'][1] == 'V'
-    #dwarf d gets V assigned
-    assert result['class_lum'][2] == 'V'
-
-
-def test_assign_null_values():
-    sptype = np.array(['', 'D2.3V'])
-    main_id = np.array(['test', 'test2'])
-    example_table = Table([main_id, sptype],
-                          names=['main_id', 'sptype_string'],
-                          dtype=[object, object])
-
-    result = sptype_string_to_class(example_table, 'fake_ref')
-
-    #empty entry gets '?' assigned
-    assert result['class_temp'][0] == '?'
-    assert result['class_temp_nr'][0] == '?'
-    assert result['class_lum'][0] == '?'
-    assert result['class_ref'][0] == '?'
-
-    #non main sequence
-    assert result['class_temp'][1] == '?'
-    assert result['class_temp_nr'][1] == '?'
-    assert result['class_lum'][1] == '?'
-    assert result['class_ref'][1] == '?'
 
 
 def test_modeled_param():

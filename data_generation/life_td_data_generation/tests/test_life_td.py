@@ -1,6 +1,6 @@
 from life_td import *
 from utils.io import save
-from astropy.table import setdiff
+from astropy.table import Table, setdiff
 from sdata import empty_dict_wit_columns
 import numpy as np
 
