@@ -9,6 +9,15 @@ from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
 from sdata import empty_dict, empty_dict_wit_columns, paras_dict
 
+def jointwoidslists(ids1, ids2):
+    ids = ids1 + ids2  # should be list
+    # removing double entries
+    ids = set(ids)
+    # changing type back into list
+    ids = list(ids)
+    # joining list into object with elements separated by |
+    ids = "|".join(ids)
+    return ids
 
 def idsjoin(cat, column_ids1, column_ids2):
     """
@@ -38,16 +47,17 @@ def idsjoin(cat, column_ids1, column_ids2):
         elif ids1 == ['']:
             cat['ids'][i] = cat[column_ids2][i]
         else:
-            ids = ids1 + ids2  #should be list
-            #removing double entries
-            ids = set(ids)
-            #changing type back into list
-            ids = list(ids)
-            #joining list into object with elements separated by |
-            ids = "|".join(ids)
-            cat['ids'][i] = ids
+            cat['ids'][i] = jointwoidslists(ids1, ids2)
         cat['ids'][i] = cat['ids'][i].strip('|')
     return cat
+
+def assign_type(cat, i):
+    if type(cat['type_2'][i]) == np.ma.core.MaskedConstant or \
+            cat['type_2'][i] == 'None':
+        cat['type'][i] = cat['type_1'][i]
+    else:
+        cat['type'][i] = cat['type_2'][i]
+    return cat['type'][i]
 
 
 def objectmerging(cat):
@@ -73,13 +83,10 @@ def objectmerging(cat):
         cat['type_1'] = cat['type_1'].astype(object)
         cat['type_2'] = cat['type_2'].astype(object)
         for i in range(len(cat)):
-            if type(cat['type_2'][i]) == np.ma.core.MaskedConstant or \
-                    cat['type_2'][i] == 'None':
-                cat['type'][i] = cat['type_1'][i]
-            else:
-                cat['type'][i] = cat['type_2'][i]
+            cat['type'][i] = assign_type(cat, i)
         cat.remove_columns(['type_1', 'type_2'])
     return cat
+
 
 
 def assign_source_idref(cat, sources, paras, provider):

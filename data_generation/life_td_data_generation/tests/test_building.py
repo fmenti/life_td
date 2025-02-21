@@ -1,6 +1,14 @@
 from building import *
 from astropy.table import Table, MaskedColumn, setdiff
 
+def test_jointwoidslists():
+    ids1=['a1','a2']
+    ids2=['b1','b2','b3']
+
+    ids = jointwoidslists(ids1, ids2)
+
+    assert ids.split('|').sort() == ['a1','a2', 'b1', 'b2', 'b3'].sort()
+
 
 def test_idsjoin_no_mask():
     cat = Table(data=[['* 61 Cyg b|61 Cyg b', '', 'GCRV 13273|LTT 16180'],
@@ -46,9 +54,9 @@ def test_best_para_id():
                       dtype=[int, object, object])
     best_para_table = best_para_id(mes_table)
 
-    #non provider reverences don't get included
+    # non provider reverences don't get included
     assert 'irgendein_id_obj1' not in best_para_table['id']
-    #ids of the same object are all unique
+    # ids of the same object are all unique
     assert len(best_para_table[np.where(best_para_table['object_idref'] == 4)]) == 1
 
 
@@ -103,7 +111,10 @@ def test_best_para():
                          dtype=[object, float, object, float, int])
     assert len(setdiff(wanted_table, mes_table)) == 0
 
-#def test_building():
-#input_data=
-#building(prov_tables_list,table_names,list_of_tables)
+
+# def test_building():
+# input_data=
+# building(prov_tables_list,table_names,list_of_tables)
 #    assert False
+
+
