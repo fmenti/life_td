@@ -372,7 +372,7 @@ def create_mes_teff_st_table(life_helptab):
     """
     life_mes_teff_st = life_helptab['main_id', 'mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff', 'teff_st_value')
-    life_mes_teff_st['teff_st_qual'] = ['D' for i in range(len(life_mes_teff_st))]
+    life_mes_teff_st['teff_st_qual'] = ['C' for i in range(len(life_mes_teff_st))]
     life_mes_teff_st['teff_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
     return life_mes_teff_st
 
@@ -388,7 +388,7 @@ def create_mes_radius_st_table(life_helptab):
     """
     life_mes_radius_st = life_helptab['main_id', 'mod_R']
     life_mes_radius_st.rename_column('mod_R', 'radius_st_value')
-    life_mes_radius_st['radius_st_qual'] = ['D' for i in range(len(life_mes_radius_st))]
+    life_mes_radius_st['radius_st_qual'] = ['C' for i in range(len(life_mes_radius_st))]
     life_mes_radius_st['radius_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
     return life_mes_radius_st
 
@@ -404,7 +404,7 @@ def create_mes_mass_st_table(life_helptab):
     """
     life_mes_mass_st = life_helptab['main_id', 'mod_M']
     life_mes_mass_st.rename_column('mod_M', 'mass_st_value')
-    life_mes_mass_st['mass_st_qual'] = ['D' for i in range(len(life_mes_mass_st))]
+    life_mes_mass_st['mass_st_qual'] = ['C' for i in range(len(life_mes_mass_st))]
     life_mes_mass_st['mass_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
 
     #specifying stars cocerning multiplicity
