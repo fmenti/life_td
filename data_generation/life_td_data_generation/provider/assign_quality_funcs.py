@@ -45,8 +45,8 @@ def exo_assign_quality(exo_helptab):
 def assign_quality(table, column='', special_mode=''):
     # Define a mapping of special modes to their respective handler functions
     mode_handlers = {
-        'teff_st_spec': teff_st_spec_assign_quality,
-        'exo': exo_assign_quality,
+        'teff_st_spec': lambda t, _: teff_st_spec_assign_quality(t),
+        'exo': lambda t, _: exo_assign_quality(t),
         'gaia_binary': lambda t, col: assign_gaia_binary_quality(t, col),
         'wds_sep1': lambda t, col: assign_wds_sep_quality(t, col, mode='wds_sep1'),
         'wds_sep2': lambda t, col: assign_wds_sep_quality(t, col, mode='wds_sep2'),
