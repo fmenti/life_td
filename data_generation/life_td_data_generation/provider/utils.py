@@ -375,11 +375,18 @@ def assign_gaia_binary_quality(table, column):
 
 # Helper function for WDS separation cases
 def assign_wds_sep_quality(table, column, mode):
-    data_source = wds_mes_sep_ang1 if mode == 'wds_sep1' else wds_mes_sep_ang2
-    table[column] = [
-        'C' if type(j) != np.ma.core.MaskedConstant else 'E'
-        for j in data_source['sep_ang_obs_date']
-    ]
+    if mode == 'wds_sep1':
+        data_source = wds_mes_sep_ang1
+        table[column] = [
+            'C' if type(j) != np.ma.core.MaskedConstant else 'E'
+            for j in data_source['sep_ang_obs_date']
+        ]
+    elif mode == 'wds_sep2':
+        data_source = wds_mes_sep_ang2
+        table[column] = [
+            'B' if type(j) != np.ma.core.MaskedConstant else 'E'
+            for j in data_source['sep_ang_obs_date']
+        ]
     return table
 
 
