@@ -52,12 +52,11 @@ def idsjoin(cat, column_ids1, column_ids2):
     return cat
 
 def assign_type(cat, i):
-    if type(cat['type_2'][i]) == np.ma.core.MaskedConstant or \
-            cat['type_2'][i] == 'None':
-        cat['type'][i] = cat['type_1'][i]
-    else:
-        cat['type'][i] = cat['type_2'][i]
+    # Check if 'type_2' is masked or equal to 'None', then fall back to 'type_1', otherwise use 'type_2'
+    cat['type'][i] = cat['type_1'][i] if isinstance(cat['type_2'][i], np.ma.core.MaskedConstant) or cat['type_2'][
+        i] == 'None' else cat['type_2'][i]
     return cat['type'][i]
+
 
 
 def objectmerging(cat):

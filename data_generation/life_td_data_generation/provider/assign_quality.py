@@ -48,8 +48,8 @@ def assign_quality(table, column='', special_mode=''):
         'teff_st_spec': teff_st_spec_assign_quality,
         'exo': exo_assign_quality,
         'gaia_binary': lambda t, col: assign_gaia_binary_quality(t, col),
-        'wds_sep1': lambda t, col: assign_wds_sep_quality(t, col, 'wds_sep1'),
-        'wds_sep2': lambda t, col: assign_wds_sep_quality(t, col, 'wds_sep2'),
+        'wds_sep1': lambda t, col: assign_wds_sep_quality(t, col, mode='wds_sep1'),
+        'wds_sep2': lambda t, col: assign_wds_sep_quality(t, col, mode='wds_sep2'),
     }
 
     # Check if special_mode exists in handlers
@@ -58,7 +58,7 @@ def assign_quality(table, column='', special_mode=''):
 
     # Handle default or special edge cases
     quality = _default_quality(column, special_mode)
-    table[column] = [quality for _ in range(len(table))]
+    table[column] = [quality] * len(table)
     return table
 
 
@@ -73,17 +73,20 @@ def assign_gaia_binary_quality(table, column):
 
 # Helper function for WDS separation cases
 def assign_wds_sep_quality(table, column, mode):
+    if column not in table.colnames:
+        table[column] = [''] * len(table)  # Initialize column if it doesn't exist
     if mode == 'wds_sep1':
-        table[column] = [
-            'C' if type(j) != np.ma.core.MaskedConstant else 'E'
+        table[column][:] = [
+            'C' if not isinstance(j, np.ma.core.MaskedConstant) else 'E'
             for j in table['sep_ang_obs_date']
         ]
     elif mode == 'wds_sep2':
-        table[column] = [
-            'B' if type(j) != np.ma.core.MaskedConstant else 'E'
+        table[column][:] = [
+            'B' if not isinstance(j, np.ma.core.MaskedConstant) else 'E'
             for j in table['sep_ang_obs_date']
         ]
     return table
+
 
 
 # Encapsulate default/assumption logic for fallback cases

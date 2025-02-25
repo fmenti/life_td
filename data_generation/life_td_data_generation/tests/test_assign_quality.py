@@ -58,18 +58,24 @@ def test_gaia_binary_special_mode(table_with_binary_flag):
     assert result['quality'] == ['B', 'E', 'B']  # Verify correct 'B' or 'E' assignment
 
 
-def test_wds_sep1_special_mode():
-    """Test 'wds_sep1' special mode."""
-    table = {'sep_ang_obs_date': [1, 2, np.ma.core.MaskedConstant()]}
+def test_assign_quality_wds_sep1():
+    # Mock table
+    table = Table({
+        'sep_ang_obs_date': [1, 2, np.ma.core.MaskedConstant()],
+    })
+
     result = assign_quality(table, column='quality', special_mode='wds_sep1')
-    assert result['quality'] == ['C', 'C', 'E']  # Verify correct 'C' or 'E' assignment
+    assert list(result['quality']) == ['C', 'C', 'E']  # Check the results
 
 
-def test_wds_sep2_special_mode():
-    """Test 'wds_sep2' special mode."""
-    table = {'sep_ang_obs_date': [3, np.ma.core.MaskedConstant(), 5]}
+def test_assign_quality_wds_sep2():
+    # Mock table
+    table = Table({
+        'sep_ang_obs_date': [1, np.ma.core.MaskedConstant(), 5],
+    })
+
     result = assign_quality(table, column='quality', special_mode='wds_sep2')
-    assert result['quality'] == ['B', 'E', 'B']  # Verify correct 'B' or 'E' assignment
+    assert list(result['quality']) == ['B', 'E', 'B']  # Check the results
 
 
 

@@ -112,9 +112,34 @@ def test_best_para():
     assert len(setdiff(wanted_table, mes_table)) == 0
 
 
-# def test_building():
-# input_data=
-# building(prov_tables_list,table_names,list_of_tables)
-#    assert False
+def test_assign_type_with_masked_constant():
+    # Create a mock Table
+    cat = Table(
+        {
+            'type_1': ['A', 'B', 'C'],
+            'type_2': [np.ma.core.MaskedConstant(), 'None', 'D'],
+            'type': [''] * 3,  # Initialize 'type' column as empty
+        }
+    )
+
+    # Test the function for each row in the table
+    assert assign_type(cat, 0) == 'A'  # type_2 is masked, fallback to type_1
+    assert assign_type(cat, 1) == 'B'  # type_2 is 'None', fallback to type_1
+    assert assign_type(cat, 2) == 'D'  # type_2 is valid, use it
+
+
+def test_assign_type_with_no_masked_constant():
+    # Create a mock Table
+    cat = Table(
+        {
+            'type_1': ['X'],
+            'type_2': ['Y'],
+            'type': [''],  # Initialize 'type' column as empty
+        }
+    )
+
+    # Test the function for the first (and only) row in the table
+    assert assign_type(cat, 0) == 'Y'  # type_2 is valid, use it
+
 
 
