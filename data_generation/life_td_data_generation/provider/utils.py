@@ -308,3 +308,71 @@ def lower_quality(qual):
     elif qual == 'D':
         qual = 'E'
     return qual
+
+def teff_st_spec_assign_quality(gaia_mes_teff_st_spec):
+    interval = 41 * 9 / 5.
+    gaia_mes_teff_st_spec['teff_st_qual'] = ['?' for j in range(len(gaia_mes_teff_st_spec))]
+    for i, flag in enumerate(gaia_mes_teff_st_spec['flags_gspspec']):
+        summed = 0
+        for j in flag:
+            summed += int(j)
+        if summed in range(0, int(interval) + 1):
+            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'A'
+        elif summed in range(int(interval) + 1, int(interval * 2) + 1):
+            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'B'
+        elif summed in range(int(interval * 2) + 1, int(interval * 3) + 1):
+            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'C'
+        elif summed in range(int(interval * 3) + 1, int(interval * 4) + 1):
+            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'D'
+        elif summed in range(int(interval * 4) + 1, int(interval * 5) + 1):
+            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'E'
+    return gaia_mes_teff_st_spec
+
+def assign_quality_elementwise(exo_helptab, para, i):
+    qual = 'B'
+    if exo_helptab[para + '_max'][i] == 1e+20:
+        qual = lower_quality(qual)
+    if exo_helptab[para + '_min'][i] == 1e+20:
+        qual = lower_quality(qual)
+    return qual
+
+def exo_assign_quality(exo_helptab):
+    for para in ['mass', 'msini']:
+        exo_helptab[para + '_pl_qual'] = MaskedColumn(dtype=object, length=len(exo_helptab))
+        exo_helptab[para + '_pl_qual'] = ['?' for j in range(len(exo_helptab))]
+        for i in range(len(exo_helptab)):
+            exo_helptab[para + '_pl_qual'][i] = assign_quality_elementwise(exo_helptab, para, i)
+    return exo_helptab
+
+def assign_quality(table, column = '',special_mode = ''):
+    if special_mode == 'teff_st_spec':
+        # assign quality based on reliability flags
+        table = teff_st_spec_assign_quality(table)
+    elif special_mode == 'exo':
+        table = exo_assign_quality(table)
+    elif special_mode == 'gaia_binary':
+        table[column]=['B' if table['binary_flag'][j] == 'True' \
+             else 'E' for j in range(len(table))]
+    elif special_mode == 'wds_sep1':
+        table[column] = ['C' if type(j) != np.ma.core.MaskedConstant
+                         else 'E' for j in wds_mes_sep_ang1['sep_ang_obs_date']]
+    elif special_mode == 'wds_sep2':
+        # add a quality to sep1 which is better than sep2. because newer measurements should be better.
+        table[column] = ['B' if type(j) != np.ma.core.MaskedConstant
+                         else 'E' for j in wds_mes_sep_ang2['sep_ang_obs_date']]
+    else:
+        if column == 'coo_gal_qual':
+            # not sure how to transform quality from ra and dec to gal
+            qual = '?'
+        elif special_mode in ['teff_st_phot','radius_st_flame','mass_st_flame']:
+            # just assumption. to do -> think about it more
+            qual = 'B'
+        elif special_mode in ['model','wds_binary']:
+            # quality assumption of model
+            qual = 'C'
+        elif special_mode == 'sim_binary':
+            qual = 'D'
+        table[column] == [qual for j in range(len(table))]
+
+    return table
+

@@ -9,7 +9,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create_sources_table, query, nullvalues, \
-    replace_value, create_provider_table
+    replace_value, create_provider_table, assign_quality
 from sdata import empty_dict
 
 
@@ -285,7 +285,7 @@ def expanding_helpertable_stars(sim_helptab, sim, stars):
 
     stars['binary_ref'] = [sim['provider']['provider_bibcode'][0] for j in range(
         len(stars))]
-    stars['binary_qual'] = ['D' for j in range(len(stars))]
+    stars = assign_quality(stars,'binary_qual',special_mode='sim_binary')
     return stars
 
 

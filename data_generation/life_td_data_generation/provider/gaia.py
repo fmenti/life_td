@@ -9,7 +9,7 @@ from astropy.table import Table, vstack, setdiff, join
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, ids_from_ident, replace_value, \
-    create_provider_table, query
+    create_provider_table, query, assign_quality
 from sdata import empty_dict
 
 
@@ -141,30 +141,9 @@ def create_mes_binary_table(gaia):
     gaia_mes_binary = replace_value(gaia_mes_binary, 'binary_flag', 'sy', 'True')
     gaia_mes_binary = replace_value(gaia_mes_binary, 'binary_flag', 'st', 'False')
     gaia_mes_binary['binary_ref'] = ['2016A&A...595A...1G' for j in range(len(gaia_mes_binary))]
-    gaia_mes_binary['binary_qual'] = ['B' if gaia_mes_binary['binary_flag'][j] == 'True' \
-                                          else 'E' for j in range(len(gaia_mes_binary))]
+    gaia_mes_binary = assign_quality(gaia_mes_binary,'binary_qual',special_mode='gaia_binary')
     #if necessary lower binary_qual for binary_flag = False to level of simbad.
     return gaia_mes_binary
-
-
-def assign_quality(gaia_mes_teff_st_spec):
-    interval = 41 * 9 / 5.
-    gaia_mes_teff_st_spec['teff_st_qual'] = ['?' for j in range(len(gaia_mes_teff_st_spec))]
-    for i, flag in enumerate(gaia_mes_teff_st_spec['flags_gspspec']):
-        summed = 0
-        for j in flag:
-            summed += int(j)
-        if summed in range(0, int(interval) + 1):
-            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'A'
-        elif summed in range(int(interval) + 1, int(interval * 2) + 1):
-            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'B'
-        elif summed in range(int(interval * 2) + 1, int(interval * 3) + 1):
-            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'C'
-        elif summed in range(int(interval * 3) + 1, int(interval * 4) + 1):
-            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'D'
-        elif summed in range(int(interval * 4) + 1, int(interval * 5) + 1):
-            gaia_mes_teff_st_spec['teff_st_qual'][i] = 'E'
-    return gaia_mes_teff_st_spec
 
 
 def create_mes_teff_st_table(gaia_helptab):
@@ -183,13 +162,13 @@ def create_mes_teff_st_table(gaia_helptab):
     #remove masked rows
     gaia_mes_teff_st.remove_rows(gaia_mes_teff_st['teff_gspphot'].mask.nonzero()[0])
     gaia_mes_teff_st.rename_columns(['teff_gspphot', 'ref'], ['teff_st_value', 'teff_st_ref'])
-    gaia_mes_teff_st['teff_st_qual'] = ['B' for j in range(len(gaia_mes_teff_st))]
+    gaia_mes_teff_st = assign_quality(gaia_mes_teff_st,'teff_st_qual',special_mode='teff_st_phot')
 
     gaia_mes_teff_st_spec = gaia_helptab['main_id', 'teff_gspspec', 'flags_gspspec']
     gaia_mes_teff_st_spec['ref'] = [gaia_helptab['ref'][j] + ' GSP-Spec'
                                     for j in range(len(gaia_helptab))]
     gaia_mes_teff_st_spec.remove_rows(gaia_mes_teff_st_spec['teff_gspspec'].mask.nonzero()[0])
-    gaia_mes_teff_st_spec = assign_quality(gaia_mes_teff_st_spec)
+    gaia_mes_teff_st_spec = assign_quality(gaia_mes_teff_st_spec,special_mode='teff_st_spec')
     gaia_mes_teff_st_spec.rename_columns(['teff_gspspec', 'ref'], ['teff_st_value', 'teff_st_ref'])
 
     gaia_mes_teff_st = vstack([gaia_mes_teff_st, gaia_mes_teff_st_spec])
@@ -209,7 +188,7 @@ def create_mes_radius_st_table(gaia_helptab):
     """
     gaia_mes_radius_st = gaia_helptab['main_id', 'radius_st_value', 'ref']
     gaia_mes_radius_st.remove_rows(gaia_mes_radius_st['radius_st_value'].mask.nonzero()[0])
-    gaia_mes_radius_st['radius_st_qual'] = ['B' for j in range(len(gaia_mes_radius_st))]
+    gaia_mes_radius_st = assign_quality(gaia_mes_radius_st, 'radius_st_qual', 'radius_st_flame')
     gaia_mes_radius_st['radius_st_ref'] = [gaia_mes_radius_st['ref'][j] + ' FLAME'
                                            for j in range(len(gaia_mes_radius_st))]
     gaia_mes_radius_st.remove_column('ref')
@@ -227,7 +206,7 @@ def create_mes_mass_st_table(gaia_helptab):
     """
     gaia_mes_mass_st = gaia_helptab['main_id', 'mass_st_value', 'ref']
     gaia_mes_mass_st.remove_rows(gaia_mes_mass_st['mass_st_value'].mask.nonzero()[0])
-    gaia_mes_mass_st['mass_st_qual'] = ['B' for j in range(len(gaia_mes_mass_st))]
+    gaia_mes_mass_st = assign_quality(gaia_mes_mass_st, 'mass_st_qual', 'mass_st_flame')
     gaia_mes_mass_st['mass_st_ref'] = [gaia_mes_mass_st['ref'][j] + ' FLAME'
                                        for j in range(len(gaia_mes_mass_st))]
     gaia_mes_mass_st.remove_column('ref')

@@ -9,7 +9,7 @@ from astropy.table import unique, join, MaskedColumn, Column
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns
+from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns, assign_quality
 from sdata import empty_dict
 
 
@@ -321,8 +321,7 @@ def create_star_basic_table():
                                           for j in range(len(life_star_basic))]
     life_star_basic['coo_gal_err_min'] = [-1
                                           for j in range(len(life_star_basic))]
-    life_star_basic['coo_gal_qual'] = ['?'
-                                       for j in range(len(life_star_basic))]
+    life_star_basic = assign_quality(life_star_basic,'coo_gal_qual')
     life_star_basic['main_id'] = life_star_basic['main_id'].astype(str)
     # source
     # transformed from simbad ircs coordinates using astropy
@@ -372,7 +371,7 @@ def create_mes_teff_st_table(life_helptab):
     """
     life_mes_teff_st = life_helptab['main_id', 'mod_Teff']
     life_mes_teff_st.rename_column('mod_Teff', 'teff_st_value')
-    life_mes_teff_st['teff_st_qual'] = ['C' for i in range(len(life_mes_teff_st))]
+    life_mes_teff_st = assign_quality(life_mes_teff_st, 'teff_st_qual', 'model')
     life_mes_teff_st['teff_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
     return life_mes_teff_st
 
@@ -388,7 +387,7 @@ def create_mes_radius_st_table(life_helptab):
     """
     life_mes_radius_st = life_helptab['main_id', 'mod_R']
     life_mes_radius_st.rename_column('mod_R', 'radius_st_value')
-    life_mes_radius_st['radius_st_qual'] = ['C' for i in range(len(life_mes_radius_st))]
+    life_mes_radius_st = assign_quality(life_mes_radius_st, 'radius_st_qual', 'model')
     life_mes_radius_st['radius_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
     return life_mes_radius_st
 
@@ -404,7 +403,7 @@ def create_mes_mass_st_table(life_helptab):
     """
     life_mes_mass_st = life_helptab['main_id', 'mod_M']
     life_mes_mass_st.rename_column('mod_M', 'mass_st_value')
-    life_mes_mass_st['mass_st_qual'] = ['C' for i in range(len(life_mes_mass_st))]
+    life_mes_mass_st = assign_quality(life_mes_mass_st, 'mass_st_qual', 'model')
     life_mes_mass_st['mass_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
 
     #specifying stars cocerning multiplicity

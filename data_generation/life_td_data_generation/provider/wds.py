@@ -9,7 +9,7 @@ from datetime import datetime
 #self created modules
 from utils.io import save, load
 from provider.utils import fill_sources_table, create_sources_table, query, ids_from_ident, distance_cut, \
-    create_provider_table
+    create_provider_table, assign_quality
 from sdata import empty_dict
 
 
@@ -313,7 +313,7 @@ def create_mes_binary_table(wds_helptab, wds, test_objects):
     wds_mes_binary['binary_flag'] = wds_mes_binary['binary_flag'].astype(object)
     wds_mes_binary['binary_flag'] = ['True' for j in range(len(wds_mes_binary))]
     wds_mes_binary['binary_ref'] = [wds['provider']['provider_bibcode'][0] for j in range(len(wds_mes_binary))]
-    wds_mes_binary['binary_qual'] = ['C' for j in range(len(wds_mes_binary))]
+    wds_mes_binary = assign_quality(wds_mes_binary,'binary_qual',special_mode='wds_binary')
 
     if len(test_objects) > 0:
         print('number of test objects that are in mes_binary main_id \n', \
@@ -344,16 +344,14 @@ def create_mes_sep_ang_table(wds_helptab, wds, test_objects):
     #          wds_ident['id']==wds['system_name'][masked_system_main_id][j])]
     wds_mes_sep_ang1 = wds_mes_sep_ang0['main_id', 'wds_sep1', 'wds_obs1']
     wds_mes_sep_ang1.rename_columns(['wds_sep1', 'wds_obs1'], ['sep_ang_value', 'sep_ang_obs_date'])
-    wds_mes_sep_ang1['sep_ang_qual'] = \
-        ['C' if type(j) != np.ma.core.MaskedConstant else 'E' for j in wds_mes_sep_ang1['sep_ang_obs_date']]
+    wds_mes_sep_ang1 = assign_quality(wds_mes_sep_ang1,'sep_ang_qual',special_mode='wds_sep1')
     #issue, what if system_main_id is empty?
 
     wds_mes_sep_ang2 = wds_mes_sep_ang0['main_id', 'wds_sep2', 'wds_obs2']
     wds_mes_sep_ang2.rename_columns(['wds_sep2', 'wds_obs2'], ['sep_ang_value', 'sep_ang_obs_date'])
-    wds_mes_sep_ang2['sep_ang_qual'] = \
-        ['B' if type(j) != np.ma.core.MaskedConstant else 'E' for j in wds_mes_sep_ang2['sep_ang_obs_date']]
+    wds_mes_sep_ang2 = assign_quality(wds_mes_sep_ang2,'sep_ang_qual',special_mode='wds_sep2')
     wds_mes_sep_ang = vstack([wds_mes_sep_ang1, wds_mes_sep_ang2])
-    #add a quality to sep1 which is better than sep2. because newer measurements should be better.
+
     wds_mes_sep_ang['sep_ang_ref'] = [wds['provider']['provider_bibcode'][0] for j in range(len(wds_mes_sep_ang))]
     #wds_mes_sep_ang.rename_column('system_main_id','main_id')
     #remove columns where sep_ang_value is masked

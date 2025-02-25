@@ -10,7 +10,7 @@ from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique, vs
 #self created modules
 from utils.io import save, load, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, query, distance_cut, ids_from_ident, \
-    create_provider_table, nullvalues, replace_value, lower_quality
+    create_provider_table, nullvalues, replace_value, lower_quality, assign_quality
 from sdata import empty_dict
 
 
@@ -164,24 +164,6 @@ def create_objects_table(exo):
     return exo_objects
 
 
-def assign_quality_elementwise(exo_helptab, para, i):
-    qual = 'B'
-    if exo_helptab[para + '_max'][i] == 1e+20:
-        qual = lower_quality(qual)
-    if exo_helptab[para + '_min'][i] == 1e+20:
-        qual = lower_quality(qual)
-    return qual
-
-
-def assign_quality(exo_helptab, parameter):
-    for para in parameter:
-        exo_helptab[para + '_pl_qual'] = MaskedColumn(dtype=object, length=len(exo_helptab))
-        exo_helptab[para + '_pl_qual'] = ['?' for j in range(len(exo_helptab))]
-        for i in range(len(exo_helptab)):
-            exo_helptab[para + '_pl_qual'][i] = assign_quality_elementwise(exo_helptab, para, i)
-    return exo_helptab
-
-
 def deal_with_mass_nullvalues(exo_helptab, cols):
     for colname in cols:
         exo_helptab = nullvalues(exo_helptab, colname, 1e+20, verbose=False)
@@ -276,7 +258,7 @@ def create_mes_mass_pl_table(exo_helptab):
     cols = ['mass_max', 'mass_min', 'mass', 'msini', 'msini_max', 'msini_min']
     exo_helptab = deal_with_mass_nullvalues(exo_helptab, cols)
 
-    exo_helptab = assign_quality(exo_helptab, ['mass', 'msini'])
+    exo_helptab = assign_quality(exo_helptab)
 
     exo_mes_mass_pl1 = create_para_exo_mes_mass_pl(exo_helptab, 'mass', 'False')
     exo_mes_mass_pl2 = create_para_exo_mes_mass_pl(exo_helptab, 'msini', 'True')
