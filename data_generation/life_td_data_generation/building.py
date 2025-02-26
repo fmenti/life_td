@@ -1,7 +1,7 @@
 """ Combines the data from the individual data providers. """
 
 import numpy as np  #arrays
-from astropy.table import Column, join, column, vstack, unique
+from astropy.table import Column, join, column, vstack, unique, MaskedColumn
 from itertools import islice
 
 #self created modules
@@ -9,47 +9,39 @@ from utils.io import save, Path
 from provider.utils import nullvalues, replace_value
 from sdata import empty_dict, empty_dict_wit_columns, paras_dict
 
-def jointwoidslists(ids1, ids2):
-    ids = ids1 + ids2  # should be list
-    # removing double entries
-    ids = set(ids)
-    # changing type back into list
-    ids = list(ids)
-    # joining list into object with elements separated by |
-    ids = "|".join(ids)
-    return ids
 
 def idsjoin(cat, column_ids1, column_ids2):
     """
-    Merges the identifiers from two different columns into one.
-    
-    :param cat: Astropy table containing two identifer columns.
-    :type cat: astropy.table.table.Table
-    :param column_ids1: column name for the first identifier column
-    :type column_ids1: str
-    :param column_ids2: column name for the second identifier column
-    :type column_ids2: str
-    :return: Like input cat but with only one identifier
-        column containing the unique identifiers of both of the
-        previous identifier columns.
-    :rtype: astropy.table.table.Table
+    Merges two identifier columns into one, removing duplicates.
+
+    - Merge identifiers across both columns per row.
+    - Remove duplicate identifiers within the same row.
+    - Return the result in a row-wise manner, where all identifiers for that row are sorted.
+
+    :param cat: Astropy Table containing two identifier columns.
+    :type cat: astropy.table.Table
+    :param str column_ids1: Name of the first identifier column.
+    :param str column_ids2: Name of the second identifier column.
+    :return: Table with a unified 'ids' column containing merged, unique identifiers.
+    :rtype: astropy.table.Table
     """
 
-    cat['ids'] = Column(dtype=object, length=len(cat))
-    for column in [column_ids1, column_ids2]:
-        cat = nullvalues(cat, column, '')
-    for i in range(len(cat)):
-        # splitting object into list of elements
-        ids1 = cat[column_ids1][i].split('|')
-        ids2 = cat[column_ids2][i].split('|')
-        if ids2 == ['']:
-            cat['ids'][i] = cat[column_ids1][i]
-        elif ids1 == ['']:
-            cat['ids'][i] = cat[column_ids2][i]
-        else:
-            cat['ids'][i] = jointwoidslists(ids1, ids2)
-        cat['ids'][i] = cat['ids'][i].strip('|')
+    # Step 1: Replace masked/empty values in both columns with empty strings
+    ids1 = cat[column_ids1].filled('') if isinstance(cat[column_ids1], MaskedColumn) else cat[column_ids1]
+    ids2 = cat[column_ids2].filled('') if isinstance(cat[column_ids2], MaskedColumn) else cat[column_ids2]
+
+    # Step 2: Vectorized merging of identifiers using set operations
+    merged_ids = []
+    for val1, val2 in zip(ids1, ids2):
+        ids1_list = val1.split('|') if val1 not in (None, '') else [] # Split strings on '|'
+        ids2_list = val2.split('|') if val2 not in (None, '') else []
+        unique_ids = set(ids1_list + ids2_list) - {''}  # Merge and remove duplicates
+        merged_ids.append('|'.join(sorted(unique_ids)))  # Join unique ids back to a single string
+
+    # Step 3: Add the merged identifiers column to the table
+    cat['ids'] = Column(data=merged_ids, dtype=object)
     return cat
+
 
 def assign_type(cat, i):
     # Check if 'type_2' is masked or equal to 'None', then fall back to 'type_1', otherwise use 'type_2'

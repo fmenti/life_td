@@ -1,43 +1,86 @@
 from building import *
 from astropy.table import Table, MaskedColumn, setdiff
-
-def test_jointwoidslists():
-    ids1=['a1','a2']
-    ids2=['b1','b2','b3']
-
-    ids = jointwoidslists(ids1, ids2)
-
-    assert ids.split('|').sort() == ['a1','a2', 'b1', 'b2', 'b3'].sort()
-
+import pytest
 
 def test_idsjoin_no_mask():
+    """Test idsjoin with no masked values."""
     cat = Table(data=[['* 61 Cyg b|61 Cyg b', '', 'GCRV 13273|LTT 16180'],
                       ['61 Cyg b|markmuster', 'HD 201091|LSPM J2106+3844N', 'USNO-B1.0 1287-00443364']],
                 names=['ids1', 'ids2'],
                 dtype=[object, object])
-    cat = idsjoin(cat, 'ids1', 'ids2')
 
-    for ID in cat['ids']:
+    result = idsjoin(cat, 'ids1', 'ids2')
+
+    # Assert no empty values
+    for ID in result['ids']:
         assert ID.split('|').count('') == 0
 
-    assert cat['ids'][0].split('|').count('61 Cyg b') == 1
-    assert cat['ids'][0].split('|').count('* 61 Cyg b') == 1
-    assert cat['ids'][0].split('|').count('markmuster') == 1
+    # Assert unique merged identifiers
+    assert result['ids'][0].split('|').count('61 Cyg b') == 1
+    assert result['ids'][0].split('|').count('* 61 Cyg b') == 1
+    assert result['ids'][0].split('|').count('markmuster') == 1
 
 
 def test_idsjoin_with_mask():
+    """Test idsjoin with masked values."""
     a = MaskedColumn(data=['* 61 Cyg b|61 Cyg b', '', 'GCRV 13273|LTT 16180'], name='ids1', mask=[True, False, False])
     cat = Table(data=[a,
                       ['61 Cyg b|markmuster', 'HD 201091|LSPM J2106+3844N', 'USNO-B1.0 1287-00443364']],
                 names=['ids1', 'ids2'],
                 dtype=[object, object])
-    cat = idsjoin(cat, 'ids1', 'ids2')
 
-    for ID in cat['ids']:
+    result = idsjoin(cat, 'ids1', 'ids2')
+
+    # Assert no empty values
+    for ID in result['ids']:
         assert ID.split('|').count('') == 0
 
-    assert cat['ids'][0].split('|').count('61 Cyg b') == 1
-    assert cat['ids'][0].split('|').count('markmuster') == 1
+    # Assert unique merged identifiers
+    assert result['ids'][0].split('|').count('61 Cyg b') == 1
+    assert result['ids'][0].split('|').count('markmuster') == 1
+
+
+def test_idsjoin_duplicates():
+    """Test idsjoin with duplicate values across columns."""
+    cat = Table(data=[['ID1|ID2', 'ID4|ID5'],
+                      ['ID2|ID3', 'ID4|ID6']],
+                names=['ids1', 'ids2'],
+                dtype=[object, object])
+
+    result = idsjoin(cat, 'ids1', 'ids2')
+
+    # Assert duplicates are removed
+    assert result['ids'][0] == 'ID1|ID2|ID3'
+    assert result['ids'][1] == 'ID4|ID5|ID6'
+
+
+def test_idsjoin_empty_columns():
+    """Test idsjoin with empty and masked columns."""
+    cat = Table(data=[['', ''],
+                      ['', '']],
+                names=['ids1', 'ids2'],
+                dtype=[object, object])
+
+    result = idsjoin(cat, 'ids1', 'ids2')
+
+    # Assert resulting 'ids' column is empty
+    assert all(val == '' for val in result['ids'])
+
+
+def test_idsjoin_large_table():
+    """Test idsjoin on a large table."""
+    n_rows = 10_000
+    ids1 = ['ID{}'.format(i) for i in range(n_rows)]
+    ids2 = ['ID{}'.format(i + 1) for i in range(n_rows)]
+
+    cat = Table({'ids1': ids1, 'ids2': ids2})
+    result = idsjoin(cat, 'ids1', 'ids2')
+
+    # Assert all rows processed correctly
+    assert len(result) == n_rows
+    for i, id_val in enumerate(result['ids']):
+        assert f'ID{i}' in id_val
+        assert f'ID{i + 1}' in id_val
 
 
 def test_best_para_id():
