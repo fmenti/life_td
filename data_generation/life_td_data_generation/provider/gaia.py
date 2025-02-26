@@ -9,7 +9,8 @@ from astropy.table import Table, vstack, setdiff, join
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, ids_from_ident, replace_value, \
-    create_provider_table, query, assign_quality
+    create_provider_table, query
+from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
 

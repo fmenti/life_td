@@ -72,44 +72,6 @@ def test_exo_create_objects_table():
     assert len(exo_objects[np.where(exo_objects['main_id'] == '*   6 Lyn b')]) == 1
 
 
-def test_assign_quality_elementwise():
-    #data
-    exo_helptab = Table(data=[[1e+20, 1e+20, 1],
-                              [1e+20, 1, 1]],
-                        names=['mass_max', 'mass_min'],
-                        dtype=[float, float])
-    exo_helptab['mass_pl_qual'] = MaskedColumn(dtype=object, length=len(exo_helptab))
-
-    #function
-    qual_b = assign_quality_elementwise(exo_helptab, 'mass', 2)
-    qual_c = assign_quality_elementwise(exo_helptab, 'mass', 1)
-    qual_d = assign_quality_elementwise(exo_helptab, 'mass', 0)
-
-    #assert
-    assert qual_b == 'B'
-    assert qual_c == 'C'
-    assert qual_d == 'D'
-
-
-def test_assign_quality():
-    # data
-    exo_helptab = Table(data=[[1e+20, 1e+20, 1],
-                              [1e+20, 1, 1],
-                              [1e+20, 1e+20, 1],
-                              [1e+20, 1, 1]],
-                        names=['mass_max', 'mass_min', 'msini_max', 'msini_min'],
-                        dtype=[float, float, float, float])
-    # function
-    exo_helptab = assign_quality(exo_helptab, ['mass', 'msini'])
-    # assert
-    assert exo_helptab['mass_pl_qual'][0] == 'D'
-    assert exo_helptab['mass_pl_qual'][1] == 'C'
-    assert exo_helptab['mass_pl_qual'][2] == 'B'
-    assert exo_helptab['msini_pl_qual'][0] == 'D'
-    assert exo_helptab['msini_pl_qual'][1] == 'C'
-    assert exo_helptab['msini_pl_qual'][2] == 'B'
-
-
 def test_deal_with_mass_nullvalues():
     # data
     m = MaskedColumn(data=[20.76, 0.1, 0, np.inf, 1e+20],

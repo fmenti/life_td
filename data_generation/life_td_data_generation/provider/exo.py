@@ -10,7 +10,8 @@ from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique, vs
 #self created modules
 from utils.io import save, load, Path, stringtoobject
 from provider.utils import fetch_main_id, IdentifierCreator, create_sources_table, query, distance_cut, ids_from_ident, \
-    create_provider_table, nullvalues, replace_value, lower_quality, assign_quality
+    create_provider_table, nullvalues, replace_value, lower_quality
+from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
 
@@ -258,7 +259,7 @@ def create_mes_mass_pl_table(exo_helptab):
     cols = ['mass_max', 'mass_min', 'mass', 'msini', 'msini_max', 'msini_min']
     exo_helptab = deal_with_mass_nullvalues(exo_helptab, cols)
 
-    exo_helptab = assign_quality(exo_helptab)
+    exo_helptab = assign_quality(exo_helptab, special_mode='exo')
 
     exo_mes_mass_pl1 = create_para_exo_mes_mass_pl(exo_helptab, 'mass', 'False')
     exo_mes_mass_pl2 = create_para_exo_mes_mass_pl(exo_helptab, 'msini', 'True')

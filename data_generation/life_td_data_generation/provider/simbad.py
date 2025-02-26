@@ -9,7 +9,8 @@ from datetime import datetime
 #self created modules
 from utils.io import save
 from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create_sources_table, query, nullvalues, \
-    replace_value, create_provider_table, assign_quality
+    replace_value, create_provider_table
+from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
 

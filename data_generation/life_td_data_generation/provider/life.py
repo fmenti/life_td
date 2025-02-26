@@ -9,7 +9,8 @@ from astropy.table import unique, join, MaskedColumn, Column
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns, assign_quality
+from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns
+from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
 

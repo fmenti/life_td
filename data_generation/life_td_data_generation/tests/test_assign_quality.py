@@ -1,5 +1,5 @@
 from provider.assign_quality_funcs import *
-from astropy.table import Table
+from astropy.table import Table, setdiff
 import pytest
 import numpy as np
 from unittest.mock import patch
@@ -19,6 +19,43 @@ def test_teff_st_spec_assign_quality():
     assert gaia_mes_teff_st_spec['teff_st_qual'][0] == 'B'
     assert gaia_mes_teff_st_spec['teff_st_qual'][2] == 'C'
 
+def test_assign_quality_elementwise():
+    #data
+    exo_helptab = Table(data=[[1e+20, 1e+20, 1],
+                              [1e+20, 1, 1]],
+                        names=['mass_max', 'mass_min'],
+                        dtype=[float, float])
+    exo_helptab['mass_pl_qual'] = MaskedColumn(dtype=object, length=len(exo_helptab))
+
+    #function
+    qual_b = assign_quality_elementwise(exo_helptab, 'mass', 2)
+    qual_c = assign_quality_elementwise(exo_helptab, 'mass', 1)
+    qual_d = assign_quality_elementwise(exo_helptab, 'mass', 0)
+
+    #assert
+    assert qual_b == 'B'
+    assert qual_c == 'C'
+    assert qual_d == 'D'
+
+
+def test_exo_assign_quality():
+    # data
+    exo_helptab = Table(data=[[1e+20, 1e+20, 1],
+                              [1e+20, 1, 1],
+                              [1e+20, 1e+20, 1],
+                              [1e+20, 1, 1]],
+                        names=['mass_max', 'mass_min', 'msini_max', 'msini_min'],
+                        dtype=[float, float, float, float])
+    # function
+    exo_helptab = exo_assign_quality(exo_helptab)
+    # assert
+    assert exo_helptab['mass_pl_qual'][0] == 'D'
+    assert exo_helptab['mass_pl_qual'][1] == 'C'
+    assert exo_helptab['mass_pl_qual'][2] == 'B'
+    assert exo_helptab['msini_pl_qual'][0] == 'D'
+    assert exo_helptab['msini_pl_qual'][1] == 'C'
+    assert exo_helptab['msini_pl_qual'][2] == 'B'
+
 
 @pytest.fixture
 def table_with_binary_flag():
@@ -35,10 +72,11 @@ def table_with_column_data():
 def test_teff_st_spec_special_mode(table_with_column_data):
     """Test 'teff_st_spec' special mode."""
     with patch('provider.assign_quality_funcs.teff_st_spec_assign_quality') as mock_func:
-        mock_func.return_value = table_with_column_data  # Mock the returned table
+        mock_func.return_value = table_with_column_data # Mock the returned table
         result = assign_quality(table_with_column_data, special_mode='teff_st_spec')
         mock_func.assert_called_once_with(table_with_column_data)
-        assert result == table_with_column_data
+        assert len(setdiff(result, table_with_column_data)) == 0
+
 
 
 def test_exo_special_mode(table_with_column_data):
@@ -47,7 +85,7 @@ def test_exo_special_mode(table_with_column_data):
         mock_func.return_value = table_with_column_data  # Mock the returned table
         result = assign_quality(table_with_column_data, special_mode='exo')
         mock_func.assert_called_once_with(table_with_column_data)
-        assert result == table_with_column_data
+        assert len(setdiff(result, table_with_column_data)) == 0
 
 
 def test_gaia_binary_special_mode(table_with_binary_flag):
