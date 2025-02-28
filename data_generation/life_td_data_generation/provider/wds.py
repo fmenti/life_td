@@ -13,6 +13,106 @@ from provider.utils import fill_sources_table, create_sources_table, query, ids_
 from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
+def load_wds_helptab():
+    print(' loading...')
+    [wds_helptab] = load(['wds_helptab'])
+    # currently temp=True not giving same result because
+    # wds['system_main_id'][j] are '' and not masked
+    for col in ['system_main_id', 'primary_main_id', 'secondary_main_id']:
+        wds_helptab[col][np.where(wds_helptab[col] == '')] = np.ma.masked
+    # tbd: add provider_access of last query
+    return wds_helptab
+
+
+def assign_names(wds_helptab):
+    for j in range(len(wds_helptab)):
+        if wds_helptab['wds_comp'][j] == '':  # trivial binaries
+            wds_helptab['system_name'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'AB'
+            # AB added since apparently simbad calls trivial binary system AB too
+            wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'A'
+            wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'B'
+        else:  # higer order multiples
+            wds_helptab['system_name'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j]
+            if len(wds_helptab['wds_comp'][j]) == 2:
+                wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j][0]
+                wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j][1]
+            else:
+                if ',' in wds_helptab['wds_comp'][j]:
+                    components = wds_helptab['wds_comp'][j].split(',')
+                    wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + components[0]
+                    wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + components[1]
+                else:
+                    print('not sure how to handle: ',wds_helptab['wds_comp'][j])
+    return wds_helptab
+
+
+def look_at_test_objects_after_name_assignment(test_objects, wds_helptab):
+    if len(test_objects) > 0:
+        print('in wds as system_name',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['system_name']))])
+        print('in wds as primary',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['primary']))])
+        print('in wds as secondary',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['secondary']))])
+
+def look_at_test_objects_after_wds_creation(test_objects, wds_helptab):
+    if len(test_objects) > 0:
+        print(wds_helptab['system_main_id', 'primary_main_id', 'secondary_main_id'])
+        print('in wds as system_main_id',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['system_main_id']))])
+        print('in wds as primary_main_id',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['primary_main_id']))])
+        print('in wds as secondary_main_id',
+              test_objects[np.where(np.isin(test_objects,
+                                            wds_helptab['secondary_main_id']))])
+
+
+def create_wds_helptab(adql_query, test_objects, wds):
+    print(' querying VizieR for WDS...')
+    wds_helptab = query(wds['provider']['provider_url'][0], adql_query[0])
+    # I need to match the wds objects with the simbad ones to inforce the
+    # distance cut since wds does not have distance information.
+    # initializing and setting type for object comparison in later join
+    for col in ['sim_wds_id', 'system_name', 'primary', 'secondary']:
+        wds_helptab[col] = wds_helptab['wds_name'].astype(object)
+    # assigning correct name of system, primary and secondary for each wds object
+    wds_helptab = assign_names(wds_helptab)
+    # print('number of trivial binary systems:',
+    #   len(wds[np.where(wds['wds_comp']=='')]))
+    look_at_test_objects_after_name_assignment(test_objects, wds_helptab)
+    # an alternative would be to query simbad for the main id and then cut by distance
+    # this however takes way longer as it joins 150'000 elements
+    #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
+    #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
+    print(' performing distance cut...')
+    # assigning main_id for system using sim_hlink and cutting on the system
+    #  or the components
+    wds_system_cut = distance_cut(wds_helptab, colname='system_name', main_id=False)
+    wds_system_cut.rename_column('main_id', 'system_main_id')
+    wds_primary_cut = distance_cut(wds_helptab, colname='primary', main_id=False)
+    wds_secondary_cut = distance_cut(wds_helptab, colname='secondary', main_id=False)
+    [sim_h_link] = load(['sim_h_link'])
+    # joining parent object
+    wds_primary_cut = join(wds_primary_cut, sim_h_link['main_id', 'parent_main_id'],
+                           keys='main_id', join_type='left')
+    wds_primary_cut.rename_columns(['main_id', 'parent_main_id'], ['primary_main_id', 'system_main_id'])
+    wds_secondary_cut = join(wds_secondary_cut, sim_h_link['main_id', 'parent_main_id'],
+                             keys='main_id', join_type='left')
+    wds_secondary_cut.rename_columns(['main_id', 'parent_main_id'], ['secondary_main_id', 'system_main_id'])
+    # here some empty ones when child is known in simbad but no parent. in
+    # this case would I want to assign system_name in system main_id? do it
+    # later
+    wds_helptab = vstack([wds_system_cut, wds_primary_cut])
+    wds_helptab = vstack([wds_helptab, wds_secondary_cut])
+    look_at_test_objects_after_wds_creation(test_objects, wds_helptab)
+    save([wds_helptab], ['wds_helptab'])
+    return wds_helptab
+
 
 def create_wds_helpertable(temp, test_objects):
     """
@@ -43,97 +143,9 @@ def create_wds_helpertable(temp, test_objects):
     #perform query for objects with parallax >50mas
     test_objects = np.array(test_objects)
     if temp:
-        print(' loading...')
-        [wds_helptab] = load(['wds_helptab'])
-        # currently temp=True not giving same result because 
-        # wds['system_main_id'][j] are '' and not masked
-        for col in ['system_main_id', 'primary_main_id', 'secondary_main_id']:
-            wds_helptab[col][np.where(wds_helptab[col] == '')] = np.ma.masked
-        # tbd: add provider_access of last query
+        wds_helptab = load_wds_helptab()
     else:
-        print(' querying VizieR for WDS...')
-        wds_helptab = query(wds['provider']['provider_url'][0], adql_query[0])
-
-        # I need to match the wds objects with the simbad ones to inforce the
-        # distance cut since wds does not have distance information.
-
-        # initializing and setting type for object comparison in later join 
-        for col in ['sim_wds_id', 'system_name', 'primary', 'secondary']:
-            wds_helptab[col] = wds_helptab['wds_name'].astype(object)
-
-        # assigning correct name of system, primary and secondary for each wds object
-        for j in range(len(wds_helptab)):
-            if wds_helptab['wds_comp'][j] == '':  #trivial binaries
-                wds_helptab['system_name'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'AB'
-                #AB added since apparently simbad calls trivial binary system AB too
-                wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'A'
-                wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + 'B'
-            else:  #higer order multiples
-                wds_helptab['system_name'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j]
-                if len(wds_helptab['wds_comp'][j]) == 2:
-                    wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j][0]
-                    wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + wds_helptab['wds_comp'][j][1]
-                else:
-                    components = wds_helptab['wds_comp'][j].split(',')
-                    wds_helptab['primary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + components[0]
-                    wds_helptab['secondary'][j] = 'WDS J' + wds_helptab['wds_name'][j] + components[1]
-        # print('number of trivial binary systems:',
-        #   len(wds[np.where(wds['wds_comp']=='')]))
-
-        if len(test_objects) > 0:
-            print('in wds as system_name',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['system_name']))])
-            print('in wds as primary',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['primary']))])
-            print('in wds as secondary',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['secondary']))])
-
-        # an alternative would be to query simbad for the main id and then cut by distance
-        # this however takes way longer as it joins 150'000 elements
-        #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
-        #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
-        print(' performing distance cut...')
-
-        #assigning main_id for system using sim_hlink and cutting on the system
-        #  or the components
-        wds_system_cut = distance_cut(wds_helptab, colname='system_name', main_id=False)
-        wds_system_cut.rename_column('main_id', 'system_main_id')
-
-        wds_primary_cut = distance_cut(wds_helptab, colname='primary', main_id=False)
-
-        wds_secondary_cut = distance_cut(wds_helptab, colname='secondary', main_id=False)
-        [sim_h_link] = load(['sim_h_link'])
-        #joining parent object
-        wds_primary_cut = join(wds_primary_cut, sim_h_link['main_id', 'parent_main_id'],
-                               keys='main_id', join_type='left')
-        wds_primary_cut.rename_columns(['main_id', 'parent_main_id'], ['primary_main_id', 'system_main_id'])
-
-        wds_secondary_cut = join(wds_secondary_cut, sim_h_link['main_id', 'parent_main_id'],
-                                 keys='main_id', join_type='left')
-        wds_secondary_cut.rename_columns(['main_id', 'parent_main_id'], ['secondary_main_id', 'system_main_id'])
-        #here some empty ones when child is known in simbad but no parent. in 
-        # this case would I want to assign system_name in system main_id? do it 
-        # later
-
-        wds_helptab = vstack([wds_system_cut, wds_primary_cut])
-        wds_helptab = vstack([wds_helptab, wds_secondary_cut])
-
-        if len(test_objects) > 0:
-            print(wds_helptab['system_main_id', 'primary_main_id', 'secondary_main_id'])
-            print('in wds as system_main_id',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['system_main_id']))])
-            print('in wds as primary_main_id',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['primary_main_id']))])
-            print('in wds as secondary_main_id',
-                  test_objects[np.where(np.isin(test_objects,
-                                                wds_helptab['secondary_main_id']))])
-
-        save([wds_helptab], ['wds_helptab'])
+        wds_helptab = create_wds_helptab(adql_query, test_objects, wds)
 
     wds_helptab['system_main_id'] = wds_helptab['system_main_id'].astype(object)
     wds_helptab['system_name'] = wds_helptab['system_name'].astype(object)

@@ -5,7 +5,7 @@ Distance cut is performed by joining on life_db simbad objects.
 
 import numpy as np  #arrays
 from astropy.io import ascii
-from astropy.table import Table, Column, MaskedColumn, join, setdiff, unique, vstack
+from astropy.table import Table, Column, join, setdiff, unique, vstack
 
 #self created modules
 from utils.io import save, load, Path, stringtoobject
@@ -14,6 +14,23 @@ from provider.utils import fetch_main_id, IdentifierCreator, create_sources_tabl
 from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
+def query_exomercat(adql_query, exo):
+    exo['provider'] = create_provider_table('Exo-MerCat',
+                                            "http://archives.ia2.inaf.it/vo/tap/projects",
+                                            '2020A&C....3100370A')  # change bibcode once paper on ads
+    exo_helptab = query(exo['provider']['provider_url'][0], adql_query)
+    return exo_helptab
+
+def load_exomercat(exo):
+    exo['provider'] = create_provider_table('Exo-MerCat',
+                                            "http://archives.ia2.inaf.it/vo/tap/projects",
+                                            '2020A&C....3100370A', '2024-12-13')
+    exo_helptab = ascii.read(
+        Path().additional_data + "exo-mercat13-12-2024_v2.0.csv")
+    exo_helptab = stringtoobject(exo_helptab, 3000)
+    exo['provider']['provider_access'] = ['2024-12-13']
+    print('loading exomercat version from', exo['provider']['provider_access'])
+    return exo_helptab
 
 def query_or_load_exomercat():
     """
@@ -30,19 +47,9 @@ def query_or_load_exomercat():
                   FROM exomercat.exomercat"""
 
     try:
-        exo['provider'] = create_provider_table('Exo-MerCat',
-                                                "http://archives.ia2.inaf.it/vo/tap/projects",
-                                                '2020A&C....3100370A')  #change bibcode once paper on ads
-        exo_helptab = query(exo['provider']['provider_url'][0], adql_query)
+        exo_helptab = query_exomercat(adql_query, exo)
     except:
-        exo['provider'] = create_provider_table('Exo-MerCat',
-                                                "http://archives.ia2.inaf.it/vo/tap/projects",
-                                                '2020A&C....3100370A', '2024-12-13')
-        exo_helptab = ascii.read(
-            Path().additional_data + "exo-mercat13-12-2024_v2.0.csv")
-        exo_helptab = stringtoobject(exo_helptab, 3000)
-        exo['provider']['provider_access'] = ['2024-12-13']
-        print('loading exomercat version from', exo['provider']['provider_access'])
+        exo_helptab = load_exomercat(exo)
     return exo, exo_helptab
 
 
