@@ -8,6 +8,86 @@ import astropy as ap #votables
 import matplotlib.pyplot as plt
 
 
+def detail_criteria(database_tables, l):
+    """
+    This code scans for reasons, why the given objects would not be included in StarCat4
+
+    """
+    print(
+        'tbd: file starcat4 analysis where this code is used to give specific reason why a given object was not included into the cat4')
+    cat_i = database_tables['ident']
+    cat_o = database_tables['objects']
+    cat_h = database_tables['best_h_link']  # -> use best_h_link
+    children = []
+    not_found = []
+    number_of_stellar_siblings = []
+    multiple_parents = []  # multiple components in wds
+    single_child = []
+    binary = []
+    higher_order_multiple = []
+    star_without_parent = []
+    system_without_child = []
+    for name in l:
+        if len(cat_i['main_id'][np.where(cat_i['id'] == name)]) > 0:
+            main_id = cat_i['main_id'][np.where(cat_i['id'] == name)][0]
+            if cat_o['type'][np.where(cat_o['main_id'] == main_id)][0] == 'sy':
+                if len(cat_h[np.where(cat_h['parent_main_id'] == main_id)]) > 0:
+                    # print('system object but with found child object',main_id)
+                    # print(cat_h[np.where(cat_h['parent_main_id']==main_id)])
+                    for child in cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == main_id)]:
+                        children.append(child)
+                else:
+                    system_without_child.append(name)
+            elif cat_o['type'][np.where(cat_o['main_id'] == main_id)][0] == 'st':
+                # if it has parents:
+                if len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) > 0:
+                    # print('system object but with found child object',main_id)
+                    # print(cat_h[np.where(cat_h['parent_main_id']==main_id)])
+                    if len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) > 1:
+                        multiple_parents.append(name)
+                    elif len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) == 1:
+                        st_sib = 0
+                        nestled = False
+                        parent = cat_h['parent_main_id'][np.where(cat_h['child_main_id'] == main_id)]
+                        # wrong code here, parent can't be type st
+                        for sibling in cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == parent)]:
+                            print(cat_h[np.where(cat_h['child_main_id'] == sibling)])
+                            if cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'sy':
+                                nestled = True
+                            elif cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'st':
+                                st_sib += 1
+                            number_of_stellar_siblings.append(st_sib)
+                        if st_sib == 1 and nestled == False:
+                            single_child.append(name)
+                        if st_sib > 2 or nestled == True:
+                            higher_order_multiple.append(name)
+                        if st_sib == 2 and nestled == False:
+                            binary.append(name)
+                else:
+                    star_without_parent.append(name)
+            else:
+                print('no sys or st \n', name, cat_o['main_id', 'type'][np.where(cat_o['main_id'] == main_id)][0])
+        else:
+            # print('object not found',name)
+            not_found.append(name)
+    print('Of the', len(l), 'objects given:')
+    print('Some are not in cat 4 because they are either:')
+    print('system_without_child', system_without_child, len(system_without_child))
+    print('star_without_parent', star_without_parent, len(star_without_parent))
+    print('not found', not_found, '\n')
+    print('Some were not included because they are systems and instead one should look at their child objects:')
+    print('children', children, '\n')
+    print('some are non trivial binaries:')
+    print('multiple parents', multiple_parents, len(multiple_parents))
+    print('higher_order_multiple', higher_order_multiple, len(higher_order_multiple), '\n')
+    # print('# stellar siblings',number_of_stellar_siblings)
+    if len(single_child) > 0:
+        print('single_child', single_child, len(single_child))
+    print('And the reminder have conpanions that don t fit the spectral type requirements')
+    print('trivial binary', binary, len(binary))
+    return
+
+
 def object_contained(stars,cat,details=False):
     """
     Checks which of the entries in stars is also in cat.
