@@ -1,5 +1,5 @@
 from provider.exo import *
-from astropy.table import Table
+from astropy.table import Table, MaskedColumn
 from sdata import empty_dict
 import numpy as np
 

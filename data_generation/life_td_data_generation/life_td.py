@@ -6,8 +6,8 @@ Generates the data for the LIFE Target Database.
 from astropy import io
 
 #self created modules
-from sdata import empty_dict, empty_provider_tables_dict, table_names
-from utils.io import stringtoobject, load, Path, string_to_object_whole_dict
+from sdata import empty_dict, empty_provider_tables_dict
+from utils.io import load, Path, string_to_object_whole_dict
 from provider.exo import provider_exo
 from provider.gaia import provider_gaia
 from provider.life import provider_life
@@ -80,7 +80,7 @@ def partial_create(distance_cut_in_pc, create=[]):
     data = io.votable.parse_single_table(
         Path().additional_data + "sdb_30pc_09_02_2024.xml").to_table()
     functions = [provider_simbad, provider_sdb, provider_wds, provider_exo, provider_life, provider_gaia]
-    arguments = [(distance_cut_in_pc), (distance_cut_in_pc, data), (False), (), (), (distance_cut_in_pc)]
+    arguments = [(distance_cut_in_pc), (distance_cut_in_pc, data), (), (), (), (distance_cut_in_pc)]
 
     for i, prov in enumerate(list(provider_tables_dict.keys())):
         #provider_tables_dict[prov]=string_to_object_whole_dict(provider_tables_dict[prov])
