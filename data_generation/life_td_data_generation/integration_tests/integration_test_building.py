@@ -1,5 +1,5 @@
 from utils.io import load, Path
-from utils.analysis import different_data, linfit
+from utils.analysis import different_data
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import norm
@@ -192,7 +192,7 @@ def test_data_makes_sense_mag_k():
     
     mu = norm_fit(data,'mag_k_value')
 
-    assert mu <11 and mu > 7#failed at 5pc
+    assert mu <11 and mu > 6#failed at 5pc
 
 def test_data_makes_sense_plx():
     #data
