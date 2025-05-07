@@ -15,6 +15,10 @@ def detail_criteria(database_tables, l):
     """
     print(
         'tbd: file starcat4 analysis where this code is used to give specific reason why a given object was not included into the cat4')
+    # to do:
+    # include get main id search
+    # this code could use some refactoring. and also printing the corresponding objects why it was not included.
+    # write tests
     cat_i = database_tables['ident']
     cat_o = database_tables['objects']
     cat_h = database_tables['best_h_link']  # -> use best_h_link
@@ -51,7 +55,7 @@ def detail_criteria(database_tables, l):
                         parent = cat_h['parent_main_id'][np.where(cat_h['child_main_id'] == main_id)]
                         # wrong code here, parent can't be type st
                         for sibling in cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == parent)]:
-                            print(cat_h[np.where(cat_h['child_main_id'] == sibling)])
+                            #print(cat_h[np.where(cat_h['child_main_id'] == sibling)])
                             if cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'sy':
                                 nestled = True
                             elif cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'st':

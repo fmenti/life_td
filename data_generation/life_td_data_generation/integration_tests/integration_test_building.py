@@ -139,6 +139,7 @@ def test_data_makes_sense_mass_pl():
     #assert
     assert max(data) < 75 # m star
     assert min(data) > 0 
+    #not working for distance cut 20
 
 
 
