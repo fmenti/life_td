@@ -1247,7 +1247,8 @@ tables may change at any time without prior warning.
                 star_basic.coo_dec, dec
                 star_basic.dist_st_value, dist
                 planet_basic.mass_pl_value, planet_mass
-                planet_basic.mass_pl_err, planet_mass_error
+                planet_basic.mass_pl_err_max, planet_mass_error_max
+                planet_basic.mass_pl_err_min, planet_mass_error_min
             </csvItems>
             <events>
                 <column original="\src" name="\name" verbLevel="5"/>
@@ -1269,7 +1270,8 @@ tables may change at any time without prior warning.
                 coo_dec as dec,
                 dist_st_value as dist,
                 mass_pl_value as planet_mass,
-                mass_pl_err as planet_mass_error
+                mass_pl_err_max as planet_mass_error_max
+                mass_pl_err_min as planet_mass_error_min
             from life_td.star_basic as s
                 join life_td.h_link as slink on (parent_object_idref=s.object_idref)
                 join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
