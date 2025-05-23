@@ -135,7 +135,7 @@ def test_best_para_membership():
 
 
 def test_best_para():
-    mes_table = Table(data=[['*  61 Cyg A', '*  61 Cyg A', '*  61 Cyg A'],
+    mes_table_teff = Table(data=[['*  61 Cyg A', '*  61 Cyg A', '*  61 Cyg A'],
                             [4192.0, 4353.743, 4440.0],
                             ['B', 'B', 'D'],
                             [1e+20, 1e+20, 1e+20],
@@ -143,8 +143,8 @@ def test_best_para():
                       names=['main_id', 'teff_st_value', 'teff_st_qual',
                              'teff_st_err', 'teff_st_source_idref'],
                       dtype=[object, float, object, float, int])
-    best_para_table = best_para('teff_st', mes_table)
-    wanted_table = Table(data=[['*  61 Cyg A'],
+    best_para_table_teff = best_para('teff_st', mes_table_teff)
+    wanted_table_teff = Table(data=[['*  61 Cyg A'],
                                [4192.0],
                                ['B'],
                                [1e+20],
@@ -152,7 +152,32 @@ def test_best_para():
                          names=['main_id', 'teff_st_value', 'teff_st_qual',
                                 'teff_st_err', 'teff_st_source_idref'],
                          dtype=[object, float, object, float, int])
-    assert len(setdiff(wanted_table, mes_table)) == 0
+    assert len(setdiff(wanted_table_teff, best_para_table_teff)) == 0
+
+    mes_table_mass = Table(data=[['* 61 Cyg b', '* 61 Cyg b', '* 61 Cyg b'],
+                            [10, 1.5, 10],
+                            ['B', 'B', 'D'],
+                            [1e+20, 0.5, 1e+20],
+                            [1e+20, 0.5, 1e+20],
+                            ['?', '?', '?'],
+                            [1, 2, 3]],
+                      names=['main_id', 'mass_pl_value', 'mass_pl_qual',
+                             'mass_pl_err_max','mass_pl_err_min',
+                             'mass_pl_rel','mass_pl_source_idref'],
+                      dtype=[object, float, object, float,float,object, int])
+    best_para_table_mass = best_para('mass_pl', mes_table_mass)
+    wanted_table_mass = Table(data=[['* 61 Cyg b'],
+                               [10],
+                               ['B'],
+                               [1e+20],
+                                [1e+20],
+                                ['?'],
+                               [1]],
+                        names=['main_id', 'mass_pl_value', 'mass_pl_qual',
+                                'mass_pl_err_max', 'mass_pl_err_min',
+                                'mass_pl_rel','mass_pl_source_idref'],
+                         dtype=[object, float, object, float, float,object,int])
+    assert len(setdiff(wanted_table_mass, best_para_table_mass)) == 0
 
 
 def test_assign_type_with_masked_constant():
