@@ -817,7 +817,6 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,mass_pl_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
