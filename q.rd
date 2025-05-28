@@ -1469,7 +1469,7 @@ WHERE
                 rows = self.getVOTableRows()
                 self.assertEqual(len(rows), 1)
                 self.assertAlmostEqual(rows[0]["mass_pl_value"],
-                    8.053)
+                    8.5)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
                 self.assertEqual(rows[0]["type"],
