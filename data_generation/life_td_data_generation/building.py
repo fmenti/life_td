@@ -221,7 +221,7 @@ def best_para(para, mes_table):
     elif para == 'binary':
         columns = ['main_id', para + '_flag', para + '_qual', para + '_source_idref']
     elif para == 'mass_pl':
-        columns = ['main_id', para + '_value', para + '_rel', para + '_err_max', para + '_err_min', para + '_qual',
+        columns = ['main_id', para + '_value', para + '_rel', para + '_err_max', para + '_err_min', para + '_qual', para+ '_sini_flag',
                    para + '_source_idref']
     elif para == 'sep_ang':
         columns = ['main_id', para + '_value', para + '_err', para + '_obs_date',

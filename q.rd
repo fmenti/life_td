@@ -622,6 +622,11 @@ tables may change at any time without prior warning.
             tablehead="Quality Mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
+        <column name="mass_pl_sini_flag" type="text"
+            ucd="meta.code.multip"
+            tablehead="msini_flag"
+            description="Mass sin(i) flag."
+            verbLevel="1" displayHint="sf=2"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mass_pl_source_idref"
@@ -643,6 +648,7 @@ tables may change at any time without prior warning.
                 <map key="mass_pl_err_max" nullExpr="1e+20" />
                 <map key="mass_pl_err_min" nullExpr="1e+20" />
                 <map key="mass_pl_qual" nullExpr="'?'" />
+                <map key="mass_pl_sini_flag" nullExpr="'?'" />
                 <map key="mass_pl_source_idref" nullExpr="999999" />
             </rowmaker>
         </make>
@@ -847,6 +853,11 @@ tables may change at any time without prior warning.
             tablehead="Quality mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
+        <column name="mass_pl_sini_flag" type="text"
+            ucd="meta.code.multip"
+            tablehead="msini_flag"
+            description="Mass sin(i) flag."
+            verbLevel="1" displayHint="sf=2"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mass_source_idref"
@@ -867,6 +878,7 @@ tables may change at any time without prior warning.
                  <map key="mass_pl_err_max" nullExpr="1e+20" />
                  <map key="mass_pl_err_min" nullExpr="1e+20" />
                  <map key="mass_pl_qual" nullExpr="'?'" />
+                 <map key="mass_pl_sini_flag" nullExpr="'?'" />
                  <map key="mass_pl_source_idref" nullExpr="999999" />
              </rowmaker>
         </make>

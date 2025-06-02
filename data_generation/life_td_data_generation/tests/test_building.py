@@ -160,11 +160,12 @@ def test_best_para():
                             [1e+20, 0.5, 1e+20],
                             [1e+20, 0.5, 1e+20],
                             ['?', '?', '?'],
+                            ['True', 'False', 'True'],
                             [1, 2, 3]],
                       names=['main_id', 'mass_pl_value', 'mass_pl_qual',
                              'mass_pl_err_max','mass_pl_err_min',
-                             'mass_pl_rel','mass_pl_source_idref'],
-                      dtype=[object, float, object, float,float,object, int])
+                             'mass_pl_rel','mass_pl_sini_flag','mass_pl_source_idref'],
+                      dtype=[object, float, object, float,float,object, object,int])
     best_para_table_mass = best_para('mass_pl', mes_table_mass)
     wanted_table_mass = Table(data=[['* 61 Cyg b'],
                                [10],
@@ -172,11 +173,12 @@ def test_best_para():
                                [1e+20],
                                 [1e+20],
                                 ['?'],
+                                ['True'],
                                [1]],
                         names=['main_id', 'mass_pl_value', 'mass_pl_qual',
                                 'mass_pl_err_max', 'mass_pl_err_min',
-                                'mass_pl_rel','mass_pl_source_idref'],
-                         dtype=[object, float, object, float, float,object,int])
+                                'mass_pl_rel','mass_pl_sini_flag','mass_pl_source_idref'],
+                         dtype=[object, float, object, float, float,object,object,int])
     assert len(setdiff(wanted_table_mass, best_para_table_mass)) == 0
 
 
