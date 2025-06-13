@@ -17,8 +17,11 @@ with open(Path().data+'distance_cut.txt', 'r') as h:
     distance_cut=float(h.readlines()[0])
 
 def get_data(table_name,colname):
+    # loading the correct table
     [table]=load([table_name],location=Path().data)
+    # exctracting the correct columns
     arr_with_potential_fill_values=table[colname]
+    # removing fill values
     data=different_data(arr_with_potential_fill_values)
     return data
 
@@ -129,6 +132,31 @@ def test_data_makes_sense_mass_st():
     #assert
     assert max(data) < 60 # O3V
     assert min(data) > 0.074 # brown dwarf
+
+def test_data_makes_sense_temp_st():
+    #want a scatter plot x axis distance and y axis temperature
+    #not sure what to assert
+    #not sure how to get data -> what to do about fill values?
+    #data
+    # loading the correct table
+    [table]=load(['star_basic'],location=Path().data)
+    # exctracting the correct columns
+    arr=table['dist_st_value','teff_st_value']
+    arr2=arr[np.where(arr['dist_st_value']!=1e20)]
+    data=arr2[np.where(arr2['teff_st_value']!=1e20)]
+    
+    #plt.figure()
+    fig, ax = plt.subplots(figsize = (9, 6))
+    
+    ax.scatter(data['dist_st_value'],data['teff_st_value'],s=2)
+    ax.set_yscale("log")
+    
+    ax.set_xlabel('Distance [pc]')
+    ax.set_ylabel('Temperature [K]')
+
+    #assert
+    assert False
+
 
 def test_data_makes_sense_mass_pl():
     #data
