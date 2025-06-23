@@ -44,6 +44,7 @@ def load_life_td():
     for i, prov in enumerate(list(provider_tables_dict.keys())):
         print(f'Loading {prov} data')
         cat = load_cat(prov)
+        provider_tables_dict[prov] = string_to_object_whole_dict(cat)
 
     db = load_cat('')
     database_tables = string_to_object_whole_dict(db)
