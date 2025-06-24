@@ -13,6 +13,46 @@ from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create
 from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
 
+#---------------define queries--------------------------------------
+adql_queries_moduls = {
+    'select_statement': """SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
+        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
+        b.coo_bibcode AS coo_ref, b.coo_qual,b.sp_type AS sptype_string,
+        b.sp_qual AS sptype_qual, b.sp_bibcode AS sptype_ref,
+        b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
+        h_link.membership, h_link.parent AS parent_oid,
+        h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids,
+        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value
+        """,
+    'tables_statement': """
+    FROM basic AS b
+        JOIN ids ON b.oid=ids.oidref
+            JOIN alltypes AS a ON b.oid=a.oidref
+                LEFT JOIN h_link ON b.oid=h_link.child
+                    LEFT JOIN allfluxes AS f ON b.oid=f.oidref
+
+    """}
+
+
+def main_adql_queries(plx_cut):
+    return adql_queries_moduls['select_statement'] + \
+        adql_queries_moduls['tables_statement'] + \
+        'WHERE b.plx_value >=' + str(plx_cut)
+
+
+adql_upload_queries = {
+    'sy_without_plx_but_child_with_upload': adql_queries_moduls['select_statement'] + \
+                                            adql_queries_moduls['tables_statement'] + \
+                                            """JOIN TAP_UPLOAD.t1 ON b.oid=t1.parent_oid
+                                                 WHERE (b.plx_value IS NULL) AND (otype='**..')""",
+    'pl_without_plx_but_host_with_upload': adql_queries_moduls['select_statement'] + \
+                                           adql_queries_moduls['tables_statement'] + \
+                                           """JOIN TAP_UPLOAD.t1 ON b.oid=t1.oid
+                                             WHERE (b.plx_value IS NULL) AND (otype='Pl..')""",
+    'ids_from_upload': """SELECT id, t1.*
+                          FROM ident
+                                   JOIN TAP_UPLOAD.t1 ON oidref = t1.oid"""
+}
 
 def create_simbad_helpertable(distance_cut_in_pc, test_objects):
     """
@@ -33,65 +73,17 @@ def create_simbad_helpertable(distance_cut_in_pc, test_objects):
                                             "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
                                             '2000A&AS..143....9W')
 
-    #---------------define queries--------------------------------------
-    select = """SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
-        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
-        b.coo_bibcode AS coo_ref, b.coo_qual,b.sp_type AS sptype_string,
-        b.sp_qual AS sptype_qual, b.sp_bibcode AS sptype_ref,
-        b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
-        h_link.membership, h_link.parent AS parent_oid,
-        h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids,
-        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value
-        """  #which parameters to query from simbad and what alias to give them
-    #,f.I as mag_i_value, f.J as mag_j_value
-    tables = """
-    FROM basic AS b
-        JOIN ids ON b.oid=ids.oidref
-            JOIN alltypes AS a ON b.oid=a.oidref
-                LEFT JOIN h_link ON b.oid=h_link.child
-                    LEFT JOIN allfluxes AS f ON b.oid=f.oidref
-    
-    """
-    #JOIN allfluxes AS f ON b.oid=f.oidref
-
-    adql_query = [
-        select +
-        tables +
-        'WHERE b.plx_value >=' + str(plx_cut)]
-    #creating one table out of parameters from multiple ones and
-    #keeping only objects with parallax bigger than ... mas
-
-    upload_query = [
-        #query for systems without parallax data but
-        #children (in TAP_UPLOAD.t1 table) with parallax bigger than 50mas
-        select +
-        tables +
-        """JOIN TAP_UPLOAD.t1 ON b.oid=t1.parent_oid
-        WHERE (b.plx_value IS NULL) AND (otype='**..')""",
-        #query for planets without parallax data but
-        #host star (in TAP_UPLOAD.t1 table) with parallax bigger than 50mas
-        select +
-        tables +
-        """JOIN TAP_UPLOAD.t1 ON b.oid=t1.oid
-        WHERE (b.plx_value IS NULL) AND (otype='Pl..')""",
-        #query all distance measurements for objects in TAP_UPLOAD.t1 table
-        """SELECT oid, dist AS dist_st_value, plus_err, qual AS dist_st_qual,
-        bibcode AS dist_st_ref,minus_err,dist_prec AS dist_st_prec
-        FROM mesDistance
-        JOIN TAP_UPLOAD.t1 ON oidref=t1.oid""",
-        #query all identifiers for objects in TAP_UPLOAD.t1 table
-        """SELECT id, t1.*
-        FROM ident
-        JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""]
 
     #------------------querrying----------------------------------------
     #perform query for objects with in distance given
-    sim_helptab = query(sim['provider']['provider_url'][0], adql_query[0])
+    sim_helptab = query(sim['provider']['provider_url'][0], main_adql_queries(plx_cut))
     #querries parent and children objects with no parallax value
     parents_without_plx = query(sim['provider']['provider_url'][0],
-                                upload_query[0], [sim_helptab])
+                                adql_upload_queries['sy_without_plx_but_child_with_upload'],
+                                [sim_helptab])
     children_without_plx = query(sim['provider']['provider_url'][0],
-                                 upload_query[1], [sim_helptab])
+                                 adql_upload_queries['pl_without_plx_but_host_with_upload'],
+                                 [sim_helptab])
 
     test_objects = np.array(test_objects)
     if len(test_objects) > 0:
@@ -301,11 +293,9 @@ def create_ident_table(sim_helptab, sim):
     :returns: Identifier table.
     :rtype: astropy.table.table.Table
     """
-    # query all identifiers for objects in TAP_UPLOAD.t1 table
-    upload_query = """SELECT id, t1.*
-                    FROM ident
-                    JOIN TAP_UPLOAD.t1 ON oidref=t1.oid"""
-    sim_ident = query(sim['provider']['provider_url'][0], upload_query,
+
+    sim_ident = query(sim['provider']['provider_url'][0],
+                      adql_upload_queries['ids_from_upload'],
                       [sim_helptab['oid', 'main_id'][:].copy()])  #adds column id
     sim_ident['id_ref'] = [sim['provider']['provider_bibcode'][0] \
                            for j in range(len(sim_ident))]
