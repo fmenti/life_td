@@ -1,3 +1,7 @@
+from provider.utils import query
+from provider.exo import *
+from provider.gaia import *
+from provider.simbad import *
 from provider.wds import *
 
 def test_wds_queryable():
