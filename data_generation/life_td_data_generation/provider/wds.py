@@ -293,13 +293,7 @@ def create_objects_table(wds_helptab, wds, test_objects):
     #change to st for those that have no children
     wds_objects['type'][np.invert(np.isin(wds_objects['main_id'], wds['h_link']['parent_main_id']))] = ['st' for j in
                                                                                                         range(len(
-                                                                                                            [np.invert(
-                                                                                                                np.isin(
-                                                                                                                    wds_objects[
-                                                                                                                        'main_id'],
-                                                                                                                    wds[
-                                                                                                                        'h_link'][
-                                                                                                                        'parent_main_id']))]))]
+                                                                                                            'parent_main_id']))]))]
 
     if len(test_objects) > 0:
         print('number of test objects that are in objects main_id \n', \
