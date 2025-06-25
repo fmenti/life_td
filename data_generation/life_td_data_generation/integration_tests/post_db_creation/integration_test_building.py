@@ -1,5 +1,5 @@
 from utils.io import load, Path
-from utils.analysis import different_data
+from utils.analysis.analysis import different_data
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import norm
