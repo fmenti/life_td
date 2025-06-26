@@ -161,10 +161,12 @@ def create_mes_teff_st_table(gaia_helptab):
                                for j in range(len(gaia_helptab))]
 
     #remove masked rows
+    # gsp_phot
     gaia_mes_teff_st.remove_rows(gaia_mes_teff_st['teff_gspphot'].mask.nonzero()[0])
     gaia_mes_teff_st.rename_columns(['teff_gspphot', 'ref'], ['teff_st_value', 'teff_st_ref'])
     gaia_mes_teff_st = assign_quality(gaia_mes_teff_st,'teff_st_qual',special_mode='teff_st_phot')
 
+    # gsp_spec
     gaia_mes_teff_st_spec = gaia_helptab['main_id', 'teff_gspspec', 'flags_gspspec']
     gaia_mes_teff_st_spec['ref'] = [gaia_helptab['ref'][j] + ' GSP-Spec'
                                     for j in range(len(gaia_helptab))]
@@ -172,6 +174,7 @@ def create_mes_teff_st_table(gaia_helptab):
     gaia_mes_teff_st_spec = assign_quality(gaia_mes_teff_st_spec,special_mode='teff_st_spec')
     gaia_mes_teff_st_spec.rename_columns(['teff_gspspec', 'ref'], ['teff_st_value', 'teff_st_ref'])
 
+    # combine phot and spec
     gaia_mes_teff_st = vstack([gaia_mes_teff_st, gaia_mes_teff_st_spec])
     gaia_mes_teff_st = gaia_mes_teff_st['main_id', 'teff_st_value',
     'teff_st_qual', 'teff_st_ref']
