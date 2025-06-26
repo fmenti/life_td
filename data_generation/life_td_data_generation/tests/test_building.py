@@ -1,5 +1,6 @@
 from building import *
 from astropy.table import Table, MaskedColumn, setdiff
+from sdata import empty_dict_wit_columns
 import pytest
 
 def test_idsjoin_no_mask():
@@ -210,6 +211,66 @@ def test_assign_type_with_no_masked_constant():
 
     # Test the function for the first (and only) row in the table
     assert assign_type(cat, 0) == 'Y'  # type_2 is valid, use it
+
+def manage_boundary_objects(database_tables):
+    # find boundary objects
+    boundary_objects = database_tables['star_basic']['object_idref'][np.where(database_tables['star_basic']['dist_st_value'] > 30)]
+
+    # find their companions
+    for b_object_id in boundary_objects:
+        parents = database_tables['best_h_link']['child_object_idref'][
+                np.where(database_tables['best_h_link']['child_object_idref'] ==b_object_id)]
+        children = database_tables['best_h_link']['parent_object_idref'][
+                np.where(database_tables['best_h_link']['parent_object_idref'] == b_object_id)]
+        #siblings = ...
+        #companions = list of all those
+
+    # assign flag to their companions
+
+    # remove all occurences of boundary objects
+    return database_tables
+
+
+def test_manage_boundary_objects():
+    # data
+    database_tables = empty_dict_wit_columns
+    # insert three objects of which one is outside of distance cut
+    database_tables['sources']['ref', 'provider_name', 'source_id'].add_row(['test', 'LIFE', 1])
+
+    database_tables['objects']['type', 'ids',
+            'main_id', 'object_id'].add_row(['sy', 'Boundary AB|Boundary', 'Boundary AB', 1])
+    database_tables['objects']['type', 'ids',
+            'main_id', 'object_id'].add_row(['st', 'Boundary A|A', 'Boundary A', 2])
+    database_tables['objects']['type', 'ids',
+            'main_id', 'object_id'].add_row(['st', 'Boundary B|B', 'Boundary B', 3])
+
+    database_tables['provider']['provider_name', 'provider_url',
+                             'provider_bibcode', 'provider_access'].add_row(['LIFE', '','test','2024-12-13'])
+
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([1,'Boundary AB',1])
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([1, 'Boundary', 1])
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([2, 'Boundary A', 1])
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([2, 'A', 1])
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([3, 'Boundary B', 1])
+    database_tables['ident']['object_idref', 'id', 'id_source_idref'].add_row([3, 'B', 1])
+
+    database_tables['best_h_link']['child_object_idref', 'parent_object_idref',
+                                'h_link_source_idref', 'h_link_ref', 'membership'].add_row([2,1,'test',100])
+    database_tables['best_h_link']['child_object_idref', 'parent_object_idref',
+                                'h_link_source_idref', 'h_link_ref', 'membership'].add_row([3, 1, 'test', 100])
+    # most likely need to assignd differently as I don't have all the rows listed
+    database_tables['star_basic']['object_idref', 'main_id', 'dist_st_value'].add_row([2, 'Boundary A', 29.9])
+    database_tables['star_basic']['object_idref','main_id','dist_st_value'].add_row([3,'Boundary B',30.1])
+
+    # add some more data to make sure it gets removed smoothly from the other tables too
+
+    # function
+    # database_tables = manage_boundary_objects(database_tables)
+
+    # assert
+    # make sure there is a flag companion_out_of_cut
+    # make sure the objects and all its occurences gets removed from the db
+
 
 
 
