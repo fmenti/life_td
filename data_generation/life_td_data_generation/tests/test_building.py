@@ -1,6 +1,6 @@
 from building import *
 from astropy.table import Table, MaskedColumn, setdiff
-from sdata import empty_dict_wit_columns
+from sdata import empty_dict_wit_columns, table_names
 import pytest
 
 def test_idsjoin_no_mask():
@@ -212,22 +212,56 @@ def test_assign_type_with_no_masked_constant():
     # Test the function for the first (and only) row in the table
     assert assign_type(cat, 0) == 'Y'  # type_2 is valid, use it
 
+def find_companions(boundary_objects,database_tables):
+    for b_object_id in boundary_objects:
+        parents = database_tables['best_h_link']['parent_object_idref'][
+                np.where(database_tables['best_h_link']['child_object_idref'] ==b_object_id)]
+        children = database_tables['best_h_link']['child_object_idref'][
+                np.where(database_tables['best_h_link']['parent_object_idref'] == b_object_id)]
+        if len(parents) >1:
+            siblings = Table()
+            for par in parents:
+                par_children = database_tables['best_h_link']['child_object_idref'][
+                    np.where(database_tables['best_h_link']['parent_object_idref'] == par)]
+                # remove b_object_id
+                b_object_siblings = par_children[np.where(par_children['child_object_idref'] != b_object_id)]
+                b_object_siblings.rename_column('child_object_idref', 'sibling_object_idref')
+                siblings = vstack(siblings,b_object_siblings)
+
+        companions = list(parents['parent_object_idref'])
+        companions = companions + list(children['child_object_idref'])
+        companions = companions + list(siblings['sibling_object_idref'])
+    return companions
+
 def manage_boundary_objects(database_tables):
     # find boundary objects
     boundary_objects = database_tables['star_basic']['object_idref'][np.where(database_tables['star_basic']['dist_st_value'] > 30)]
 
     # find their companions
-    for b_object_id in boundary_objects:
-        parents = database_tables['best_h_link']['child_object_idref'][
-                np.where(database_tables['best_h_link']['child_object_idref'] ==b_object_id)]
-        children = database_tables['best_h_link']['parent_object_idref'][
-                np.where(database_tables['best_h_link']['parent_object_idref'] == b_object_id)]
-        #siblings = ...
-        #companions = list of all those
+    companions = find_companions(boundary_objects,database_tables)
 
-    # assign flag to their companions
+    # assign boundary_flag to companions objects table
+    database_tables['objects']['boundary_flag']=[False for j in range(len(boundary_objects))]
+    for companion in companions:
+        database_tables['objects']['boundary_flag'][np.where(
+                database_tables['objects']['object_id']==companion)] = True
 
     # remove all occurences of boundary objects
+    # this needs to be made nicer with AI
+    for table_name in table_names:
+        if table_name == 'objects':
+            colname = 'object_id'
+        elif table_name == 'best_h_link' or 'h_link':
+            #issue, need to go over two columns !!!
+            #colname = 'child_object_idref'
+            colname = 'parent_object_idref'
+        else:
+            colanme = 'object_idref'
+        for b_object_id in boundary_objects:
+            database_tables[table_name] = database_tables[table_name][np.where(
+                    database_tables[table_name][colname] != b_object_id)]
+
+
     return database_tables
 
 
