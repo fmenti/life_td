@@ -67,8 +67,8 @@ def objectmerging(cat):
 
     cat = idsjoin(cat, 'ids_1', 'ids_2')
     cat.remove_columns(['ids_1', 'ids_2'])
-    #merging types
-    #initializing column
+    # merging types
+    # initializing column
     if 'type' not in cat.colnames:  #----------
         cat['type'] = Column(dtype=object, length=len(cat))
         cat['type_1'] = cat['type_1'].astype(object)
@@ -82,44 +82,61 @@ def objectmerging(cat):
 
 def assign_source_idref(cat, sources, paras, provider):
     """
-    This function joins the source identifiers of parameters of cat.
-    
-    :param cat: With empty para_source_id columns.
+    This function joins source identifiers to parameters in a catalog table.
+
+    For each parameter that has a reference column, this function:
+    1. Validates and handles existing source ID columns
+    2. Processes null values in reference columns
+    3. Links reference data with source identifiers
+    4. Manages masked parameter values
+
+    :param cat: Astropy table with empty para_source_id columns
     :type cat: astropy.table.table.Table
-    :param sources: Contains reference data.
+    :param sources: Contains reference data
     :type sources: astropy.table.table.Table
-    :param paras: Describes a parameter in cat.
-    :type paras: str
-    :param provider: Name of the data provider.
+    :param paras: List of parameters to process
+    :type paras: list
+    :param provider: Name of the data provider
     :type provider: str
-    :returns: Astropy table containing para_source_id data.
+    :returns: Catalog table with parameter source IDs added
     :rtype: astropy.table.table.Table
     """
-    #for all parameters specified
     for para in paras:
-        #if they have reference columns
-        if para + '_ref' in cat.colnames:
-            if f'{para}_source_idref' in cat.colnames:
-                print(f'warning, {para}_source_idref already in table. something went wrong with loading')
-                cat.remove_column(f'{para}_source_idref')
-            #if those reference columns are masked
-            cat = nullvalues(cat, para + '_ref', 'None')
-            #join to each reference parameter its source_id
-            cat = join(cat, sources['ref', 'source_id'][np.where(
-                sources['provider_name'] == provider)],
-                       keys_left=para + '_ref', keys_right='ref',
-                       join_type='left')
-            #renaming column to specify to which parameter the source_id
-            # correspond
-            cat.rename_column('source_id', f'{para}_source_idref')
-            #deleting double column containing reference information
-            cat.remove_columns('ref')
-            #in case the para_value entry is masked this if environment
-            # will put the source_id entry to null
-            if para + '_value' in cat.colnames:
-                if type(cat[para + '_value']) == column.MaskedColumn:
-                    for i in cat[para + '_value'].mask.nonzero()[0]:
-                        cat[f'{para}_source_idref'][i] = 999999
+        ref_column = para + '_ref'
+        source_id_column = f'{para}_source_idref'
+        value_column = para + '_value'
+
+        # Skip if no reference column exists
+        if ref_column not in cat.colnames:
+            continue
+
+        # Check for existing source ID column
+        if source_id_column in cat.colnames:
+            print(f'warning, {source_id_column} already in table. something went wrong with loading')
+            cat.remove_column(source_id_column)
+
+        # Replace null values in reference column
+        cat = nullvalues(cat, ref_column, 'None')
+
+        # Join with sources table to get source IDs
+        source_subset = sources['ref', 'source_id'][
+            np.where(sources['provider_name'] == provider)
+        ]
+        cat = join(cat, source_subset,
+                   keys_left=ref_column,
+                   keys_right='ref',
+                   join_type='left')
+
+        # Rename source_id column to parameter-specific name
+        cat.rename_column('source_id', source_id_column)
+        cat.remove_columns('ref')
+
+        # Handle masked values in parameter column
+        if value_column in cat.colnames:
+            if type(cat[value_column]) == column.MaskedColumn:
+                for i in cat[value_column].mask.nonzero()[0]:
+                    cat[source_id_column][i] = 999999
+
     return cat
 
 
@@ -127,9 +144,9 @@ def merge_table(cat1, cat2):
     """
     Merges two tables.
     
-    :param cat1:
+    :param cat1: Table 1
     :type cat1: astropy.table.table.Table
-    :param cat2:
+    :param cat2: Table 2
     :type cat2: astropy.table.table.Table
     :returns: Merged table.
     :rtype: astropy.table.table.Table
@@ -198,54 +215,82 @@ def best_para_membership(mes_table):
     return best_para_table
 
 
+def _get_parameter_columns(para):
+    """
+    Helper function to determine which columns to include based on parameter type.
+
+    :param para: Parameter name
+    :type para: str
+    :returns: List of column names to include
+    :rtype: list
+    """
+    if para == 'binary':
+        return ['main_id', f'{para}_flag', f'{para}_qual', f'{para}_source_idref']
+    elif para == 'mass_pl':
+        return ['main_id', f'{para}_value', f'{para}_rel', f'{para}_err_max',
+                f'{para}_err_min', f'{para}_qual', f'{para}_sini_flag',
+                f'{para}_source_idref']
+    elif para == 'sep_ang':
+        return ['main_id', f'{para}_value', f'{para}_err', f'{para}_obs_date',
+                f'{para}_qual', f'{para}_source_idref']
+    else:
+        return ['main_id', f'{para}_value', f'{para}_err', f'{para}_qual',
+                f'{para}_source_idref']
+
+
+def _find_best_quality_measurement(group, para):
+    """
+    Helper function to find the highest quality measurement in a group.
+
+    :param group: Group of measurements for a single object
+    :type group: astropy.table.Table
+    :param para: Parameter name
+    :type para: str
+    :returns: Row with highest quality measurement or None if no valid measurement
+    :rtype: astropy.table.Row or None
+    """
+    quality_levels = ['A', 'B', 'C', 'D', 'E', '?']
+    qual_column = f'{para}_qual'
+
+    for quality in quality_levels:
+        for row in group:
+            if row[qual_column] == quality:
+                return row
+    return None
+
+
 def best_para(para, mes_table):
     """
-    This function keeps only highest quality row for each object. 
-    
-    tried to avoid . for performance reasons
-    
+    Selects the highest quality measurement for each object in the measurement table.
+
     :param para: Describes parameter e.g. mass
     :type para: str
-    :param mes_table: Contains only columns 'main_id',
-         para+'_value',para+'_err',para+'_qual' and para+'_ref'
-    :type mes_table: astropy.table.table.Table
-    :returns: Table like mes_table but only highest quality rows for
-         each object
-    :rtype: astropy.table.table.Table
+    :param mes_table: Contains only columns needed for this function
+    :type mes_table: astropy.table.Table
+    :returns: Table like mes_table but only highest quality rows for each object
+    :rtype: astropy.table.Table
     """
-
+    # Special case handlers
     if para == 'id':
         return best_para_id(mes_table)
     elif para == 'membership':
         return best_para_membership(mes_table)
-    elif para == 'binary':
-        columns = ['main_id', para + '_flag', para + '_qual', para + '_source_idref']
-    elif para == 'mass_pl':
-        columns = ['main_id', para + '_value', para + '_rel', para + '_err_max', para + '_err_min', para + '_qual', para+ '_sini_flag',
-                   para + '_source_idref']
-    elif para == 'sep_ang':
-        columns = ['main_id', para + '_value', para + '_err', para + '_obs_date',
-                   para + '_qual', para + '_source_idref']
-    else:
-        columns = ['main_id', para + '_value', para + '_err', para + '_qual',
-                   para + '_source_idref']
-    mes_table = mes_table[columns[0:]]
-    best_para_table = mes_table[columns[0:]][:0].copy()
-    #group mes_table by object (=main_id)
+
+    # Define columns based on parameter type
+    columns = _get_parameter_columns(para)
+
+    # Select only needed columns and create empty result table
+    mes_table = mes_table[columns]
+    best_para_table = mes_table[:0].copy()
+
+    # Group by main_id and process each group
     grouped_mes_table = mes_table.group_by('main_id')
-    #take highest quality
-    #quite time intensive (few minutes) could maybe be optimized using 
-    # np.isin function
-    for j in range(len(grouped_mes_table.groups.keys)):
-        # go through all objects
-        for qual in ['A', 'B', 'C', 'D', 'E', '?']:
-            for i in range(len(grouped_mes_table.groups[j])):
-                if grouped_mes_table.groups[j][i][para + '_qual'] == qual:
-                    best_para_table.add_row(grouped_mes_table.groups[j][i])
-                    break  # if best para found go to next main_id group
-            else:
-                continue  # only executed if the inner loop did NOT break
-            break  # only executed if the inner loop DID break 
+
+    for group in grouped_mes_table.groups:
+        best_measurement = _find_best_quality_measurement(group, para)
+        if best_measurement is not None:
+            best_para_table.add_row(best_measurement)
+
     return best_para_table
 
 
