@@ -29,35 +29,45 @@ def get_data(table_name,colname):
 def model_exp_decay(x,a,b,c):
     return a * np.exp(-b * x) + c
 
+def plot_data_and_fit(title, data, p0):
+    """
+    Plot histogram of data with an exponential decay fit.
 
-def plot_data_and_fit(title,data,p0):
-    #trying to not fit the scatter but the histogram directly
-    #issue, scatter points offset from histogram bars
-    #current issue, not meaningful zoom because y_model too high
-    
+    :param str title: Plot title
+    :param array-like data: Data to plot and fit
+    :param list p0: Initial parameters [a, b, c] for exponential decay fit: a * exp(-b * x) + c
+    """
+    # Setup plot
     plt.figure()
     plt.title(title)
-    bins=10
-    
-    bin_heights, bin_borders,patches=plt.hist(data, bins, density=True,label='pdf of data')
-    bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
-    #careful density=True means probability density (area under histogram integrates to 1
-    xmin, xmax = plt.xlim()
-    x = np.linspace(xmin, xmax, bins)
 
-    popt, pcov = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)#1,8,0])
-    #print(popt)
+    # Create histogram
+    bins = 10
+    bin_heights, bin_borders, _ = plt.hist(
+        data,
+        bins=bins,
+        density=True,
+        label='pdf of data'
+    )
+    bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
+
+    # Fit exponential decay model
+    popt, _ = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)
     a_opt, b_opt, c_opt = popt
-    #use here bin_centers[0] instead of min(x) to prevent first y_model value being so high
-    # that one does nearly not see any data
-    x_model = np.linspace(bin_centers[0], max(x), 100)
-    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt) 
-    
+
+    # Create fitted curve
+    x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
+    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
+
+    # Plot fitted curve
     plt.plot(x_model, y_model, color='r', label='fit')
+
+    # Add labels and legend
     plt.ylabel('amount of objects')
     plt.legend(loc='upper right')
     plt.show()
-    return
+
+
 
 def ravsdec(x_label,y_label,x,y):
     plt.figure()
@@ -80,7 +90,7 @@ def norm_fit(data,title):
     mu, std = norm.fit(data)
     y_fit = norm.pdf(np.sort(data), mu, std)
     
-    plt.title('mag_i_value')
+    plt.title(title)
     plt.plot(np.sort(data), y_fit, color='r',label='fit')
     plt.legend()
     plt.show()
@@ -121,13 +131,13 @@ def test_data_makes_sense_main_id():
     assert sy <1.5 and sy > 0.4
     assert pl <1.5 and pl > 0.3
     assert di <0.4 and di > 0.1
-    #tbd make this via analytical and not just experimental numbers
+    # tbd make this via analytical and not just experimental numbers
 
 def test_data_makes_sense_mass_st():
     #data
     data=get_data('mes_mass_st','mass_st_value')
     
-    plot_data_and_fit('mes_mass_st',data,[1,8,0])
+    plot_data_and_fit('Stellar Mass',data,[1,8,0])
 
     #assert
     assert max(data) < 60 # O3V
@@ -146,7 +156,7 @@ def test_data_makes_sense_temp_st():
     data=arr2[np.where(arr2['teff_st_value']!=1e20)]
     
     #plt.figure()
-    fig, ax = plt.subplots(figsize = (9, 6))
+    fig, ax = plt.subplots(figsize = (9, 6)) #subplots so that I can overplot old version?
     
     ax.scatter(data['dist_st_value'],data['teff_st_value'],s=2)
     ax.set_yscale("log")
@@ -155,19 +165,21 @@ def test_data_makes_sense_temp_st():
     ax.set_ylabel('Temperature [K]')
 
     #assert
-    assert False
+    assert max(data['teff_st_value']) < 45000  # O3V
+    assert min(data['teff_st_value']) > 2300 # brown dwarf
 
 
 def test_data_makes_sense_mass_pl():
     #data
     data=get_data('mes_mass_pl','mass_pl_value')
 
-    plot_data_and_fit('mes_mass_pl',data,[1,1,0]) 
+    plot_data_and_fit('Planetary Mass',data,[1,1,0])
 
     #assert
     assert max(data) < 75 # m star
     assert min(data) > 0 
     #not working for distance cut 20
+    #looks like they have 0 values in there
 
 
 
@@ -203,7 +215,7 @@ def test_data_makes_sense_mag_i():
     #data
     data=get_data('star_basic','mag_i_value')
      
-    mu = norm_fit(data,'mag_i_value')
+    mu = norm_fit(data,'Stellar i-band magnitude')
     
     assert mu <11 and mu > 7
 
@@ -211,7 +223,7 @@ def test_data_makes_sense_mag_j():
     #data
     data=get_data('star_basic','mag_j_value')
     
-    mu = norm_fit(data,'mag_j_value')
+    mu = norm_fit(data,'Stellar J-band magnitude')
     
     assert mu <11 and mu > 7
 
@@ -219,7 +231,7 @@ def test_data_makes_sense_mag_k():
     #data
     data=get_data('star_basic','mag_k_value')
     
-    mu = norm_fit(data,'mag_k_value')
+    mu = norm_fit(data,'Stellar K-band magnitude')
 
     assert mu <11 and mu > 6#failed at 5pc
 
@@ -227,7 +239,7 @@ def test_data_makes_sense_plx():
     #data
     data=get_data('star_basic','plx_value')
 
-    plot_data_and_fit('plx_value',data,[0.03,0.01,0.001])
+    plot_data_and_fit('Stellar Parallax',data,[0.03,0.01,0.001])
 
     #assert
     assert min(data) > 28 # 35 pc equivalent marcsec
@@ -237,7 +249,7 @@ def test_data_makes_sense_dist_st():
     #data
     data=get_data('star_basic','dist_st_value')
 
-    plot_data_and_fit('plx_value',data,[1,-1,0])
+    plot_data_and_fit('Stellar Distance',data,[1,-1,0])
 
     #assert
     assert min(data) <  35 
