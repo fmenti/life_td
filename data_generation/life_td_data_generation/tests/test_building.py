@@ -1,7 +1,9 @@
 from building import *
-from astropy.table import Table, MaskedColumn, setdiff
-from sdata import empty_dict_wit_columns, table_names
+from building import _apply_table_specific_logic, _process_object_refs
+from astropy.table import Table, MaskedColumn, setdiff,Column, vstack
+from sdata import empty_dict_wit_columns, table_names, empty_provider_tables_dict
 import pytest
+from unittest.mock import Mock, patch
 
 def test_idsjoin_no_mask():
     """Test idsjoin with no masked values."""
@@ -289,5 +291,82 @@ def test_assign_source_idref():
     # Check number of rows remained the same
     assert len(result) == len(cat)
 
+
+def test_provider_data_merging():
+    """Test the provider_data_merging function with various scenarios."""
+    # Setup basic catalog with required tables
+    # Setup basic catalog with all tables initialized
+    cat = empty_dict.copy()
+
+    # Create provider tables dictionary with test data
+    provider1_data = empty_dict.copy()
+    provider1_data['sources'] = Table({
+        'ref': ['ref1'],
+        'provider_name': ['provider1']
+    })
+    provider1_data['objects'] = Table({
+        'type': ['st', 'st'],
+        'ids': ['id1|id2', 'id3|id4'],
+        'main_id': ['star1', 'star2']
+    })
+    provider1_data['provider'] = Table({
+        'provider_name': ['provider1'],
+        'provider_url': ['url1'],
+        'provider_bibcode': ['bib1'],
+        'provider_access': ['access1']
+    })
+
+    provider2_data = empty_dict.copy()
+    provider2_data['sources'] = Table({
+        'ref': ['ref2'],
+        'provider_name': ['provider2']
+    })
+    provider2_data['objects'] = Table({
+        'type': ['st', 'pl'],
+        'ids': ['id5|id6', 'id7'],
+        'main_id': ['star3', 'planet1']
+    })
+    provider2_data['provider'] = Table({
+        'provider_name': ['provider2'],
+        'provider_url': ['url2'],
+        'provider_bibcode': ['bib2'],
+        'provider_access': ['access2']
+    })
+
+
+    prov_tables_dict = {
+        'provider1': provider1_data,
+        'provider2': provider2_data
+    }
+
+    # Test Case 1: Merge sources table
+    result = provider_data_merging(cat, 'sources', prov_tables_dict)
+    assert len(result['sources']) > 0
+    assert 'ref' in result['sources'].colnames
+    assert 'provider_name' in result['sources'].colnames
+
+    # Test Case 2: Merge objects table with object merging
+    result = provider_data_merging(cat, 'objects', prov_tables_dict, o_merging=True)
+    assert len(result['objects']) > 0
+    assert 'type' in result['objects'].colnames
+    assert 'main_id' in result['objects'].colnames
+    assert 'ids' in result['objects'].colnames
+
+    # Test Case 3: Merge provider table
+    result = provider_data_merging(cat, 'provider', prov_tables_dict)
+    assert len(result['provider']) > 0
+    assert 'provider_name' in result['provider'].colnames
+    assert 'provider_url' in result['provider'].colnames
+    assert 'provider_bibcode' in result['provider'].colnames
+    assert 'provider_access' in result['provider'].colnames
+
+    # Test Case 4: Empty provider data
+    empty_prov_dict = {
+        'empty_provider': empty_dict.copy()
+    }
+
+    initial_length = len(cat['sources'])
+    result = provider_data_merging(cat, 'sources', empty_prov_dict)
+    assert len(result['sources']) == initial_length  # Should not change when merging empty data
 
 
