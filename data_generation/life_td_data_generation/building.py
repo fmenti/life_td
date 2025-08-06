@@ -397,7 +397,10 @@ def unify_null_values(cat):
     return cat
 
 
-def build_sources_table(cat, prov_tables_dict, empty):
+def build_sources_table(prov_tables_dict):
+    cat = empty_dict.copy()
+    empty = empty_dict_wit_columns.copy()
+
     #for the sources and objects joins tables from different prov_tables_list
     cat = provider_data_merging(
         cat, 'sources', prov_tables_dict)
@@ -426,7 +429,8 @@ def build_objects_table(cat, prov_tables_dict):
     return cat
 
 
-def build_provider_table(cat, prov_tables_dict, empty):
+def build_provider_table(cat, prov_tables_dict):
+    empty = empty_dict_wit_columns.copy()
     cat = provider_data_merging(
         cat, 'provider', prov_tables_dict)
 
@@ -436,7 +440,8 @@ def build_provider_table(cat, prov_tables_dict, empty):
     return cat
 
 
-def build_rest_of_tables(cat, prov_tables_dict, empty):
+def build_rest_of_tables(cat, prov_tables_dict):
+    empty = empty_dict_wit_columns.copy()
     for table_name in islice(cat, 3, None):
         # for the tables star_basic,...,mes_mass_st
         cat = provider_data_merging(cat, table_name,
@@ -549,12 +554,10 @@ def build_rest_of_tables(cat, prov_tables_dict, empty):
 
 
 def build_tables(prov_tables_dict):
-    cat = empty_dict.copy()
-    empty = empty_dict_wit_columns.copy()
-    cat = build_sources_table(cat, prov_tables_dict, empty)
+    cat = build_sources_table(prov_tables_dict)
     cat = build_objects_table(cat, prov_tables_dict)
-    cat = build_provider_table(cat, prov_tables_dict, empty)
-    cat = build_rest_of_tables(cat, prov_tables_dict, empty)
+    cat = build_provider_table(cat, prov_tables_dict)
+    cat = build_rest_of_tables(cat, prov_tables_dict)
     return cat
 
 
