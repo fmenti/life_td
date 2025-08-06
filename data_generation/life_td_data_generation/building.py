@@ -334,33 +334,40 @@ def provider_data_merging(cat, table_name, prov_tables_dict, o_merging=False, pa
 
     for prov_table in list(prov_tables_dict.keys()):
         if para_match:
-            # redefining of paras multiple times is not optimal but easier to 
-            # read the code if I don't have to define them globally or pass
-            # them to the function.
-            #print('careful, I have here hardcoded parameter and table order')
-            paras = paras_dict.copy()
-            if len(prov_tables_dict[prov_table][table_name]) > 0:
-                #prov_tables_list[j] is a table containing the two columns ref 
-                # and provider name. replacing ref columns with 
-                # corresponding source_idref one. issue is that order 
-                # prov_tables_list and provider_name not the same
-                prov_tables_dict[prov_table][table_name] = assign_source_idref(prov_tables_dict[prov_table][table_name],
-                                                                               cat['sources'], paras[table_name],
-                                                                               prov_tables_dict[prov_table]['provider'][
-                                                                                   'provider_name'][0])
+            matching_parameters(cat, prov_table, prov_tables_dict, table_name)
         if len(cat[table_name]) > 0:
-            #joining data from different providers (simbad,...,wds)
-            if len(prov_tables_dict[prov_table][table_name]) > 0:
-                if o_merging:
-                    cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name],
-                                           keys='main_id', join_type='outer')
-                    cat[table_name] = objectmerging(cat[table_name])
-                else:
-                    cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name], join_type='outer')
-
+            join_different_provider_data(cat, o_merging, prov_table, prov_tables_dict, table_name)
         else:
             cat[table_name] = prov_tables_dict[prov_table][table_name]
     return cat
+
+
+def join_different_provider_data(cat, o_merging, prov_table, prov_tables_dict, table_name):
+    # joining data from different providers (simbad,...,wds)
+    if len(prov_tables_dict[prov_table][table_name]) > 0:
+        if o_merging:
+            cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name],
+                                   keys='main_id', join_type='outer')
+            cat[table_name] = objectmerging(cat[table_name])
+        else:
+            cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name], join_type='outer')
+
+
+def matching_parameters(cat, prov_table, prov_tables_dict, table_name):
+    # redefining of paras multiple times is not optimal but easier to
+    # read the code if I don't have to define them globally or pass
+    # them to the function.
+    # print('careful, I have here hardcoded parameter and table order')
+    if len(prov_tables_dict[prov_table][table_name]) > 0:
+        paras = paras_dict.copy()
+        # prov_tables_list[j] is a table containing the two columns ref
+        # and provider name. replacing ref columns with
+        # corresponding source_idref one. issue is that order
+        # prov_tables_list and provider_name not the same
+        prov_tables_dict[prov_table][table_name] = assign_source_idref(prov_tables_dict[prov_table][table_name],
+                                                                       cat['sources'], paras[table_name],
+                                                                       prov_tables_dict[prov_table]['provider'][
+                                                                           'provider_name'][0])
 
 
 def unify_null_values(cat):
