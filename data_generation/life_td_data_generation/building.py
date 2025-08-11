@@ -398,6 +398,8 @@ def unify_null_values(cat):
 
 
 def build_sources_table(prov_tables_dict):
+
+    # Initialization
     cat = empty_dict.copy()
     empty = empty_dict_wit_columns.copy()
 
