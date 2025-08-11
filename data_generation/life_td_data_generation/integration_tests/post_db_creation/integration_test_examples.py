@@ -1,8 +1,7 @@
 from provider.utils import query
 from astropy.table import Table
 
-#I think this does not work. idea was to make sure the examples in the q.rd work. turns out that translating adql back
-# to work with db_input is harder than I thought and will still not cover all as when ingesting db errors could still happen.
+# db needs to be ingested by GAVO DaCHS and hosted on localhost for this to be meaningful
 
 def test_life_db_filter_objects_by_type():
     life_db_provider=Table()
