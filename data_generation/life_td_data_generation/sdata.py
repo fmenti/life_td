@@ -117,11 +117,11 @@ empty_dict_wit_columns = {
                                float, float, object, object, int, object]
                         ),
     'mes_mass_pl': Table(names=['object_idref',
-                                'mass_pl_value', 'mass_pl_err', 'mass_pl_rel',
+                                'mass_pl_value', 'mass_pl_err_max', 'mass_pl_err_min', 'mass_pl_rel',
                                 'mass_pl_qual', 'mass_pl_source_idref',
                                 'mass_pl_ref'],
                          dtype=[int,
-                                float, float, object, object, int, object]),
+                                float, float,float, object, object, int, object]),
     'mes_teff_st': Table(names=['object_idref',
                                 'teff_st_value', 'teff_st_err', 'teff_st_qual',
                                 'teff_st_source_idref', 'teff_st_ref'],
