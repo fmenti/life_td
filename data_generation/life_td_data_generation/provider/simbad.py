@@ -77,13 +77,16 @@ def create_simbad_helpertable(distance_cut_in_pc, test_objects):
     #------------------querrying----------------------------------------
     #perform query for objects with in distance given
     sim_helptab = query(sim['provider']['provider_url'][0], main_adql_queries(plx_cut))
+    save([sim_helptab], ['sim_helptab_query'])
     #querries parent and children objects with no parallax value
     parents_without_plx = query(sim['provider']['provider_url'][0],
                                 adql_upload_queries['sy_without_plx_but_child_with_upload'],
                                 [sim_helptab])
+    save([parents_without_plx], ['parents_without_plx_query'])
     children_without_plx = query(sim['provider']['provider_url'][0],
                                  adql_upload_queries['pl_without_plx_but_host_with_upload'],
                                  [sim_helptab])
+    save([children_without_plx], ['children_without_plx_query'])
 
     test_objects = np.array(test_objects)
     if len(test_objects) > 0:
@@ -124,7 +127,9 @@ def create_simbad_helpertable(distance_cut_in_pc, test_objects):
                 sim_helptab['type'][i] = 'st'
         else:
             removed_otypes.append(sim_helptab['otypes'][i])
-            #most likely single brown dwarfs
+            #most likely single brown dwarfs -> wait, they have BD* and get caught above...
+            # so I am not as restrictive as I thought I am here. shouldn't matter as they
+            # shouldn't make it into the catalog because of the spectral type criteria
             #storing information for later removal from table called simbad
             to_remove_list.append(i)
     #removing any objects that are neither planet, star nor system in type
