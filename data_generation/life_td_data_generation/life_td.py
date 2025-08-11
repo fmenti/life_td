@@ -75,6 +75,8 @@ def partial_create(distance_cut_in_pc, create=[]):
         # Write the floating point number to the file
         f.write(str(distance_cut_in_pc))
 
+    distance_cut_in_pc = float(distance_cut_in_pc)
+
     print(f'Building life_td data with distance cut of {distance_cut_in_pc} pc')
 
     provider_tables_dict = empty_provider_tables_dict.copy()
