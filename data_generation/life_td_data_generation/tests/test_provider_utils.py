@@ -24,16 +24,22 @@ def test_create_provider_table_no_date_given():
 #@pytest.mark.dependency()
 def test_fetch_main_id():
     #data
-    cat = Table(data=[['HD 166', '6 Cet']],
+    id_cat = Table(data=[['HD 166', '6 Cet']],
                 names=['sdb_host_main_id'],
                 dtype=[object])
+    oid_cat = Table(data=[[1800872, 508940]],
+                names=['parent_oid'],
+                dtype=[int])
 
     #function
-    result = fetch_main_id(cat, id_creator=IdentifierCreator(name='main_id', colname='sdb_host_main_id'))
+    id_result = fetch_main_id(id_cat, id_creator=IdentifierCreator(name='main_id', colname='sdb_host_main_id'))
+    oid_result = fetch_main_id(oid_cat, id_creator=OidCreator(name='parent_main_id', colname='parent_oid'))
 
     #assert
-    assert result['main_id'][np.where(result['sdb_host_main_id'] == 'HD 166')] == 'HD    166'
-    assert result['main_id'][np.where(result['sdb_host_main_id'] == '6 Cet')] == '*   6 Cet'
+    assert id_result['main_id'][np.where(id_result['sdb_host_main_id'] == 'HD 166')] == 'HD    166'
+    assert id_result['main_id'][np.where(id_result['sdb_host_main_id'] == '6 Cet')] == '*   6 Cet'
+    assert oid_result['parent_main_id'][np.where(oid_result['parent_oid'] == 1800872)] == '* ksi UMa'
+    assert oid_result['parent_main_id'][np.where(oid_result['parent_oid'] == 508940)] == 'MCC 541'
 
 
 def test_lower_quality():
