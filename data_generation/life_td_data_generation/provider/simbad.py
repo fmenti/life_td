@@ -4,11 +4,10 @@ Generates the data for the database for each of the data providers separately.
 
 import numpy as np  #arrays
 from astropy.table import setdiff, Table, join, vstack, unique, MaskedColumn
-from datetime import datetime
 
 #self created modules
 from utils.io import save
-from provider.utils import fetch_main_id, OidCreator, fill_sources_table, create_sources_table, query, nullvalues, \
+from provider.utils import fetch_main_id, OidCreator, create_sources_table, query, nullvalues, \
     replace_value, create_provider_table
 from provider.assign_quality_funcs import assign_quality
 from sdata import empty_dict
@@ -109,6 +108,7 @@ def create_simbad_helpertable(distance_cut_in_pc, test_objects):
 
     #sorting from object type into star, system and planet type
     sim_helptab['type'] = ['None' for i in range(len(sim_helptab))]
+    sim_helptab['type'] = sim_helptab['type'].astype(object)
     sim_helptab['binary_flag'] = ['False' for i in range(len(sim_helptab))]
     to_remove_list = []
     removed_otypes = []
@@ -154,14 +154,14 @@ def stars_in_multiple_system(cat, sim_h_link, all_objects):
     This function assignes object type 'st' to those objects that are in
     multiple systems but don't have any stellar child object.
 
-    :param cat: Table alias containing 
+    :param cat: Table alias containing objects of type sy.
     :type cat: astropy.table.table.Table
     :param sim_h_link: Table copy containing columns main_id,
         type and sptype_string.
     :type sim_h_link: astropy.table.table.Table
     :param all_objects: Table copy containing columns 
-        parent_main_id and h_link_ref. Rows are all objects with child
-        objects.
+        main_id and type. Rows are all objects with child
+        objects and their children.
     :type all_objects: astropy.table.table.Table
     :returns: Table alias like param cat with desired types
         adapted.
@@ -172,40 +172,57 @@ def stars_in_multiple_system(cat, sim_h_link, all_objects):
     #this should work if alias works well
     #need parent_main_id for sim_h_link here. but setdiff does 
     #not support that.
-    parents = sim_h_link['parent_main_id', 'main_id', 'h_link_ref'][:]
-    parents.rename_column('main_id', 'child_main_id')
-    parents.rename_column('parent_main_id', 'main_id')
-    sy_wo_child = setdiff(cat['main_id', 'type', 'sptype_string'][:],
-                          parents[:], keys=['main_id'])
-    #that don t have children: sy_wo_child['main_id','type']
-    #list of those with children
-    sy_w_child = join(parents[:],
-                      cat['main_id', 'type', 'sptype_string'][:],
-                      keys=['main_id'])
-    #list of those with children joined with type of child
-    all_objects.rename_columns(['type', 'main_id'],
-                               ['child_type', 'child_main_id'])
-    sy_w_child = join(sy_w_child[:],
-                      all_objects['child_type', 'child_main_id'][:],
-                      keys=['child_main_id'], join_type='left')
-    #remove all where type child is not pl
-    sy_w_child_pl = sy_w_child[np.where(sy_w_child['child_type'] == 'pl')]
-    if len(sy_w_child_pl) == 0:
-        #no systems with child of type planet
-        sy_wo_child_st = sy_wo_child
-    else:
-        #join with list of sy that dont habe children
-        sy_wo_child_st = vstack([sy_wo_child[:], sy_w_child_pl[:]])
-        sy_wo_child_st.remove_column('child_type')
-    #systems that don t have children except planets: sy_wo_child_st
-    #no + in sptype_string because that is another indication of binarity
-    temp = [len(i.split('+')) == 1 for i in sy_wo_child_st['sptype_string']]
-    #have it as an array of bools 
-    temp = np.array(temp)
-    #have it as lisit of indices 
-    temp = list(np.where(temp == True)[0])
-    single_sptype = sy_wo_child_st[:][temp]
-    #and no + in spectral type: single_sptype['main_id','type']      
+    # initiating parent table with correct column names:
+    def split_into_sy_w_and_wo_child(sim_h_link,cat,all_objects):
+        parents = sim_h_link['parent_main_id', 'main_id', 'h_link_ref'][:]
+        parents.rename_column('main_id', 'child_main_id')
+        parents.rename_column('parent_main_id', 'main_id')
+        # initiating subset of objects that are type system withouh having child objects
+        sy_wo_child = setdiff(cat['main_id', 'type', 'sptype_string'][:],
+                              parents[:], keys=['main_id'])
+        # initiating subset of objects that are type system and have child objects
+        sy_w_child = join(parents[:],
+                          cat['main_id', 'type', 'sptype_string'][:],
+                          keys=['main_id'])
+        # adding information about those children
+        all_objects.rename_columns(['type', 'main_id'],
+                                   ['child_type', 'child_main_id'])
+        sy_w_child = join(sy_w_child[:],
+                          all_objects['child_type', 'child_main_id'][:],
+                          keys=['child_main_id'], join_type='left')
+        return sy_wo_child, sy_w_child
+
+    sy_wo_child, sy_w_child = split_into_sy_w_and_wo_child(sim_h_link, cat, all_objects)
+
+    # now differentating between stellar and planetary children:
+    # I want to get those that have children but not of type star e.g. pl or sy as
+    # children remaining. because those I want to reassign the type st
+    def get_sy_wo_child_st(sy_wo_child,sy_w_child):
+        sy_w_child_pl = sy_w_child[np.where(sy_w_child['child_type'] == 'pl')]
+        if len(sy_w_child_pl) == 0:
+            #no systems with child of type planet
+            sy_wo_child_st = sy_wo_child
+        else:
+            #join with list of sy that dont habe children
+            sy_wo_child_st = vstack([sy_wo_child[:], sy_w_child_pl[:]])
+            sy_wo_child_st.remove_column('child_type')
+        return sy_wo_child_st
+    sy_wo_child_st = get_sy_wo_child_st(sy_wo_child,sy_w_child)
+
+    def special_treatment_spectral_type(sy_wo_child_st):
+        #no + in sptype_string because that is another indication of binarity
+        temp = [len(i.split('+')) == 1 for i in sy_wo_child_st['sptype_string']]
+        #have it as an array of bools
+        temp = np.array(temp)
+        #have it as lisit of indices
+        temp = list(np.where(temp == True)[0])
+        single_sptype = sy_wo_child_st[:][temp]
+        #and no + in spectral type: single_sptype['main_id','type']
+        return single_sptype
+
+    single_sptype = special_treatment_spectral_type(sy_wo_child_st)
+
+    # reassign type to st:
     cat['type'][np.where(np.isin(cat['main_id'],
                                  single_sptype['main_id']))] = \
         ['st' for j in range(len(cat[np.where(np.isin(cat['main_id'],
@@ -276,10 +293,8 @@ def expanding_helpertable_stars(sim_helptab, sim, stars):
                 stars[f'mag_{band}_ref'][np.where(
                     stars[f'mag_{band}_value'].mask == False)]))]
 
-    stars = replace_value(stars, 'plx_ref', '', sim['provider']['provider_bibcode'][0])
-    stars = replace_value(stars, 'sptype_ref', '',
-                          sim['provider']['provider_bibcode'][0])
-    stars = replace_value(stars, 'coo_ref', '', sim['provider']['provider_bibcode'][0])
+    for colname in ['plx_ref','sptype_ref','coo_ref']:
+        stars = replace_value(stars, colname, '', sim['provider']['provider_bibcode'][0])
 
     stars['binary_ref'] = [sim['provider']['provider_bibcode'][0] for j in range(
         len(stars))]
@@ -304,6 +319,7 @@ def create_ident_table(sim_helptab, sim):
                       [sim_helptab['oid', 'main_id'][:].copy()])  #adds column id
     sim_ident['id_ref'] = [sim['provider']['provider_bibcode'][0] \
                            for j in range(len(sim_ident))]
+    sim_ident['id_ref']=sim_ident['id_ref'].astype(object)
     sim_ident.remove_column('oid')
     return sim_ident
 
