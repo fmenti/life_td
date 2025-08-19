@@ -1,7 +1,51 @@
 from provider.utils import *
+from astropy.table import Table, setdiff
 
 
 #import pytest
+
+def test_fill_sources_table():
+    # Data
+    cat = Table({
+        'para1_ref': ['ref1','ref2'],
+        'para2_ref': ['ref2','ref3']
+    })
+    ref_columns = ['para1_ref','para2_ref']
+    provider = 'SIMBAD'
+
+    # Execute
+    return_sources = fill_sources_table(cat, ref_columns, provider)
+
+    # Verify
+    expected_sources = Table({
+        'ref': ['ref1', 'ref2', 'ref3'],
+        'provider_name': ['SIMBAD' for j in range(3)]
+    })
+    assert len(setdiff(return_sources,expected_sources)) == 0
+
+def test_create_sources_table():
+    # Data
+    cat = Table({
+        'para1_ref': ['ref1', 'ref2'],
+        'para2_ref': ['ref2', 'ref3']
+    })
+    cat2 = Table({
+        'para3_ref': ['ref4', 'ref2'],
+        'para4_ref': ['ref2', 'ref5']
+    })
+    tables = [cat, cat2]
+    ref_columns = [['para1_ref', 'para2_ref'],[ 'para3_ref', 'para4_ref']]
+    provider_name = 'SIMBAD'
+
+    # Execute
+    return_sources = create_sources_table(tables, ref_columns, provider_name)
+
+    # Verify
+    expected_sources = Table({
+        'ref': ['ref1', 'ref2', 'ref3','ref4', 'ref5'],
+        'provider_name': ['SIMBAD' for j in range(5)]
+    })
+    assert len(setdiff(return_sources, expected_sources)) == 0
 
 
 def test_create_provider_table_date_given():
