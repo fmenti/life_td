@@ -12,6 +12,7 @@ def query_returns(monkeypatch):
     test_objects = []
 
     membership = MaskedColumn([np.ma.masked,np.ma.masked,100], name='membership', mask=[True, True,False])
+    plx_qual = MaskedColumn(data=['A','A','C'], mask=[False, False, False], fill_value='N')
     t0 = Table({
         'main_id': np.array(['star1','star2','star3'],dtype=object),
         'coo_ra': [160.,165.,100.],
@@ -28,11 +29,11 @@ def query_returns(monkeypatch):
         'plx_err': [0.05,0.9,3],
         'plx_value': [190.,230.,375.],
         'plx_ref': np.array(['ref_plx','ref_plx','ref_plx2'],dtype=object),
-        'plx_qual': ['A','A','C'],
+        'plx_qual': plx_qual,
         'membership': membership,
         'parent_oid': [4,np.ma.masked,4],
         'h_link_ref': np.array(['ref_hlink','','ref_hlink'],dtype=object),
-        'otypes': np.array(['*','BD?','*|**'],dtype=object),
+        'otypes': np.array(['*|**','BD?','*|**'],dtype=object),
         'ids': np.array(['star1|id1','star2|id2','star3|id3'],dtype=object),
         'mag_i_value': [np.ma.masked,np.ma.masked,7.],
         'mag_j_value': [8.,np.ma.masked,6.],
@@ -73,7 +74,7 @@ def test_create_simbad_helpertable(query_returns):
     # Verify
     # all helptab columns are present
     assert set(result_sim_helptab.colnames) == set(t0.colnames+['type','binary_flag'])
-    assert set(result_sim_helptab['type']) == set(['st','sy','sy','pl'])
+    assert set(result_sim_helptab['type']) == set(['sy','sy','sy','pl'])
     # objects got correctly added and removed from helptab
     assert len(result_sim_helptab) == 4# stars, systems and planets but removed star2
     # provider table is correctly filled in
@@ -171,10 +172,41 @@ def test_stars_in_multiple_system():
     })
     assert len(setdiff(return_cat, expected_cat)) == 0
 
+def expanded_helptab_stars(expected_stars,ref):
+    expected_stars.remove_row(-1)  # removing planet object row
+    # doing stars in multiple systems function
+    expected_stars['binary_flag'] = ['True', 'True', 'True']
+    # expected_stars['plx_qual'][np.where(expected_stars['main_id']=='system1')] = '?'
+    expected_stars['plx_qual']=expected_stars['plx_qual'].astype(object)
+    expected_stars['plx_ref'][np.where(expected_stars['main_id'] == 'system1')] = ref
+    # for magnitude do ref
+
+    expected_stars['mag_i_ref'] = MaskedColumn(
+        data=np.array(['', ref, ''],
+                      dtype=object),
+        mask=[True, False, True], fill_value='N')
+    expected_stars['mag_j_ref'] = MaskedColumn(
+        data=np.array([ref, ref, ''],
+                      dtype=object),
+        mask=[False, False, True], fill_value='N')
+    expected_stars['mag_k_ref'] = MaskedColumn(
+        data=np.array([ref, ref, ''],
+                      dtype=object),
+        mask=[False, False, True], fill_value='N')
+    # replacing null values in plx , coo and sptype with sim prvoder
+    expected_stars['sptype_ref'][np.where(expected_stars['main_id'] == 'system1')] = ref
+    expected_stars['coo_ref'][np.where(expected_stars['main_id'] == 'system1')] = ref
+    expected_stars['binary_ref'] = [ref, ref, ref]
+    expected_stars['binary_qual'] = ['D', 'D', 'D']
+    expected_stars['type'][np.where(expected_stars['main_id'] == 'star1')] = 'st'  # stars in multiple systems function
+    return expected_stars
+
 def test_expanding_helpertable_stars(query_returns):
     # Data
     result_sim_helptab, result_sim, t0, return_ident = query_returns
     stars = result_sim_helptab
+    expected_stars = expanded_helptab_stars(stars.copy(),result_sim['provider']['provider_bibcode'][0])
+
     stars.remove_row(-1) # removing planet object row
     result_sim['h_link']= Table({
         'main_id': np.array(['star1','star3', 'planet1'],dtype=object),
@@ -186,25 +218,18 @@ def test_expanding_helpertable_stars(query_returns):
     # Execute
     #isue, plx_qual needs to be masked column with null value 'N'
     #why not '?' as I will use later?
-    stars['plx_qual'] = MaskedColumn(data = stars['plx_qual'], mask=[False,False,False],fill_value='N')
-    result_stars = expanding_helpertable_stars(result_sim_helptab, result_sim, stars)
+    stars['plx_qual'].mask = [False,False,True]
+    result_stars = expanding_helpertable_stars(result_sim_helptab, result_sim, stars.copy())
 
     # Verify
-    expected_stars = stars
-    # doing stars in multiple systems function
-    expected_stars['binary_flag'] = np.array(['True','True','True'],dtype=object)
-    expected_stars['plx_qual'][np.where(expected_stars['main_id']=='system1')] = '?'
-    expected_stars['plx_ref'][np.where(expected_stars['main_id'] == 'system1')] = result_sim['provider']['provider_bibcode'][0]
-    # adding binary_flag
-    # exchanging null values in plx qual
-    # for magnitude do ref
-    # replacing null values in plx , coo and sptype with sim prvoder
-    # add binary_ref and assign quality binary
+
+
     for null,colname in zip([999999,999999,999999,999999,999999,999999,999999,999999,
-                             '','',''],
+                             '','','','','','','',''],
                             ['membership','coo_err_angle','coo_err_maj',
                              'coo_err_min','parent_oid','mag_i_value','mag_j_value','mag_k_value',
-                             'mag_i_ref','mag_j_ref','mag_k_ref']):
+                             'mag_i_ref','mag_j_ref','mag_k_ref','plx_qual',
+                             'coo_qual','sptype_string','sptype_qual','h_link_ref']):
         result_stars= nullvalues(result_stars, colname, null)
         expected_stars = nullvalues(expected_stars, colname, null)
     assert len(setdiff(result_stars, expected_stars)) == 0
@@ -214,32 +239,44 @@ def test_create_object_table(query_returns):
     result_sim_helptab, result_sim, t0, return_ident = query_returns
     stars = result_sim_helptab.copy()
     stars.remove_row(-1)  # removing planet object row
-    stars['plx_qual'] = MaskedColumn(data=stars['plx_qual'], mask=[False, False, False], fill_value='N')
-    stars['binary_flag'] = np.array(['True', 'True', 'True'],dtype=object)
-    stars['plx_qual'][np.where(stars['main_id'] == 'system1')] = '?'
-    stars['plx_ref'][np.where(stars['main_id'] == 'system1')] = \
-            result_sim['provider']['provider_bibcode'][0]
-    stars['type'][np.where(stars['main_id'] == 'star3')] = 'st' #stars in multiple systems function
+
+    stars['type'][np.where(stars['main_id'] == 'star1')] = 'st' #stars in multiple systems function
 
     return_object = create_objects_table(result_sim_helptab, stars)
 
     # Verify
     expected_object = Table({
         'main_id': np.array(['star1', 'star3', 'system1', 'planet1'],dtype=object),
-        'type': np.array(['st', 'st', 'sy', 'pl'],dtype=object),
+        'type': np.array(['st', 'sy', 'sy', 'pl'],dtype=object),
         'ids': np.array(['star1|id1','star3|id3', 'system1', 'planet1'],dtype=object)
     })
-    expected_object = stringtoobject(expected_object)
 
     assert len(setdiff(return_object, expected_object)) == 0
 
-    # this stuff below here is for further testing functions
-
-    minimal_simbad = empty_dict.copy()
-
-
-    minimal_simbad['sources'] = Table({
-        'ref': ['ref1', 'ref2'],
-        'provider_name': ['SIMBAD', 'SIMBAD']
+def test_create_sim_sources_table(query_returns):
+    # Data
+    result_sim_helptab, result_sim, t0, return_ident = query_returns
+    stars = result_sim_helptab.copy()
+    expected_stars = expanded_helptab_stars(stars.copy(),result_sim['provider']['provider_bibcode'][0])
+    result_sim['h_link'] = Table({
+        'main_id': np.array(['star1','star3', 'planet1'],dtype=object),
+        'parent_main_id': np.array(['system1','system1', 'star3'],dtype=object),
+        'h_link_ref': np.array(['ref_hlink','ref_hlink','ref_hlink2'],dtype=object),
+        'membership': [999999, 100,999999]
     })
+
+    # Execute
+    return_sources = create_sim_sources_table(expected_stars,result_sim)
+
+    # Verify
+    expected_sources = Table({
+        'ref': ['ref_coo', 'ref_coo2', 'ref_sptype', 'ref_sptype2',
+                         'ref_plx','ref_plx2','ref_hlink','ref_hlink2',
+                         result_sim['provider']['provider_bibcode'][0]],
+        'provider_name': ['SIMBAD' for j in range(9)]
+    })
+    assert len(setdiff(return_sources, expected_sources)) == 0
+
+    #need to add another single star to test stuff properly as I currently only have binary_flag true tones
+
 
