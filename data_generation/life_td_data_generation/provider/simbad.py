@@ -109,7 +109,7 @@ def create_simbad_helpertable(distance_cut_in_pc, test_objects):
     #sorting from object type into star, system and planet type
     sim_helptab['type'] = ['None' for i in range(len(sim_helptab))]
     sim_helptab['type'] = sim_helptab['type'].astype(object)
-    sim_helptab['binary_flag'] = ['False' for i in range(len(sim_helptab))]
+    sim_helptab['binary_flag'] = np.array(['False' for i in range(len(sim_helptab))],dtype=object)
     to_remove_list = []
     removed_otypes = []
     for i in range(len(sim_helptab)):
@@ -293,8 +293,16 @@ def expanding_helpertable_stars(sim_helptab, sim, stars):
                 stars[f'mag_{band}_ref'][np.where(
                     stars[f'mag_{band}_value'].mask == False)]))]
 
-    for colname in ['plx_ref','sptype_ref','coo_ref']:
-        stars = replace_value(stars, colname, '', sim['provider']['provider_bibcode'][0])
+    stars[np.where(stars['sptype_string'] != '')] = replace_value(
+            stars[np.where(stars['sptype_string'] != '')],
+        'sptype_ref','',sim['provider']['provider_bibcode'][0])
+
+    for colname,colval in zip(['plx_ref','coo_ref'],
+                                ['plx_value','coo_ra']):
+
+        stars[np.where(stars[colval].mask == False)] = replace_value(
+            stars[np.where(stars[colval].mask == False)],
+            colname, '', sim['provider']['provider_bibcode'][0])
 
     stars['binary_ref'] = [sim['provider']['provider_bibcode'][0] for j in range(
         len(stars))]
