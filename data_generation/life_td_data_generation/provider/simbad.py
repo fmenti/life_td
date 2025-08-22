@@ -296,13 +296,20 @@ def expanding_helpertable_stars(sim_helptab, sim, stars):
     stars[np.where(stars['sptype_string'] != '')] = replace_value(
             stars[np.where(stars['sptype_string'] != '')],
         'sptype_ref','',sim['provider']['provider_bibcode'][0])
+    # make the remaning ones into masked entries
+    stars['sptype_ref']=MaskedColumn(stars['sptype_ref'])
+    stars['sptype_ref'].mask[np.where(stars['sptype_ref'] == '')] = [True
+                for j in range(len(stars[np.where(stars['sptype_ref'] == '')]))]
 
     for colname,colval in zip(['plx_ref','coo_ref'],
                                 ['plx_value','coo_ra']):
-
+        stars[colname] = MaskedColumn(stars[colname])
         stars[np.where(stars[colval].mask == False)] = replace_value(
             stars[np.where(stars[colval].mask == False)],
             colname, '', sim['provider']['provider_bibcode'][0])
+        # make the remaning ones into masked entries
+        stars[colname].mask[np.where(stars[colname] == '')] = [True
+                for j in range(len(stars[np.where(stars[colname] == '')]))]
 
     stars['binary_ref'] = [sim['provider']['provider_bibcode'][0] for j in range(
         len(stars))]
