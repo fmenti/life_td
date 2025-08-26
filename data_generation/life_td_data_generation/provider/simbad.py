@@ -204,51 +204,54 @@ def create_simbad_helpertable(
     return sim_helptab, sim
 
 
-def stars_in_multiple_system(cat, sim_h_link, all_objects):
+def stars_in_multiple_system(
+    cat: Table,
+    sim_h_link: Table,
+    all_objects: Table,
+) -> Table:
     """
-    Assigns object type to special subset of stars.
+    Assign object type "st" to a subset of systems.
 
-    This function assignes object type 'st' to those objects that are in
-    multiple systems but don't have any stellar child object.
+    Assign the object type "st" to those entries in a system table that are
+    members of multiple systems but do not have stellar children.
 
-    :param cat: Table alias containing objects of type sy.
-    :type cat: astropy.table.table.Table
-    :param sim_h_link: Table copy containing columns main_id,
-        type and sptype_string.
-    :type sim_h_link: astropy.table.table.Table
-    :param all_objects: Table copy containing columns
-        main_id and type. Rows are all objects with child
-        objects and their children.
-    :type all_objects: astropy.table.table.Table
-    :returns: Table alias like param cat with desired types
-        adapted.
-    :rtype: astropy.table.table.Table
+    :param cat: Table alias containing objects of type "sy".
+    :type cat: astropy.table.Table
+    :param sim_h_link: Table with columns parent_main_id, main_id and
+        h_link_ref (parent-child pairs).
+    :type sim_h_link: astropy.table.Table
+    :param all_objects: Table copy containing columns main_id and type.
+        Rows are all objects with child objects and their children.
+    :type all_objects: astropy.table.Table
+    :returns: The input table with selected rows having their type set to "st".
+    :rtype: astropy.table.Table
     """
 
-    # all type sy objects: cat['main_id','type']
-    # this should work if alias works well
-    # need parent_main_id for sim_h_link here. but setdiff does
-    # not support that.
-    # initiating parent table with correct column names:
-    def split_into_sy_w_and_wo_child(sim_h_link, cat, all_objects):
+    # Initiate parent table with consistent names.
+    def split_into_sy_w_and_wo_child(
+        sim_h_link: Table,
+        cat: Table,
+        all_objects: Table,
+    ) -> tuple[Table, Table]:
         parents = sim_h_link["parent_main_id", "main_id", "h_link_ref"][:]
         parents.rename_column("main_id", "child_main_id")
         parents.rename_column("parent_main_id", "main_id")
-        # initiating subset of objects that are type system withouh
-        # having child objects
+
+        # Objects of type system without children.
         sy_wo_child = setdiff(
             cat["main_id", "type", "sptype_string"][:],
             parents[:],
             keys=["main_id"],
         )
-        # initiating subset of objects that are type system and
-        # have child objects
+
+        # Objects of type system that have children.
         sy_w_child = join(
             parents[:],
             cat["main_id", "type", "sptype_string"][:],
             keys=["main_id"],
         )
-        # adding information about those children
+
+        # Add information about those children.
         all_objects.rename_columns(
             ["type", "main_id"], ["child_type", "child_main_id"]
         )
@@ -264,40 +267,35 @@ def stars_in_multiple_system(cat, sim_h_link, all_objects):
         sim_h_link, cat, all_objects
     )
 
-    # now differentating between stellar and planetary children:
-    # I want to get those that have children but not of type star e.g.
-    # pl or sy as
-    # children remaining. because those I want to reassign the type st
-    def get_sy_wo_child_st(sy_wo_child, sy_w_child):
+    # Get those that have planetary children or no children at all.
+    def get_sy_wo_child_st(
+        sy_wo_child: Table,
+        sy_w_child: Table,
+    ) -> Table:
         sy_w_child_pl = sy_w_child[np.where(sy_w_child["child_type"] == "pl")]
         if len(sy_w_child_pl) == 0:
-            # no systems with child of type planet
-            sy_wo_child_st = sy_wo_child
-        else:
-            # join with list of sy that dont habe children
-            sy_wo_child_st = vstack([sy_wo_child[:], sy_w_child_pl[:]])
-            sy_wo_child_st.remove_column("child_type")
+            return sy_wo_child
+
+        # Join with list of systems without children.
+        sy_wo_child_st = vstack([sy_wo_child[:], sy_w_child_pl[:]])
+        sy_wo_child_st.remove_column("child_type")
         return sy_wo_child_st
 
     sy_wo_child_st = get_sy_wo_child_st(sy_wo_child, sy_w_child)
 
-    def special_treatment_spectral_type(sy_wo_child_st):
-        # no + in sptype_string because that is another indication of binarity
+    def special_treatment_spectral_type(sy_wo_child_st: Table) -> Table:
+        # No "+" in sptype_string because that indicates binarity.
         temp = [len(i.split("+")) == 1 for i in sy_wo_child_st["sptype_string"]]
-        # have it as an array of bools
-        temp = np.array(temp)
-        # have it as lisit of indices
-        temp = list(np.where(temp == True)[0])
-        single_sptype = sy_wo_child_st[:][temp]
-        # and no + in spectral type: single_sptype['main_id','type']
-        return single_sptype
+        mask = np.array(temp)
+        indices = list(np.where(mask)[0])
+        return sy_wo_child_st[:][indices]
 
     single_sptype = special_treatment_spectral_type(sy_wo_child_st)
 
-    # reassign type to st:
+    # Reassign type to "st".
     cat["type"][np.where(np.isin(cat["main_id"], single_sptype["main_id"]))] = [
         "st"
-        for j in range(
+        for _ in range(
             len(
                 cat[np.where(np.isin(cat["main_id"], single_sptype["main_id"]))]
             )
@@ -306,55 +304,64 @@ def stars_in_multiple_system(cat, sim_h_link, all_objects):
     return cat
 
 
-def creating_helpertable_stars(sim_helptab, sim):
+def creating_helpertable_stars(
+    sim_helptab: Table,
+) -> Table:
     """
-    Creates another helper table.
+    Create a helper table for stars.
+
+    Removes planets, de-duplicates by main_id, and returns the table that
+    contains only systems and stars.
 
     :param sim_helptab: Main SIMBAD helper table.
-    :type sim_helptab: astropy.table.table.Table
+    :type sim_helptab: astropy.table.Table
     :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
-    :returns: Helper table.
-    :rtype: astropy.table.table.Table
+    :type sim: dict[str, astropy.table.Table]
+    :returns: Helper table for star/system entries.
+    :rtype: astropy.table.Table
     """
     temp_stars = sim_helptab[np.where(sim_helptab["type"] != "pl")]
-    # removing double objects (in there due to multiple parents)
+    # Removing double objects (in there due to multiple parents).
     stars = Table(unique(temp_stars, keys="main_id"), copy=True)
     return stars
 
 
-def expanding_helpertable_stars(sim_helptab, sim, stars):
+
+def expanding_helpertable_stars(
+    sim_helptab: Table,
+    sim: Dict[str, Table],
+    stars: Table,
+) -> Table:
     """
-    Adds data to helper table stars.
+    Expand the star helper table with additional fields and quality flags.
+
+    Updates the multiplicity type for certain systems, sets binary flags,
+    normalizes reference fields, and assigns quality flags.
 
     :param sim_helptab: Main SIMBAD helper table.
-    :type sim_helptab: astropy.table.table.Table
+    :type sim_helptab: astropy.table.Table
     :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
+    :type sim: dict[str, astropy.table.Table]
     :param stars: Secondary SIMBAD helper table.
-    :type stars: astropy.table.table.Table
-    :returns: Helper table stars.
-    :rtype: astropy.table.table.Table
+    :type stars: astropy.table.Table
+    :returns: Expanded star helper table.
+    :rtype: astropy.table.Table
     """
-    # --------------------creating helper table sim_stars----------------
-    # updating multiplicity object type
-    # no children and sptype does not contain + -> type needs to be st
-
-    # all objects in stars table: stars['main_id','type']
+    # Update multiplicity object type: no children and sptype without "+"
+    # implies the type needs to be "st".
     stars[np.where(stars["type"] == "sy")] = stars_in_multiple_system(
         stars[np.where(stars["type"] == "sy")],
         sim["h_link"][:],
         sim_helptab["main_id", "type"][:],
     )
 
-    # binary_flag 'True' for all stars with parents
-    # meaning stars[main_id] in sim_h_link[child_main_id]
-    # -> stars[binary_flag]=='True'
+    # Binary_flag "True" for all stars with parents. That is, stars[main_id]
+    # in sim_h_link[child_main_id].
     stars["binary_flag"][
         np.where(np.isin(stars["main_id"], sim["h_link"]["main_id"]))
     ] = [
         "True"
-        for j in range(
+        for _ in range(
             len(
                 stars[
                     np.where(
@@ -365,58 +372,62 @@ def expanding_helpertable_stars(sim_helptab, sim, stars):
         )
     ]
 
-    # change null value of plx_qual
+    # Change null value of plx_qual.
     stars["plx_qual"] = stars["plx_qual"].astype(object)
     stars = replace_value(stars, "plx_qual", "", stars["plx_qual"].fill_value)
 
+    # Initialize and fill photometry references if values exist.
     for band in ["i", "j", "k"]:
-        # initiate some of the ref columns
-        stars[f"mag_{band}_ref"] = MaskedColumn(
-            dtype=object,
-            length=len(stars),
-            mask=[True for j in range(len(stars))],
+        ref_col = f"mag_{band}_ref"
+        val_col = f"mag_{band}_value"
+
+        stars[ref_col] = MaskedColumn(
+            dtype=object, length=len(stars), mask=[True] * len(stars)
         )
-        # add simbad reference where no other is given
-        stars[f"mag_{band}_ref"][
-            np.where(stars[f"mag_{band}_value"].mask == False)
-        ] = [
+        mask_has_val = np.where(stars[val_col].mask == False)
+
+        stars[ref_col][mask_has_val] = [
             sim["provider"]["provider_bibcode"][0]
-            for j in range(
-                len(
-                    stars[f"mag_{band}_ref"][
-                        np.where(stars[f"mag_{band}_value"].mask == False)
-                    ]
-                )
-            )
+            for _ in range(len(stars[ref_col][mask_has_val]))
         ]
 
-    stars[np.where(stars["sptype_string"] != "")] = replace_value(
-        stars[np.where(stars["sptype_string"] != "")],
+    # Spectral type reference: fill empty with provider bibcode where value set.
+    non_empty_sptype = np.where(stars["sptype_string"] != "")
+    stars[non_empty_sptype] = replace_value(
+        stars[non_empty_sptype],
         "sptype_ref",
         "",
         sim["provider"]["provider_bibcode"][0],
     )
-    # make the remaning ones into masked entries
+
+    # Make the remaining ones into masked entries.
     stars["sptype_ref"] = MaskedColumn(stars["sptype_ref"])
     stars["sptype_ref"].mask[np.where(stars["sptype_ref"] == "")] = [
-        True for j in range(len(stars[np.where(stars["sptype_ref"] == "")]))
+        True
+        for _ in range(len(stars[np.where(stars["sptype_ref"] == "")]))
     ]
 
-    for colname, colval in zip(["plx_ref", "coo_ref"], ["plx_value", "coo_ra"]):
+    # Handle parallax and coordinate references similarly.
+    for colname, colval in zip(
+        ["plx_ref", "coo_ref"],
+        ["plx_value", "coo_ra"],
+    ):
         stars[colname] = MaskedColumn(stars[colname])
-        stars[np.where(stars[colval].mask == False)] = replace_value(
-            stars[np.where(stars[colval].mask == False)],
+        mask_has_val = np.where(stars[colval].mask == False)
+        stars[mask_has_val] = replace_value(
+            stars[mask_has_val],
             colname,
             "",
             sim["provider"]["provider_bibcode"][0],
         )
-        # make the remaning ones into masked entries
+        # Make the remaining ones into masked entries.
         stars[colname].mask[np.where(stars[colname] == "")] = [
-            True for j in range(len(stars[np.where(stars[colname] == "")]))
+            True for _ in range(len(stars[np.where(stars[colname] == "")]))
         ]
 
+    # Binarity columns.
     stars["binary_ref"] = [
-        sim["provider"]["provider_bibcode"][0] for j in range(len(stars))
+        sim["provider"]["provider_bibcode"][0] for _ in range(len(stars))
     ]
     stars = assign_quality(stars, "binary_qual", special_mode="sim_binary")
     return stars
@@ -602,7 +613,7 @@ def provider_simbad(distance_cut_in_pc, test_objects=[]):
     sim_helptab, sim = create_simbad_helpertable(
         distance_cut_in_pc, test_objects
     )
-    stars = creating_helpertable_stars(sim_helptab, sim)
+    stars = creating_helpertable_stars(sim_helptab)
     sim["ident"] = create_ident_table(sim_helptab, sim)
     sim["h_link"] = create_h_link_table(sim_helptab, sim, stars)
     stars = expanding_helpertable_stars(sim_helptab, sim, stars)

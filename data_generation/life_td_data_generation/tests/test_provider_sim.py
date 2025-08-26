@@ -204,7 +204,7 @@ def test_creating_helpertable_stars(query_returns):
     result_sim_helptab, result_sim, t0, return_ident = query_returns
 
     # Execute
-    result_stars = creating_helpertable_stars(result_sim_helptab, result_sim)
+    result_stars = creating_helpertable_stars(result_sim_helptab)
 
     # Verify
     expected_stars = result_sim_helptab
@@ -292,7 +292,7 @@ def test_create_ident_table(query_returns):
 def test_create_h_link_table(query_returns, monkeypatch):
     # Data
     result_sim_helptab, result_sim, t0, return_ident = query_returns
-    result_stars = creating_helpertable_stars(result_sim_helptab, result_sim)
+    result_stars = creating_helpertable_stars(result_sim_helptab)
     main_id_table = Table(
         {
             "main_id": np.array(["star1", "star3", "planet1"], dtype=object),
