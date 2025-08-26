@@ -16,6 +16,7 @@ from provider.utils import (
 )
 from sdata import empty_dict
 from utils.io import save
+from typing import Dict, Optional, Sequence, Tuple
 
 # ---------------define queries--------------------------------------
 adql_queries_moduls = {
@@ -39,7 +40,15 @@ adql_queries_moduls = {
 }
 
 
-def main_adql_queries(plx_cut):
+def main_adql_queries(plx_cut: float) -> str:
+    """
+    Build the main ADQL query for SIMBAD with a parallax cut.
+
+    :param plx_cut: Minimum parallax in milliarcseconds to include.
+    :type plx_cut: float
+    :returns: Complete ADQL string for the TAP service.
+    :rtype: str
+    """
     return (
         adql_queries_moduls["select_statement"]
         + adql_queries_moduls["tables_statement"]
@@ -67,15 +76,20 @@ adql_upload_queries = {
 }
 
 
-def create_simbad_helpertable(distance_cut_in_pc, test_objects):
+def create_simbad_helpertable(
+    distance_cut_in_pc: float,
+    test_objects: Optional[Sequence[str]],
+) -> Tuple[Table, Dict[str, Table]]:
     """
-    Creates helper table.
+    Create the main SIMBAD helper table.
 
-    :param float distance_cut_in_pc: Distance up to which stars are included.
-    :param test_objects: Objects to be tested where they drop out of the criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Helper table and dictionary of database table names and tables.
-    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
+    :param distance_cut_in_pc: Distance up to which stars are included (pc).
+    :type distance_cut_in_pc: float
+    :param test_objects: Optional list of object names to trace through the
+        filtering pipeline for debugging.
+    :type test_objects: list[str] or None
+    :returns: Helper table and a dictionary of database tables.
+    :rtype: (astropy.table.Table, dict[str, astropy.table.Table])
     """
     plx_in_mas_cut = 1000.0 / distance_cut_in_pc
     # making cut a bit bigger for correct treatment of objects on boundary
