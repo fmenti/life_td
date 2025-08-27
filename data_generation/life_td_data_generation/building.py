@@ -1,13 +1,12 @@
-""" Combines the data from the individual data providers. """
+"""Combines the data from the individual data providers."""
 
-import numpy as np  #arrays
-from astropy.table import Column, join, column, vstack, unique, MaskedColumn
 from itertools import islice
 
-#self created modules
-from utils.io import save, Path
+import numpy as np  # arrays
+from astropy.table import Column, MaskedColumn, column, join, unique, vstack
 from provider.utils import nullvalues, replace_value
 from sdata import empty_dict, empty_dict_wit_columns, paras_dict
+from utils.io import Path, save
 
 
 def idsjoin(cat, column_ids1, column_ids2):
@@ -16,68 +15,85 @@ def idsjoin(cat, column_ids1, column_ids2):
 
     - Merge identifiers across both columns per row.
     - Remove duplicate identifiers within the same row.
-    - Return the result in a row-wise manner, where all identifiers for that row are sorted.
+    - Return the result in a row-wise manner, where all identifiers for that
+        row are sorted.
 
     :param cat: Astropy Table containing two identifier columns.
     :type cat: astropy.table.Table
     :param str column_ids1: Name of the first identifier column.
     :param str column_ids2: Name of the second identifier column.
-    :return: Table with a unified 'ids' column containing merged, unique identifiers.
+    :return: Table with a unified 'ids' column containing merged, unique
+        identifiers.
     :rtype: astropy.table.Table
     """
-
     # Step 1: Replace masked/empty values in both columns with empty strings
-    ids1 = cat[column_ids1].filled('') if isinstance(cat[column_ids1], MaskedColumn) else cat[column_ids1]
-    ids2 = cat[column_ids2].filled('') if isinstance(cat[column_ids2], MaskedColumn) else cat[column_ids2]
+    ids1 = (
+        cat[column_ids1].filled("")
+        if isinstance(cat[column_ids1], MaskedColumn)
+        else cat[column_ids1]
+    )
+    ids2 = (
+        cat[column_ids2].filled("")
+        if isinstance(cat[column_ids2], MaskedColumn)
+        else cat[column_ids2]
+    )
 
     # Step 2: Vectorized merging of identifiers using set operations
     merged_ids = []
     for val1, val2 in zip(ids1, ids2):
-        ids1_list = val1.split('|') if val1 not in (None, '') else [] # Split strings on '|'
-        ids2_list = val2.split('|') if val2 not in (None, '') else []
-        unique_ids = set(ids1_list + ids2_list) - {''}  # Merge and remove duplicates
-        merged_ids.append('|'.join(sorted(unique_ids)))  # Join unique ids back to a single string
+        ids1_list = (
+            val1.split("|") if val1 not in (None, "") else []
+        )  # Split strings on '|'
+        ids2_list = val2.split("|") if val2 not in (None, "") else []
+        unique_ids = set(ids1_list + ids2_list) - {
+            ""
+        }  # Merge and remove duplicates
+        merged_ids.append(
+            "|".join(sorted(unique_ids))
+        )  # Join unique ids back to a single string
 
     # Step 3: Add the merged identifiers column to the table
-    cat['ids'] = Column(data=merged_ids, dtype=object)
+    cat["ids"] = Column(data=merged_ids, dtype=object)
     return cat
 
 
 def assign_type(cat, i):
-    # Check if 'type_2' is masked or equal to 'None', then fall back to 'type_1', otherwise use 'type_2'
-    cat['type'][i] = cat['type_1'][i] if isinstance(cat['type_2'][i], np.ma.core.MaskedConstant) or cat['type_2'][
-        i] == 'None' else cat['type_2'][i]
-    return cat['type'][i]
-
+    # Check if 'type_2' is masked or equal to 'None', then fall back to
+    # 'type_1', otherwise use 'type_2'
+    cat["type"][i] = (
+        cat["type_1"][i]
+        if isinstance(cat["type_2"][i], np.ma.core.MaskedConstant)
+        or cat["type_2"][i] == "None"
+        else cat["type_2"][i]
+    )
+    return cat["type"][i]
 
 
 def objectmerging(cat):
     """
     Merges the data of each object given in the different providers.
-    
-    The object is the same physical one but the data is provided by 
+
+    The object is the same physical one but the data is provided by
     different providers and merged into one entry.
-    
+
     :param cat: Astropy table containing multiple entries for the same
         physical objects due to data from different providers.
     :type cat: astropy.table.table.Table
     :returns: Like cat with unique object entries.
     :rtype: astropy.table.table.Table
     """
-
-    cat = idsjoin(cat, 'ids_1', 'ids_2')
-    cat.remove_columns(['ids_1', 'ids_2'])
+    cat = idsjoin(cat, "ids_1", "ids_2")
+    cat.remove_columns(["ids_1", "ids_2"])
     # merging types
     # initializing column
-    if 'type' not in cat.colnames:  #----------
-        cat['type'] = Column(dtype=object, length=len(cat))
-        cat['type_1'] = cat['type_1'].astype(object)
-        cat['type_2'] = cat['type_2'].astype(object)
+    if "type" not in cat.colnames:
+        cat["type"] = Column(dtype=object, length=len(cat))
+        cat["type_1"] = cat["type_1"].astype(object)
+        cat["type_2"] = cat["type_2"].astype(object)
         for i in range(len(cat)):
-            cat['type'][i] = assign_type(cat, i)
-        cat.remove_columns(['type_1', 'type_2'])
+            cat["type"][i] = assign_type(cat, i)
+        cat.remove_columns(["type_1", "type_2"])
     return cat
-
 
 
 def assign_source_idref(cat, sources, paras, provider):
@@ -102,9 +118,9 @@ def assign_source_idref(cat, sources, paras, provider):
     :rtype: astropy.table.table.Table
     """
     for para in paras:
-        ref_column = para + '_ref'
-        source_id_column = f'{para}_source_idref'
-        value_column = para + '_value'
+        ref_column = para + "_ref"
+        source_id_column = f"{para}_source_idref"
+        value_column = para + "_value"
 
         # Skip if no reference column exists
         if ref_column not in cat.colnames:
@@ -112,24 +128,31 @@ def assign_source_idref(cat, sources, paras, provider):
 
         # Check for existing source ID column
         if source_id_column in cat.colnames:
-            print(f'warning, {source_id_column} already in table. something went wrong with loading')
+            print(
+                "warning, ",
+                {source_id_column},
+                "already in table. something went wrong with loading"
+            )
             cat.remove_column(source_id_column)
 
         # Replace null values in reference column
-        cat = nullvalues(cat, ref_column, 'None')
+        cat = nullvalues(cat, ref_column, "None")
 
         # Join with sources table to get source IDs
-        source_subset = sources['ref', 'source_id'][
-            np.where(sources['provider_name'] == provider)
+        source_subset = sources["ref", "source_id"][
+            np.where(sources["provider_name"] == provider)
         ]
-        cat = join(cat, source_subset,
-                   keys_left=ref_column,
-                   keys_right='ref',
-                   join_type='left')
+        cat = join(
+            cat,
+            source_subset,
+            keys_left=ref_column,
+            keys_right="ref",
+            join_type="left",
+        )
 
         # Rename source_id column to parameter-specific name
-        cat.rename_column('source_id', source_id_column)
-        cat.remove_columns('ref')
+        cat.rename_column("source_id", source_id_column)
+        cat.remove_columns("ref")
 
         # Handle masked values in parameter column
         if value_column in cat.colnames:
@@ -143,7 +166,7 @@ def assign_source_idref(cat, sources, paras, provider):
 def merge_table(cat1, cat2):
     """
     Merges two tables.
-    
+
     :param cat1: Table 1
     :type cat1: astropy.table.table.Table
     :param cat2: Table 2
@@ -151,13 +174,12 @@ def merge_table(cat1, cat2):
     :returns: Merged table.
     :rtype: astropy.table.table.Table
     """
-
     if len(cat1) == 0 or len(cat2) == 0:
-        #in this case astropy join function wouldn't work
+        # in this case astropy join function wouldn't work
         merged_cat = vstack([cat1, cat2])
-    #elif #some columns being empty, others not:
-    #remove empty columns
-    #make sure merged_cat has all colnames it needs
+    # elif #some columns being empty, others not:
+    # remove empty columns
+    # make sure merged_cat has all colnames it needs
     else:
         merged_cat = join(cat1, cat2)
 
@@ -165,51 +187,58 @@ def merge_table(cat1, cat2):
 
 
 def best_para_id(mes_table):
-    para = 'id'
-    best_para_table = mes_table[:0].copy()
-    grouped_mes_table = mes_table.group_by('id_ref')
-    #making simbad default best para
-    mask = grouped_mes_table.groups.keys['id_ref'] == '2000A&AS..143....9W'
+    grouped_mes_table = mes_table.group_by("id_ref")
+    # 1. Making simbad identifiers the default best parameters
+    mask = grouped_mes_table.groups.keys["id_ref"] == "2000A&AS..143....9W"
     best_para_table = grouped_mes_table.groups[mask]
-    # TBD: use id_ref as variable from provider_bibcode 
+    # 2. Adding identifiers that are not in the best_para_table yet.
+    # Order of the provider identifier references as which gets seen as having
+    # higher quality.
+    # TBD: use id_ref as variable from provider_bibcode
     #        instad of constant""")
-    for ref in ['2022A&A...664A..21Q', '2016A&A...595A...1G', 'priv. comm.',
-                '2020A&C....3100370A', '2001AJ....122.3466M']:
-        #priority of id best para: 
-        mask = grouped_mes_table.groups.keys['id_ref'] == ref
+    for ref in [
+        "2022A&A...664A..21Q",
+        "2016A&A...595A...1G",
+        "priv. comm.",
+        "2020A&C....3100370A",
+        "2001AJ....122.3466M",
+    ]:
+        # priority of id best para:
+        mask = grouped_mes_table.groups.keys["id_ref"] == ref
         all_ref_ids = grouped_mes_table.groups[mask]
-        #removing those already in best_para_table
-        new_ids = all_ref_ids[np.where(np.invert(np.isin(
-            all_ref_ids['id'],
-            best_para_table['id'])))]
+        # removing those already in best_para_table
+        new_ids = all_ref_ids[
+            np.where(
+                np.invert(np.isin(all_ref_ids["id"], best_para_table["id"]))
+            )
+        ]
         best_para_table = vstack([best_para_table, new_ids])
-    best_para_table.remove_column('id_ref')
+    best_para_table.remove_column("id_ref")
     return best_para_table
 
 
 def best_para_membership(mes_table):
-    para = 'membership'
+    para = "membership"
     best_para_table = mes_table[:0].copy()
-    grouped_mes_table = mes_table.group_by(['child_object_idref',
-                                            'parent_object_idref'])
+    grouped_mes_table = mes_table.group_by(
+        ["child_object_idref", "parent_object_idref"]
+    )
     ind = grouped_mes_table.groups.indices
     for i in range(len(ind) - 1):
-        l = ind[i + 1] - ind[i]
-        if l == 1:
+        number_of_entries_per_pair = ind[i + 1] - ind[i]
+        if number_of_entries_per_pair == 1:
             best_para_table.add_row(grouped_mes_table[ind[i]])
         else:
-            temp = grouped_mes_table[ind[i]:ind[i + 1]]
-            not_nan_temp = temp[np.where(temp[para] != 999999)]
-            if len(not_nan_temp) > 0:
-                max_row = not_nan_temp[np.where(
-                    not_nan_temp[para] == max(not_nan_temp[para]))]
+            h_link_pair = grouped_mes_table[ind[i] : ind[i + 1]]
+            h_link_pair_with_value = h_link_pair[np.where(h_link_pair[para] != 999999)]
+            if len(h_link_pair_with_value) > 0:
                 for j in range(ind[i], ind[i + 1]):
-                    if grouped_mes_table[para][j] == max(not_nan_temp[para]):
+                    if grouped_mes_table[para][j] == max(h_link_pair_with_value[para]):
                         best_para_table.add_row(grouped_mes_table[j])
                         break  # make sure not multiple of same max
                         # value are added
             else:
-                #if none of the objects has a membership entry 
+                # if none of the objects has a membership entry
                 # then pick just first one
                 best_para_table.add_row(grouped_mes_table[ind[i]])
     return best_para_table
@@ -224,18 +253,41 @@ def _get_parameter_columns(para):
     :returns: List of column names to include
     :rtype: list
     """
-    if para == 'binary':
-        return ['main_id', f'{para}_flag', f'{para}_qual', f'{para}_source_idref']
-    elif para == 'mass_pl':
-        return ['main_id', f'{para}_value', f'{para}_rel', f'{para}_err_max',
-                f'{para}_err_min', f'{para}_qual', f'{para}_sini_flag',
-                f'{para}_source_idref']
-    elif para == 'sep_ang':
-        return ['main_id', f'{para}_value', f'{para}_err', f'{para}_obs_date',
-                f'{para}_qual', f'{para}_source_idref']
+    if para == "binary":
+        return [
+            "main_id",
+            f"{para}_flag",
+            f"{para}_qual",
+            f"{para}_source_idref",
+        ]
+    elif para == "mass_pl":
+        return [
+            "main_id",
+            f"{para}_value",
+            f"{para}_rel",
+            f"{para}_err_max",
+            f"{para}_err_min",
+            f"{para}_qual",
+            f"{para}_sini_flag",
+            f"{para}_source_idref",
+        ]
+    elif para == "sep_ang":
+        return [
+            "main_id",
+            f"{para}_value",
+            f"{para}_err",
+            f"{para}_obs_date",
+            f"{para}_qual",
+            f"{para}_source_idref",
+        ]
     else:
-        return ['main_id', f'{para}_value', f'{para}_err', f'{para}_qual',
-                f'{para}_source_idref']
+        return [
+            "main_id",
+            f"{para}_value",
+            f"{para}_err",
+            f"{para}_qual",
+            f"{para}_source_idref",
+        ]
 
 
 def _find_best_quality_measurement(group, para):
@@ -249,8 +301,8 @@ def _find_best_quality_measurement(group, para):
     :returns: Row with highest quality measurement or None if no valid measurement
     :rtype: astropy.table.Row or None
     """
-    quality_levels = ['A', 'B', 'C', 'D', 'E', '?']
-    qual_column = f'{para}_qual'
+    quality_levels = ["A", "B", "C", "D", "E", "?"]
+    qual_column = f"{para}_qual"
 
     for quality in quality_levels:
         for row in group:
@@ -271,9 +323,9 @@ def best_para(para, mes_table):
     :rtype: astropy.table.Table
     """
     # Special case handlers
-    if para == 'id':
+    if para == "id":
         return best_para_id(mes_table)
-    elif para == 'membership':
+    elif para == "membership":
         return best_para_membership(mes_table)
 
     # Define columns based on parameter type
@@ -284,7 +336,7 @@ def best_para(para, mes_table):
     best_para_table = mes_table[:0].copy()
 
     # Group by main_id and process each group
-    grouped_mes_table = mes_table.group_by('main_id')
+    grouped_mes_table = mes_table.group_by("main_id")
 
     for group in grouped_mes_table.groups:
         best_measurement = _find_best_quality_measurement(group, para)
@@ -311,17 +363,19 @@ def best_parameters_ingestion(cat_mes, cat_basic, para, columns=[]):
     best_para_cat_mes = best_para(para, cat_mes)
     if columns != []:
         cat_basic.remove_columns(columns)
-    cat_basic = join(cat_basic, best_para_cat_mes, join_type='left')
+    cat_basic = join(cat_basic, best_para_cat_mes, join_type="left")
     return cat_basic
 
 
-def provider_data_merging(cat, table_name, prov_tables_dict, o_merging=False, para_match=False):
+def provider_data_merging(
+    cat, table_name, prov_tables_dict, o_merging=False, para_match=False
+):
     """
     Merges the data from the different providers.
-    
-    :para cat: 
+
+    :para cat:
     :type cat: astropy.table.table.Table
-    :para str table_name: 
+    :para str table_name:
     :param prov_tables_dict: Containing simbad, grant kennedy, exomercat, gaia
         and wds data.
     :type prov_tables_dict: dict(astropy.table.table.Table)
@@ -330,27 +384,39 @@ def provider_data_merging(cat, table_name, prov_tables_dict, o_merging=False, pa
     :returns:
     :rtype: astropy.table.table.Table
     """
-    print(f'Building {table_name} table ...')  #sources
+    print(f"Building {table_name} table ...")  # sources
 
     for prov_table in list(prov_tables_dict.keys()):
         if para_match:
             matching_parameters(cat, prov_table, prov_tables_dict, table_name)
         if len(cat[table_name]) > 0:
-            join_different_provider_data(cat, o_merging, prov_table, prov_tables_dict, table_name)
+            join_different_provider_data(
+                cat, o_merging, prov_table, prov_tables_dict, table_name
+            )
         else:
             cat[table_name] = prov_tables_dict[prov_table][table_name]
     return cat
 
 
-def join_different_provider_data(cat, o_merging, prov_table, prov_tables_dict, table_name):
+def join_different_provider_data(
+    cat, o_merging, prov_table, prov_tables_dict, table_name
+):
     # joining data from different providers (simbad,...,wds)
     if len(prov_tables_dict[prov_table][table_name]) > 0:
         if o_merging:
-            cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name],
-                                   keys='main_id', join_type='outer')
+            cat[table_name] = join(
+                cat[table_name],
+                prov_tables_dict[prov_table][table_name],
+                keys="main_id",
+                join_type="outer",
+            )
             cat[table_name] = objectmerging(cat[table_name])
         else:
-            cat[table_name] = join(cat[table_name], prov_tables_dict[prov_table][table_name], join_type='outer')
+            cat[table_name] = join(
+                cat[table_name],
+                prov_tables_dict[prov_table][table_name],
+                join_type="outer",
+            )
 
 
 def matching_parameters(cat, prov_table, prov_tables_dict, table_name):
@@ -364,67 +430,82 @@ def matching_parameters(cat, prov_table, prov_tables_dict, table_name):
         # and provider name. replacing ref columns with
         # corresponding source_idref one. issue is that order
         # prov_tables_list and provider_name not the same
-        prov_tables_dict[prov_table][table_name] = assign_source_idref(prov_tables_dict[prov_table][table_name],
-                                                                       cat['sources'], paras[table_name],
-                                                                       prov_tables_dict[prov_table]['provider'][
-                                                                           'provider_name'][0])
+        prov_tables_dict[prov_table][table_name] = assign_source_idref(
+            prov_tables_dict[prov_table][table_name],
+            cat["sources"],
+            paras[table_name],
+            prov_tables_dict[prov_table]["provider"]["provider_name"][0],
+        )
 
 
 def unify_null_values(cat):
-    print('Unifying null values...')
-    # unify null values (had 'N' and '?' because of astropy default 
+    print("Unifying null values...")
+    # unify null values (had 'N' and '?' because of astropy default
     # fill_value and type conversion string vs object)
-    tables = [cat['star_basic'],
-              cat['planet_basic'],
-              cat['disk_basic'],
-              cat['mes_mass_pl'],
-              cat['mes_teff_st'],
-              cat['mes_radius_st'],
-              cat['mes_mass_st'],
-              cat['mes_binary']]
-    columns = [['coo_qual', 'coo_gal_qual', 'plx_qual', 'dist_st_qual',
-                'sep_ang_qual', 'teff_st_qual', 'radius_st_qual', 'binary_flag',
-                'binary_qual', 'mass_st_qual', 'sptype_qual', 'class_temp',
-                'class_temp_nr'],
-               ['mass_pl_qual'],
-               ['rad_qual', 'rad_rel'], ['mass_pl_qual'],
-               ['teff_st_qual'], ['radius_st_qual'], ['mass_st_qual'],
-               ['binary_qual']]
+    tables = [
+        cat["star_basic"],
+        cat["planet_basic"],
+        cat["disk_basic"],
+        cat["mes_mass_pl"],
+        cat["mes_teff_st"],
+        cat["mes_radius_st"],
+        cat["mes_mass_st"],
+        cat["mes_binary"],
+    ]
+    columns = [
+        [
+            "coo_qual",
+            "coo_gal_qual",
+            "plx_qual",
+            "dist_st_qual",
+            "sep_ang_qual",
+            "teff_st_qual",
+            "radius_st_qual",
+            "binary_flag",
+            "binary_qual",
+            "mass_st_qual",
+            "sptype_qual",
+            "class_temp",
+            "class_temp_nr",
+        ],
+        ["mass_pl_qual"],
+        ["rad_qual", "rad_rel"],
+        ["mass_pl_qual"],
+        ["teff_st_qual"],
+        ["radius_st_qual"],
+        ["mass_st_qual"],
+        ["binary_qual"],
+    ]
     for i in range(len(tables)):
         for col in columns[i]:
-            tables[i] = replace_value(tables[i], col, 'N', '?')
-            tables[i] = replace_value(tables[i], col, 'N/A', '?')
+            tables[i] = replace_value(tables[i], col, "N", "?")
+            tables[i] = replace_value(tables[i], col, "N/A", "?")
     return cat
 
 
 def build_sources_table(prov_tables_dict):
-
     # Initialization
     cat = empty_dict.copy()
     empty = empty_dict_wit_columns.copy()
 
-    #for the sources and objects joins tables from different prov_tables_list
-    cat = provider_data_merging(
-        cat, 'sources', prov_tables_dict)
+    # for the sources and objects joins tables from different prov_tables_list
+    cat = provider_data_merging(cat, "sources", prov_tables_dict)
 
-    #adding empty columns for later being able to join tables
-    cat['sources'] = vstack(
-        [cat['sources'], empty['sources']])
+    # adding empty columns for later being able to join tables
+    cat["sources"] = vstack([cat["sources"], empty["sources"]])
     # keeping only unique values then create identifiers for the tables
-    cat['sources'] = unique(
-        cat['sources'], silent=True)
-    cat['sources']['source_id'] = [j + 1 for j \
-                                   in range(len(cat['sources']))]
+    cat["sources"] = unique(cat["sources"], silent=True)
+    cat["sources"]["source_id"] = [j + 1 for j in range(len(cat["sources"]))]
     return cat
 
 
 def build_objects_table(cat, prov_tables_dict):
     cat = provider_data_merging(
-        cat, 'objects', prov_tables_dict, o_merging=True)
+        cat, "objects", prov_tables_dict, o_merging=True
+    )
 
-    #assigning object_id
-    cat['objects']['object_id'] = [j + 1 for j \
-                                   in range(len(cat['objects']))]
+    # assigning object_id
+    cat["objects"]["object_id"] = [j + 1 for j in range(len(cat["objects"]))]
 
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
@@ -433,12 +514,10 @@ def build_objects_table(cat, prov_tables_dict):
 
 def build_provider_table(cat, prov_tables_dict):
     empty = empty_dict_wit_columns.copy()
-    cat = provider_data_merging(
-        cat, 'provider', prov_tables_dict)
+    cat = provider_data_merging(cat, "provider", prov_tables_dict)
 
-    #I do this to get those columns that are empty in the data
-    cat['provider'] = vstack(
-        [cat['provider'], empty['provider']])
+    # I do this to get those columns that are empty in the data
+    cat["provider"] = vstack([cat["provider"], empty["provider"]])
     return cat
 
 
@@ -446,111 +525,172 @@ def build_rest_of_tables(cat, prov_tables_dict):
     empty = empty_dict_wit_columns.copy()
     for table_name in islice(cat, 3, None):
         # for the tables star_basic,...,mes_mass_st
-        cat = provider_data_merging(cat, table_name,
-                                    prov_tables_dict, para_match=True)
+        cat = provider_data_merging(
+            cat, table_name, prov_tables_dict, para_match=True
+        )
 
-        #I do this to get those columns that are empty in the data
+        # I do this to get those columns that are empty in the data
 
         cat[table_name] = vstack([cat[table_name], empty[table_name]])
-        #filling so when I run unique it doesn't neglect previously masked columns
+        # filling so when I run unique it doesn't neglect previously masked columns
         cat[table_name] = cat[table_name].filled()
 
-        if 'object_idref' in cat[table_name].colnames and len(cat[table_name]) > 0:
+        if (
+            "object_idref" in cat[table_name].colnames
+            and len(cat[table_name]) > 0
+        ):
             # add object_idref
-            # first remove the object_idref we got from empty 
-            # initialization though I would prefer a more elegant way 
+            # first remove the object_idref we got from empty
+            # initialization though I would prefer a more elegant way
             # to do this. Is needed as empty columns don't work for join
-            cat[table_name].remove_column('object_idref')
-            cat[table_name] = join(cat[table_name], cat['objects']['object_id', 'main_id'],
-                                   join_type='left')
-            cat[table_name].rename_column('object_id', 'object_idref')
-        if table_name == 'ident':
-            cat[table_name] = best_para('id', cat[table_name])
-        if table_name == 'h_link':
-            #expanding from child_main_id to object_idref
-            #first remove the child_object_idref we got from empty
+            cat[table_name].remove_column("object_idref")
+            cat[table_name] = join(
+                cat[table_name],
+                cat["objects"]["object_id", "main_id"],
+                join_type="left",
+            )
+            cat[table_name].rename_column("object_id", "object_idref")
+        if table_name == "ident":
+            cat[table_name] = best_para("id", cat[table_name])
+        if table_name == "h_link":
+            # expanding from child_main_id to object_idref
+            # first remove the child_object_idref we got from empty
             # initialization. Would prefer a more elegant way to do this
-            cat[table_name].remove_column('child_object_idref')
-            cat[table_name] = join(cat[table_name], cat['objects']['object_id', 'main_id'],
-                                   keys='main_id', join_type='left')
-            cat[table_name].rename_columns(['object_id', 'main_id'],
-                                           ['child_object_idref', 'child_main_id'])
+            cat[table_name].remove_column("child_object_idref")
+            cat[table_name] = join(
+                cat[table_name],
+                cat["objects"]["object_id", "main_id"],
+                keys="main_id",
+                join_type="left",
+            )
+            cat[table_name].rename_columns(
+                ["object_id", "main_id"],
+                ["child_object_idref", "child_main_id"],
+            )
 
-            #expanding from parent_main_id to parent_object_idref
-            cat[table_name].remove_column('parent_object_idref')
-            #kick out any h_link rows where parent_main_id not in
+            # expanding from parent_main_id to parent_object_idref
+            cat[table_name].remove_column("parent_object_idref")
+            # kick out any h_link rows where parent_main_id not in
             # objects (e.g. clusters)
-            cat[table_name] = join(cat[table_name], cat['objects']['object_id', 'main_id'],
-                                   keys_left='parent_main_id', keys_right='main_id')
-            #removing because same as parent_main_id
-            cat[table_name].remove_column('main_id')
-            cat[table_name].rename_column('object_id', 'parent_object_idref')
-            cat['best_h_link'] = best_para('membership', cat['h_link'])
-        if table_name == 'star_basic':
-            #choosing all objects with type star or system. this I use 
-            # to join the object_id parameter from objects table to 
-            # star_basic. what about gaia stuff where I don't know 
+            cat[table_name] = join(
+                cat[table_name],
+                cat["objects"]["object_id", "main_id"],
+                keys_left="parent_main_id",
+                keys_right="main_id",
+            )
+            # removing because same as parent_main_id
+            cat[table_name].remove_column("main_id")
+            cat[table_name].rename_column("object_id", "parent_object_idref")
+            cat["best_h_link"] = best_para("membership", cat["h_link"])
+        if table_name == "star_basic":
+            # choosing all objects with type star or system. this I use
+            # to join the object_id parameter from objects table to
+            # star_basic. what about gaia stuff where I don't know
             # this? there I also don't have star_basic info.
-            # Note: main_id was only added because I have not found out 
+            # Note: main_id was only added because I have not found out
             # how to do join with just one column of a table
-            stars = cat['objects']['object_id', 'main_id'][np.where(
-                cat['objects']['type'] == 'st')]
-            systems = cat['objects']['object_id', 'main_id'][np.where(
-                cat['objects']['type'] == 'sy')]
+            stars = cat["objects"]["object_id", "main_id"][
+                np.where(cat["objects"]["type"] == "st")
+            ]
+            systems = cat["objects"]["object_id", "main_id"][
+                np.where(cat["objects"]["type"] == "sy")
+            ]
             temp = vstack([stars, systems])
-            temp.rename_column('object_id', 'object_idref')
+            temp.rename_column("object_id", "object_idref")
 
-            # cat[i] are all the star_cat tables from prov_tables_list where 
-            # those are given the new objects are needed to join the 
+            # cat[i] are all the star_cat tables from prov_tables_list where
+            # those are given the new objects are needed to join the
             # best parameters from mes_ tables later on
-            cat[table_name] = join(cat[table_name], temp, join_type='outer',
-                                   keys=['object_idref', 'main_id'])
-        if table_name == 'planet_basic':
-            planets = cat['objects']['object_id', 'main_id'][np.where(
-                cat['objects']['type'] == 'pl')]
-            planets.rename_column('object_id', 'object_idref')
-            cat[table_name] = planets  #can't use join below because cat[i] has no rows
-        if table_name == 'mes_teff_st':
-            cat['star_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['star_basic'],
-                'teff_st', ['teff_st_value', 'teff_st_err',
-                            'teff_st_qual', 'teff_st_source_idref',
-                            'teff_st_ref'])
-        if table_name == 'mes_radius_st':
-            cat['star_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['star_basic'],
-                'radius_st', ['radius_st_value', 'radius_st_err',
-                              'radius_st_qual', 'radius_st_source_idref',
-                              'radius_st_ref'])
-        if table_name == 'mes_mass_st':
-            cat['star_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['star_basic'],
-                'mass_st', ['mass_st_value', 'mass_st_err',
-                            'mass_st_qual', 'mass_st_source_idref',
-                            'mass_st_ref'])
-        if table_name == 'mes_mass_pl':
-            cat['planet_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['planet_basic'],
-                'mass_pl')
-        if table_name == 'mes_binary':
-            cat['star_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['star_basic'],
-                'binary', ['binary_flag',
-                           'binary_qual', 'binary_source_idref',
-                           'binary_ref'])
-        if table_name == 'mes_sep_ang':
-            cat['star_basic'] = best_parameters_ingestion(
-                cat[table_name], cat['star_basic'],
-                'sep_ang', ['sep_ang_value', 'sep_ang_err',
-                            'sep_ang_obs_date', 'sep_ang_qual',
-                            'sep_ang_source_idref', 'sep_ang_ref'])
+            cat[table_name] = join(
+                cat[table_name],
+                temp,
+                join_type="outer",
+                keys=["object_idref", "main_id"],
+            )
+        if table_name == "planet_basic":
+            planets = cat["objects"]["object_id", "main_id"][
+                np.where(cat["objects"]["type"] == "pl")
+            ]
+            planets.rename_column("object_id", "object_idref")
+            cat[table_name] = (
+                planets  # can't use join below because cat[i] has no rows
+            )
+        if table_name == "mes_teff_st":
+            cat["star_basic"] = best_parameters_ingestion(
+                cat[table_name],
+                cat["star_basic"],
+                "teff_st",
+                [
+                    "teff_st_value",
+                    "teff_st_err",
+                    "teff_st_qual",
+                    "teff_st_source_idref",
+                    "teff_st_ref",
+                ],
+            )
+        if table_name == "mes_radius_st":
+            cat["star_basic"] = best_parameters_ingestion(
+                cat[table_name],
+                cat["star_basic"],
+                "radius_st",
+                [
+                    "radius_st_value",
+                    "radius_st_err",
+                    "radius_st_qual",
+                    "radius_st_source_idref",
+                    "radius_st_ref",
+                ],
+            )
+        if table_name == "mes_mass_st":
+            cat["star_basic"] = best_parameters_ingestion(
+                cat[table_name],
+                cat["star_basic"],
+                "mass_st",
+                [
+                    "mass_st_value",
+                    "mass_st_err",
+                    "mass_st_qual",
+                    "mass_st_source_idref",
+                    "mass_st_ref",
+                ],
+            )
+        if table_name == "mes_mass_pl":
+            cat["planet_basic"] = best_parameters_ingestion(
+                cat[table_name], cat["planet_basic"], "mass_pl"
+            )
+        if table_name == "mes_binary":
+            cat["star_basic"] = best_parameters_ingestion(
+                cat[table_name],
+                cat["star_basic"],
+                "binary",
+                [
+                    "binary_flag",
+                    "binary_qual",
+                    "binary_source_idref",
+                    "binary_ref",
+                ],
+            )
+        if table_name == "mes_sep_ang":
+            cat["star_basic"] = best_parameters_ingestion(
+                cat[table_name],
+                cat["star_basic"],
+                "sep_ang",
+                [
+                    "sep_ang_value",
+                    "sep_ang_err",
+                    "sep_ang_obs_date",
+                    "sep_ang_qual",
+                    "sep_ang_source_idref",
+                    "sep_ang_ref",
+                ],
+            )
 
         cat[table_name] = cat[table_name].filled()
 
         if len(cat[table_name]) == 0:
-            print('warning: empty table', table_name)
+            print("warning: empty table", table_name)
         else:
-            #only keeping unique entries
+            # only keeping unique entries
             cat[table_name] = unique(cat[table_name], silent=True)
     return cat
 
@@ -563,11 +703,11 @@ def build_tables(prov_tables_dict):
     return cat
 
 
-#------------------------provider combining----------------------------
+# ------------------------provider combining----------------------------
 def building(prov_tables_dict):
     """
     This function builds the tables for the LIFE database.
-    
+
     :param prov_tables_dict: Containing simbad, grant kennedy, exomercat, gaia
         and wds data.
     :type prov_tables_dict: dict(dict(astropy.table.table.Table))
@@ -576,14 +716,18 @@ def building(prov_tables_dict):
     """
     cat = build_tables(prov_tables_dict)
 
-    #next line is needed as multimeasurement adaptions lead to potentially masked entries
-    cat['star_basic'] = cat['star_basic'].filled()
+    # next line is needed as multimeasurement adaptions lead to potentially masked entries
+    cat["star_basic"] = cat["star_basic"].filled()
 
     cat = unify_null_values(cat)
 
     # TBD: Add exact object distance cut. So far for correct treatment
     #       of boundary objects 10% additional distance cut used""")
 
-    print('Saving data...')
-    save(list(cat.values()), [element for element in list(cat.keys())], location=Path().data)
+    print("Saving data...")
+    save(
+        list(cat.values()),
+        [element for element in list(cat.keys())],
+        location=Path().data,
+    )
     return cat
