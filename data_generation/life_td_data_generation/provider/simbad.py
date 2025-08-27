@@ -618,21 +618,31 @@ def create_star_basic_table(stars: Table) -> Table:
     return sim_star_basic
 
 
-def provider_simbad(distance_cut_in_pc, test_objects=[]):
+def provider_simbad(
+    distance_cut_in_pc: float,
+    test_objects: Optional[Sequence[str]] = None,
+) -> Dict[str, Table]:
     """
-    Optains and arranges SIMBAD data.
+    Obtain and arrange SIMBAD data.
 
-    :param float distance_cut_in_pc: Distance up to which stars are included.
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Dictionary with names and astropy tables containing
-        reference data, provider data, object data, identifier data, object to
-        object relation data, basic stellar data and binarity data.
-    :rtype: dict(str,astropy.table.table.Table)
+    Runs the SIMBAD queries, builds helper tables, expands star data with
+    quality flags and references, and assembles the final set of SIMBAD
+    provider tables.
+
+    :param distance_cut_in_pc: Distance up to which stars are included (pc).
+    :type distance_cut_in_pc: float
+    :param test_objects: Optional list of object names to trace through the
+        filtering pipeline for debugging.
+    :type test_objects: list[str] or None
+    :returns: Dictionary of SIMBAD tables (sources, provider, objects, ident,
+        h_link, star_basic, mes_binary).
+    :rtype: dict[str, astropy.table.Table]
     """
+    # Normalize optional test_objects to a list for downstream functions.
+    _test_objects = list(test_objects) if test_objects is not None else []
+
     sim_helptab, sim = create_simbad_helpertable(
-        distance_cut_in_pc, test_objects
+        distance_cut_in_pc, _test_objects
     )
     stars = creating_helpertable_stars(sim_helptab)
     sim["ident"] = create_ident_table(sim_helptab, sim)
