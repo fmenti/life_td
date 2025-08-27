@@ -433,63 +433,75 @@ def expanding_helpertable_stars(
     return stars
 
 
-def create_ident_table(sim_helptab, sim):
+def create_ident_table(sim_helptab: Table, sim: Dict[str, Table]) -> Table:
     """
-    Creates identifier table.
+    Create the identifier table.
+
+    Upload the object IDs to SIMBAD to fetch the corresponding identifiers
+    (id) and add a reference column.
 
     :param sim_helptab: Main SIMBAD helper table.
-    :type sim_helptab: astropy.table.table.Table
+    :type sim_helptab: astropy.table.Table
     :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
-    :returns: Identifier table.
-    :rtype: astropy.table.table.Table
+    :type sim: dict[str, astropy.table.Table]
+    :returns: Identifier table with id and id_ref columns.
+    :rtype: astropy.table.Table
     """
     sim_ident = query(
         sim["provider"]["provider_url"][0],
         adql_upload_queries["ids_from_upload"],
         [sim_helptab["oid", "main_id"][:].copy()],
-    )  # adds column id
+    )
     sim_ident["id_ref"] = [
-        sim["provider"]["provider_bibcode"][0] for j in range(len(sim_ident))
+        sim["provider"]["provider_bibcode"][0] for _ in range(len(sim_ident))
     ]
     sim_ident["id_ref"] = sim_ident["id_ref"].astype(object)
     sim_ident.remove_column("oid")
     return sim_ident
 
 
-def create_h_link_table(sim_helptab, sim, stars):
+def create_h_link_table(
+    sim_helptab: Table,
+    sim: Dict[str, Table],
+    stars: Table,
+) -> Table:
     """
-    Creates hierarchical link table.
+    Create the hierarchical link (parent-child) table.
+
+    Filters to hierarchical multiples (i.e., removes cluster/association
+    parents), resolves parent oids to main_ids, normalizes null values,
+    and adds reference information.
 
     :param sim_helptab: Main SIMBAD helper table.
-    :type sim_helptab: astropy.table.table.Table
+    :type sim_helptab: astropy.table.Table
     :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
+    :type sim: dict[str, astropy.table.Table]
     :param stars: Secondary SIMBAD helper table.
-    :type stars: astropy.table.table.Table
-    :returns: Hierarchical link table.
-    :rtype: astropy.table.table.Table
+    :type stars: astropy.table.Table
+    :returns: Hierarchical link table with parent_main_id, main_id,
+        membership, and h_link_ref.
+    :rtype: astropy.table.Table
     """
     sim_h_link = sim_helptab[
         "main_id", "parent_oid", "h_link_ref", "membership"
     ]
-    # sim_h_link=nullvalues(sim_h_link,'parent_oid',0,verbose=False)
-    ###sim_h_link=nullvalues(sim_h_link,'membership',-1,verbose=False)
 
-    # removing entries in h_link where parent objects are clusters or
-    # associations as we are
-    # only interested in hierarchical multiples.
+    # Keep only links whose parents are stellar/system objects (not clusters).
     sim_h_link = sim_h_link[
         np.where(np.isin(sim_h_link["parent_oid"], stars["oid"]))
     ]
 
+    # Resolve parent oid to main_id.
     sim_h_link = fetch_main_id(
         sim_h_link, OidCreator(name="parent_main_id", colname="parent_oid")
     )
     sim_h_link.remove_column("parent_oid")
-    # typeconversion needed as smallint fill value != int null value
+
+    # Convert to int and normalize nulls to a sentinel value for joins.
     sim_h_link["membership"] = sim_h_link["membership"].astype(int)
     sim_h_link = nullvalues(sim_h_link, "membership", 999999)
+
+    # Ensure reference is set.
     sim_h_link = replace_value(
         sim_h_link, "h_link_ref", "", sim["provider"]["provider_bibcode"][0]
     )
@@ -497,23 +509,27 @@ def create_h_link_table(sim_helptab, sim, stars):
     return sim_h_link
 
 
-def create_objects_table(sim_helptab, stars):
+def create_objects_table(sim_helptab: Table, stars: Table) -> Table:
     """
-    Creates objects table.
+    Create the objects table.
+
+    Combines unique planet rows with star/system rows, keeping main_id,
+    ids, and type.
 
     :param sim_helptab: Main SIMBAD helper table.
-    :type sim_helptab: astropy.table.table.Table
+    :type sim_helptab: astropy.table.Table
     :param stars: Secondary SIMBAD helper table.
-    :type stars: astropy.table.table.Table
-    :returns: Objects table.
-    :rtype: astropy.table.table.Table
+    :type stars: astropy.table.Table
+    :returns: Objects table with main_id, ids, and type.
+    :rtype: astropy.table.Table
     """
-    # -----------------creating output table sim_planets-----------------
+    # Planets subset, unique by main_id.
     temp_sim_planets = sim_helptab["main_id", "ids", "type"][
         np.where(sim_helptab["type"] == "pl")
     ]
     sim_planets = Table(unique(temp_sim_planets, keys="main_id"), copy=True)
-    # -----------------creating output table sim_objects-----------------
+
+    # Stack planets and stars/systems.
     sim_objects = vstack(
         [sim_planets["main_id", "ids", "type"], stars["main_id", "ids", "type"]]
     )
@@ -522,20 +538,22 @@ def create_objects_table(sim_helptab, stars):
     return sim_objects
 
 
-def create_sim_sources_table(stars, sim):
+def create_sim_sources_table(stars: Table, sim: Dict[str, Table]) -> Table:
     """
-    Creates sources table.
+    Create the sources table.
+
+    Collects and normalizes reference columns from provider, stars,
+    h_link, and ident tables into a unified sources table.
 
     :param sim: Dictionary of database table names and tables.
-    :type sim: dict(str,astropy.table.table.Table)
+    :type sim: dict[str, astropy.table.Table]
     :param stars: Secondary SIMBAD helper table.
-    :type stars: astropy.table.table.Table
-    :returns: Sources table.
-    :rtype: astropy.table.table.Table
+    :type stars: astropy.table.Table
+    :returns: Sources table with deduplicated references.
+    :rtype: astropy.table.Table
     """
-    # --------------creating output table sim_sources -------------------
     tables = [sim["provider"], stars, sim["h_link"], sim["ident"]]
-    # define header name of columns containing references data
+    # Columns that contain reference information per input table.
     ref_columns = [
         ["provider_bibcode"],
         [
@@ -556,14 +574,17 @@ def create_sim_sources_table(stars, sim):
     return sim_sources
 
 
-def create_star_basic_table(stars):
+def create_star_basic_table(stars: Table) -> Table:
     """
-    Creates basic stellar data table.
+    Create the table with basic stellar data.
+
+    Converts certain columns to strings to support downstream joins that
+    rely on fixed-width string dtype compatibility.
 
     :param stars: Secondary SIMBAD helper table.
-    :type stars: astropy.table.table.Table
+    :type stars: astropy.table.Table
     :returns: Basic stellar data table.
-    :rtype: astropy.table.table.Table
+    :rtype: astropy.table.Table
     """
     sim_star_basic = stars[
         "main_id",
@@ -588,7 +609,7 @@ def create_star_basic_table(stars):
         "plx_qual",
         "plx_ref",
     ]
-    # changing type from object to string for later join functions
+    # Change type from object to string for later join functions.
     sim_star_basic["sptype_string"] = sim_star_basic["sptype_string"].astype(
         str
     )
