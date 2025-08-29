@@ -1,21 +1,35 @@
+"""Tests for the SIMBAD provider module."""
+
+import numpy as np  # arrays
 import provider.simbad as simbad_module
 import pytest
 from astropy.table import MaskedColumn, Table, setdiff
 from provider.simbad import (
+    create_h_link_table,
+    create_ident_table,
+    create_objects_table,
+    create_sim_sources_table,
     create_simbad_helpertable,
     creating_helpertable_stars,
-    create_ident_table,
-    create_h_link_table,
-    stars_in_multiple_system,
     expanding_helpertable_stars,
-    create_objects_table,
-    create_sim_sources_table
+    stars_in_multiple_system,
 )
-import numpy as np  # arrays
 from provider.utils import nullvalues
 
 @pytest.fixture
 def query_returns(monkeypatch):
+    """
+    Prepare common SIMBAD test data and patch network calls.
+
+    Mocks the SIMBAD TAP queries by returning preconstructed tables in a
+    fixed sequence. Also runs the initial helper-table construction and
+    identifier table creation.
+
+    :param monkeypatch: Pytest fixture for monkeypatching attributes.
+    :type monkeypatch: _pytest.monkeypatch.MonkeyPatch
+    :returns: Tuple of (sim_helptab, sim dict, base table t0, ident table).
+    :rtype: tuple[Table, dict[str, Table], Table, Table]
+    """
     # Shared setup for tests that need the helper table
     distance_cut_in_pc = 5
     test_objects = []
@@ -174,16 +188,32 @@ def query_returns(monkeypatch):
     result_sim_helptab, result_sim = create_simbad_helpertable(
         distance_cut_in_pc, test_objects
     )
-
     result_sim["ident"] = create_ident_table(result_sim_helptab, result_sim)
 
     return result_sim_helptab, result_sim, t0, result_sim["ident"]
 
 
+def normalize_table_nulls(tab: Table, columns: list[str], values: list[object]) -> Table:
+    """
+    Normalize masked/null values across multiple columns.
+
+    :param tab: Table to normalize.
+    :type tab: astropy.table.Table
+    :param columns: Column names to normalize.
+    :type columns: list[str]
+    :param values: Replacement values matching columns list order.
+    :type values: list[object]
+    :returns: The same table with normalized null values.
+    :rtype: astropy.table.Table
+    """
+    for value, colname in zip(values, columns):
+        tab = nullvalues(tab, colname, value)
+    return tab
+
+
 def test_create_simbad_helpertable(query_returns):
     result_sim_helptab, result_sim, t0, ident = query_returns
 
-    # Verify
     # all helptab columns are present
     assert set(result_sim_helptab.colnames) == set(
         t0.colnames + ["type", "binary_flag"]
@@ -209,38 +239,27 @@ def test_creating_helpertable_stars(query_returns):
     # Verify
     expected_stars = result_sim_helptab
     expected_stars.remove_row(-1)
-    for null, colname in zip(
-        [
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-        ],
-        [
-            "membership",
-            "coo_err_angle",
-            "coo_err_maj",
-            "coo_err_min",
-            "parent_oid",
-            "mag_i_value",
-            "mag_j_value",
-            "mag_k_value",
-            "coo_ra",
-            "coo_dec",
-            "plx_value",
-        ],
-    ):
-        result_stars = nullvalues(result_stars, colname, null)
-        expected_stars = nullvalues(expected_stars, colname, null)
 
-    assert len(result_stars) == 4  # stars and systems but removed planets
+    cols = [
+        "membership",
+        "coo_err_angle",
+        "coo_err_maj",
+        "coo_err_min",
+        "parent_oid",
+        "mag_i_value",
+        "mag_j_value",
+        "mag_k_value",
+        "coo_ra",
+        "coo_dec",
+        "plx_value",
+    ]
+    vals = [999999] * len(cols)
+
+    result_stars = normalize_table_nulls(result_stars, cols, vals)
+    expected_stars = normalize_table_nulls(expected_stars, cols, vals)
+
+    # stars and systems but removed planets
+    assert len(result_stars) == 4
     assert len(setdiff(result_stars, expected_stars)) == 0
     assert len(setdiff(expected_stars, result_stars)) == 0
 
@@ -266,9 +285,7 @@ def test_create_ident_table(query_returns):
                 ],
                 dtype=object,
             ),
-            "id_ref": np.array(
-                [ref, ref, ref, ref, ref, ref, ref, ref], dtype=object
-            ),
+            "id_ref": np.array([ref] * 8, dtype=object),
             "id": np.array(
                 [
                     "id1",
@@ -316,8 +333,6 @@ def test_create_h_link_table(query_returns, monkeypatch):
     result_h_link = create_h_link_table(
         result_sim_helptab, result_sim, result_stars
     )
-    # issue: wrong null value in membership column. find out what simbad returns, str, need to have them as object.
-    # sim returns int and masked entries
 
     expected_h_link = Table(
         {
@@ -365,6 +380,7 @@ def test_stars_in_multiple_system():
             ),
         }
     )
+
     # Execute
     return_cat = stars_in_multiple_system(cat, sim_h_link, all_objects)
 
@@ -382,16 +398,30 @@ def test_stars_in_multiple_system():
     assert len(setdiff(expected_cat, return_cat)) == 0
 
 
-def expanded_helptab_stars(expected_stars, ref):
+def expanded_helptab_stars(expected_stars: Table, ref: str) -> Table:
+    """
+    Build the expected 'stars' table after expansion for assertions.
+
+    Applies the same logical changes that expanding_helpertable_stars()
+    performs, but in-place on a provided copy to serve as an oracle in tests.
+
+    :param expected_stars: Copy of the sim_helptab with planet row present.
+    :type expected_stars: astropy.table.Table
+    :param ref: Provider bibcode reference to populate reference fields.
+    :type ref: str
+    :returns: The transformed expected stars table.
+    :rtype: astropy.table.Table
+    """
     expected_stars.remove_row(-1)  # removing planet object row
-    # doing stars in multiple systems function
+
+    # stars in multiple systems function -> default True, star4 gets False
     expected_stars["binary_flag"] = np.array(
-        ["True" for j in range(len(expected_stars))], dtype=object
+        ["True" for _ in range(len(expected_stars))], dtype=object
     )
     expected_stars["binary_flag"][
         np.where(expected_stars["main_id"] == "star4")
     ] = "False"
-    # expected_stars['plx_qual'][np.where(expected_stars['main_id']=='system1')] = '?'
+
     expected_stars["plx_qual"] = expected_stars["plx_qual"].astype(object)
 
     expected_stars["mag_i_ref"] = MaskedColumn(
@@ -409,6 +439,7 @@ def expanded_helptab_stars(expected_stars, ref):
         mask=[False, False, True, True],
         fill_value="N",
     )
+
     for col in ["sptype_ref", "coo_ref", "plx_ref"]:
         expected_stars[col] = MaskedColumn(expected_stars[col])
         expected_stars[col].mask[
@@ -418,9 +449,12 @@ def expanded_helptab_stars(expected_stars, ref):
 
     expected_stars["binary_ref"] = [ref, ref, ref, ref]
     expected_stars["binary_qual"] = ["D", "D", "D", "D"]
-    expected_stars["type"][np.where(expected_stars["main_id"] == "star1")] = (
-        "st"  # stars in multiple systems function
-    )
+
+    # stars in multiple systems function result
+    expected_stars["type"][
+        np.where(expected_stars["main_id"] == "star1")
+    ] = "st"
+
     return expected_stars
 
 
@@ -453,58 +487,46 @@ def test_expanding_helpertable_stars(query_returns):
     )
 
     # Verify
-    for null, colname in zip(
-        [
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            999999,
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            999999,
-            999999,
-            999999,
-            "",
-            "",
-            "",
-        ],
-        [
-            "membership",
-            "coo_err_angle",
-            "coo_err_maj",
-            "coo_err_min",
-            "parent_oid",
-            "mag_i_value",
-            "mag_j_value",
-            "mag_k_value",
-            "mag_i_ref",
-            "mag_j_ref",
-            "mag_k_ref",
-            "plx_qual",
-            "coo_qual",
-            "sptype_string",
-            "sptype_qual",
-            "h_link_ref",
-            "coo_ra",
-            "coo_dec",
-            "plx_value",
-            "coo_ref",
-            "sptype_ref",
-            "plx_ref",
-        ],
-    ):
-        result_stars = nullvalues(result_stars, colname, null)
-        expected_stars = nullvalues(expected_stars, colname, null)
+    int_null_cols = [
+        "membership",
+        "coo_err_angle",
+        "coo_err_maj",
+        "coo_err_min",
+        "parent_oid",
+        "mag_i_value",
+        "mag_j_value",
+        "mag_k_value",
+        "coo_ra",
+        "coo_dec",
+        "plx_value",
+    ]
+    str_null_cols = [
+        "mag_i_ref",
+        "mag_j_ref",
+        "mag_k_ref",
+        "plx_qual",
+        "coo_qual",
+        "sptype_string",
+        "sptype_qual",
+        "h_link_ref",
+        "coo_ref",
+        "sptype_ref",
+        "plx_ref",
+    ]
+
+    result_stars = normalize_table_nulls(
+        result_stars, int_null_cols, [999999] * len(int_null_cols)
+    )
+    expected_stars = normalize_table_nulls(
+        expected_stars, int_null_cols, [999999] * len(int_null_cols)
+    )
+
+    result_stars = normalize_table_nulls(
+        result_stars, str_null_cols, [""] * len(str_null_cols)
+    )
+    expected_stars = normalize_table_nulls(
+        expected_stars, str_null_cols, [""] * len(str_null_cols)
+    )
 
     assert len(setdiff(result_stars, expected_stars)) == 0
     assert len(setdiff(expected_stars, result_stars)) == 0
@@ -516,9 +538,8 @@ def test_create_object_table(query_returns):
     stars = result_sim_helptab.copy()
     stars.remove_row(-1)  # removing planet object row
 
-    stars["type"][np.where(stars["main_id"] == "star1")] = (
-        "st"  # stars in multiple systems function
-    )
+    # stars in multiple systems function
+    stars["type"][np.where(stars["main_id"] == "star1")] = "st"
 
     return_object = create_objects_table(result_sim_helptab, stars)
 
@@ -577,7 +598,7 @@ def test_create_sim_sources_table(query_returns):
                 "ref_hlink2",
                 result_sim["provider"]["provider_bibcode"][0],
             ],
-            "provider_name": ["SIMBAD" for j in range(9)],
+            "provider_name": ["SIMBAD" for _ in range(9)],
         }
     )
 
