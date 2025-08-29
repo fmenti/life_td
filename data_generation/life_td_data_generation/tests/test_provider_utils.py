@@ -5,11 +5,12 @@ from provider.utils import (
     fetch_main_id,
     lower_quality,
     IdentifierCreator,
-    OidCreator
+    OidCreator,
+    distance_cut
 )
-
+import pytest
+import provider.utils as utils_module
 from datetime import datetime
-
 import numpy as np  # arrays
 from astropy.table import (
     Table,
@@ -127,3 +128,102 @@ def test_lower_quality():
     assert lower_quality("C") == "D"
     assert lower_quality("D") == "E"
     assert lower_quality("E") == "E"
+
+
+def _make_sim_objects() -> Table:
+    """
+    Create a minimal sim_objects table for testing joins by main_id.
+
+    :returns: Table with main_id and ids columns.
+    :rtype: astropy.table.Table
+    """
+    return Table(
+        {
+            "main_id": np.array(["A", "B"], dtype=object),
+            "ids": np.array(["A|A1", "B|B1"], dtype=object),
+        }
+    )
+
+
+def _make_sim_ident() -> Table:
+    """
+    Create a minimal sim_ident table for testing joins by identifier.
+
+    :returns: Table with id and main_id columns.
+    :rtype: astropy.table.Table
+    """
+    return Table(
+        {
+            "id": np.array(["A","A1", "B1","B", "C1","C"], dtype=object),
+            "main_id": np.array(["A", "A","B", "B","C","C"], dtype=object),
+        }
+    )
+
+
+def test_distance_cut_by_main_id(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Keep only rows whose main_id exists in sim_objects.
+
+    Verifies:
+    - unmatched rows are filtered out,
+    - the returned table preserves the original schema (no temp columns).
+    """
+    # Input catalog with one non-matching row ("X")
+    cat = Table(
+        {
+            "main_id": np.array(["A", "X", "B"], dtype=object),
+            "value": np.array([1, 2, 3]),
+        }
+    )
+
+    def fake_load(names):
+        # utils.distance_cut loads ["sim_objects"] in main_id=True mode
+        assert names == ["sim_objects"]
+        return [_make_sim_objects()]
+
+    monkeypatch.setattr(utils_module, "load", fake_load)
+
+    out = distance_cut(cat, colname="main_id", main_id=True)
+
+    # Only A and B remain
+    assert set(out["main_id"]) == set(["A", "B"])
+    assert set(out["value"]) == set([1, 3])
+
+    # No temp columns leaked
+    assert "temp1" not in out.colnames
+    assert "temp2" not in out.colnames
+
+
+def test_distance_cut_by_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Keep only rows whose identifier exists in sim_ident.
+
+    Verifies:
+    - unmatched rows are filtered out,
+    - the returned table contains main_id coming from sim_ident.
+    """
+    # Input catalog with identifiers; "ID-X" is not present in sim_ident
+    cat = Table(
+        {
+            "ext_id": np.array(["A", "X", "C1"], dtype=object),
+            "note": np.array(["ok", "drop", "ok"], dtype=object),
+        }
+    )
+
+    def fake_load(names):
+        # utils.distance_cut loads ["sim_ident"] in main_id=False mode
+        assert names == ["sim_ident"]
+        return [_make_sim_ident()]
+
+    monkeypatch.setattr(utils_module, "load", fake_load)
+
+    out = distance_cut(cat, colname="ext_id", main_id=False)
+
+    # Only rows with matching IDs remain; main_id is added by the join
+    assert list(out["ext_id"]) == ["A", "C1"]
+    assert list(out["note"]) == ["ok", "ok"]
+    assert list(out["main_id"]) == ["A", "C"]
+
+    # Temp column removed
+    assert "temp1" not in out.colnames
+
