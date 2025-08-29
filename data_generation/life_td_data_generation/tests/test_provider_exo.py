@@ -1,5 +1,5 @@
 import numpy as np
-from astropy.table import MaskedColumn, Table
+from astropy.table import MaskedColumn, Table, Column, MaskedColumn
 from provider.exo import (
     create_ident_table,
     create_objects_table,
@@ -10,11 +10,14 @@ from provider.exo import (
     assign_new_qual,
     betterthan,
     align_quality_with_bestmass,
-    create_mes_mass_pl_table
+    create_mes_mass_pl_table,
+    create_exo_helpertable
 )
 from sdata import empty_dict
+import pytest
+import provider.exo as exo_module
 
-def test_exo_main_object_ids():
+def test_create_object_main_id():
     a = MaskedColumn(
         data=["*   3 Cnc", "*   4 Mon", ""],
         name="main_id",
@@ -36,6 +39,104 @@ def test_exo_main_object_ids():
         "6 Lyn b",
     ]
 
+
+def test_create_exo_helpertable(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Verify helper-table creation, distance cut, stripping, SIMBAD join,
+    and saving of removed objects.
+    """
+    # Build a minimal exo_helptab with leading/trailing spaces to test stripping.
+    base = Table()
+    # objects are: normal planet, planet not in simbad, planet outside 20pc
+    base["main_id"] = MaskedColumn(
+        data=np.array([" HD 1", "","* HD 3"], dtype=object),
+        dtype=object,
+        mask=[False, True, False]
+    )
+    base["host"] = Column(
+        data=np.array(["HD 1", " HD 2"," HD 3"], dtype=object), dtype=object
+    )
+    base["binary"] = MaskedColumn(
+        data=np.array(["A", "",""], dtype=object),
+        dtype=object,
+        mask=[False, True, True]
+    )
+    base["letter"] = Column(
+        data=np.array(["b", "c","b"], dtype=object), dtype=object
+    )
+    base["exomercat_name"] = Column(
+        data=np.array(["HD 1 A b", "HD 2 c","HD 3 b"], dtype=object), dtype=object
+    )
+
+    # 1) Mock query_or_load_exomercat: return a dummy exo dict and the table.
+    def fake_query_or_load_exomercat():
+        return ({}, base.copy())
+
+    monkeypatch.setattr(
+        exo_module, "query_or_load_exomercat", fake_query_or_load_exomercat
+    )
+
+    # 2) Mock distance_cut to drop the second row (simulate outside distance).
+    captured_distance_args = {}
+
+    def fake_distance_cut(cat: Table, colname: str, main_id: bool = True):
+        captured_distance_args["colname"] = colname
+        captured_distance_args["main_id"] = main_id
+        # Keep only the first row
+        return cat[:1].copy()
+
+    monkeypatch.setattr(exo_module, "distance_cut", fake_distance_cut)
+
+    # 3) Mock fetch_main_id to map one planet to a SIMBAD-style name.
+    #    The function receives a table with planet_main_id, host_main_id.
+    def fake_fetch_main_id(tab: Table, id_creator):
+        return Table(
+            {
+                "sim_planet_main_id": np.array(["* HD 1 A b"], dtype=object),
+                "planet_main_id": np.array(["HD 1 A b"], dtype=object),
+                "host_main_id": np.array(["HD 1 A"], dtype=object),
+            }
+        )
+
+    monkeypatch.setattr(exo_module, "fetch_main_id", fake_fetch_main_id)
+
+    # 4) Mock save to capture removed objects written by the function.
+    saved = {}
+
+    def fake_save(cats, names, location=None):
+        # Expect exactly one table saved under this logical name.
+        assert names == ["exomercat_removed_objects"]
+        assert len(cats) == 1
+        saved["removed_objects"] = cats[0]
+
+    monkeypatch.setattr(exo_module, "save", fake_save)
+
+    # Execute
+    exo, exo_helptab = create_exo_helpertable()
+
+    # Assertions
+
+    # distance_cut was called with the main_id column and main_id=True
+    assert captured_distance_args["colname"] == "main_id"
+    assert captured_distance_args["main_id"] is True
+
+    # Only one row remains after the fake distance cut.
+    assert len(exo_helptab) == 1
+
+    # Stripping applied: no leading/trailing spaces.
+    assert exo_helptab["main_id"][0] == "HD 1"
+    assert exo_helptab["exomercat_name"][0] == "HD 1 A b"
+    assert exo_helptab["planet_main_id"][0] == "HD 1 A b"
+
+    # SIMBAD join applied: new column present and mapped value is correct.
+    assert "sim_planet_main_id" in exo_helptab.colnames
+    assert exo_helptab["sim_planet_main_id"][0] == "* HD 1 A b"
+
+    # Removed objects saved: should contain the row we dropped (PL-2).
+    assert "removed_objects" in saved
+    removed = saved["removed_objects"]
+    assert "exomercat_name" in removed.colnames
+    assert "HD 2 c" in set(removed["exomercat_name"])
 
 def test_exo_create_ident_table():
     # data
@@ -100,7 +201,7 @@ def test_exo_create_ident_table():
     )
 
 
-def test_exo_create_objects_table():
+def test_create_objects_table():
     # data
     exo = empty_dict.copy()
     exo["ident"] = Table(
