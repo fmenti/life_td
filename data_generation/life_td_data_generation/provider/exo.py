@@ -23,7 +23,18 @@ from sdata import empty_dict
 from utils.io import Path, load, save, stringtoobject
 
 
-def query_exomercat(adql_query, exo):
+def query_exomercat(adql_query: str, exo: dict) -> Table:
+    """
+    Query the Exo-MerCat TAP service for the helper table.
+
+    :param str adql_query: ADQL query string executed on the Exo-MerCat
+        TAP service.
+    :param exo: Mutable dictionary that will receive the provider table.
+        Expected to be the shared provider dict used through this module.
+    :type exo: dict[str, Table]
+    :returns: The queried Exo-MerCat helper table.
+    :rtype: astropy.table.table.Table
+    """
     exo["provider"] = create_provider_table(
         "Exo-MerCat",
         "http://archives.ia2.inaf.it/vo/tap/projects",
@@ -33,7 +44,18 @@ def query_exomercat(adql_query, exo):
     return exo_helptab
 
 
-def load_exomercat(exo):
+def load_exomercat(exo: dict) -> Table:
+    """
+    Load a previously exported Exo-MerCat helper table from local storage.
+
+    This is used as a fallback when the remote TAP service is not reachable.
+
+    :param exo: Mutable dictionary that will receive the provider table.
+        Expected to be the shared provider dict used through this module.
+    :type exo: dict[str, Table]
+    :returns: The locally loaded Exo-MerCat helper table.
+    :rtype: astropy.table.table.Table
+    """
     exo["provider"] = create_provider_table(
         "Exo-MerCat",
         "http://archives.ia2.inaf.it/vo/tap/projects",
@@ -49,15 +71,16 @@ def load_exomercat(exo):
     return exo_helptab
 
 
-def query_or_load_exomercat():
+def query_or_load_exomercat() -> tuple[dict, Table]:
     """
-    Queries or loads exomercat table.
+    Get the Exo-MerCat helper table either via TAP or from local backup.
 
-    If the exomercat server is not online a temporary method to
-    ingest old exomercat data is used.
+    Tries the live TAP query first. If that fails (e.g. server down), a
+    shipped CSV snapshot is loaded instead. The returned provider dict is
+    the shared container used throughout the Exo provider pipeline.
 
-    :returns: Dictionary of database table names and tables.
-    :rtype: dict(str,astropy.table.table.Table)
+    :returns: Tuple of (provider dict, helper table).
+    :rtype: tuple[dict[str, Table], astropy.table.table.Table]
     """
     exo = empty_dict.copy()
     adql_query = """SELECT *
@@ -65,7 +88,7 @@ def query_or_load_exomercat():
 
     try:
         exo_helptab = query_exomercat(adql_query, exo)
-    except:
+    except Exception:
         exo_helptab = load_exomercat(exo)
     return exo, exo_helptab
 
@@ -105,7 +128,6 @@ def create_exo_helpertable():
     :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
     """
     exo, exo_helptab = query_or_load_exomercat()
-
     exo_helptab = create_object_main_id(exo_helptab)
     # join exo_helptab on host_main_id and sim_objects main_id
     # Unfortunately exomercat does not provide distance measurements so we
@@ -116,7 +138,6 @@ def create_exo_helpertable():
     #   A compromise is to keep the list of objects I lost for later improvement.
     exo_helptab_before_distance_cut = exo_helptab
     exo_helptab = distance_cut(exo_helptab, "main_id")
-
     # removing whitespace in front of main_id and name.
     # done after distance_cut function to prevent missing values error
     for i in range(len(exo_helptab)):
@@ -127,22 +148,20 @@ def create_exo_helpertable():
         exo_helptab["exomercat_name"][i] = exo_helptab["exomercat_name"][
             i
         ].strip()
-
     # fetching simbad main_id for planet since sometimes exomercat planet main id is not the same
     exo_helptab2 = fetch_main_id(
         exo_helptab["planet_main_id", "host_main_id"],
         # host_main_id just present to create table in contrast to column
         IdentifierCreator(name="sim_planet_main_id", colname="planet_main_id"),
     )
-
     # I use a left join as otherwise I would loose some objects that are not in simbad
+    # didn't I loose them already in the distance_cut?
     exo_helptab = join(
         exo_helptab,
         exo_helptab2["sim_planet_main_id", "planet_main_id"],
         keys="planet_main_id",
         join_type="left",
     )
-
     # show which elements from exo_helptab were not found in sim_objects
     exo_helptab_before_distance_cut["exomercat_name"] = (
         exo_helptab_before_distance_cut["exomercat_name"].astype(object)
