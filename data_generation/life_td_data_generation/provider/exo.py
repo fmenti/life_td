@@ -93,83 +93,161 @@ def query_or_load_exomercat() -> tuple[dict, Table]:
     return exo, exo_helptab
 
 
-def create_object_main_id(exo_helptab):
-    # initializing column
-    exo_helptab["planet_main_id"] = Column(
+def create_object_main_id(exo_helptab: Table) -> Table:
+    """
+    Build canonical main identifiers for host and planet objects.
+
+    Constructs:
+    - host_main_id: host name augmented with a binary component (if present).
+    - planet_main_id: host_main_id + letter (planet label).
+
+    The inputs can contain masked values (astropy masked columns). This
+    function preserves those semantics and falls back to the 'host'
+    column if 'main_id' is masked.
+
+    :param exo_helptab: Raw Exo-MerCat helper table with columns 'main_id',
+        'host', 'binary' and 'letter'.
+    :type exo_helptab: astropy.table.table.Table
+    :returns: The same table with 'host_main_id' and 'planet_main_id' added.
+    :rtype: astropy.table.table.Table
+    """
+    # Initialize target columns with proper length and dtype.
+    exo_helptab["planet_main_id"] = Column(  # object dtype for mixed strings
         dtype=object, length=len(exo_helptab)
     )
+    # host_main_id starts with the original main_id (may include mask).
     exo_helptab["host_main_id"] = exo_helptab["main_id"]
 
     for i in range(len(exo_helptab)):
-        # if there is a main id use that
+        # If 'main_id' is present, use it, else fallback to 'host'.
+        # Note: astropy masked values use MaskedConstant.
         if type(exo_helptab["main_id"][i]) != np.ma.core.MaskedConstant:
             hostname = exo_helptab["main_id"][i]
-        # else use host column entry
         else:
             hostname = exo_helptab["host"][i]
-        # if there is a binary entry
+
+        # If a binary code is present, append it (e.g., 'A', 'B', ...).
         if type(exo_helptab["binary"][i]) != np.ma.core.MaskedConstant:
             exo_helptab["host_main_id"][i] = (
                 hostname + " " + exo_helptab["binary"][i]
             )
         else:
             exo_helptab["host_main_id"][i] = hostname
+
+        # Planet main id is host_main_id + planet letter (e.g., 'b', 'c').
         exo_helptab["planet_main_id"][i] = (
             exo_helptab["host_main_id"][i] + " " + exo_helptab["letter"][i]
         )
     return exo_helptab
 
 
-def create_exo_helpertable():
+def _distance_cut_and_strip(exo_helptab: Table) -> Table:
     """
-    Creates helper table.
+    Apply distance cut (via SIMBAD join) and strip whitespace from IDs.
 
-    :returns: Helper table and dictionary of database table names and tables.
-    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
+    Whitespace stripping is performed after the distance_cut call to avoid
+    issues with masked values during the join.
+
+    :param exo_helptab: Helper table after planet/host ids were created.
+    :type exo_helptab: astropy.table.table.Table
+    :returns: Table filtered to the distance-limited sample with trimmed
+        'planet_main_id', 'main_id', and 'exomercat_name'.
+    :rtype: astropy.table.table.Table
     """
-    exo, exo_helptab = query_or_load_exomercat()
-    exo_helptab = create_object_main_id(exo_helptab)
-    # join exo_helptab on host_main_id and sim_objects main_id
-    # Unfortunately exomercat does not provide distance measurements so we
-    #   relie on matching it to simbad for enforcing the database cutoff of 20 pc.
-    #   The downside is, that the match does not work so well due to different
-    #   identifier notation which means we loose some objects. That is, however,
-    #   preferrable to having to do the work of checking the literature.
-    #   A compromise is to keep the list of objects I lost for later improvement.
-    exo_helptab_before_distance_cut = exo_helptab
     exo_helptab = distance_cut(exo_helptab, "main_id")
-    # removing whitespace in front of main_id and name.
-    # done after distance_cut function to prevent missing values error
+
     for i in range(len(exo_helptab)):
-        exo_helptab["planet_main_id"][i] = exo_helptab["planet_main_id"][
-            i
-        ].strip()
+        exo_helptab["planet_main_id"][i] = exo_helptab["planet_main_id"][i].strip()
         exo_helptab["main_id"][i] = exo_helptab["main_id"][i].strip()
-        exo_helptab["exomercat_name"][i] = exo_helptab["exomercat_name"][
-            i
-        ].strip()
-    # fetching simbad main_id for planet since sometimes exomercat planet main id is not the same
-    exo_helptab2 = fetch_main_id(
+        exo_helptab["exomercat_name"][i] = exo_helptab["exomercat_name"][i].strip()
+
+    return exo_helptab
+
+
+def _fetch_sim_names(exo_helptab: Table) -> Table:
+    """
+    Attach SIMBAD planet names to the helper table using a left join.
+
+    A separate SIMBAD lookup is performed on the planet main ids to
+    resolve the SIMBAD main id that should be used. The join is left-typed
+    to preserve rows not present in SIMBAD.
+     TBD: check if I loose them already in the distance_cut?
+
+    :param exo_helptab: Distance-cut and stripped helper table.
+    :type exo_helptab: astropy.table.table.Table
+    :returns: Table with an added 'sim_planet_main_id' column (may be empty
+        for rows not found in SIMBAD).
+    :rtype: astropy.table.table.Table
+    """
+    # Note: include 'host_main_id' to keep a Table (not Column) in fetch call.
+    sim_matches = fetch_main_id(
         exo_helptab["planet_main_id", "host_main_id"],
-        # host_main_id just present to create table in contrast to column
-        IdentifierCreator(name="sim_planet_main_id", colname="planet_main_id"),
+        IdentifierCreator(  # id_creator config for SIMBAD-planet lookup
+            name="sim_planet_main_id", colname="planet_main_id"
+        ),
     )
-    # I use a left join as otherwise I would loose some objects that are not in simbad
-    # didn't I loose them already in the distance_cut?
     exo_helptab = join(
         exo_helptab,
-        exo_helptab2["sim_planet_main_id", "planet_main_id"],
+        sim_matches["sim_planet_main_id", "planet_main_id"],
         keys="planet_main_id",
         join_type="left",
     )
-    # show which elements from exo_helptab were not found in sim_objects
-    exo_helptab_before_distance_cut["exomercat_name"] = (
-        exo_helptab_before_distance_cut["exomercat_name"].astype(object)
-    )
-    removed_objects = setdiff(
-        exo_helptab_before_distance_cut, exo_helptab, keys=["exomercat_name"]
-    )
+    return exo_helptab
+
+
+def _compute_removed_objects_and_save(before: Table, after: Table) -> None:
+    """
+    Persist the list of Exo-MerCat objects removed during distance cut.
+
+    Compares two helper tables by 'exomercat_name' and writes differences
+    to a sidecar file for later inspection.
+
+    :param before: Helper table before the distance cut.
+    :type before: astropy.table.table.Table
+    :param after: Helper table after the distance cut and SIMBAD join.
+    :type after: astropy.table.table.Table
+    :returns: Nothing. Writes the 'exomercat_removed_objects' table via save().
+    :rtype: None
+    """
+    before["exomercat_name"] = before["exomercat_name"].astype(object)
+    removed_objects = setdiff(before, after, keys=["exomercat_name"])
     save([removed_objects], ["exomercat_removed_objects"])
+    return
+
+
+
+def create_exo_helpertable() -> tuple[dict, Table]:
+    """
+    Create the Exo-MerCat helper table used downstream.
+
+    Steps:
+    1. Query or load Exo-MerCat base data (provider dict + raw table).
+    2. Build host/planet canonical ids (host_main_id, planet_main_id).
+    3. Apply distance cut (via SIMBAD join) and strip whitespace.
+    4. Fetch SIMBAD planet names and left-join them.
+    5. Save a table of removed objects for auditing.
+    6. Return provider dict and finalized helper table.
+
+    :returns: Tuple of (provider dict, helper table).
+    :rtype: tuple[dict[str, Table], astropy.table.table.Table]
+    """
+    exo, exo_helptab = query_or_load_exomercat()
+    exo_helptab = create_object_main_id(exo_helptab)
+
+    # Keep pre-cut copy to report removed objects later.
+    exo_helptab_before_distance_cut = exo_helptab
+
+    # Distance cut and id trimming.
+    exo_helptab = _distance_cut_and_strip(exo_helptab)
+
+    # Attach SIMBAD main ids for planets via left join.
+    exo_helptab = _fetch_sim_names(exo_helptab)
+
+    # Report dropped rows (by exomercat_name) for traceability.
+    _compute_removed_objects_and_save(
+        exo_helptab_before_distance_cut, exo_helptab
+    )
+
     return exo, exo_helptab
 
 
