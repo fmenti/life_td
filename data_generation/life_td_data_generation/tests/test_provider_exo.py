@@ -1,5 +1,5 @@
 import numpy as np
-from astropy.table import MaskedColumn, Table, Column, MaskedColumn
+from astropy.table import MaskedColumn, Table, Column
 from provider.exo import (
     create_ident_table,
     create_objects_table,
@@ -11,7 +11,9 @@ from provider.exo import (
     betterthan,
     align_quality_with_bestmass,
     create_mes_mass_pl_table,
-    create_exo_helpertable
+    create_exo_helpertable,
+    create_h_link_table,
+    create_exo_sources_table
 )
 from sdata import empty_dict
 import pytest
@@ -540,3 +542,94 @@ def test_create_mes_mass_pl_table():
         ]
         == "Mass"
     )
+
+def test_create_h_link_table():
+    # data: helper table with planet and host ids
+    exo_helptab = Table(
+        names=["planet_main_id", "host_main_id"],
+        dtype=[object, object],
+    )
+    exo_helptab.add_row(("Planet-1", "Host-A"))
+    exo_helptab.add_row(("Planet-2", "Host-B"))
+
+    # provider table to supply provider_bibcode
+    exo = {
+        "provider": Table(
+            names=[
+                "provider_name",
+                "provider_url",
+                "provider_bibcode",
+                "provider_access",
+            ],
+            dtype=[object, object, object, object],
+        )
+    }
+    exo["provider"].add_row(
+        ("ExoMercat", "http://example.org", "2025Test.Bib", "open")
+    )
+
+    # function under test
+    result = create_h_link_table(exo_helptab, exo)
+
+    # assertions
+    assert set(result.colnames) == {"main_id", "parent_main_id", "h_link_ref"}
+    assert list(result["main_id"]) == ["Planet-1", "Planet-2"]
+    assert list(result["parent_main_id"]) == ["Host-A", "Host-B"]
+    assert list(result["h_link_ref"]) == ["2025Test.Bib", "2025Test.Bib"]
+
+def test_create_exo_sources_table():
+    # data: minimal provider + ref-bearing tables
+    provider = Table(
+        names=["provider_name", "provider_url", "provider_bibcode", "provider_access"],
+        dtype=[object, object, object, object],
+    )
+    provider.add_row(("ExoMercat", "http://example.org", "BIB1", "open"))
+
+    h_link = Table(
+        names=["h_link_ref"],
+        dtype=[object],
+    )
+    # duplicate and unique refs
+    h_link.add_row(("REF_H1",))
+    h_link.add_row(("REF_H1",))
+
+    ident = Table(
+        names=["id_ref"],
+        dtype=[object],
+    )
+    ident.add_row(("REF_I1",))
+    ident.add_row(("REF_H1",))  # intentionally duplicate across tables
+
+    mes_mass_pl = Table()
+    mes_mass_pl["mass_pl_ref"] = MaskedColumn(
+        data=["REF_M1", "IGNORED"], mask=[False, True], dtype=object
+    )
+    # simulate missing/None reference
+
+    exo = {
+        "provider": provider,
+        "h_link": h_link,
+        "ident": ident,
+        "mes_mass_pl": mes_mass_pl,
+    }
+
+    # function under test
+    sources = create_exo_sources_table(exo)
+
+    # assertions
+    assert set(sources.colnames) >= {"ref", "provider_name"}
+    expected_refs = {"BIB1", "REF_H1", "REF_I1", "REF_M1"}
+    # ensure references are unique and no None in the set
+    assert expected_refs.issubset(set(sources["ref"]))
+    # all provider_name entries should match the single provider
+    assert set(sources["provider_name"]) == {"ExoMercat"}
+
+
+# to do:
+# - make exo nicer like done with simbad
+#       -> AI suggested stuff, just need to copy paste and check
+# - make test_exo nicer like done with simbad
+# - push
+# - get version 3 branch working via dachs
+# - merge version3 into master branch
+
