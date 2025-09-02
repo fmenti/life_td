@@ -251,36 +251,52 @@ def create_exo_helpertable() -> tuple[dict, Table]:
     return exo, exo_helptab
 
 
-def create_ident_table(exo_helptab, exo):
+def create_ident_table(exo_helptab: Table, exo: dict[str, Table]) -> tuple[Table, Table]:
     """
-    Creates identifier table.
+    Create the identifier table for Exo-MerCat objects.
 
-    :param exo_helptab: Exo-Mercat helper table.
+    For each row in the helper table this function emits two identifier rows:
+    - (main_id, main_id, id_ref) where id_ref comes from SIMBAD if
+      sim_planet_main_id is available, otherwise from Exo-MerCat.
+    - (main_id, exomercat_name, exomercat_bibcode) as the Exo-MerCat alias.
+
+    If sim_planet_main_id is not empty, planet_main_id in the helper table is
+    replaced with that SIMBAD value. This matches downstream expectations
+    (e.g. uniqueness, join behavior).
+
+    :param exo_helptab: Helper table with 'planet_main_id', 'sim_planet_main_id'
+        and 'exomercat_name' columns.
     :type exo_helptab: astropy.table.table.Table
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
-    :returns: Identifier table.
-    :rtype: astropy.table.table.Table
+    :param exo: Provider dict containing the 'provider' table with
+        'provider_bibcode'.
+    :type exo: dict[str, astropy.table.table.Table]
+    :returns: Tuple of (identifier table, possibly updated helper table).
+    :rtype: tuple[astropy.table.table.Table, astropy.table.table.Table]
     """
     exo_ident = Table(
         names=["main_id", "id", "id_ref"], dtype=[object, object, object]
     )
 
     for i in range(len(exo_helptab)):
+        # Use SIMBAD name if present, otherwise keep Exo-MerCat one.
         if exo_helptab["sim_planet_main_id"][i] != "":
             main_id = exo_helptab["sim_planet_main_id"][i]
             exo_helptab["planet_main_id"][i] = exo_helptab[
                 "sim_planet_main_id"
             ][i]
-            # issue: changing exo_helptab but not returning it
+            # SIMBAD bibcode from local snapshot
             [simbad_ref] = load(["sim_provider"])
             idref = simbad_ref["provider_bibcode"][0]
         else:
             main_id = exo_helptab["planet_main_id"][i]
             # in else because otherwise will result in double sim main id
             # from sim provider in case of sim being main id
+            # Exo-MerCat bibcode
             idref = exo["provider"]["provider_bibcode"][0]
+
+        # main_id as an identifier (self-id)
         exo_ident.add_row([main_id, main_id, idref])
+        # Exo-MerCat name as alias
         exo_ident.add_row(
             [
                 main_id,
@@ -290,24 +306,27 @@ def create_ident_table(exo_helptab, exo):
         )
 
     exo_ident = unique(exo_ident)
-
     return exo_ident, exo_helptab
 
 
-def create_objects_table(exo):
+def create_objects_table(exo: dict[str, Table]) -> Table:
     """
-    Creates objects table.
+    Create the objects table from identifiers.
 
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
-    :returns: Objects table.
+    Builds a unique list of objects from the identifier table and assigns
+    object type 'pl' (planet) for all entries produced by the Exo-MerCat
+    provider.
+
+    :param exo: Provider dict that contains 'ident' table with columns
+        'main_id' and 'id'.
+    :type exo: dict[str, astropy.table.table.Table]
+    :returns: Objects table with columns 'main_id', 'ids', and 'type'.
     :rtype: astropy.table.table.Table
     """
-    # tbd at one point: add hosts to object because currently parent not in sim is not in objects table
-
+    # Note: hosts not in SIMBAD are not added (tbd in future).
     exo_objects = Table(names=["main_id", "ids"], dtype=[object, object])
     exo_objects = ids_from_ident(exo["ident"]["main_id", "id"], exo_objects)
-    exo_objects["type"] = ["pl" for j in range(len(exo_objects))]
+    exo_objects["type"] = ["pl" for _ in range(len(exo_objects))]
     return exo_objects
 
 
@@ -438,15 +457,19 @@ def create_mes_mass_pl_table(exo_helptab):
     return exo_mes_mass_pl
 
 
-def create_h_link_table(exo_helptab, exo):
+def create_h_link_table(exo_helptab: Table, exo: dict[str, Table]) -> Table:
     """
-    Creates hierarchical link table.
+    Create the hierarchical link table for planet-to-host relations.
 
-    :param exo_helptab: Exo-Mercat helper table.
+    The link connects child 'main_id' (planet) to 'parent_main_id' (host).
+    A uniform reference column is filled using the Exo-MerCat provider bibcode.
+
+    :param exo_helptab: Helper table with 'planet_main_id' and 'host_main_id'.
     :type exo_helptab: astropy.table.table.Table
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
-    :returns: Hierarchical link table.
+    :param exo: Provider dict containing 'provider' table with
+        'provider_bibcode'.
+    :type exo: dict[str, astropy.table.table.Table]
+    :returns: h_link table with 'main_id', 'parent_main_id', 'h_link_ref'.
     :rtype: astropy.table.table.Table
     """
     exo_h_link = exo_helptab["planet_main_id", "host_main_id"]
@@ -454,7 +477,7 @@ def create_h_link_table(exo_helptab, exo):
         ["planet_main_id", "host_main_id"], ["main_id", "parent_main_id"]
     )
     exo_h_link["h_link_ref"] = [
-        exo["provider"]["provider_bibcode"][0] for j in range(len(exo_h_link))
+        exo["provider"]["provider_bibcode"][0] for _ in range(len(exo_h_link))
     ]
     return exo_h_link
 
