@@ -1,5 +1,6 @@
 import numpy as np
 from astropy.table import MaskedColumn, Table, Column
+from provider.utils import create_provider_table
 from provider.exo import (
     create_ident_table,
     create_objects_table,
@@ -18,6 +19,129 @@ from provider.exo import (
 from sdata import empty_dict
 import pytest
 import provider.exo as exo_module
+
+
+def test_query_exomercat_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Ensure query_exomercat uses TAP query and sets provider metadata.
+    """
+    # Arrange
+    exo = {}
+    expected = Table({"col": np.array([1, 2], dtype=object)})
+
+    def fake_query(url: str, adql_query: str):
+        # Validate URL from provider table
+        assert url == "http://archives.ia2.inaf.it/vo/tap/projects"
+        assert "SELECT" in adql_query
+        return expected
+
+    monkeypatch.setattr(exo_module, "query", fake_query)
+
+    # Act
+    result = exo_module.query_exomercat("SELECT * FROM t", exo)
+
+    # Assert
+    assert result is expected
+    assert "provider" in exo
+    assert exo["provider"]["provider_name"][0] == "Exo-MerCat"
+    assert (
+        exo["provider"]["provider_url"][0]
+        == "http://archives.ia2.inaf.it/vo/tap/projects"
+    )
+    assert exo["provider"]["provider_bibcode"][0] == "2020A&C....3100370A"
+
+def test_load_exomercat_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Ensure load_exomercat reads local CSV snapshot and sets access date.
+    """
+    # Arrange
+    exo = {}
+    loaded = Table({"name": np.array(["row1", "row2"], dtype=object)})
+
+    def fake_ascii_read(path: str):
+        # Path is derived from Path().additional_data + filename
+        assert "exo-mercat13-12-2024_v2.0.csv" in path
+        return loaded
+
+    def fake_stringtoobject(tab: Table, number: int = 3000):
+        assert tab is loaded
+        return tab
+
+    monkeypatch.setattr(exo_module.ascii, "read", fake_ascii_read)
+    monkeypatch.setattr(exo_module, "stringtoobject", fake_stringtoobject)
+
+    # Act
+    result = exo_module.load_exomercat(exo)
+
+    # Assert
+    assert result is loaded
+    assert "provider" in exo
+    assert exo["provider"]["provider_name"][0] == "Exo-MerCat"
+    assert (
+        exo["provider"]["provider_url"][0]
+        == "http://archives.ia2.inaf.it/vo/tap/projects"
+    )
+    assert exo["provider"]["provider_bibcode"][0] == "2020A&C....3100370A"
+    # Access date is stamped by the function
+    assert exo["provider"]["provider_access"][0] == "2024-12-13"
+
+def test_query_or_load_exomercat_prefers_query(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Ensure query_or_load_exomercat uses query path when it succeeds.
+    """
+    returned = Table({"ok": np.array([True], dtype=object)})
+
+    def fake_query_exomercat(adql: str, exo: dict):
+        exo["provider"] = create_provider_table(
+            "Exo-MerCat",
+            "http://archives.ia2.inaf.it/vo/tap/projects",
+            "2020A&C....3100370A",)
+        assert "FROM exomercat.exomercat" in adql
+        return returned
+
+    def fake_load_exomercat(exo: dict):
+        raise AssertionError("Should not be called if query succeeds")
+
+    monkeypatch.setattr(exo_module, "query_exomercat", fake_query_exomercat)
+    monkeypatch.setattr(exo_module, "load_exomercat", fake_load_exomercat)
+
+    # Act
+    exo, helptab = exo_module.query_or_load_exomercat()
+
+    # Assert
+    assert isinstance(exo, dict)
+    assert helptab is returned
+    assert exo["provider"]["provider_name"][0] == "Exo-MerCat"
+
+def test_query_or_load_exomercat_uses_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Ensure query_or_load_exomercat falls back to local load on failure.
+    """
+    fallback = Table({"src": np.array(["local"], dtype=object)})
+
+    def fake_query_exomercat(adql: str, exo: dict):
+        raise RuntimeError("Simulated TAP failure")
+
+    def fake_load_exomercat(exo: dict):
+        exo["provider"] = create_provider_table(
+            "Exo-MerCat",
+            "http://archives.ia2.inaf.it/vo/tap/projects",
+            "2020A&C....3100370A",
+            "2024-12-13",
+        )
+        return fallback
+
+    monkeypatch.setattr(exo_module, "query_exomercat", fake_query_exomercat)
+    monkeypatch.setattr(exo_module, "load_exomercat", fake_load_exomercat)
+
+    # Act
+    exo, helptab = exo_module.query_or_load_exomercat()
+
+    # Assert
+    assert isinstance(exo, dict)
+    assert helptab is fallback
+    assert exo["provider"]["provider_name"][0] == "Exo-MerCat"
+
 
 def test_create_object_main_id():
     a = MaskedColumn(
@@ -626,8 +750,7 @@ def test_create_exo_sources_table():
 
 
 # to do:
-# - make exo nicer like done with simbad
-#       -> AI suggested stuff, just need to copy paste and check
+# just realized need data access layer tests too, make ai prose them
 # - make test_exo nicer like done with simbad
 # - push
 # - get version 3 branch working via dachs
