@@ -1,3 +1,9 @@
+"""
+Tests for the Exo-MerCat provider (unit + small integration facades).
+
+Covers data access (query/load) and downstream table builders.
+"""
+
 import numpy as np
 from astropy.table import MaskedColumn, Table, Column
 from provider.utils import create_provider_table
@@ -14,22 +20,28 @@ from provider.exo import (
     create_mes_mass_pl_table,
     create_exo_helpertable,
     create_h_link_table,
-    create_exo_sources_table
+    create_exo_sources_table,
 )
 from sdata import empty_dict
 import pytest
 import provider.exo as exo_module
 
 
-def test_query_exomercat_success(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_query_exomercat_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Ensure query_exomercat uses TAP query and sets provider metadata.
+
+    :param monkeypatch: Pytest fixture for temporary attribute patching.
+    :type monkeypatch: pytest.MonkeyPatch
     """
     # Arrange
-    exo = {}
+    exo: dict = {}
     expected = Table({"col": np.array([1, 2], dtype=object)})
 
-    def fake_query(url: str, adql_query: str):
+    def fake_query(url: str, adql_query: str) -> Table:
+        """Fake TAP query returning a small table for assertions."""
         # Validate URL from provider table
         assert url == "http://archives.ia2.inaf.it/vo/tap/projects"
         assert "SELECT" in adql_query
@@ -50,20 +62,28 @@ def test_query_exomercat_success(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     assert exo["provider"]["provider_bibcode"][0] == "2020A&C....3100370A"
 
-def test_load_exomercat_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_load_exomercat_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
-    Ensure load_exomercat reads local CSV snapshot and sets access date.
+    Ensure load_exomercat reads the CSV snapshot and stamps access date.
+
+    :param monkeypatch: Pytest fixture for temporary attribute patching.
+    :type monkeypatch: pytest.MonkeyPatch
     """
     # Arrange
-    exo = {}
+    exo: dict = {}
     loaded = Table({"name": np.array(["row1", "row2"], dtype=object)})
 
-    def fake_ascii_read(path: str):
+    def fake_ascii_read(path: str) -> Table:
+        """Fake CSV loader returning a small table."""
         # Path is derived from Path().additional_data + filename
         assert "exo-mercat13-12-2024_v2.0.csv" in path
         return loaded
 
-    def fake_stringtoobject(tab: Table, number: int = 3000):
+    def fake_stringtoobject(tab: Table, number: int = 3000) -> Table:
+        """Pass-through conversion used by fallback loader."""
         assert tab is loaded
         return tab
 
@@ -85,21 +105,29 @@ def test_load_exomercat_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
     # Access date is stamped by the function
     assert exo["provider"]["provider_access"][0] == "2024-12-13"
 
-def test_query_or_load_exomercat_prefers_query(monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_query_or_load_exomercat_prefers_query(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Ensure query_or_load_exomercat uses query path when it succeeds.
+
+    :param monkeypatch: Pytest fixture for temporary attribute patching.
+    :type monkeypatch: pytest.MonkeyPatch
     """
     returned = Table({"ok": np.array([True], dtype=object)})
 
-    def fake_query_exomercat(adql: str, exo: dict):
+    def fake_query_exomercat(adql: str, exo: dict) -> Table:
+        """Populate 'exo' provider and return a small result table."""
         exo["provider"] = create_provider_table(
             "Exo-MerCat",
             "http://archives.ia2.inaf.it/vo/tap/projects",
-            "2020A&C....3100370A",)
+            "2020A&C....3100370A",
+        )
         assert "FROM exomercat.exomercat" in adql
         return returned
 
-    def fake_load_exomercat(exo: dict):
+    def fake_load_exomercat(exo: dict) -> Table:  # pragma: no cover
         raise AssertionError("Should not be called if query succeeds")
 
     monkeypatch.setattr(exo_module, "query_exomercat", fake_query_exomercat)
@@ -113,16 +141,24 @@ def test_query_or_load_exomercat_prefers_query(monkeypatch: pytest.MonkeyPatch) 
     assert helptab is returned
     assert exo["provider"]["provider_name"][0] == "Exo-MerCat"
 
-def test_query_or_load_exomercat_uses_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_query_or_load_exomercat_uses_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     Ensure query_or_load_exomercat falls back to local load on failure.
+
+    :param monkeypatch: Pytest fixture for temporary attribute patching.
+    :type monkeypatch: pytest.MonkeyPatch
     """
     fallback = Table({"src": np.array(["local"], dtype=object)})
 
-    def fake_query_exomercat(adql: str, exo: dict):
+    def fake_query_exomercat(adql: str, exo: dict) -> Table:
+        """Simulate TAP failure to trigger fallback load."""
         raise RuntimeError("Simulated TAP failure")
 
-    def fake_load_exomercat(exo: dict):
+    def fake_load_exomercat(exo: dict) -> Table:
+        """Return fallback table while also stamping provider metadata."""
         exo["provider"] = create_provider_table(
             "Exo-MerCat",
             "http://archives.ia2.inaf.it/vo/tap/projects",
@@ -750,7 +786,6 @@ def test_create_exo_sources_table():
 
 
 # to do:
-# just realized need data access layer tests too, make ai prose them
 # - make test_exo nicer like done with simbad
 # - push
 # - get version 3 branch working via dachs
