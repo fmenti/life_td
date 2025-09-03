@@ -330,14 +330,46 @@ def create_objects_table(exo: dict[str, Table]) -> Table:
     return exo_objects
 
 
-def deal_with_mass_nullvalues(exo_helptab, cols):
+def deal_with_mass_nullvalues(exo_helptab: Table, cols: list[str]) -> Table:
+    """
+    Normalize null and infinite values in mass-related columns.
+
+    Replaces masked and sentinel values in the given columns using the
+    shared null-handling utilities. This makes downstream filtering
+    consistent and avoids NaN/Inf artifacts in calculations.
+
+    :param exo_helptab: Helper table with mass-like columns to normalize.
+    :type exo_helptab: astropy.table.table.Table
+    :param cols: Column names to normalize (e.g. 'mass', 'msini', ...).
+    :type cols: list[str]
+    :returns: Table with normalized mass columns.
+    :rtype: astropy.table.table.Table
+    """
     for colname in cols:
         exo_helptab = nullvalues(exo_helptab, colname, 1e20, verbose=False)
         exo_helptab = replace_value(exo_helptab, colname, np.inf, 1e20)
     return exo_helptab
 
 
-def create_para_exo_mes_mass_pl(exo_helptab, para, sini_flag):
+def create_para_exo_mes_mass_pl(
+    exo_helptab: Table, para: str, sini_flag: str
+) -> Table:
+    """
+    Extract a single-parameter planet-mass table (mass or msini).
+
+    Selects columns for the given parameter, renames them to the unified
+    'mes_mass_pl' schema, assigns the sin(i) flag, and filters out rows
+    with placeholder values.
+
+    :param exo_helptab: Normalized helper table with mass columns present.
+    :type exo_helptab: astropy.table.table.Table
+    :param para: Parameter to extract ('mass' or 'msini').
+    :type para: str
+    :param sini_flag: 'True' when para is 'msini', else 'False'.
+    :type sini_flag: str
+    :returns: Parameter-specific mass table in unified format.
+    :rtype: astropy.table.table.Table
+    """
     table = exo_helptab[
         "planet_main_id",
         para,
@@ -359,15 +391,26 @@ def create_para_exo_mes_mass_pl(exo_helptab, para, sini_flag):
     )
     if para == "msini":
         table.rename_column(para + "_pl_qual", "mass_pl_qual")
-    table["mass_pl_sini_flag"] = [sini_flag for j in range(len(table))]
-    # remove null values
+    table["mass_pl_sini_flag"] = [sini_flag for _ in range(len(table))]
+    # remove placeholder null values
     table = table[np.where(table["mass_pl_value"] != 1e20)]
     return table
 
 
-def betterthan(qual1, qual2):
-    # is it usefull to do all this work with the quality when I could just assign b for bestmass and c for otherone?
-    # nearly done, finish this then do other one as well. call one exomercatqual other dbqual
+def betterthan(qual1: str, qual2: str) -> bool:
+    """
+    Compare Exo-MerCat/DB quality flags.
+
+    Returns True if qual1 is strictly better than qual2 according to
+    the order A > B > C > D > E > ?.
+
+    :param qual1: Candidate quality flag.
+    :type qual1: str
+    :param qual2: Other quality flag.
+    :type qual2: str
+    :returns: True if qual1 ranks better than qual2, else False.
+    :rtype: bool
+    """
     quals = ["A", "B", "C", "D", "E", "?"]
     for i in [0, 1, 2, 3, 4]:
         if qual1 == quals[i] and qual2 in quals[i + 1 :]:
@@ -378,7 +421,25 @@ def betterthan(qual1, qual2):
     return result
 
 
-def bestmass_better_qual(bestmass, qual_msini, qual_mass):
+def bestmass_better_qual(
+    bestmass: str, qual_msini: str, qual_mass: str
+) -> tuple[str, str]:
+    """
+    Reconcile quality flags based on the chosen best-mass provenance.
+
+    If bestmass indicates 'Mass', then a same-or-better msini quality is
+    lowered. Conversely for 'Msini'. This recursion continues until both
+    qualities are consistent with the chosen bestmass.
+
+    :param bestmass: 'Mass' or 'Msini' provenance marker.
+    :type bestmass: str
+    :param qual_msini: Quality for the msini measurement.
+    :type qual_msini: str
+    :param qual_mass: Quality for the mass measurement.
+    :type qual_mass: str
+    :returns: Tuple of possibly adjusted (qual_msini, qual_mass).
+    :rtype: tuple[str, str]
+    """
     if bestmass == "Mass":
         if betterthan(qual_msini, qual_mass) or qual_msini == qual_mass:
             qual_msini = lower_quality(qual_msini)
@@ -394,7 +455,23 @@ def bestmass_better_qual(bestmass, qual_msini, qual_mass):
     return qual_msini, qual_mass
 
 
-def assign_new_qual(exo_mes_mass_pl, main_id, flag, new_qual):
+def assign_new_qual(
+    exo_mes_mass_pl: Table, main_id: str, flag: str, new_qual: str
+) -> Table:
+    """
+    Assign a new quality to one entry selected by planet id and sini-flag.
+
+    :param exo_mes_mass_pl: Unified mass table (mass+msini entries).
+    :type exo_mes_mass_pl: astropy.table.table.Table
+    :param main_id: Planet 'main_id' identifying the target object.
+    :type main_id: str
+    :param flag: 'True' for msini, 'False' for mass.
+    :type flag: str
+    :param new_qual: New quality flag to set.
+    :type new_qual: str
+    :returns: Table with updated quality for the matching entry.
+    :rtype: astropy.table.table.Table
+    """
     temp = [np.where(exo_mes_mass_pl["main_id"] == main_id)]
     for i in temp[0][0]:
         if exo_mes_mass_pl["mass_pl_sini_flag"][i] == flag:
@@ -402,10 +479,22 @@ def assign_new_qual(exo_mes_mass_pl, main_id, flag, new_qual):
     return exo_mes_mass_pl
 
 
-def align_quality_with_bestmass(exo_mes_mass_pl):
+def align_quality_with_bestmass(exo_mes_mass_pl: Table) -> Table:
+    """
+    Ensure msini/mass quality flags align with bestmass provenance.
+
+    For each planet (grouped by main_id), compares the qualities of the
+    two entries (msini and mass) against bestmass and lowers the other
+    when necessary to enforce a strict preference.
+
+    :param exo_mes_mass_pl: Unified mass table (mass and msini rows).
+    :type exo_mes_mass_pl: astropy.table.table.Table
+    :returns: Mass table with adjusted 'mass_pl_qual' values.
+    :rtype: astropy.table.table.Table
+    """
     grouped_mass_pl = exo_mes_mass_pl.group_by("main_id")
     ind = grouped_mass_pl.groups.indices
-    for i in range(len(ind) - 1):  # range(len(ind)-1):
+    for i in range(len(ind) - 1):
         if ind[i + 1] - ind[i] == 2:
             bestmass = grouped_mass_pl["bestmass_provenance"][ind[i]]
             if grouped_mass_pl["mass_pl_sini_flag"][ind[i]] == "True":
@@ -414,11 +503,11 @@ def align_quality_with_bestmass(exo_mes_mass_pl):
             else:
                 qual_msini = grouped_mass_pl["mass_pl_qual"][ind[i] + 1]
                 qual_mass = grouped_mass_pl["mass_pl_qual"][ind[i]]
+
             new_qual_msini, new_qual_mass = bestmass_better_qual(
                 bestmass, qual_msini, qual_mass
             )
-            # assign them the right place
-            # I think I need a where here
+
             if new_qual_msini != qual_msini:
                 main_id = grouped_mass_pl["main_id"][ind[i]]
                 exo_mes_mass_pl = assign_new_qual(
@@ -433,16 +522,21 @@ def align_quality_with_bestmass(exo_mes_mass_pl):
     return exo_mes_mass_pl
 
 
-def create_mes_mass_pl_table(exo_helptab):
+def create_mes_mass_pl_table(exo_helptab: Table) -> Table:
     """
-    Creates planetary mass measurement table.
+    Create the planetary mass-measurement table (mass and msini entries).
 
-    :param exo_helptab: Exo-Mercat helper table.
+    Steps:
+    - Normalize mass columns and assign initial qualities.
+    - Build separate tables for 'mass' (flag=False) and 'msini' (flag=True).
+    - Vertically stack, de-duplicate, then align qualities with bestmass.
+
+    :param exo_helptab: Helper table with mass and msini columns.
     :type exo_helptab: astropy.table.table.Table
-    :returns: Planetary mass measurement table.
+    :returns: Unified planetary mass table.
     :rtype: astropy.table.table.Table
     """
-    # include other parameters r, a, e, i, p, status
+    # include other parameters r, a, e, i, p, status in future (tbd)
     cols = ["mass_max", "mass_min", "mass", "msini", "msini_max", "msini_min"]
     exo_helptab = deal_with_mass_nullvalues(exo_helptab, cols)
 
@@ -482,17 +576,20 @@ def create_h_link_table(exo_helptab: Table, exo: dict[str, Table]) -> Table:
     return exo_h_link
 
 
-def create_exo_sources_table(exo):
+def create_exo_sources_table(exo: dict[str, Table]) -> Table:
     """
-    Creates sources table.
+    Create the unified sources table for Exo-MerCat-derived data.
 
-    :param exo: Dictionary of database table names and tables.
-    :type exo: dict(str,astropy.table.table.Table)
-    :returns: Sources table.
+    Collects and de-duplicates reference strings from multiple tables
+    (provider, h_link, ident, mes_mass_pl) and tags them with the
+    provider name.
+
+    :param exo: Provider dict with the listed tables present.
+    :type exo: dict[str, astropy.table.table.Table]
+    :returns: Sources table with columns 'ref' and 'provider_name'.
     :rtype: astropy.table.table.Table
     """
     tables = [exo["provider"], exo["h_link"], exo["ident"], exo["mes_mass_pl"]]
-    # define header name of columns containing references data
     ref_columns = [
         ["provider_bibcode"],
         ["h_link_ref"],
@@ -505,15 +602,19 @@ def create_exo_sources_table(exo):
     return exo_sources
 
 
-def provider_exo():
+def provider_exo() -> dict[str, Table]:
     """
-    This function obtains and arranges exomercat data.
+    Build and persist the full Exo-MerCat provider dataset.
 
-    :returns: Dictionary with names and astropy tables containing
-        reference data, object data, identifier data, object to object
-        relation data, basic planetary data and planetary mass measurement
-        data.
-    :rtype: dict(str,astropy.table.table.Table)
+    Pipeline:
+    1. Build helper table (query/load, ids, distance cut, SIMBAD join).
+    2. Create identifier and object tables.
+    3. Build the planet mass measurement table (mass + msini).
+    4. Create hierarchical links and the unified sources table.
+    5. Save all provider tables for reuse and return them.
+
+    :returns: Provider dictionary with all Exo-MerCat tables.
+    :rtype: dict[str, astropy.table.table.Table]
     """
     exo, exo_helptab = create_exo_helpertable()
 
