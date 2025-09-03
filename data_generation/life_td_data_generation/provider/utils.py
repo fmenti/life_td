@@ -17,25 +17,55 @@ from astropy.table import (
 )
 from pyvo.dal import TAPService
 
-# self created modules
 from utils.io import load
 
 
-def initiate_columns(table, columns, types, maskc):
-    for i in range(len(columns)):
-        if maskc[i]:
-            table[columns[i]] = MaskedColumn(dtype=types[i], length=len(table))
+def initiate_columns(
+    table_obj: Table, columns: list[str], types: list[type], mask: list[bool]
+) -> Table:
+    """
+    Initialize multiple columns on a table with dtype and mask settings.
+
+    :param table_obj: Table to receive the new columns.
+    :type table_obj: astropy.table.Table
+    :param columns: Column names to create.
+    :type columns: list[str]
+    :param types: Dtypes for the respective columns.
+    :type types: list[type]
+    :param mask: Mask flags; True -> MaskedColumn, False -> Column.
+    :type mask: list[bool]
+    :returns: The same table with the new columns added.
+    :rtype: astropy.table.Table
+    """
+    for name, dtype, use_mask in zip(columns, types, mask):
+        if use_mask:
+            table_obj[name] = MaskedColumn(dtype=dtype, length=len(table_obj))
         else:
-            table[columns[i]] = Column(dtype=types[i], length=len(table))
-    return table
+            table_obj[name] = Column(dtype=dtype, length=len(table_obj))
+    return table_obj
+
 
 
 def create_provider_table(
-    provider_name,
-    provider_url,
-    provider_bibcode,
-    provider_access=datetime.now().strftime("%Y-%m-%d"),
-):
+    provider_name: str,
+    provider_url: str,
+    provider_bibcode: str,
+    provider_access: str = datetime.now().strftime("%Y-%m-%d"),
+) -> Table:
+    """
+    Build a one-row provider metadata table.
+
+    :param provider_name: Human-readable provider name.
+    :type provider_name: str
+    :param provider_url: TAP/base URL for the provider service.
+    :type provider_url: str
+    :param provider_bibcode: ADS bibcode or similar reference marker.
+    :type provider_bibcode: str
+    :param provider_access: Access date (YYYY-MM-DD). Defaults to today.
+    :type provider_access: str
+    :returns: Table with provider metadata columns.
+    :rtype: astropy.table.Table
+    """
     print(f"Trying to create {provider_name} tables from {provider_access}...")
     provider_table = Table()
     provider_table["provider_name"] = [provider_name]
@@ -49,18 +79,18 @@ def query(
     link: str, adql_query: str, upload_tables: list[table.Table] = []
 ) -> table.Table:
     """
-    Performs a query via TAP on the service given in the link parameter.
+    Perform a TAP query against a service.
 
-    If a list of tables is given in the catalogs parameter,
-    those are uploaded to the service beforehand.
+    If upload tables are provided, they are made available to the service
+    as TAP_UPLOAD tables.
 
-    :param str link: Service access URL.
-    :param str adql_query: Query to be asked of the external database service
-         in ADQL.
-    :param upload_tables: List of astropy tables to be uploaded to the
-        service.
-    :type upload_tables: list(astropy.table.table.Table)
-    :returns: Result of the query.
+    :param link: Service access URL.
+    :type link: str
+    :param adql_query: Query to execute (ADQL).
+    :type adql_query: str
+    :param upload_tables: Optional tables to upload for join operations.
+    :type upload_tables: list[astropy.table.table.Table]
+    :returns: Result table returned by the TAP service.
     :rtype: astropy.table.table.Table
     """
     service = TAPService(link)
@@ -70,24 +100,25 @@ def query(
         )
     else:
         tables = {}
-        for i in range(len(upload_tables)):
-            tables.update({f"t{i + 1}": upload_tables[i]})
+        for i, t in enumerate(upload_tables, start=1):
+            tables[f"t{i}"] = t
         result = service.run_async(
             adql_query, uploads=tables, timeout=None, maxrec=1600000
         )
     return result.to_table()
 
 
-def remove_catalog_description(cat: table.Table, no_description) -> table.Table:
+def remove_catalog_description(cat: table.Table, no_description: bool) -> table.Table:
     """
-    Removes description meta data of catalog columns.
+    Remove description metadata from all columns of a table.
 
-    This is useful if by merging different catalogs the description of the
-    resulting catalog is not correct any longer.
+    Useful when merging catalogs has left descriptions inconsistent.
 
-    :param cat: Catalog
+    :param cat: Catalog to sanitize.
     :type cat: astropy.table.table.Table
-    :returns: Catalog with no description of columns.
+    :param no_description: When True, clear all column descriptions.
+    :type no_description: bool
+    :returns: Catalog with cleared descriptions (if requested).
     :rtype: astropy.table.table.Table
     """
     for col in cat.colnames:
@@ -103,31 +134,27 @@ def fill_sources_table(
     old_sources: table.Table = Table(),
 ) -> table.Table:
     """
-    Creates or updates the source table out of the given references.
+    Create or update the sources table from reference columns of a table.
 
-    The entries are unique and the columns consist out of the
-    reference and provider_name.
+    Entries are unique. Output has two columns: 'ref' and 'provider_name'.
 
-    :param cat: Table on which the references should be gathered.
+    :param cat: Table on which to gather references.
     :type cat: astropy.table.table.Table
-    :param ref_columns: Header of the columns containing reference
-        information.
-    :type ref_columns: list(str)
-    :param str provider: Provider name.
-    :param old_sources: Previously created reference table.
+    :param ref_columns: Column names containing reference strings.
+    :type ref_columns: list[str]
+    :param provider: Provider name tag for all collected references.
+    :type provider: str
+    :param old_sources: Previously created sources table to extend.
     :type old_sources: astropy.table.table.Table
-    :return: Table containing references and provider information.
+    :returns: Sources table containing unique refs and provider labels.
     :rtype: astropy.table.table.Table
     """
     if len(cat) > 0:
-        # table initialization to prevent error messages when assigning
-        # columns
         cat_sources = Table()
-        # initialization of list to store reference information
-        cat_reflist = []
-        # for all the columns given add reference information
+        cat_reflist: list[object] = []
+
         for k in range(len(ref_columns)):
-            # In case the column has elements that are masked skip those
+            # Skip masked entries if the column is a MaskedColumn.
             if type(cat[ref_columns[k]]) == column.MaskedColumn:
                 cat_reflist.extend(
                     cat[ref_columns[k]][
@@ -136,40 +163,64 @@ def fill_sources_table(
                 )
             else:
                 cat_reflist.extend(cat[ref_columns[k]])
-        # add list of collected references to the table and call the
-        # column ref
+
         cat_sources["ref"] = cat_reflist
         cat_sources = unique(cat_sources)
-        # attaches service information
+
         cat_sources["provider_name"] = [
-            provider for j in range(len(cat_sources))
+            provider for _ in range(len(cat_sources))
         ]
-        # combine old and new sources into one table
+
         sources = vstack([old_sources, cat_sources])
-        sources = unique(sources)  # remove double entries
+        sources = unique(sources)
     else:
         sources = old_sources
     return sources
 
 
-def create_sources_table(tables, ref_columns, provider_name):
-    # --------------creating output table sim_sources -------------------
+def create_sources_table(
+    tables: list[table.Table], ref_columns: list[list[str]], provider_name: str
+) -> table.Table:
+    """
+    Build a sources table from multiple input tables and reference columns.
+
+    :param tables: List of input tables to scan for references.
+    :type tables: list[astropy.table.table.Table]
+    :param ref_columns: Parallel list of reference-column name lists.
+    :type ref_columns: list[list[str]]
+    :param provider_name: Provider label to attach to each reference.
+    :type provider_name: str
+    :returns: Final sources table with unique references.
+    :rtype: astropy.table.table.Table
+    """
     sources = Table()
-    for cat, ref in zip(tables, ref_columns):
-        sources = fill_sources_table(cat, ref, provider_name, sources)
+    for cat, refs in zip(tables, ref_columns):
+        sources = fill_sources_table(cat, refs, provider_name, sources)
     return sources
 
 
 class OidCreator:
     """
-    Create adql query for fetch_main_id function using oid column.
+    Create ADQL query builder for fetch_main_id using an 'oid' join column.
     """
 
-    def __init__(self, name, colname):
+    def __init__(self, name: str, colname: str) -> None:
+        """
+        :param name: Output alias for SIMBAD main_id (e.g. 'sim_main_id').
+        :type name: str
+        :param colname: Column name in the uploaded table to join on.
+        :type colname: str
+        """
         self.name = name
         self.colname = colname
 
-    def create_main_id_query(self):
+    def create_main_id_query(self) -> str:
+        """
+        Build the ADQL query that joins SIMBAD basic on an 'oid' column.
+
+        :returns: ADQL string with column alias and join.
+        :rtype: str
+        """
         return (
             "SELECT b.main_id AS "
             + self.name
@@ -182,14 +233,26 @@ class OidCreator:
 
 class IdentifierCreator:
     """
-    Create adql query for fetch_main_id function using identifier column.
+    Create ADQL query builder for fetch_main_id using an identifier column.
     """
 
-    def __init__(self, name, colname):
+    def __init__(self, name: str, colname: str) -> None:
+        """
+        :param name: Output alias for SIMBAD main_id (e.g. 'sim_main_id').
+        :type name: str
+        :param colname: Identifier column name in the uploaded table.
+        :type colname: str
+        """
         self.name = name
         self.colname = colname
 
-    def create_main_id_query(self):
+    def create_main_id_query(self) -> str:
+        """
+        Build the ADQL query that joins via SIMBAD 'ident' on identifiers.
+
+        :returns: ADQL string with column alias and identifier join.
+        :rtype: str
+        """
         return (
             "SELECT b.main_id AS "
             + self.name
@@ -199,9 +262,6 @@ class IdentifierCreator:
                         JOIN TAP_UPLOAD.t1 ON ident.id=t1."""
             + self.colname
         )
-
-
-# looks better but don't think this will run. issue is that I pass variables to a class that doesn't take any
 
 
 def fetch_main_id(
