@@ -265,40 +265,45 @@ class IdentifierCreator:
 
 
 def fetch_main_id(
-    cat: table.Table, id_creator=OidCreator(name="main_id", colname="oid")
+        cat: table.Table, id_creator: object = OidCreator(name="main_id", colname="oid")
 ) -> table.Table:
     """
-    Joins main_id from simbad to the column colname.
+    Attach SIMBAD main_id to a table via an ADQL join strategy.
 
-    Returns the whole table cat but without any rows where no simbad
-    main_id was found.
+    The id_creator decides whether to join via 'oid' (OidCreator) or
+    via identifiers (IdentifierCreator). The returned table is the
+    uploaded table with an additional main_id-alias column.
 
-    :param cat: Astropy table containing column colname.
+    :param cat: Table containing the join column (as decided by id_creator).
     :type cat: astropy.table.table.Table
-    :param id_creator: OidCreator or IdentifierCreator object.
-    :return: Table with all main SIMBAD identifiers that could be found
-        in column "name".
+    :param id_creator: Strategy object with create_main_id_query() method.
+        Typically OidCreator or IdentifierCreator.
+    :type id_creator: object
+    :returns: The uploaded table enriched with SIMBAD main_id.
     :rtype: astropy.table.table.Table
     """
-    # improvement idea to be performed at one point
     # tbd option to match on position instead of main_id or oid
-    # SIMBAD TAP service
     TAP_service = "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
-    # performing query using external function
     main_id_query = id_creator.create_main_id_query()
-    cat = query(TAP_service, main_id_query, [cat])
-    return cat
+    return query(TAP_service, main_id_query, [cat])
 
 
-def distance_cut(cat: table.Table, colname: str, main_id: bool = True):
+def distance_cut(
+        cat: table.Table, colname: str, main_id: bool = True
+) -> table.Table:
     """
-    Sorts out objects not within the provider_simbad distance cut.
+    Filter a table by matching against SIMBAD objects inside the cut.
 
-    :param cat: Astropy table to be matched against sim_objects table.
+    If main_id is True, match on main identifiers; otherwise match using
+    an identifier table.
+
+    :param cat: Table to be matched against SIMBAD objects/identifiers.
     :type cat: astropy.table.table.Table
-    :param str colname: Name of the column to use for the match.
-    :return: Table like cat without any objects not found in
-        sim_objects.
+    :param colname: Column name to use for matching.
+    :type colname: str
+    :param main_id: If True, match on SIMBAD 'main_id', else on 'id'.
+    :type main_id: bool
+    :returns: Reduced table keeping only matching entries.
     :rtype: astropy.table.table.Table
     """
     if main_id:
@@ -318,23 +323,24 @@ def distance_cut(cat: table.Table, colname: str, main_id: bool = True):
     return cat
 
 
-def nullvalues(cat, colname, nullvalue, verbose=False):
+def nullvalues(
+        cat: table.Table, colname: str, nullvalue: object, verbose: bool = False
+) -> table.Table:
     """
-    This function fills masked entries of specified column.
+    Fill masked entries in a given column with a specified value.
 
-    :param cat: Astropy table containing the column colname.
+    :param cat: Table containing the column to modify.
     :type cat: astropy.table.table.Table
-    :param str colname: Name of a column.
-    :param nullvalue: Value to be placed instead of masked elements.
-    :type nullvalue: str or float or bool
-    :param verbose: If True prints message if the column is not an
-        astropy masked column, defaults to False.
-    :type verbose: bool, optional
-    :return: Astropy table with masked elements of colname replaced
-        by nullvalue.
+    :param colname: Name of the column to fill.
+    :type colname: str
+    :param nullvalue: Replacement value for masked entries.
+    :type nullvalue: object
+    :param verbose: If True, print a note if the column is not masked.
+    :type verbose: bool
+    :returns: Table with masked values replaced.
     :rtype: astropy.table.table.Table
     """
-    if type(cat[colname]) == column.MaskedColumn:
+    if isinstance(cat[colname], column.MaskedColumn):
         cat[colname].fill_value = nullvalue
         cat[colname] = cat[colname].filled()
     elif verbose:
@@ -342,56 +348,64 @@ def nullvalues(cat, colname, nullvalue, verbose=False):
     return cat
 
 
-def replace_value(cat, column, value, replace_by):
+def replace_value(
+        cat: table.Table, colname: str, value: object, replace_by: object
+) -> table.Table:
     """
-    This function replaces values.
+    Replace all occurrences of a value in a column with another value.
 
-    :param cat: Table containing column specified as colname.
+    :param cat: Table containing the column to modify.
     :type cat: astropy.table.table.Table
-    :param str column: Designates column in which to replace the
-        entries.
-    :param value: Entry to be replaced.
-    :type value: str or float or bool
-    :param replace_by: Entry to be put in place of param value.
-    :type replace_by: str or float or bool
-    :return: Table with replaced entries.
+    :param colname: Target column name.
+    :type colname: str
+    :param value: Value to be replaced.
+    :type value: object
+    :param replace_by: Value to insert instead.
+    :type replace_by: object
+    :returns: Table with values replaced in the specified column.
     :rtype: astropy.table.table.Table
     """
-    cat[column][np.where(cat[column] == value)] = [
-        replace_by
-        for i in range(len(cat[column][np.where(cat[column] == value)]))
-    ]
+    where = np.where(cat[colname] == value)
+    cat[colname][where] = [replace_by for _ in range(len(where[0]))]
     return cat
 
 
-def ids_from_ident(ident, objects):
+def ids_from_ident(ident: table.Table, objects: table.Table) -> table.Table:
     """
-    Concatenates identifier entries of same main_id object.
+    Concatenate identifier entries of the same object into one 'ids' string.
 
-    This function extracts the identifiers of common main_id objects in
-    column id of table ident using the delimiter | and stores the result
-    in the column ids of the table objects.
+    Groups rows by main_id and joins 'id' values with the '|' separator,
+    adding one row per main_id into the objects table.
 
-    :param ident: Table containing the rows main_id and id
+    :param ident: Table containing 'main_id' and 'id' columns.
     :type ident: astropy.table.table.Table
-    :param objects: Table containing the columns main_id and ids
+    :param objects: Table to fill with concatenated identifiers.
     :type objects: astropy.table.table.Table
-    :returns: Filled out table objects.
+    :returns: The updated objects table with 'main_id' and 'ids'.
     :rtype: astropy.table.table.Table
     """
     grouped_ident = ident.group_by("main_id")
     ind = grouped_ident.groups.indices
     for i in range(len(ind) - 1):
-        # -1 is needed because else ind[i+1] is out of bonds
-        ids = []
+        ids: list[str] = []
         for j in range(ind[i], ind[i + 1]):
             ids.append(grouped_ident["id"][j])
-        ids = "|".join(ids)
-        objects.add_row([grouped_ident["main_id"][ind[i]], ids])
+        objects.add_row([grouped_ident["main_id"][ind[i]], "|".join(ids)])
     return objects
 
 
-def lower_quality(qual):
+def lower_quality(qual: str) -> str:
+    """
+    Lower a quality flag by one step in the order A > B > C > D > E.
+
+    The function does not handle '?' by design and returns it unchanged
+    when passed.
+
+    :param qual: Quality flag ('A'..'E' or others).
+    :type qual: str
+    :returns: Lowered quality flag (or unchanged if not applicable).
+    :rtype: str
+    """
     if qual == "A":
         qual = "B"
     elif qual == "B":
