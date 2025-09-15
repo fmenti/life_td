@@ -1,0 +1,32 @@
+[tool.ruff]
+line-length = 80
+target-version = "py313"
+src = ["data_generation", "life_td"]
+extend-exclude = [".venv", ".git", ".pytest_cache"]
+
+[tool.ruff.lint]
+# Start with a smaller, safer set.
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # import sorting
+    "UP",  # pyupgrade
+]
+# Disable docstring checks for now; re-enable file-by-file later.
+ignore = []
+
+# Keep the section; you can re-enable later when you work on docstrings.
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+# When you re-enable D, this keeps tests quieter.
+"**/tests/**" = ["D"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+docstring-code-line-length = "dynamic"

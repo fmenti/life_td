@@ -2,19 +2,19 @@
 Generates the data for the database for the provider LIFE. 
 """
 
-import numpy as np #arrays
-from astropy import units, io, coordinates
-from astropy.table import Table, unique, join, MaskedColumn, Column
-from datetime import datetime
+import numpy as np  #arrays
+from astropy import units, coordinates
+from astropy.io import ascii, votable
+from astropy.table import unique, join, MaskedColumn, Column
 
 #self created modules
 from utils.io import save, load, Path
-from provider.utils import fill_sources_table, create_sources_table, replace_value, create_provider_table
-from sdata import empty_cat
+from provider.utils import create_sources_table, replace_value, create_provider_table, initiate_columns
+from provider.assign_quality_funcs import assign_quality
+from sdata import empty_dict
 
 
-
-def lum_class(nr,sptype):
+def extract_lum_class(nr, sptype):
     """
     Extracts luminocity class.
     
@@ -23,26 +23,16 @@ def lum_class(nr,sptype):
     :returns: luminocity class
     :rtype: str
     """
-    
-    lum_class=sptype[nr]
-    if len(sptype)>nr+1 and sptype[nr+1] in ['I','V']:
-        lum_class=sptype[nr:nr+2]
-        if len(sptype)>nr+2 and sptype[nr+2] in ['I','V']:
-            lum_class=sptype[nr:nr+3]
+
+    lum_class = sptype[nr]
+    if len(sptype) > nr + 1 and sptype[nr + 1] in ['I', 'V']:
+        lum_class = sptype[nr:nr + 2]
+        if len(sptype) > nr + 2 and sptype[nr + 2] in ['I', 'V']:
+            lum_class = sptype[nr:nr + 3]
     return lum_class
 
-def assign_lum_class_V(table,index):
-    """
-    Assignes luminocity class 'V' to specified entry of table.
-    
-    :param table: Table containing column 'class_lum'.
-    :type table: astropy.table.table.Table
-    :param int index: Index of entry.
-    """
-    table['class_lum'][index]='V'
-    return
 
-def assign_null_values(table,index):
+def assign_null_values(table, index):
     """
     Sets table entry to '?' for given index in specific columns.
     
@@ -51,13 +41,14 @@ def assign_null_values(table,index):
     :type table: astropy.table.table.Table
     :param int index: Index of entry.
     """
-    table['class_temp'][index]='?'
-    table['class_temp_nr'][index]='?'
-    table['class_lum'][index]='?'
-    table['class_ref'][index]='?'
-    return
+    table['class_temp'][index] = '?'
+    table['class_temp_nr'][index] = '?'
+    table['class_lum'][index] = '?'
+    table['class_ref'][index] = '?'
+    return table
 
-def deal_with_leading_d_sptype(table,index):
+
+def deal_with_leading_d_sptype(table, index):
     """
     Deals with old annotation of leading d in spectraltype representing dwarf star.
     
@@ -67,89 +58,119 @@ def deal_with_leading_d_sptype(table,index):
     :returns: Entry with leading d removed.
     :rtype: str
     """
-    if len(table['sptype_string'][index])>0:
-        if table['sptype_string'][index][0]=='d':
-            assign_lum_class_V(table,index)      
-    return table['sptype_string'][index].strip('d')
+    sptype = table['sptype_string'][index]
+    if len(sptype) > 0:
+        if sptype[0] == 'd':
+            table['class_lum'][index] = 'V'
+            sptype = sptype.strip('d')
+    return sptype
 
-def sptype_string_to_class(temp,ref):
+
+def deal_with_middle_minus(sptype_string):
+    """
+    Removes intermediate minus sign from sptype_string.
+    
+    :param str sptype_string:
+    :returns: Entry with middle - removed.
+    :rtype: str
+    """
+    if len(sptype_string) > 0:
+        sp_type = sptype_string.split('-')
+        if len(sp_type) > 1:
+            sptype_string = ''.join(sp_type)
+    return sptype_string
+
+
+def decimal_sptype(i, sptype, table):
+    table['class_temp_nr'][i] = sptype[1:4]
+    if len(sptype) > 4 and sptype[4] in ['I', 'V']:
+        table['class_lum'][i] = extract_lum_class(4, sptype)
+    else:
+        table['class_lum'][i] = 'V' # assumption
+    return table
+
+
+def assign_diff_lum_classes(i, sptype, table):
+    if len(sptype) > 1 and sptype[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        table['class_temp_nr'][i] = sptype[1]
+        #distinguishing between objects like K5V and K5.5V
+        if len(sptype) > 2 and sptype[2] == '.':
+            table = decimal_sptype(i, sptype, table)
+        elif len(sptype) > 2 and sptype[2] in ['I', 'V']:
+            table['class_lum'][i] = extract_lum_class(2, sptype)
+        else:
+            table['class_lum'][i] = 'V' # assumption
+    else:
+        table['class_lum'][i] = 'V'  # assumption
+    return table
+
+
+def sptype_string_to_class(table, ref):
     """
     Extracts stellar parameters from spectral type string one.
 
     This function extracts the temperature class, temperature class number
-    and luminocity class information from the spectral type string (e.g. 
+    and luminocity class information from the spectral type string (e.g.
     M5V to M, 5 and V). It stores that information in the for this purpose
     generated new columns. Only objects of temperature class O, B, A, F,
     G, K, and M are processed. Only objects of luminocity class IV, V and VI
     are processed.
 
-    :param temp: Table containing spectral type information in
+    :param table: Table containing spectral type information in
         the column sptype_string.
-    :type temp: astropy.table.table.Table
+    :type table: astropy.table.table.Table
     :param str ref: Designates origin of data.
     :returns: Table like temp with additional columns class_temp,
         class_temp_nr, class_lum and class_ref.
     :rtype: astropy.table.table.Table
     """
 
-    temp['class_temp']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_temp_nr']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_lum']=MaskedColumn(dtype=object,length=len(temp))
-    temp['class_ref']=MaskedColumn(dtype=object,length=len(temp))
+    table = initiate_columns(table, ['class_temp', 'class_temp_nr', 'class_lum', 'class_ref'],
+                             [object, object, object, object], [True, True, True, True])
 
-    for i in range(len(temp)):
+    for i in range(len(table)):
         #sorting out objects like M5V+K7V
-        sptype=deal_with_leading_d_sptype(temp,i)
-        
-        if (len(sptype.split('+'))==1 and
+        sptype = deal_with_leading_d_sptype(table, i)
+        sptype = deal_with_middle_minus(sptype)
+
+        if (len(sptype.split('+')) == 1 and
                 #sorting out entries like ''
-                len(sptype)>0 and 
+                len(sptype) > 0 and
                 # sorting out brown dwarfs i.e. T1V
-                sptype[0] in ['O','B','A','F','G','K','M']):
+                sptype[0] in ['O', 'B', 'A', 'F', 'G', 'K', 'M']):
             #assigning temperature class and reference
-            temp['class_temp'][i]=sptype[0]
-            temp['class_ref'][i]=ref
-            if len(sptype)>1 and sptype[1] in ['0','1','2','3','4','5','6','7','8','9']:
-                temp['class_temp_nr'][i]=sptype[1]
-                #distinguishing between objects like K5V and K5.5V
-                if len(sptype)>2 and sptype[2]=='.':
-                    temp['class_temp_nr'][i]=sptype[1:4]
-                    if len(sptype)>4 and sptype[4] in ['I','V']:
-                        temp['class_lum'][i]=lum_class(4,sptype)
-                    else:
-                        assign_lum_class_V(temp,i) # assumption
-                elif len(sptype)>2 and sptype[2] in ['I','V']:
-                    temp['class_lum'][i]=lum_class(2,sptype)
-                else:
-                    assign_lum_class_V(temp,i) # assumption
-            else:
-                assign_lum_class_V(temp,i) # assumption
+            table['class_temp'][i] = sptype[0]
+            table['class_ref'][i] = ref
+            table = assign_diff_lum_classes(i, sptype, table)
         else:
-            assign_null_values(temp,i)
-    return temp
+            table = assign_null_values(table, i)
+        table['sptype_string'][i] =sptype
+    return table
+
 
 def realspectype(cat):
     """
     Removes rows not containing main sequence stars.
 
     Removes rows of cat where elements in column named 'sim_sptype' are
-    either '', 'nan' or start with an other letter than the main sequence
+    either '', 'nan' or start with another letter than the main sequence
     spectral type classification.
 
-    :param cat: Table containing 'sim_sptype' column
+    :param cat: Table containing class_temp and class_lum column
     :type cat: astropy.table.table.Table
     :returns: Table, param cat with undesired rows removed
     :rtype: astropy.table.table.Table
     """
-    ms_tempclass=np.array(['O','B','A','F','G','K','M'])
-    ms_temp=cat[np.where(np.in1d(cat['class_temp'],ms_tempclass))]
-    
-    ms_lumclass=np.array(['V'])
-    ms=ms_temp[np.where(np.in1d(ms_temp['class_lum'],ms_lumclass))]
-    
+    ms_tempclass = np.array(['O', 'B', 'A', 'F', 'G', 'K', 'M'])
+    ms_temp = cat[np.where(np.isin(cat['class_temp'], ms_tempclass))]
+
+    ms_lumclass = np.array(['V'])
+    ms = ms_temp[np.where(np.isin(ms_temp['class_lum'], ms_lumclass))]
+
     return ms
 
-def model_param():
+
+def modeled_param():
     """
     Loads and cleans up model file.
 
@@ -161,20 +182,22 @@ def model_param():
     :rtype: astropy.table.table.Table
     """
 
-    EEM_table=io.ascii.read(Path().additional_data+"Mamajek2022-04-16.csv")['SpT','Teff','R_Rsun','Msun']
-    EEM_table.rename_columns(['R_Rsun','Msun'],['Radius','Mass'])
-    EEM_table=replace_value(EEM_table,'Radius',' ...','nan')
-    EEM_table=replace_value(EEM_table,'Mass',' ...','nan')
-    EEM_table=replace_value(EEM_table,'Mass',' ....','nan')
-    EEM_table['Teff'].unit=units.K
-    EEM_table['Radius'].unit=units.R_sun
-    EEM_table['Mass'].unit=units.M_sun       
-    io.votable.writeto(io.votable.from_table(EEM_table), \
-                          f'{Path().additional_data}model_param.xml')#saving votable
-    return EEM_table
+    eem_table_all_columns = ascii.read(Path().additional_data + "Mamajek2022-04-16.csv")
+    eem_table = eem_table_all_columns['SpT', 'Teff', 'R_Rsun', 'Msun']
+    eem_table.rename_columns(['R_Rsun', 'Msun'], ['Radius', 'Mass'])
+    eem_table = replace_value(eem_table, 'Radius', ' ...', 'nan')
+    eem_table = replace_value(eem_table, 'Mass', ' ...', 'nan')
+    eem_table = replace_value(eem_table, 'Mass', ' ....', 'nan')
+    eem_table['Teff'].unit = units.K
+    eem_table['Radius'].unit = units.R_sun
+    eem_table['Mass'].unit = units.M_sun
+    votable.writeto(votable.from_table(eem_table), \
+                       f'{Path().additional_data}model_param.xml')  #saving votable
+    return eem_table
 
-def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff',\
-                 rstring='mod_R',mstring='mod_M'):
+
+def match_sptype(cat, sptypestring='mp_specmatch', teffstring='mod_Teff', \
+                 rstring='mod_R', mstring='mod_M'):
     """
     Assigns modeled parameter values.
 
@@ -194,39 +217,40 @@ def match_sptype(cat,model_param,sptypestring='sim_sptype',teffstring='mod_Teff'
         effective temperature, radius and mass filled with model values
     :rtype: astropy.table.table.Table
     """
-
+    model_param = modeled_param()  #create model table as votable
     #initiating columns with right units
-    
-    arr=np.zeros(len(cat))
-    cat[teffstring]=arr*np.nan*units.K
-    cat[teffstring]=MaskedColumn(mask=np.full(len(cat),True), \
-                                         length=len(cat),unit=units.K)
-    cat[rstring]=arr*np.nan*units.R_sun
-    cat[mstring]=arr*np.nan*units.M_sun
+
+    arr = np.zeros(len(cat))
+    cat[teffstring] = arr * np.nan * units.K
+    cat[teffstring] = MaskedColumn(mask=np.full(len(cat), True), \
+                                   length=len(cat), unit=units.K)
+    cat[rstring] = arr * np.nan * units.R_sun
+    cat[mstring] = arr * np.nan * units.M_sun
     #go through all spectral types in cat
-    for j in range(len(cat[sptypestring])): 
+    for j in range(len(cat[sptypestring])):
         # for all the entries that are not empty
-        if cat[sptypestring][j]!='':
+        if cat[sptypestring][j] != '':
             #remove first d coming from old notation for dwarf meaning main sequence star
-            cat[sptypestring][j]=cat[sptypestring][j].strip('d')
+            cat[sptypestring][j] = cat[sptypestring][j].strip('d')
             #go through the model spectral types of Mamajek 
-            for i in range(len(model_param['SpT'])): 
+            for i in range(len(model_param['SpT'])):
                 #match first two letters
-                if model_param['SpT'][i][:2]==cat[sptypestring][j][:2]: 
-                        cat[teffstring][j]=model_param['Teff'][i]
-                        cat[rstring][j]=model_param['Radius'][i]
-                        cat[mstring][j]=model_param['Mass'][i]
+                if model_param['SpT'][i][:3] == cat[sptypestring][j][:3]:
+                    cat[teffstring][j] = model_param['Teff'][i]
+                    cat[rstring][j] = model_param['Radius'][i]
+                    cat[mstring][j] = model_param['Mass'][i]
             #as the model does not cover all spectral types on .5 accuracy, check those separately
-            if cat[sptypestring][j][2:4]=='.5':
+            if cat[sptypestring][j][2:4] == '.5':
                 for i in range(len(model_param['SpT'])):
                     # match first four letters
-                    if model_param['SpT'][i][:4]==cat[sptypestring][j][:4]:
-                        cat[teffstring][j]=model_param['Teff'][i]
-                        cat[rstring][j]=model_param['Radius'][i]
-                        cat[mstring][j]=model_param['Mass'][i] 
+                    if model_param['SpT'][i][:4] == cat[sptypestring][j][:4]:
+                        cat[teffstring][j] = model_param['Teff'][i]
+                        cat[rstring][j] = model_param['Radius'][i]
+                        cat[mstring][j] = model_param['Mass'][i]
         else:
-            cat[sptypestring][j]='None' 
+            cat[sptypestring][j] = 'None'
     return cat
+
 
 def spec(cat):
     """
@@ -237,76 +261,87 @@ def spec(cat):
     non unique simbad name.
 
     :param cat: astropy table containing columns named 
-        'sim_sptype','sim_name' and 'sim_otypes'
+        'main_id', class_temp_nr, class_temp and,class_lum 
     :type cat: astropy.table.table.Table
     :returns: Catalog of mainsequence stars with unique 
         simbad names, no binary subtypes and modeled parameters.
     :rtype: astropy.table.table.Table
-    """   
+    """
 
     #Do I even need realspectype function? I can just take cat where class_temp not empty
-    cat=realspectype(cat)
-    #model_param=io.votable.parse_single_table(\
-        #f"catalogs/model_param.xml").to_table()
-    mp=model_param()#create model table as votable
-    cat=match_sptype(cat,mp,sptypestring='sptype_string')
-    cat.remove_rows([np.where(cat['mod_Teff'].mask==True)])
+    cat = realspectype(cat)
+    #model_param=votable.parse_single_table(\
+    #f"catalogs/model_param.xml").to_table()
+    cat = cat[np.where(cat['class_temp_nr'] != 0)]
+    cat['specmatch_temp_nr'] = cat['class_temp_nr']
+    for i, temp_nr in enumerate(cat['specmatch_temp_nr']):
+        if temp_nr[1:3] == '.0':
+            cat['specmatch_temp_nr'][i] = temp_nr[0]
+    cat['mp_specmatch'] = cat['class_temp'] + cat['specmatch_temp_nr'] + cat['class_lum']
+    cat = match_sptype(cat)
+    cat.remove_rows([np.where(cat['mod_Teff'].mask == True)])
     cat.remove_rows([np.where(np.isnan(cat['mod_Teff']))])
-    cat=unique(cat, keys='main_id')
+    cat = unique(cat, keys='main_id')
     return cat
 
-def create_star_basic_table(life):  
+
+def create_star_basic_table():
     """
     Creates basic stellar data table.
     
-    :param life: Dictionary of database table names and tables.
-    :type life: dict(str,astropy.table.table.Table)
-    :returns: Basic stellar data table.
-    :rtype: astropy.table.table.Table
+    :returns: Dictionary of database table names and tables with 
+        filled basic stellar data table.
+    :rtype: dict(str,astropy.table.table.Table)
     """
+
+    life = empty_dict.copy()
+    life['provider'] = create_provider_table('LIFE',
+                                             'www.life-space-mission.com',
+                                             '2022A&A...664A..21Q')
+
     #galactic coordinates:  transformed from simbad ircs coordinates using astropy
-    [life_star_basic]=load(['sim_star_basic'])
-    ircs_coord=coordinates.SkyCoord(\
-            ra=life_star_basic['coo_ra'],dec=life_star_basic['coo_dec'],frame='icrs')
-    gal_coord=ircs_coord.galactic
-    life_star_basic['coo_gal_l']=gal_coord.l.deg*units.degree
-    life_star_basic['coo_gal_b']=gal_coord.b.deg*units.degree
-    life_star_basic['dist_st_value']=1000./life_star_basic['plx_value'] 
-    life_star_basic['dist_st_value']=np.round(life_star_basic['dist_st_value'],2)
+    [life_star_basic] = load(['sim_star_basic'])
+    ircs_coord = coordinates.SkyCoord( \
+        ra=life_star_basic['coo_ra'], dec=life_star_basic['coo_dec'], frame='icrs')
+    gal_coord = ircs_coord.galactic
+    life_star_basic['coo_gal_l'] = gal_coord.l.deg * units.degree
+    life_star_basic['coo_gal_b'] = gal_coord.b.deg * units.degree
+    life_star_basic['dist_st_value'] = 1000. / life_star_basic['plx_value']
+    life_star_basic['dist_st_value'] = np.round(life_star_basic['dist_st_value'], 2)
     #null value treatment: plx_value has masked entries therefore distance_values too
     #ref:
-    life_star_basic['dist_st_ref']=MaskedColumn(dtype=object,length=len(life_star_basic),
-                                    mask=[True for j in range(len(life_star_basic))])
-    life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask==False)]= \
-            [life['provider']['provider_name'][0] for j in range(len(
-                life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask==False)]))]
+    life_star_basic['dist_st_ref'] = MaskedColumn(dtype=object, length=len(life_star_basic),
+                                                  mask=[True for j in range(len(life_star_basic))])
+    life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask == False)] = \
+        [life['provider']['provider_name'][0] for j in range(len(
+            life_star_basic['dist_st_ref'][np.where(life_star_basic['dist_st_value'].mask == False)]))]
     # can I do the same transformation with the errors? -> try on some examples and compare to simbad ones
-    life_star_basic['coo_gal_err_angle']=[-1
-                        for j in range(len(life_star_basic))]
-    life_star_basic['coo_gal_err_maj']=[-1
-                        for j in range(len(life_star_basic))]
-    life_star_basic['coo_gal_err_min']=[-1
-                        for j in range(len(life_star_basic))]
-    life_star_basic['coo_gal_qual']=['?'
-                        for j in range(len(life_star_basic))]
-    life_star_basic['main_id']=life_star_basic['main_id'].astype(str)
+    life_star_basic['coo_gal_err_angle'] = [-1
+                                            for j in range(len(life_star_basic))]
+    life_star_basic['coo_gal_err_maj'] = [-1
+                                          for j in range(len(life_star_basic))]
+    life_star_basic['coo_gal_err_min'] = [-1
+                                          for j in range(len(life_star_basic))]
+    life_star_basic = assign_quality(life_star_basic,'coo_gal_qual')
+    life_star_basic['main_id'] = life_star_basic['main_id'].astype(str)
     # source
     # transformed from simbad ircs coordinates using astropy
-    life_star_basic['coo_gal_ref']=Column(dtype=object,length=len(life_star_basic))
-    life_star_basic['coo_gal_ref']=life['provider']['provider_name'][0] 
+    life_star_basic['coo_gal_ref'] = Column(dtype=object, length=len(life_star_basic))
+    life_star_basic['coo_gal_ref'] = life['provider']['provider_name'][0]
     #for all entries since coo_gal column not masked column
-             
-    life_star_basic['coo_gal_ref']=life_star_basic['coo_gal_ref'].astype(str)
-    life_star_basic=life_star_basic['main_id','coo_gal_l','coo_gal_b','coo_gal_err_angle',
-                                   'coo_gal_err_maj','coo_gal_err_min','coo_gal_qual',
-                                   'coo_gal_ref','dist_st_value','dist_st_ref','sptype_string']
-    
 
-    life_star_basic=sptype_string_to_class(life_star_basic,
-                                           life['provider']['provider_name'][0])
-    return life_star_basic
+    life_star_basic['coo_gal_ref'] = life_star_basic['coo_gal_ref'].astype(str)
+    life_star_basic = life_star_basic['main_id', 'coo_gal_l', 'coo_gal_b', 'coo_gal_err_angle',
+    'coo_gal_err_maj', 'coo_gal_err_min', 'coo_gal_qual',
+    'coo_gal_ref', 'dist_st_value', 'dist_st_ref', 'sptype_string']
 
-def create_life_helpertable(life):  
+    life_star_basic = sptype_string_to_class(life_star_basic,
+                                             life['provider']['provider_name'][0])
+    life['star_basic'] = life_star_basic
+    return life
+
+
+def create_life_helpertable(life):
     """
     Creates helper table.
     
@@ -317,68 +352,66 @@ def create_life_helpertable(life):
     """
     #applying model from E. E. Mamajek on SIMBAD spectral type
 
-    [sim_objects]=load(['sim_objects'],stringtoobjects=False)
-    
-    stars=sim_objects[np.where(sim_objects['type']=='st')]
-    life_helptab=join(stars,life['star_basic'])
-    life_helptab=spec(life_helptab['main_id','sptype_string','class_lum','class_temp'])
+    [sim_objects] = load(['sim_objects'], stringtoobjects=False)
+
+    stars = sim_objects[np.where(sim_objects['type'] == 'st')]
+    life_helptab = join(stars, life['star_basic'])
+    life_helptab = spec(life_helptab['main_id', 'sptype_string', 'class_lum', 'class_temp', 'class_temp_nr'])
     #if I take only st objects from sim_star_basic I don't loose objects during realspectype
     return life_helptab
 
-def create_mes_teff_st_table(life_helptab,life):
+
+def create_mes_teff_st_table(life_helptab):
     """
     Creates stellar effective temperature table.
     
     :param life_helptab: Life helper table.
     :type life_helptab: astropy.table.table.Table
-    :param life: Dictionary of database table names and tables.
-    :type life: dict(str,astropy.table.table.Table)
     :returns: Stellar effective temperature table.
     :rtype: astropy.table.table.Table
     """
-    life_mes_teff_st=life_helptab['main_id','mod_Teff']
-    life_mes_teff_st.rename_column('mod_Teff','teff_st_value')
-    life_mes_teff_st['teff_st_qual']=['D' for i in range(len(life_mes_teff_st))]
-    life_mes_teff_st['teff_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
+    life_mes_teff_st = life_helptab['main_id', 'mod_Teff']
+    life_mes_teff_st.rename_column('mod_Teff', 'teff_st_value')
+    life_mes_teff_st = assign_quality(life_mes_teff_st, 'teff_st_qual', 'model')
+    life_mes_teff_st['teff_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_teff_st))]
     return life_mes_teff_st
 
-def create_mes_radius_st_table(life_helptab,life):
+
+def create_mes_radius_st_table(life_helptab):
     """
     Creates stellar radius table.
     
     :param life_helptab: Life helper table.
     :type life_helptab: astropy.table.table.Table
-    :param life: Dictionary of database table names and tables.
-    :type life: dict(str,astropy.table.table.Table)
     :returns: Stellar radius table.
     :rtype: astropy.table.table.Table
     """
-    life_mes_radius_st=life_helptab['main_id','mod_R']
-    life_mes_radius_st.rename_column('mod_R','radius_st_value')
-    life_mes_radius_st['radius_st_qual']=['D' for i in range(len(life_mes_radius_st))]
-    life_mes_radius_st['radius_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
+    life_mes_radius_st = life_helptab['main_id', 'mod_R']
+    life_mes_radius_st.rename_column('mod_R', 'radius_st_value')
+    life_mes_radius_st = assign_quality(life_mes_radius_st, 'radius_st_qual', 'model')
+    life_mes_radius_st['radius_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_radius_st))]
     return life_mes_radius_st
 
-def create_mes_mass_st_table(life_helptab,life):
+
+def create_mes_mass_st_table(life_helptab):
     """
     Creates stellar mass table.
     
     :param life_helptab: Life helper table.
     :type life_helptab: astropy.table.table.Table
-    :param life: Dictionary of database table names and tables.
-    :type life: dict(str,astropy.table.table.Table)
     :returns: Stellar mass table.
     :rtype: astropy.table.table.Table
     """
-    life_mes_mass_st=life_helptab['main_id','mod_M']
-    life_mes_mass_st.rename_column('mod_M','mass_st_value')
-    life_mes_mass_st['mass_st_qual']=['D' for i in range(len(life_mes_mass_st))]
-    life_mes_mass_st['mass_st_ref']=['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
-    
+    life_mes_mass_st = life_helptab['main_id', 'mod_M']
+    life_mes_mass_st.rename_column('mod_M', 'mass_st_value')
+    life_mes_mass_st = assign_quality(life_mes_mass_st, 'mass_st_qual', 'model')
+    life_mes_mass_st['mass_st_ref'] = ['2013ApJS..208....9P' for i in range(len(life_mes_mass_st))]
+
     #specifying stars cocerning multiplicity
     #main sequence simbad object type: MS*, MS? -> luminocity class
     #Interacting binaries and close CPM systems: **, **?
     return life_mes_mass_st
+
 
 def create_life_sources_table(life):
     """
@@ -389,13 +422,14 @@ def create_life_sources_table(life):
     :returns: Sources table.
     :rtype: astropy.table.table.Table
     """
-    tables=[life['provider'],life['star_basic'],life['mes_teff_st'],
-            life['mes_radius_st'],life['mes_mass_st']]
+    tables = [life['provider'], life['star_basic'], life['mes_teff_st'],
+              life['mes_radius_st'], life['mes_mass_st']]
     #define header name of columns containing references data
-    ref_columns=[['provider_bibcode'],['coo_gal_ref'],
-                 ['teff_st_ref'],['radius_st_ref'],['mass_st_ref']]
-    life_sources=create_sources_table(tables,ref_columns,life['provider']['provider_name'][0])
-    return life_sources  
+    ref_columns = [['provider_bibcode'], ['coo_gal_ref'],
+                   ['teff_st_ref'], ['radius_st_ref'], ['mass_st_ref']]
+    life_sources = create_sources_table(tables, ref_columns, life['provider']['provider_name'][0])
+    return life_sources
+
 
 def provider_life():
     """
@@ -410,20 +444,16 @@ def provider_life():
         temperature data, stellar radius data and stellar mass data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    life = empty_cat.copy()
-    life['provider'] = create_provider_table('LIFE',
-                                        'www.life-space-mission.com',
-                                        '2022A&A...664A..21Q')
 
-    life['star_basic'] = create_star_basic_table(life)
+    life = create_star_basic_table()
     life_helptab = create_life_helpertable(life)
     #removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for 
     #life parameter creation
     life['star_basic'].remove_column('sptype_string')
-    life['mes_teff_st']=create_mes_teff_st_table(life_helptab,life)
-    life['mes_radius_st']=create_mes_radius_st_table(life_helptab,life)
-    life['mes_mass_st']=create_mes_mass_st_table(life_helptab,life)
+    life['mes_teff_st'] = create_mes_teff_st_table(life_helptab)
+    life['mes_radius_st'] = create_mes_radius_st_table(life_helptab)
+    life['mes_mass_st'] = create_mes_mass_st_table(life_helptab)
     life['sources'] = create_life_sources_table(life)
-    
-    save(list(life.values()),['life_'+ element for element in list(life.keys())])
+
+    save(list(life.values()), ['life_' + element for element in list(life.keys())])
     return life

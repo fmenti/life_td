@@ -7,7 +7,7 @@ This short guide will walk you through the required steps to set up and install 
 
 The code in this repository is organized as a Python package named `life_td_data_generation` together with a set of scripts that use the functions and classes of the package. The code was written for `Python <https://www.python.org>`_ 3.10 and above; earlier versions will likely require some small modifications.
 To get started, you will need to install the package.
-For this, we *strongly* recommend you to use a `virtual environment <https://virtualenv.pypa.io/en/latest/>`_. 
+For this, we *strongly* recommend you to use a `virtual environment <https://virtualenv.pypa.io/en/latest/>`_.
 
 Virtual Environment
 -------------------
@@ -16,7 +16,7 @@ First install ``virtualenv``, for example with the apt (linux) package manager:
 .. code-block:: console
 
     $ apt install virtualenv
-    
+
 Then create a virtual environment:
 
 .. code-block:: console
@@ -48,16 +48,16 @@ Once you have set up a suitable virtualenv, clone this repository and install `l
     git clone git@github.com:fmenti/life_td.git ;
     cd life_td ;
     pip install .
-    
+
 .. Note::
    If the installation does not work try installing all modules from the requirements.txt individually e.g. pip install numpy.
-    
+
 Once a local copy of the repository exists, new commits can be pulled from Github with:
 
 .. code-block:: console
 
     $ git pull origin main
-    
+
 Testing life_td_data_generation
 -------------------------------
 
@@ -65,5 +65,5 @@ The installation can be tested by running the life_td module as a script:
 
 .. code-block:: console
 
-    $ python life_td.py
-    
+    $ python data_generation/life_td_data_generation/life_td.py
+

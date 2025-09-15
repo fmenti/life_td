@@ -7,6 +7,114 @@ import numpy as np #arrays
 import astropy as ap #votables
 import matplotlib.pyplot as plt
 
+def type_system(cat_h, lists_dict, main_id, name,verbose):
+    if len(cat_h[np.where(cat_h['parent_main_id'] == main_id)]) > 0:
+        if verbose:
+            print('system object but with found child object',main_id)
+            print(cat_h['child_main_id'][np.where(cat_h['parent_main_id']==main_id)])
+        for child in cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == main_id)]:
+            lists_dict['children'].append(child)
+    else:
+        lists_dict['system_without_child'].append(name)
+
+def type_star(lists_dict, cat_h, cat_o, main_id, name,verbose):
+    # if it has parents:
+    if len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) > 0:
+        # print('system object but with found child object',main_id)
+        # print(cat_h[np.where(cat_h['parent_main_id']==main_id)])
+        if len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) > 1:
+            if verbose:
+                print('star\'s parents')
+                print(cat_h[np.where(cat_h['child_main_id']==main_id)])
+            lists_dict['multiple_parents'].append(name)
+        elif len(cat_h[np.where(cat_h['child_main_id'] == main_id)]) == 1:
+            st_sib = 0
+            sib_name_list = []
+            nestled = False
+            parent = cat_h['parent_main_id'][np.where(cat_h['child_main_id'] == main_id)]
+            # wrong code here, parent can't be type st
+            for sibling in cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == parent)]:
+                # print(cat_h[np.where(cat_h['child_main_id'] == sibling)])
+                if cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'sy':
+                    nestled = True
+                    if verbose:
+                        print('sibling is system',sibling)
+                elif cat_o['type'][np.where(cat_o['main_id'] == sibling)][0] == 'st':
+                    st_sib += 1
+                    sib_name_list.append(sibling)
+            lists_dict['siblings'].append(sib_name_list)
+            if st_sib == 1 and nestled == False:
+                lists_dict['single_child'].append(name)
+            if st_sib > 2 or nestled == True:
+                lists_dict['higher_order_multiple'].append(name)
+            if st_sib == 2 and nestled == False:
+                lists_dict['binary'].append(name)
+            if verbose and st_sib > 2:
+                print(name, 'has more than one sibling')
+                print(cat_h['child_main_id'][np.where(cat_h['parent_main_id'] == parent)])
+    else:
+        lists_dict['star_without_parent'].append(name)
+
+def object_in_db(lists_dict, cat_h, cat_i, cat_o, name,verbose):
+    main_id = cat_i['main_id'][np.where(cat_i['id'] == name)][0]
+    if cat_o['type'][np.where(cat_o['main_id'] == main_id)][0] == 'sy':
+        type_system(cat_h, lists_dict, main_id, name,verbose)
+    elif cat_o['type'][np.where(cat_o['main_id'] == main_id)][0] == 'st':
+        type_star(lists_dict, cat_h, cat_o, main_id, name,verbose)
+    else:
+        print('no sys or st \n', name, cat_o['main_id', 'type'][np.where(cat_o['main_id'] == main_id)][0])
+
+def result(lists_dict, l):
+    print('\n \n Of the', len(l), 'objects given:')
+    print('Some are not in cat 4 because they are either:')
+    print('system_without_child', lists_dict['system_without_child'], len(lists_dict['system_without_child']))
+    print('star_without_parent', lists_dict['star_without_parent'], len(lists_dict['star_without_parent']))
+    print('not found', lists_dict['not_found'], '\n')
+    print('Some were not included because they are systems and instead one should look at their child objects:')
+    print('children', lists_dict['children'], '\n')
+    print('some are non trivial binaries:')
+    print('multiple parents', lists_dict['multiple_parents'], len(lists_dict['multiple_parents']))
+    print('higher_order_multiple', lists_dict['higher_order_multiple'], len(lists_dict['higher_order_multiple']), '\n')
+    print('siblings',lists_dict['siblings'])
+    if len(lists_dict['single_child']) > 0:
+        print('single_child', lists_dict['single_child'], len(lists_dict['single_child']))
+    print('And the reminder have conpanions that don t fit the spectral type requirements')
+    print('trivial binary', lists_dict['binary'], len(lists_dict['binary']))
+
+def detail_criteria(database_tables, l,verbose=True):
+    """
+    This code scans for reasons, why the given objects would not be included in StarCat4
+
+    """
+    print(
+        'tbd: file starcat4 analysis where this code is used to give specific reason why a given object was not included into the cat4')
+    # to do:
+    # include get main id search
+    # this code could use printing the corresponding objects why it was not included.
+    # write tests
+    cat_i = database_tables['ident']
+    cat_o = database_tables['objects']
+    cat_h = database_tables['best_h_link']  # -> use best_h_link
+    lists_dict = {
+        'children': [],
+        'not_found': [],
+        'siblings': [],
+        'multiple_parents': [], # multiple components in wds
+        'single_child': [],
+        'binary': [],
+        'higher_order_multiple': [],
+        'star_without_parent': [],
+        'system_without_child': []
+    }
+    for name in l:
+        if len(cat_i['main_id'][np.where(cat_i['id'] == name)]) > 0:
+            object_in_db(lists_dict, cat_h, cat_i, cat_o, name,verbose)
+        else:
+            # print('object not found',name)
+            lists_dict['not_found'].append(name)
+    result(lists_dict, l)
+    return
+
 
 def object_contained(stars,cat,details=False):
     """

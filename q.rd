@@ -38,6 +38,12 @@ tables may change at any time without prior warning.
     
     <meta name="_news" author="FM" date="2024-03-05">Adding mes_h_link table
     containing all links between pair of objects</meta>
+    
+    <meta name="_news" author="FM" date="2025-02-10">Updated to contain 
+    Exo-Mercat 2.0 data instead of earlier version. Changed planetary 
+    parameters from prototype demonstration version into parameters that match 
+    data from provider better. Concretely removed mass_pl_rel parameter and 
+    replaced mass_pl_err with mass_pl_err_max and mass_pl_err_min.</meta>
 
     <table id="source" onDisk="True" adql="True">
         <meta name="title">Source Table</meta>
@@ -601,22 +607,26 @@ tables may change at any time without prior warning.
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_pl_err" type="double precision"
+        <column name="mass_pl_err_max" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="Err. Mass"
-            description="Mass error"
+            tablehead="Err. Mass max"
+            description="Upper mass error"
+            verbLevel="1" displayHint="sf=3"/>
+        <column name="mass_pl_err_min" type="double precision"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
+            tablehead="Err. Mass min"
+            description="Lower mass error"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="Quality Mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_pl_rel" type="text"
-            ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel"
-            description="Mass relation defining upper / lower limit or exact
-            measurement through '&lt;', '>', and '='."
-            verbLevel="1"/>
+        <column name="mass_pl_sini_flag" type="text"
+            ucd="meta.code.multip"
+            tablehead="msini_flag"
+            description="Mass sin(i) flag."
+            verbLevel="1" displayHint="sf=2"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mass_pl_source_idref"
@@ -635,10 +645,11 @@ tables may change at any time without prior warning.
         <make table="planet_basic">
             <rowmaker idmaps="*">
                 <map key="mass_pl_value" nullExpr="1e+20" />
-                <map key="mass_pl_err" nullExpr="1e+20" />
+                <map key="mass_pl_err_max" nullExpr="1e+20" />
+                <map key="mass_pl_err_min" nullExpr="1e+20" />
                 <map key="mass_pl_qual" nullExpr="'?'" />
+                <map key="mass_pl_sini_flag" nullExpr="'?'" />
                 <map key="mass_pl_source_idref" nullExpr="999999" />
-                <map key="mass_pl_rel" nullExpr="'?'"/>
             </rowmaker>
         </make>
     </data>
@@ -812,7 +823,6 @@ tables may change at any time without prior warning.
 
         \betawarning
         </meta>
-        <primary>object_idref,mass_pl_source_idref</primary>
         <foreignKey source="object_idref" inTable="object"
             dest="object_id" />
 
@@ -828,22 +838,26 @@ tables may change at any time without prior warning.
             tablehead="Planet Mass"
             description="Mass"
             verbLevel="1" displayHint="sf=3"/>
-        <column name="mass_pl_err" type="double precision"
+        <column name="mass_pl_err_max" type="double precision"
             ucd="stat.error;phys.mass" unit="'jupiterMass'"
-            tablehead="Err. Pl. Mass"
-            description="Mass error"
+            tablehead="Err. Mass max"
+            description="Upper mass error"
+            verbLevel="1" displayHint="sf=3"/>
+        <column name="mass_pl_err_min" type="double precision"
+            ucd="stat.error;phys.mass" unit="'jupiterMass'"
+            tablehead="Err. Mass min"
+            description="Lower mass error"
             verbLevel="1" displayHint="sf=3"/>
         <column name="mass_pl_qual" type="text"
             ucd="meta.code.qual;phys.mass"
             tablehead="Quality mass"
             description="Mass quality (A:best, E:worst)"
             verbLevel="1"/>
-        <column name="mass_pl_rel" type="text"
-            ucd="phys.mass;arith.ratio"
-            tablehead="mass_rel"
-            description="Mass relation defining upper / lower limit or exact
-            measurement through '&lt;', '>', and '='."
-            verbLevel="1"/>
+        <column name="mass_pl_sini_flag" type="text"
+            ucd="meta.code.multip"
+            tablehead="msini_flag"
+            description="Mass sin(i) flag."
+            verbLevel="1" displayHint="sf=2"/>
         <column name="mass_pl_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="mass_source_idref"
@@ -861,10 +875,11 @@ tables may change at any time without prior warning.
            <make table="mes_mass_pl">
              <rowmaker idmaps="*">
                  <map key="mass_pl_value" nullExpr="1e+20" />
-                 <map key="mass_pl_err" nullExpr="1e+20" />
+                 <map key="mass_pl_err_max" nullExpr="1e+20" />
+                 <map key="mass_pl_err_min" nullExpr="1e+20" />
                  <map key="mass_pl_qual" nullExpr="'?'" />
+                 <map key="mass_pl_sini_flag" nullExpr="'?'" />
                  <map key="mass_pl_source_idref" nullExpr="999999" />
-                 <map key="mass_pl_rel" nullExpr="'?'"/>
              </rowmaker>
         </make>
     </data>
@@ -1243,7 +1258,8 @@ tables may change at any time without prior warning.
                 star_basic.coo_dec, dec
                 star_basic.dist_st_value, dist
                 planet_basic.mass_pl_value, planet_mass
-                planet_basic.mass_pl_err, planet_mass_error
+                planet_basic.mass_pl_err_max, planet_mass_error_max
+                planet_basic.mass_pl_err_min, planet_mass_error_min
             </csvItems>
             <events>
                 <column original="\src" name="\name" verbLevel="5"/>
@@ -1265,7 +1281,8 @@ tables may change at any time without prior warning.
                 coo_dec as dec,
                 dist_st_value as dist,
                 mass_pl_value as planet_mass,
-                mass_pl_err as planet_mass_error
+                mass_pl_err_max as planet_mass_error_max,
+                mass_pl_err_min as planet_mass_error_min
             from life_td.star_basic as s
                 join life_td.h_link as slink on (parent_object_idref=s.object_idref)
                 join life_td.object as star_ob on (s.object_idref=star_ob.object_id)
@@ -1445,7 +1462,7 @@ tables may change at any time without prior warning.
                 "Matched: 3",
                 "*  14 Her c", # planet id (main ids can change over time)
                 "17.90",  # Distance
-                "7.100")  # planet mass of planet c
+                "7.1")  # planet mass of planet c (can change over time)
         </code>
         </regTest>
 
@@ -1466,7 +1483,7 @@ WHERE
                 rows = self.getVOTableRows()
                 self.assertEqual(len(rows), 1)
                 self.assertAlmostEqual(rows[0]["mass_pl_value"],
-                    8.053)
+                    8.5)
                 self.assertAlmostEqual(rows[0]["coo_ra"],
                     242.60131531625294)
                 self.assertEqual(rows[0]["type"],
