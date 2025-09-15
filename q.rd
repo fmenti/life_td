@@ -1460,7 +1460,7 @@ tables may change at any time without prior warning.
                 "Matched: 3",
                 "*  14 Her c", # planet id (main ids can change over time)
                 "17.90",  # Distance
-                "5.025")  # planet mass of planet c
+                "7.1")  # planet mass of planet c (can change over time)
         </code>
         </regTest>
 
