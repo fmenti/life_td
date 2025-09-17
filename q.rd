@@ -39,7 +39,7 @@ tables may change at any time without prior warning.
     <meta name="_news" author="FM" date="2024-03-05">Adding mes_h_link table
     containing all links between pair of objects</meta>
 
-    <meta name="_news" author="FM" date="2025-09-15">Updated to contain
+    <meta name="_news" author="FM" date="2025-09-17">Updated to contain
     Exo-Mercat 2.0 data instead of earlier version. Changed planetary
     parameters from prototype demonstration version into parameters that match
     data from provider better. Concretely removed mass_pl_rel parameter and
