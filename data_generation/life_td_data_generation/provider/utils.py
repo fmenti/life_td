@@ -76,7 +76,8 @@ def create_provider_table(
 
 
 def query(
-    link: str, adql_query: str, upload_tables: list[table.Table] = []
+    link: str, adql_query: str, upload_tables: list[table.Table] = [],
+    no_description=True
 ) -> table.Table:
     """
     Perform a TAP query against a service.
@@ -105,7 +106,15 @@ def query(
         result = service.run_async(
             adql_query, uploads=tables, timeout=None, maxrec=1600000
         )
-    return result.to_table()
+
+    cat = result.to_table()
+
+    # removing descriptions because merging of data leaves wrong description
+    if no_description:
+        for col in cat.colnames:
+            cat[col].description = ""
+
+    return cat
 
 
 def remove_catalog_description(cat: table.Table, no_description: bool) -> table.Table:
