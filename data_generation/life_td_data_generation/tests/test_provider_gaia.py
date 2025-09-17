@@ -1,6 +1,6 @@
+import numpy as np
 from astropy.table import MaskedColumn, Table
 from provider.gaia import create_mes_teff_st_table
-import numpy as np
 
 
 def test_create_mes_teff_st_table():

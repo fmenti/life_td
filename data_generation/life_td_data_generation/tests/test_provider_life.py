@@ -1,6 +1,14 @@
-from astropy.table import Table
 import numpy as np
-from provider.life import spec, extract_lum_class, assign_null_values, initiate_columns, deal_with_leading_d_sptype, sptype_string_to_class, modeled_param
+from astropy.table import Table
+from provider.life import (
+    assign_null_values,
+    deal_with_leading_d_sptype,
+    extract_lum_class,
+    initiate_columns,
+    modeled_param,
+    spec,
+    sptype_string_to_class,
+)
 
 
 def test_extract_lum_class():
