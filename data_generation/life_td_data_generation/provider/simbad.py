@@ -2,6 +2,8 @@
 Generates the data for the database for each of the data providers separately.
 """
 
+from collections.abc import Sequence
+
 import numpy as np  # arrays
 from astropy.table import MaskedColumn, Table, join, setdiff, unique, vstack
 from provider.assign_quality_funcs import assign_quality
@@ -12,11 +14,10 @@ from provider.utils import (
     fetch_main_id,
     nullvalues,
     query,
-    replace_value
+    replace_value,
 )
 from sdata import empty_dict
 from utils.io import save
-from typing import Dict, Optional, Sequence, Tuple
 
 # ---------------define queries--------------------------------------
 adql_queries_moduls = {
@@ -36,7 +37,7 @@ adql_queries_moduls = {
                 LEFT JOIN h_link ON b.oid=h_link.child
                     LEFT JOIN allfluxes AS f ON b.oid=f.oidref
 
-    """
+    """,
 }
 
 
@@ -59,27 +60,27 @@ def main_adql_queries(plx_cut: float) -> str:
 
 adql_upload_queries = {
     "sy_without_plx_but_child_with_upload": adql_queries_moduls[
-            "select_statement"
-        ]
-        + adql_queries_moduls["tables_statement"]
-        + """JOIN TAP_UPLOAD.t1 ON b.oid=t1.parent_oid
+        "select_statement"
+    ]
+    + adql_queries_moduls["tables_statement"]
+    + """JOIN TAP_UPLOAD.t1 ON b.oid=t1.parent_oid
             WHERE (b.plx_value IS NULL) AND (otype='**..')""",
     "pl_without_plx_but_host_with_upload": adql_queries_moduls[
-            "select_statement"
-        ]
-        + adql_queries_moduls["tables_statement"]
-        + """JOIN TAP_UPLOAD.t1 ON b.oid=t1.oid
+        "select_statement"
+    ]
+    + adql_queries_moduls["tables_statement"]
+    + """JOIN TAP_UPLOAD.t1 ON b.oid=t1.oid
             WHERE (b.plx_value IS NULL) AND (otype='Pl..')""",
     "ids_from_upload": """SELECT id, t1.*
                           FROM ident
-                          JOIN TAP_UPLOAD.t1 ON oidref = t1.oid"""
+                          JOIN TAP_UPLOAD.t1 ON oidref = t1.oid""",
 }
 
 
 def create_simbad_helpertable(
     distance_cut_in_pc: float,
-    test_objects: Optional[Sequence[str]],
-) -> Tuple[Table, Dict[str, Table]]:
+    test_objects: Sequence[str] | None,
+) -> tuple[Table, dict[str, Table]]:
     """
     Create the main SIMBAD helper table.
 
@@ -326,10 +327,9 @@ def creating_helpertable_stars(
     return stars
 
 
-
 def expanding_helpertable_stars(
     sim_helptab: Table,
-    sim: Dict[str, Table],
+    sim: dict[str, Table],
     stars: Table,
 ) -> Table:
     """
@@ -403,8 +403,7 @@ def expanding_helpertable_stars(
     # Make the remaining ones into masked entries.
     stars["sptype_ref"] = MaskedColumn(stars["sptype_ref"])
     stars["sptype_ref"].mask[np.where(stars["sptype_ref"] == "")] = [
-        True
-        for _ in range(len(stars[np.where(stars["sptype_ref"] == "")]))
+        True for _ in range(len(stars[np.where(stars["sptype_ref"] == "")]))
     ]
 
     # Handle parallax and coordinate references similarly.
@@ -433,7 +432,7 @@ def expanding_helpertable_stars(
     return stars
 
 
-def create_ident_table(sim_helptab: Table, sim: Dict[str, Table]) -> Table:
+def create_ident_table(sim_helptab: Table, sim: dict[str, Table]) -> Table:
     """
     Create the identifier table.
 
@@ -462,7 +461,7 @@ def create_ident_table(sim_helptab: Table, sim: Dict[str, Table]) -> Table:
 
 def create_h_link_table(
     sim_helptab: Table,
-    sim: Dict[str, Table],
+    sim: dict[str, Table],
     stars: Table,
 ) -> Table:
     """
@@ -538,7 +537,7 @@ def create_objects_table(sim_helptab: Table, stars: Table) -> Table:
     return sim_objects
 
 
-def create_sim_sources_table(stars: Table, sim: Dict[str, Table]) -> Table:
+def create_sim_sources_table(stars: Table, sim: dict[str, Table]) -> Table:
     """
     Create the sources table.
 
@@ -620,8 +619,8 @@ def create_star_basic_table(stars: Table) -> Table:
 
 def provider_simbad(
     distance_cut_in_pc: float,
-    test_objects: Optional[Sequence[str]] = None,
-) -> Dict[str, Table]:
+    test_objects: Sequence[str] | None = None,
+) -> dict[str, Table]:
     """
     Obtain and arrange SIMBAD data.
 

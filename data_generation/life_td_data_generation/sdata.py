@@ -143,7 +143,7 @@ empty_dict_wit_columns = {
             "dist_st_source_idref",
             "dist_st_ref",
             "sptype_string",
-            "sptype_err", # outdated
+            "sptype_err",  # outdated
             "sptype_qual",
             "sptype_source_idref",
             "sptype_ref",

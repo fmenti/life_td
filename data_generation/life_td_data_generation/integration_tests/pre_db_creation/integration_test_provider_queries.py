@@ -1,5 +1,5 @@
-from provider.utils import query
 from astropy.table import Table
+from provider.utils import query
 
 
 def test_wds_queryable():

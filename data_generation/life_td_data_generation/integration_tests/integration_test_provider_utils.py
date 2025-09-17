@@ -1,5 +1,5 @@
 from astropy.table import Table, setdiff
-from provider.utils import query, fetch_main_id, IdentifierCreator
+from provider.utils import IdentifierCreator, fetch_main_id, query
 
 
 def test_query():

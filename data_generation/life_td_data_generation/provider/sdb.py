@@ -8,7 +8,7 @@ from provider.utils import (
     IdentifierCreator,
     create_provider_table,
     create_sources_table,
-    fetch_main_id
+    fetch_main_id,
 )
 from sdata import empty_dict
 from utils.io import save, stringtoobject
