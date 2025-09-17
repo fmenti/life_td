@@ -35,14 +35,14 @@ tables may change at any time without prior warning.
     <meta name="instrument">LIFE</meta>
     <meta name="contentLevel">Research</meta>
     <meta name="type">Archive</meta>
-    
+
     <meta name="_news" author="FM" date="2024-03-05">Adding mes_h_link table
     containing all links between pair of objects</meta>
-    
-    <meta name="_news" author="FM" date="2025-02-10">Updated to contain 
-    Exo-Mercat 2.0 data instead of earlier version. Changed planetary 
-    parameters from prototype demonstration version into parameters that match 
-    data from provider better. Concretely removed mass_pl_rel parameter and 
+
+    <meta name="_news" author="FM" date="2025-09-17">Updated to contain
+    Exo-Mercat 2.0 data instead of earlier version. Changed planetary
+    parameters from prototype demonstration version into parameters that match
+    data from provider better. Concretely removed mass_pl_rel parameter and
     replaced mass_pl_err with mass_pl_err_max and mass_pl_err_min.</meta>
 
     <table id="source" onDisk="True" adql="True">
@@ -80,7 +80,7 @@ tables may change at any time without prior warning.
 
     <data id="import_source">
         <sources>data/sources.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="source">
@@ -127,7 +127,7 @@ tables may change at any time without prior warning.
 
     <data id="import_object">
         <sources>data/objects.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="object">
@@ -172,7 +172,7 @@ tables may change at any time without prior warning.
 
     <data id="import_provider">
         <sources>data/provider.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="provider">
@@ -519,7 +519,7 @@ tables may change at any time without prior warning.
 
     <data id="import_star_basic">
         <sources>data/star_basic.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="star_basic">
@@ -639,7 +639,7 @@ tables may change at any time without prior warning.
 
     <data id="import_planet_basic">
         <sources>data/planet_basic.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="planet_basic">
@@ -705,7 +705,7 @@ tables may change at any time without prior warning.
 
     <data id="import_disk_basic">
         <sources>data/disk_basic.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="disk_basic">
@@ -762,7 +762,7 @@ tables may change at any time without prior warning.
 
     <data id="import_h_link">
         <sources>data/best_h_link.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="h_link">
@@ -807,7 +807,7 @@ tables may change at any time without prior warning.
 
     <data id="import_ident">
         <sources>data/ident.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="ident">
@@ -869,7 +869,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_pl">
         <sources>data/mes_mass_pl.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_mass_pl">
@@ -930,7 +930,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_teff_st">
         <sources>data/mes_teff_st.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_teff_st">
@@ -989,7 +989,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_radius_st">
         <sources>data/mes_radius_st.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_radius_st">
@@ -1048,7 +1048,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_mass_st">
         <sources>data/mes_mass_st.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_mass_st">
@@ -1102,7 +1102,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_binary">
         <sources>data/mes_binary.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_binary">
@@ -1176,7 +1176,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_sep_ang">
         <sources>data/mes_sep_ang.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
            <make table="mes_sep_ang">
@@ -1189,12 +1189,12 @@ tables may change at any time without prior warning.
              </rowmaker>
         </make>
     </data>
-    
+
     <table id="mes_h_link" onDisk="True" adql="True">
         <meta name="title">Object relation table</meta>
         <meta name="description">
         This table links subordinate objects (e.g. a planets of a star, or
-        a star in a multiple star system) to their parent objects. 
+        a star in a multiple star system) to their parent objects.
 
         \betawarning
         </meta>
@@ -1230,7 +1230,7 @@ tables may change at any time without prior warning.
 
     <data id="import_mes_h_link">
         <sources>data/h_link.xml</sources>
-        <!-- Data acquired using the life_td_data_generation python package. 
+        <!-- Data acquired using the life_td_data_generation python package.
         See documentation at life/td.readthedocs.io -->
         <voTableGrammar/>
         <make table="mes_h_link">
@@ -1360,7 +1360,7 @@ tables may change at any time without prior warning.
             to find (direct) parents of a star, you would run:
 
             .. tapquery::
-                SELECT DISTINCT main_id as parent_main_id, object_id as 
+                SELECT DISTINCT main_id as parent_main_id, object_id as
                 parent_object_id
                 FROM life_td.h_link
                 JOIN life_td.ident as c on c.object_idref=child_object_idref
@@ -1398,10 +1398,10 @@ tables may change at any time without prior warning.
             star '* bet Cas' you would run:
 
             .. tapquery::
-                SELECT DISTINCT main_id disk_main_id, object_id as 
+                SELECT DISTINCT main_id disk_main_id, object_id as
                 disk_object_id, db.*
                 FROM life_td.h_link
-                JOIN life_td.disk_basic as db ON 
+                JOIN life_td.disk_basic as db ON
                  db.object_idref=child_object_idref
                 JOIN life_td.ident as p on p.object_idref=parent_object_idref
                 JOIN life_td.object on object_id=child_object_idref
@@ -1430,20 +1430,20 @@ tables may change at any time without prior warning.
             .. _LIFE-StarCat: https://drive.google.com/file/d/12F7N0w3kGHJw3FBbf_P6xF9Pers38wbu/view?usp=sharing
 
             .. tapquery::
-                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value, 
-                 sb.dist_st_value, sb.sptype_string, sb.coo_gal_l, 
-                 sb.coo_gal_b, sb.teff_st_value, sb.mass_st_value, 
-                 sb.radius_st_value, sb.binary_flag, sb.mag_i_value, 
-                 sb.mag_j_value,  sb.class_lum, sb.class_temp, 
-                 o_parent.main_id AS parent_main_id, 
+                SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.plx_value,
+                 sb.dist_st_value, sb.sptype_string, sb.coo_gal_l,
+                 sb.coo_gal_b, sb.teff_st_value, sb.mass_st_value,
+                 sb.radius_st_value, sb.binary_flag, sb.mag_i_value,
+                 sb.mag_j_value,  sb.class_lum, sb.class_temp,
+                 o_parent.main_id AS parent_main_id,
                  sb_parent.sep_ang_value
                 FROM life_td.star_basic AS sb
                 JOIN life_td.object AS o ON sb.object_idref=o.object_id
-                LEFT JOIN life_td.h_link AS h ON 
+                LEFT JOIN life_td.h_link AS h ON
                  o.object_id=h.child_object_idref
-                LEFT JOIN life_td.object AS o_parent ON 
+                LEFT JOIN life_td.object AS o_parent ON
                  h.parent_object_idref=o_parent.object_id
-                LEFT JOIN life_td.star_basic AS sb_parent ON 
+                LEFT JOIN life_td.star_basic AS sb_parent ON
                  o_parent.object_id=sb_parent.object_idref
                 WHERE o.type = 'st' AND sb.dist_st_value &lt; 30.
                 </meta>
@@ -1468,7 +1468,7 @@ tables may change at any time without prior warning.
 
         <regTest title="LIFE tables appear to be in place.">
             <url parSet="TAP" QUERY="
-SELECT po.main_id AS planet_name, so.main_id AS host_name, s.coo_ra, 
+SELECT po.main_id AS planet_name, so.main_id AS host_name, s.coo_ra,
     p.mass_pl_value, po.type
 FROM
   life_td.planet_basic AS p
