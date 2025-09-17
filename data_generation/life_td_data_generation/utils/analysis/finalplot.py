@@ -1,15 +1,14 @@
+from collections.abc import Sequence  # typing helpers
+
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
-from typing import Iterable, List, Sequence, Tuple  # typing helpers
 from numpy.typing import ArrayLike  # NumPy array protocol types
-
-# self created modules
-from utils.io import Path
 from utils.analysis.analysis import (
+    SpectralType,
     spectral_type_histogram,
     x_position,
-    SpectralType,
 )
+from utils.io import Path
 
 
 def get_distance_cut(
@@ -39,7 +38,7 @@ def get_distance_cut(
     return distance_cut
 
 
-def define_xticks(distance_cut: float) -> Tuple[List[str], float]:
+def define_xticks(distance_cut: float) -> tuple[list[str], float]:
     """
     Prepare x-ticks and bin step size for the distance-binned subplot.
 
@@ -85,7 +84,7 @@ def myround(x: float, base: int = 5) -> float:
 
 def _extract_samples(
     stars: Sequence[object],
-) -> Tuple[List[ArrayLike], List[ArrayLike]]:
+) -> tuple[list[ArrayLike], list[ArrayLike]]:
     """
     Extract spectral type and distance columns from star tables.
 

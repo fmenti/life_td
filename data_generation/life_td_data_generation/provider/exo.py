@@ -157,9 +157,13 @@ def _distance_cut_and_strip(exo_helptab: Table) -> Table:
     exo_helptab = distance_cut(exo_helptab, "main_id")
 
     for i in range(len(exo_helptab)):
-        exo_helptab["planet_main_id"][i] = exo_helptab["planet_main_id"][i].strip()
+        exo_helptab["planet_main_id"][i] = exo_helptab["planet_main_id"][
+            i
+        ].strip()
         exo_helptab["main_id"][i] = exo_helptab["main_id"][i].strip()
-        exo_helptab["exomercat_name"][i] = exo_helptab["exomercat_name"][i].strip()
+        exo_helptab["exomercat_name"][i] = exo_helptab["exomercat_name"][
+            i
+        ].strip()
 
     return exo_helptab
 
@@ -215,7 +219,6 @@ def _compute_removed_objects_and_save(before: Table, after: Table) -> None:
     return
 
 
-
 def create_exo_helpertable() -> tuple[dict, Table]:
     """
     Create the Exo-MerCat helper table used downstream.
@@ -251,7 +254,9 @@ def create_exo_helpertable() -> tuple[dict, Table]:
     return exo, exo_helptab
 
 
-def create_ident_table(exo_helptab: Table, exo: dict[str, Table]) -> tuple[Table, Table]:
+def create_ident_table(
+    exo_helptab: Table, exo: dict[str, Table]
+) -> tuple[Table, Table]:
     """
     Create the identifier table for Exo-MerCat objects.
 

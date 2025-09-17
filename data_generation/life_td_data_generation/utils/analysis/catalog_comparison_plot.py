@@ -1,13 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
-
-
-# self created modules
+from utils.analysis.analysis import (
+    SpectralType,
+    distancecut_subplot,
+    full_subplot,
+    spectral_type_histogram,
+    tight_plot,
+    x_position,
+)
 from utils.io import Path
-from utils.analysis.analysis import SpectralType, x_position, tight_plot, full_subplot, distancecut_subplot, spectral_type_histogram
+
 
 def spectral_type_histogram_catalog_comparison(
-    stellar_catalogs, labels, path=Path().plot + "sthcc.png",distance_colname='dist',spectral_type_colname='spec'
+    stellar_catalogs,
+    labels,
+    path=Path().plot + "sthcc.png",
+    distance_colname="dist",
+    spectral_type_colname="spec",
 ):
     """
     Creates the figure for the RNAAS article.
@@ -37,12 +46,16 @@ def spectral_type_histogram_catalog_comparison(
         full_subplot(x_pos, specdist_total[i], i, labels)
 
         # now make same for only within 20pc sample
-        sample_sub = sample_total[np.where(stellar_catalogs[i][distance_colname] < 20.0)]
+        sample_sub = sample_total[
+            np.where(stellar_catalogs[i][distance_colname] < 20.0)
+        ]
         specdist_sub[i] = spectral_type_histogram(sample_sub)
 
         distancecut_subplot(x_pos, specdist_sub[i], i, "//")
 
-        sample_sub = sample_total[np.where(stellar_catalogs[i][distance_colname] < 10.0)]
+        sample_sub = sample_total[
+            np.where(stellar_catalogs[i][distance_colname] < 10.0)
+        ]
         specdist_sub[i] = spectral_type_histogram(sample_sub)
 
         distancecut_subplot(x_pos, specdist_sub[i], i, "////")
