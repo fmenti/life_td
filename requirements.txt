@@ -10,3 +10,4 @@ ruff
 nbsphinx
 furo
 pandoc
+scipy
