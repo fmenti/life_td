@@ -1,5 +1,12 @@
-astropy ~= 5.3.0
-numpy ~= 1.24.3
-pyvo ~= 1.4.1
-matplotlib ~= 3.6.3
+jupyter
+ipykernel
+ipywidgets
+numpy
+matplotlib
+astropy
+pyvo
 pytest
+ruff
+nbsphinx
+furo
+pandoc
