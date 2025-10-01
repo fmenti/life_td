@@ -1,16 +1,15 @@
-#data_generation/life_td_data_generation/life_td_Testbench.ipynb
-data_generation/life_td_data_generation/paused_code_writing/
 data/*.xml
 data/*.csv
-data/*.txt
 additional_data/*.xml
 additional_data/*.csv
 additional_data/*.txt
 !additional_data/Mamajek2022-04-16.csv
 !additional_data/exo-mercat05-02-2023_v2.0.csv
 !additional_data/sdb_30pc_09_02_2024.xml
-plots/
 data_generation/docs/build/
+#because ipynb_checkpoints are just backups
 **/.ipynb_checkpoints/
 **/__pycache__/
+.venv/
+.venv1/
 
