@@ -26,10 +26,10 @@ setup(
     description='life_td_data_generation: Data generation for LIFE Target Database',
     url='https://github.com/fmenti/life_td',
     install_requires=[
-        'astropy ~= 7.0.0',
-        'numpy ~= 2.2.2',
-        'pyvo ~= 1.6',
-        'matplotlib ~= 3.10.0',
+        'astropy',
+        'numpy',
+        'pyvo',
+        'matplotlib',
     ],
     extras_required={
         'docs': [
