@@ -1,0 +1,13 @@
+jupyter
+ipykernel
+ipywidgets
+numpy
+matplotlib
+astropy
+pyvo
+pytest
+ruff
+nbsphinx
+furo
+pandoc
+scipy
