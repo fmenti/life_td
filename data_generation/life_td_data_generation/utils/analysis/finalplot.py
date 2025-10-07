@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
-from typing import Iterable, List, Sequence, Tuple  # typing helpers
+from typing import List, Sequence, Tuple  # typing helpers
 from numpy.typing import ArrayLike  # NumPy array protocol types
 
 # self created modules
 from utils.io import Path
-from utils.analysis.analysis import (
+from utils.analysis.histogram_utils import (
     spectral_type_histogram,
     x_position,
     SpectralType,
 )
+
 
 
 def get_distance_cut(
