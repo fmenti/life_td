@@ -94,12 +94,12 @@ def partial_create(distance_cut_in_pc, create=[]):
         provider_gaia,
     ]
     arguments = [
-        (distance_cut_in_pc),
+        (distance_cut_in_pc,),  # Add comma to make it a tuple
         (distance_cut_in_pc, data),
         (),
         (),
         (),
-        (distance_cut_in_pc),
+        (distance_cut_in_pc,),  # Add comma to make it a tuple
     ]
 
     for i, prov in enumerate(list(provider_tables_dict.keys())):
