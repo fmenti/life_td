@@ -97,10 +97,10 @@ def test_modeled_param():
 
 
 def test_assign_teff():
-    temp = np.array(['M', 'M', 'M', 'M', 'M'])
-    temp_nr = np.array(['5.0', '3.5', '5.5', '6.5', '4.0'])
-    lum = np.array(['V', 'V', 'V', 'V', 'V'])
-    main_id = np.array(['test', 'test2', 'test3', 'test4', 'test5'])
+    temp = np.array(['M', 'M', 'M', 'M', 'M','K'])
+    temp_nr = np.array(['5.0', '3.5', '5.5', '6.5', '4.0','2.5'])
+    lum = np.array(['V', 'V', 'V', 'V', 'V','V'])
+    main_id = np.array(['test', 'test2', 'test3', 'test4', 'test5','test6'])
     cat = Table((main_id, temp, temp_nr, lum),
                 names=('main_id', 'class_temp', 'class_temp_nr', 'class_lum'),
                 dtype=[object, object, object, object])
@@ -108,9 +108,11 @@ def test_assign_teff():
     result = spec(cat)
 
     # assert
+    assert result['mod_Teff'][
+               np.where(result['class_temp_nr'] == '2.5')] == 5100 # should use the one from 2.0
     assert result['mod_Teff'][np.where(result['class_temp_nr'] == '3.5')] == 3270
     assert result['mod_Teff'][np.where(result['class_temp_nr'] == '4.0')] == 3210
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '5.0')] == 3060  #-> uses the ome from 5.5
+    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '5.0')] == 3060
     assert result['mod_Teff'][np.where(result['class_temp_nr'] == '5.5')] == 2930
     assert result['mod_Teff'][np.where(result['class_temp_nr'] == '6.5')] == 2740
 

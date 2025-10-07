@@ -312,6 +312,17 @@ def _match_spectral_type_to_model(sptype, model_param):
                     "Mass": model_param["Mass"][i]
                 }
 
+        # If no .5 match found, fall back to the integer value (e.g., K2.5V -> K2V)
+        fallback_sptype = sptype[0] + sptype[1] + sptype[
+            4:]  # e.g., 'K' + '2' + 'V'
+        for i in range(len(model_param["SpT"])):
+            if model_param["SpT"][i][:3] == fallback_sptype[:3]:
+                return {
+                    "Teff": model_param["Teff"][i],
+                    "Radius": model_param["Radius"][i],
+                    "Mass": model_param["Mass"][i]
+                }
+
     # No match found
     return None
 
