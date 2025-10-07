@@ -8,6 +8,7 @@ from astropy.table import MaskedColumn
 from scipy.optimize import curve_fit
 from scipy.stats import norm
 from sdata import empty_dict
+from utils.analysis.finalplot import starcat_distribution_plot as final_plot
 
 # self created modules
 from utils.io import Path, stringtoobject
@@ -187,14 +188,6 @@ def spectral_type_histogram(spectypes):
     return specdist
 
 
-
-
-
-
-
-
-
-
 @dataclass
 class Plotparas:
     width = 0.15
@@ -243,12 +236,6 @@ def distancecut_subplot(x, spec, i, hatch):
         hatch=hatch,
     )
     return
-
-
-
-
-
-
 
 
 def spechistplot(stars, name, path=""):

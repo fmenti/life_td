@@ -1,5 +1,6 @@
 data/*.xml
 data/*.csv
+#data/*.txt #this way the data folder will get included
 additional_data/*.xml
 additional_data/*.csv
 additional_data/*.txt
