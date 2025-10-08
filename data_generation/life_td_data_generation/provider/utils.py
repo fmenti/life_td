@@ -114,6 +114,8 @@ def query(
         for col in cat.colnames:
             cat[col].description = ""
 
+    # does not seem to work properly yet, getting warndings for WDS, exomercat and gaia
+
     return cat
 
 
