@@ -3,7 +3,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 from astropy.table import Table, setdiff, MaskedColumn
-from provider.assign_quality_funcs import teff_st_spec_assign_quality,assign_quality_elementwise, exo_assign_quality,assign_quality
+from provider.assign_quality_funcs import teff_st_spec_assign_quality, assign_quality_elementwise, assign_quality, exo_assign_quality
 
 
 def test_teff_st_spec_assign_quality():
@@ -22,7 +22,6 @@ def test_teff_st_spec_assign_quality():
         dtype=[object, float, object],
     )
     gaia_mes_teff_st_spec = teff_st_spec_assign_quality(gaia_mes_teff_st_spec)
-
 
     assert gaia_mes_teff_st_spec["teff_st_qual"][0] == "B"
     assert gaia_mes_teff_st_spec["teff_st_qual"][2] == "C"
@@ -192,5 +191,3 @@ def test_default_fallback_logic(table_with_column_data):
     assert result_unknown["unknown_column"].tolist() == [
         "?" for _ in range(len(table_with_column_data))
     ]
-
-

@@ -1,4 +1,3 @@
-from life_td import create_life_td
 from astropy.table import Table
 
 # def integration_test_create_life_td():

@@ -123,7 +123,7 @@ def assign_wds_sep_quality(table, column, mode):
 
 # Encapsulate default/assumption logic for fallback cases
 def _default_quality(column, special_mode):
-    if column in ["teff_st_phot","coo_gal_qual"]:
+    if column in ["teff_st_phot", "coo_gal_qual"]:
         # Quality transformation logic for ra/dec to gal
         return "?"
     elif special_mode in ["radius_st_flame", "mass_st_flame"]:

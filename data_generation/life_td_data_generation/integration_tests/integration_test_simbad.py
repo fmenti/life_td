@@ -1,5 +1,5 @@
-from provider.simbad import provider_simbad
 from astropy.table import Table
+from provider.simbad import provider_simbad
 from sdata import table_names
 
 

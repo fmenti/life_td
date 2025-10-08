@@ -131,7 +131,7 @@ def assign_source_idref(cat, sources, paras, provider):
             print(
                 "warning, ",
                 {source_id_column},
-                "already in table. something went wrong with loading"
+                "already in table. something went wrong with loading",
             )
             cat.remove_column(source_id_column)
 
@@ -230,10 +230,14 @@ def best_para_membership(mes_table):
             best_para_table.add_row(grouped_mes_table[ind[i]])
         else:
             h_link_pair = grouped_mes_table[ind[i] : ind[i + 1]]
-            h_link_pair_with_value = h_link_pair[np.where(h_link_pair[para] != 999999)]
+            h_link_pair_with_value = h_link_pair[
+                np.where(h_link_pair[para] != 999999)
+            ]
             if len(h_link_pair_with_value) > 0:
                 for j in range(ind[i], ind[i + 1]):
-                    if grouped_mes_table[para][j] == max(h_link_pair_with_value[para]):
+                    if grouped_mes_table[para][j] == max(
+                        h_link_pair_with_value[para]
+                    ):
                         best_para_table.add_row(grouped_mes_table[j])
                         break  # make sure not multiple of same max
                         # value are added
