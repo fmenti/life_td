@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 from utils.analysis.analysis import (
-    SpectralType,
     distancecut_subplot,
     full_subplot,
-    spectral_type_histogram,
     tight_plot,
+)
+from utils.analysis.histogram_utils import (
+    SpectralType,
+    spectral_type_histogram,
     x_position,
 )
 from utils.io import Path
