@@ -245,40 +245,86 @@ def match_sptype(
         effective temperature, radius and mass filled with model values
     :rtype: astropy.table.table.Table
     """
-    model_param = modeled_param()  # create model table as votable
-    # initiating columns with right units
+    model_param = modeled_param()  # Load Mamajek's model table
 
-    arr = np.zeros(len(cat))
-    cat[teffstring] = arr * np.nan * units.K
+    # Initialize columns with proper units and masked arrays
+    num_rows = len(cat)
     cat[teffstring] = MaskedColumn(
-        mask=np.full(len(cat), True), length=len(cat), unit=units.K
+        mask=np.full(num_rows, True), length=num_rows, unit=units.K
     )
-    cat[rstring] = arr * np.nan * units.R_sun
-    cat[mstring] = arr * np.nan * units.M_sun
-    # go through all spectral types in cat
-    for j in range(len(cat[sptypestring])):
-        # for all the entries that are not empty
-        if cat[sptypestring][j] != "":
-            # remove first d coming from old notation for dwarf meaning main sequence star
-            cat[sptypestring][j] = cat[sptypestring][j].strip("d")
-            # go through the model spectral types of Mamajek
-            for i in range(len(model_param["SpT"])):
-                # match first two letters
-                if model_param["SpT"][i][:3] == cat[sptypestring][j][:3]:
-                    cat[teffstring][j] = model_param["Teff"][i]
-                    cat[rstring][j] = model_param["Radius"][i]
-                    cat[mstring][j] = model_param["Mass"][i]
-            # as the model does not cover all spectral types on .5 accuracy, check those separately
-            if cat[sptypestring][j][2:4] == ".5":
-                for i in range(len(model_param["SpT"])):
-                    # match first four letters
-                    if model_param["SpT"][i][:4] == cat[sptypestring][j][:4]:
-                        cat[teffstring][j] = model_param["Teff"][i]
-                        cat[rstring][j] = model_param["Radius"][i]
-                        cat[mstring][j] = model_param["Mass"][i]
-        else:
+    cat[rstring] = MaskedColumn(
+        mask=np.full(num_rows, True), length=num_rows, unit=units.R_sun
+    )
+    cat[mstring] = MaskedColumn(
+        mask=np.full(num_rows, True), length=num_rows, unit=units.M_sun
+    )
+
+    # Process each spectral type in the catalog
+    for j in range(num_rows):
+        sptype = cat[sptypestring][j]
+
+        # Handle empty spectral types
+        if sptype == "":
             cat[sptypestring][j] = "None"
+            continue
+
+        # Remove old 'd' notation (dwarf = main sequence star)
+        sptype = sptype.strip("d")
+        cat[sptypestring][j] = sptype
+
+        # Try to match spectral type with model
+        matched = _match_spectral_type_to_model(sptype, model_param)
+
+        if matched:
+            cat[teffstring][j] = matched["Teff"]
+            cat[rstring][j] = matched["Radius"]
+            cat[mstring][j] = matched["Mass"]
+
     return cat
+
+
+def _match_spectral_type_to_model(sptype, model_param):
+    """
+    Helper function to match a spectral type string to Mamajek's model.
+
+    :param str sptype: Spectral type string (e.g., 'G2V', 'K5.5V')
+    :param model_param: Model parameter table from Mamajek
+    :returns: Dictionary with matched parameters or None if no match found
+    :rtype: dict or None
+    """
+    # First try exact match on first 3 characters (e.g., 'G2V')
+    for i in range(len(model_param["SpT"])):
+        if model_param["SpT"][i][:3] == sptype[:3]:
+            return {
+                "Teff": model_param["Teff"][i],
+                "Radius": model_param["Radius"][i],
+                "Mass": model_param["Mass"][i]
+            }
+
+    # For half-subtypes (e.g., 'K5.5V'), try matching first 4 characters
+    # The model doesn't cover all spectral types with .5 accuracy
+    if len(sptype) >= 4 and sptype[2:4] == ".5":
+        for i in range(len(model_param["SpT"])):
+            if model_param["SpT"][i][:4] == sptype[:4]:
+                return {
+                    "Teff": model_param["Teff"][i],
+                    "Radius": model_param["Radius"][i],
+                    "Mass": model_param["Mass"][i]
+                }
+
+        # If no .5 match found, fall back to the integer value (e.g., K2.5V -> K2V)
+        fallback_sptype = sptype[0] + sptype[1] + sptype[
+            4:]  # e.g., 'K' + '2' + 'V'
+        for i in range(len(model_param["SpT"])):
+            if model_param["SpT"][i][:3] == fallback_sptype[:3]:
+                return {
+                    "Teff": model_param["Teff"][i],
+                    "Radius": model_param["Radius"][i],
+                    "Mass": model_param["Mass"][i]
+                }
+
+    # No match found
+    return None
 
 
 def spec(cat):

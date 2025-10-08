@@ -2,13 +2,19 @@ from collections.abc import Sequence  # typing helpers
 
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
+
+from typing import List, Sequence, Tuple  # typing helpers
 from numpy.typing import ArrayLike  # NumPy array protocol types
-from utils.analysis.analysis import (
-    SpectralType,
+
+# self created modules
+from utils.io import Path
+from utils.analysis.histogram_utils import (
     spectral_type_histogram,
     x_position,
+    SpectralType,
 )
 from utils.io import Path
+
 
 
 def get_distance_cut(

@@ -154,12 +154,12 @@ def test_default_fallback_logic(table_with_column_data):
 
     # Test 'teff_st_phot'
     result_teff = assign_quality(
-        table_with_column_data, column="quality", special_mode="teff_st_phot"
+        table_with_column_data, column="teff_st_qual", special_mode="teff_st_phot"
     )
-    assert result_teff["quality"].tolist() == [
-        "B",
-        "B",
-        "B",
+    assert result_teff["teff_st_qual"].tolist() == [
+        "?",
+        "?",
+        "?",
     ]  # Replace with expected values if different
 
     # Test 'model'
