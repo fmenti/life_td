@@ -3,11 +3,10 @@
 Modules
 ========
 
-This page contains a list of all available modules and a short description of what they are used for. More details on the design of the database can be found in the :ref:`architecture` section. 
+This page contains a list of all available modules and a short description of what they are used for. More details on the design of the database can be found in the :ref:`architecture` section.
 
 .. note::
-    
-   The building and provider modules are currently in the status of "working but difficult to understand". Some new functions and classes are in the process of being implemented in an attempt to improve the readability.
+    This page is slightly outdated. If you are interested in an up to date version please contact me and I will increase the priority for updating this documentation section.
 
 
 life_td module
@@ -15,7 +14,7 @@ life_td module
 
 The data for the LIFE database is generated using the function :py:func:`life_td.create_life_td`:
 
-It is also the one being called when the module is run as a script. 
+It is also the one being called when the module is run as a script.
 
 During development it can happen that one runs the data generation multiple times e.g. when one is debugging a particular provider. As running the whole data generation takes time especially with larger distance cuts I implemented the function :py:func:`life_td.partial_create`. There one can specify which provider data is generated and which one loaded from the previously generated files and can potentially save a lot of time.
 
@@ -58,5 +57,5 @@ analysis module
 
 The analysis module contains functions for graphical display of the database tables as well as general overview of the contained data. Currently some of those functions are being transformed into unit and integration tests. As a consequence the analysis module is currently not working but will be repaired soon.
 
-The most important function :py:func:`analysis.final_plot` creates two plots for visualization of the spectral distribution. 
+The most important function :py:func:`analysis.final_plot` creates two plots for visualization of the spectral distribution.
 
