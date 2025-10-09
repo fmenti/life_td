@@ -5,6 +5,8 @@ additional_data/*.xml
 additional_data/*.csv
 additional_data/*.txt
 !additional_data/Mamajek2022-04-16.csv
+!additional_data/catalogs/LIFE-StarCat3.csv
+!additional_data/catalogs/LIFE-StarCat4_dec2024.csv.csv
 !additional_data/exo-mercat05-02-2023_v2.0.csv
 !additional_data/sdb_30pc_09_02_2024.xml
 data_generation/docs/build/
