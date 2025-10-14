@@ -7,6 +7,25 @@ import astropy as ap  # votables
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 
+def test_object_dropout(test_objects,parent_sample,silent=False):
+    if len(test_objects) > 0:
+        drop_out = test_objects[
+                np.where(
+                    np.isin(test_objects, parent_sample,invert=True)
+                )
+            ]
+        test_objects_without_dropout = test_objects[
+                np.where(
+                    np.isin(drop_out, test_objects,invert=True)
+                )
+            ]
+        if not silent:
+            print("The following objects are not part of the parent sample: \n")
+            print(drop_out)
+    else:
+        print("test objects sample is empty")
+        drop_out = []
+    return drop_out, test_objects_without_dropout
 
 def type_system(cat_h, lists_dict, main_id, name, verbose):
     if len(cat_h[np.where(cat_h["parent_main_id"] == main_id)]) > 0:
