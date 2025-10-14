@@ -7,24 +7,40 @@ import astropy as ap  # votables
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 
-def test_object_dropout(test_objects,parent_sample,silent=False):
+
+def testobject_dropout(test_objects, parent_sample, silent=False):
+    """
+    Find objects in test_objects that are not in parent_sample.
+
+    :param test_objects: Array/column of object identifiers to test
+    :param parent_sample: Array/column of parent sample identifiers
+    :param silent: If True, suppress print output
+    :return: Tuple of (dropout objects, test objects without dropout)
+    """
     if len(test_objects) > 0:
+        # Find objects in test_objects that are NOT in parent_sample
         drop_out = test_objects[
-                np.where(
-                    np.isin(test_objects, parent_sample,invert=True)
-                )
-            ]
+            np.where(
+                np.isin(test_objects, parent_sample, invert=True)
+            )
+        ]
+
+        # Find objects in test_objects that ARE in parent_sample
+        # (i.e., objects that did NOT drop out)
         test_objects_without_dropout = test_objects[
-                np.where(
-                    np.isin(drop_out, test_objects,invert=True)
-                )
-            ]
+            np.where(
+                np.isin(test_objects, parent_sample, invert=False)
+            )
+        ]
+
         if not silent:
             print("The following objects are not part of the parent sample: \n")
             print(drop_out)
     else:
         print("test objects sample is empty")
-        drop_out = []
+        drop_out = np.array([])  # Return empty array instead of empty list
+        test_objects_without_dropout = np.array([])
+
     return drop_out, test_objects_without_dropout
 
 def type_system(cat_h, lists_dict, main_id, name, verbose):
