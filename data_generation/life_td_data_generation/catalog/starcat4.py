@@ -2,6 +2,7 @@ import astropy as ap  # Used for votables
 import numpy as np  # Used for arrays
 from provider.utils import query
 from utils.io import Path, save
+from utils.analysis.catalog_comparison import testobject_dropout
 
 
 def crit_sep(eps, mu, a_bin):
@@ -66,7 +67,7 @@ def ecliptic(ang, ra, dec):
     return flag
 
 
-def starcat_creation(distance_cut):
+def starcat_creation(distance_cut,test_objects=None):
     """
     LIFE-StarCat4 creation
 
@@ -84,34 +85,31 @@ def starcat_creation(distance_cut):
     # version 3 parameters were: ra, dec, plx, distance, name, sptype,
     # coo_gal_l, coo_gal_b, Teff, R, M, sep_phys, binary_flag, mag_i,
     # mag_j
-    adql_query = """ \
-                 SELECT o.main_id, \
-                        sb.coo_ra, \
-                        sb.coo_dec, \
-                        sb.plx_value, \
-                        sb.dist_st_value, \
-                        sb.sptype_string, \
-                        sb.coo_gal_l, \
-                        sb.coo_gal_b, \
-                        sb.teff_st_value, \
-                        sb.mass_st_value, \
-                        sb.radius_st_value, \
-                        sb.binary_flag, \
-                        sb.mag_i_value, \
-                        sb.mag_j_value, \
-                        sb.class_lum, \
-                        sb.class_temp, \
-                        o_parent.main_id AS parent_main_id, \
-                        sb_parent.sep_ang_value \
-                 FROM life_td.star_basic AS sb \
-                          JOIN life_td.object AS o ON sb.object_idref = o.object_id \
-                          LEFT JOIN life_td.h_link AS h ON o.object_id = h.child_object_idref \
-                          LEFT JOIN life_td.object AS o_parent ON \
-                     h.parent_object_idref = o_parent.object_id \
-                          LEFT JOIN life_td.star_basic AS sb_parent ON \
-                     o_parent.object_id = sb_parent.object_idref \
-                 WHERE o.type = 'st' \
-                   AND sb.dist_st_value < """ + str(distance_cut)
+    adql_query = """
+    SELECT o.main_id, sb.coo_ra, sb.coo_dec, sb.sptype_string,
+        sb.plx_value, sb.dist_st_value, sb.coo_gal_l, sb.coo_gal_b,
+        sb.teff_st_value, teff_source.ref AS teff_ref,
+        sb.mass_st_value, mass_source.ref AS mass_ref,
+        sb.radius_st_value, radius_source.ref AS radius_ref,
+        sb.binary_flag, binary_source.ref AS binary_ref,
+        sb.mag_i_value, sb.mag_j_value, sb.class_lum, sb.class_temp,
+        o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
+    FROM life_td.star_basic AS sb
+    JOIN life_td.object AS o ON sb.object_idref=o.object_id
+    LEFT JOIN life_td.h_link AS h ON o.object_id=h.child_object_idref
+    LEFT JOIN life_td.object AS o_parent ON
+        h.parent_object_idref=o_parent.object_id
+    LEFT JOIN life_td.star_basic AS sb_parent ON
+        o_parent.object_id=sb_parent.object_idref
+    LEFT JOIN life_td.source AS radius_source ON
+        sb.radius_st_source_idref=radius_source.source_id
+    LEFT JOIN life_td.source AS mass_source ON
+        sb.mass_st_source_idref=mass_source.source_id
+    LEFT JOIN life_td.source AS teff_source ON
+        sb.teff_st_source_idref=teff_source.source_id
+    LEFT JOIN life_td.source AS binary_source ON
+        sb.binary_source_idref=binary_source.source_id
+    WHERE o.type = 'st' AND sb.dist_st_value < """ + str(distance_cut)
     # we are only interested in object type stars, up to a distance cut
     # and well defined luminocity class (to sort out objects not around
     # main sequence)
@@ -119,19 +117,31 @@ def starcat_creation(distance_cut):
 
     catalog = query(service, adql_query)
 
+    if test_objects:
+        print('in step query:')
+        drop_out, test_objects= testobject_dropout(test_objects, catalog['main_id'])
+
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
     cat_ms_tempclass = catalog[
-        np.where(np.in1d(catalog["class_temp"], ms_tempclass))
+        np.where(np.isin(catalog["class_temp"], ms_tempclass))
     ]
+
+    if test_objects:
+        print('in step main sequence temperature class:')
+        drop_out, test_objects= testobject_dropout(test_objects, cat_ms_tempclass['main_id'])
 
     ms_lumclass = np.array(["V"])
     cat_ms_lumclass = cat_ms_tempclass[
-        np.where(np.in1d(cat_ms_tempclass["class_lum"], ms_lumclass))
+        np.where(np.isin(cat_ms_tempclass["class_lum"], ms_lumclass))
     ]
 
     cat_ms_lumclass.remove_rows(
         cat_ms_lumclass["mass_st_value"].mask.nonzero()[0]
     )
+
+    if test_objects:
+        print('in step main sequence luminocity class:')
+        drop_out, test_objects= testobject_dropout(test_objects, cat_ms_lumclass['main_id'])
 
     singles = cat_ms_lumclass[
         np.where(cat_ms_lumclass["binary_flag"] == "False")
@@ -147,7 +157,7 @@ def starcat_creation(distance_cut):
                 """
     h_link = query(service, adql_query2)
 
-    higher_order_multiples = np.in1d(
+    higher_order_multiples = np.isin(
         multiples["parent_main_id"], h_link["child_main_id"]
     )
     multiples.remove_rows(higher_order_multiples)
@@ -160,7 +170,7 @@ def starcat_creation(distance_cut):
             multi_parent.append(grouped["main_id"][ind[i]])
 
     single_parent_multiples = grouped[
-        np.where(np.invert(np.in1d(grouped["main_id"], multi_parent)))
+        np.where(np.invert(np.isin(grouped["main_id"], multi_parent)))
     ]
 
     sep_multiples = single_parent_multiples[
@@ -217,6 +227,10 @@ def starcat_creation(distance_cut):
 
     StarCat4 = ap.table.vstack([singles, final])
 
+    if test_objects:
+        print('in step multiplicity:')
+        drop_out, test_objects= testobject_dropout(test_objects, StarCat4['main_id'])
+
     # flag any object whose declination is contained within the region
     # between -(23.4+45)*sin(RA) and +(23.4+45)*sin(RA) with the
     # object's RA in degrees.
@@ -227,7 +241,8 @@ def starcat_creation(distance_cut):
     save(
         [StarCat4],
         ["integration_test_StarCat4"],
-        location=Path().additional_data + "/catalogs",
+        location="../"+Path().additional_data + "catalogs/",
     )
+    StarCat4.write("../"+Path().additional_data + "catalogs/integration_test_StarCat4.ecsv")
 
     return StarCat4
