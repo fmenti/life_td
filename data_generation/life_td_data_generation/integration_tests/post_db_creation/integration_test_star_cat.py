@@ -3,7 +3,7 @@ import numpy as np  # Used for arrays
 from astropy import io
 from astropy.table import Table
 from utils.io import Path, load
-from utils.starcat4 import starcat_creation
+from catalog.starcat4 import starcat_creation
 
 
 def test_star_cat_looks_fine():
