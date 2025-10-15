@@ -235,6 +235,30 @@ def object_in_db(lists_dict, cat_h, cat_i, cat_o, name, verbose):
 
 
 def result(lists_dict, l):
+    """
+    Print a formatted summary of object categorization results.
+
+    This function displays the categorization results from detail_criteria analysis,
+    showing why objects may not be included in StarCat4. Results are organized by
+    category with counts and object lists.
+
+    :param lists_dict: Dictionary containing categorized object lists with keys like
+            'system_without_child', 'star_without_parent', 'not_found', 'children',
+            'multiple_parents', 'higher_order_multiple', 'siblings', 'single_child', 'binary'.
+    :type lists_dict: dict
+    :param l: Original list of input objects for context in the summary.
+    :type l: list
+    :returns: None. Prints formatted results to stdout.
+    :rtype: None
+    """
+    # Convert all lists to regular Python strings for clean output
+    for key in lists_dict:
+        if key == "siblings":
+            # Special handling for nested lists
+            lists_dict[key] = [[str(item) for item in sublist] for sublist in
+                               lists_dict[key]]
+        else:
+            lists_dict[key] = [str(item) for item in lists_dict[key]]
     print("\n \n Of the", len(l), "objects given:")
     print("Some are not in cat 4 because they are either:")
     print(
@@ -272,7 +296,7 @@ def result(lists_dict, l):
             len(lists_dict["single_child"]),
         )
     print(
-        "And the reminder have conpanions that don t fit the spectral type requirements"
+        "And the reminder have companions that don t fit the spectral type requirements"
     )
     print("trivial binary", lists_dict["binary"], len(lists_dict["binary"]))
 
