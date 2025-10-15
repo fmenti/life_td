@@ -18,22 +18,24 @@ from utils.io import Path, load, string_to_object_whole_dict
 
 
 # tbd change provider to provider_info to minimize confusion in building function with providers list
-def load_cat(provider_name=""):
+def load_cat(provider_name="",path_prefix=""):
     cat = empty_dict.copy()
     if provider_name == "":
         prov = load(
-            [direction for direction in list(cat.keys())], location=Path().data
+            [direction for direction in list(cat.keys())],
+            location=path_prefix + Path().data
         )
     else:
         prov = load(
-            [provider_name + "_" + direction for direction in list(cat.keys())]
+            [provider_name + "_" + direction for direction in list(cat.keys())],
+            location = path_prefix + Path().additional_data
         )
     for i, table in enumerate(list(cat.keys())):
         cat[table] = prov[i]
     return cat
 
 
-def load_life_td():
+def load_life_td(path_prefix=""):
     """
     Loads previously created life_td data.
 
@@ -46,10 +48,10 @@ def load_life_td():
 
     for i, prov in enumerate(list(provider_tables_dict.keys())):
         print(f"Loading {prov} data")
-        cat = load_cat(prov)
+        cat = load_cat(prov,path_prefix)
         provider_tables_dict[prov] = string_to_object_whole_dict(cat)
 
-    db = load_cat("")
+    db = load_cat("",path_prefix)
     database_tables = string_to_object_whole_dict(db)
 
     return provider_tables_dict, database_tables
