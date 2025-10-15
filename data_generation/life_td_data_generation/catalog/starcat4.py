@@ -117,7 +117,7 @@ def starcat_creation(distance_cut,test_objects=None):
 
     catalog = query(service, adql_query)
 
-    if test_objects:
+    if test_objects is not None and len(test_objects) > 0:
         print('in step query:')
         drop_out, test_objects= testobject_dropout(test_objects, catalog['main_id'])
 
@@ -126,7 +126,7 @@ def starcat_creation(distance_cut,test_objects=None):
         np.where(np.isin(catalog["class_temp"], ms_tempclass))
     ]
 
-    if test_objects:
+    if test_objects is not None and len(test_objects) > 0:
         print('in step main sequence temperature class:')
         drop_out, test_objects= testobject_dropout(test_objects, cat_ms_tempclass['main_id'])
 
@@ -139,7 +139,7 @@ def starcat_creation(distance_cut,test_objects=None):
         cat_ms_lumclass["mass_st_value"].mask.nonzero()[0]
     )
 
-    if test_objects:
+    if test_objects is not None and len(test_objects) > 0:
         print('in step main sequence luminocity class:')
         drop_out, test_objects= testobject_dropout(test_objects, cat_ms_lumclass['main_id'])
 
@@ -227,7 +227,7 @@ def starcat_creation(distance_cut,test_objects=None):
 
     StarCat4 = ap.table.vstack([singles, final])
 
-    if test_objects:
+    if test_objects is not None and len(test_objects) > 0:
         print('in step multiplicity:')
         drop_out, test_objects= testobject_dropout(test_objects, StarCat4['main_id'])
 
@@ -243,6 +243,10 @@ def starcat_creation(distance_cut,test_objects=None):
         ["integration_test_StarCat4"],
         location="../"+Path().additional_data + "catalogs/",
     )
-    StarCat4.write("../"+Path().additional_data + "catalogs/integration_test_StarCat4.ecsv")
+    StarCat4.write(
+        "../"+Path().additional_data +
+        "catalogs/integration_test_StarCat4.ecsv",
+        overwrite=True
+    )
 
     return StarCat4
