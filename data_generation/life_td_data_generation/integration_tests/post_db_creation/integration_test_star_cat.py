@@ -5,9 +5,11 @@ from astropy.table import Table
 from utils.io import Path, load
 from catalog.starcat4 import starcat_creation
 
+path = Path().additional_data + "catalogs/"
+
 
 def test_star_cat_looks_fine():
-    starcat4 = starcat_creation(30)
+    starcat4 = starcat_creation(30,path=path)
     # why do I have difficulties running
     # this function and why do I not get the print I want? because was called integration test instead of test...
     # print(starcat4)
@@ -25,7 +27,7 @@ def test_star_cat_looks_fine():
 
 
 def test_star_cat_contains_specific_objects():
-    starcat4 = starcat_creation(30)
+    starcat4 = starcat_creation(30,path=path)
 
     assert len(starcat4[np.where(starcat4["main_id"] == "TRAPPIST-1")]) == 1
 

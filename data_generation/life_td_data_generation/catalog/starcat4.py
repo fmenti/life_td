@@ -67,7 +67,8 @@ def ecliptic(ang, ra, dec):
     return flag
 
 
-def starcat_creation(distance_cut,test_objects=None):
+def starcat_creation(distance_cut,test_objects=None,
+                     path="../"+Path().additional_data + "catalogs/"):
     """
     LIFE-StarCat4 creation
 
@@ -241,11 +242,10 @@ def starcat_creation(distance_cut,test_objects=None):
     save(
         [StarCat4],
         ["integration_test_StarCat4"],
-        location="../"+Path().additional_data + "catalogs/",
+        location=path,
     )
     StarCat4.write(
-        "../"+Path().additional_data +
-        "catalogs/integration_test_StarCat4.ecsv",
+        path+"integration_test_StarCat4.ecsv",
         overwrite=True
     )
 
