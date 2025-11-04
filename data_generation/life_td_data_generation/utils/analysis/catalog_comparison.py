@@ -7,6 +7,8 @@ import astropy as ap  # votables
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 
+from utils.io import stringtoobject
+
 
 def testobject_dropout(test_objects, parent_sample, silent=False):
     """
@@ -72,7 +74,10 @@ def type_system(cat_h, lists_dict, main_id, name, verbose):
     """
     if len(cat_h[np.where(cat_h["parent_main_id"] == main_id)]) > 0:
         if verbose:
-            print("system object but with found child object", main_id)
+            reason=f"system object but with found child object, {main_id}"
+            #TBD have reason as something to be given back by the function
+            # and do the same for the other functions
+            print(reason)
             print(
                 cat_h["child_main_id"][
                     np.where(cat_h["parent_main_id"] == main_id)
