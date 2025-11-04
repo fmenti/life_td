@@ -245,7 +245,7 @@ def starcat_creation(distance_cut,test_objects=None,
         location=path,
     )
     StarCat4.write(
-        path+"integration_test_StarCat4.ecsv",
+        path+"integration_test_StarCat4.ecsv",delimiter=",",
         overwrite=True
     )
 
