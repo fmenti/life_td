@@ -1,7 +1,7 @@
 import astropy as ap  # Used for votables
 import numpy as np  # Used for arrays
 from provider.utils import query
-from utils.io import Path, save
+from utils.io import Path, save, objecttostring
 from utils.analysis.catalog_comparison import testobject_dropout
 
 
@@ -244,6 +244,7 @@ def starcat_creation(distance_cut,test_objects=None,
         ["integration_test_StarCat4"],
         location=path,
     )
+    StarCat4=objecttostring(StarCat4)
     StarCat4.write(
         path+"integration_test_StarCat4.ecsv",delimiter=",",
         overwrite=True
