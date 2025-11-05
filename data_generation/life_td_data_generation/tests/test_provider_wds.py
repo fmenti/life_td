@@ -1,6 +1,6 @@
-from provider.wds import assign_names
 from astropy.table import Table
-from provider.wds import query
+from provider.wds import query, create_objects_table, assign_names
+import numpy as np
 
 
 def test_wds_columns_queryable():
@@ -139,3 +139,5 @@ def test_assign_names_mixed_rows():
     assert updated_table["system_name"][2] == "WDS J44444+1111X,Y"
     assert updated_table["primary"][2] == "WDS J44444+1111X"
     assert updated_table["secondary"][2] == "WDS J44444+1111Y"
+
+
