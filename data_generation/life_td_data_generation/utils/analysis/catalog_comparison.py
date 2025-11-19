@@ -45,13 +45,13 @@ def testobject_dropout(test_objects, parent_sample, silent=False):
 
     return drop_out, test_objects_without_dropout
 
-def type_system(cat_h, lists_dict, main_id, name, verbose):
+def type_system(cat_h,cat_o, lists_dict, main_id, name, verbose):
     """
     Process a system-type object and categorize it based on its children.
 
-    This function checks if a system object (type='sy') has child objects
-    in the hierarchical link table. If children are found, they are added
-    to the 'children' list. If no children are found, the system is added
+    This function checks if a system object (type='sy') has non planet or disk
+    child objects in the hierarchical link table. If children are found, they
+    are added to the 'children' list. If no children are found, the system is added
     to the 'system_without_child' list for tracking.
 
     This is part of the catalog comparison workflow that analyzes why certain
@@ -72,21 +72,26 @@ def type_system(cat_h, lists_dict, main_id, name, verbose):
     :returns: None. Modifies lists_dict in place.
     :rtype: None
     """
-    if len(cat_h[np.where(cat_h["parent_main_id"] == main_id)]) > 0:
+    parent_clause = np.where(cat_h["parent_main_id"] == main_id)
+
+    if len(cat_h[parent_clause]) > 0:
         if verbose:
             reason=f"system object but with found child object, {main_id}"
             #TBD have reason as something to be given back by the function
             # and do the same for the other functions
             print(reason)
             print(
-                cat_h["child_main_id"][
-                    np.where(cat_h["parent_main_id"] == main_id)
-                ]
+                cat_h["child_main_id"][parent_clause]
             )
-        for child in cat_h["child_main_id"][
-            np.where(cat_h["parent_main_id"] == main_id)
-        ]:
-            lists_dict["children"].append(child)
+        n = 0
+        for child in cat_h["child_main_id"][parent_clause]:
+            if cat_o["type"][np.where(child == cat_o["main_id"])][0] != "pl":
+                lists_dict["children"].append(child)
+            else:
+                n+=1
+        if n==len(cat_h[parent_clause]):
+            # only planet type children which we are not interested in here
+            lists_dict["system_without_child"].append(name)
     else:
         lists_dict["system_without_child"].append(name)
 
@@ -228,7 +233,7 @@ def object_in_db(lists_dict, cat_h, cat_i, cat_o, name, verbose):
     """
     main_id = cat_i["main_id"][np.where(cat_i["id"] == name)][0]
     if cat_o["type"][np.where(cat_o["main_id"] == main_id)][0] == "sy":
-        type_system(cat_h, lists_dict, main_id, name, verbose)
+        type_system(cat_h, cat_o, lists_dict, main_id, name, verbose)
     elif cat_o["type"][np.where(cat_o["main_id"] == main_id)][0] == "st":
         type_star(lists_dict, cat_h, cat_o, main_id, name, verbose)
     else:
