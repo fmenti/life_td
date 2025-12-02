@@ -173,3 +173,21 @@ def test_spec():
     assert (
         result["mod_Teff"][np.where(result["class_temp_nr"] == "6.5")] == 2740
     )
+
+def test_assign_mass():
+    temp = np.array(['A', 'K', 'M', 'K' ])
+    temp_nr = np.array(['1.5', '3', '3', '2.5'])
+    lum = np.array(['V', 'V', 'V', 'V'])
+    main_id = np.array(['test', 'test2', 'test3', 'test4'])
+    cat = Table((main_id, temp, temp_nr, lum),
+                names=('main_id', 'class_temp', 'class_temp_nr', 'class_lum'),
+                dtype=[object, object, object, object])
+
+    result = spec(cat)
+
+    # assert
+    assert result['mod_M'][
+               np.where(result['main_id'] == 'test')] == 2.05 # should use the one from 1.0
+    assert result['mod_M'][np.where(result['main_id'] == 'test2')] == 0.78
+    assert result['mod_M'][np.where(result['main_id'] == 'test3')] == 0.37
+    assert result['mod_M'][np.where(result['main_id'] == 'test4')] == 0.82
