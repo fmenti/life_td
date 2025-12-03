@@ -460,9 +460,16 @@ def create_life_helpertable(life):
     """
     # applying model from E. E. Mamajek on SIMBAD spectral type
 
+    # instead of only using objects with simbad type "st" take all except planets
+    # because later db processing can still change a sy to a st value
+
+    # tbd: check if I need to adapt someting because motvation was: if I take only st objects from sim_star_basic I don't loose objects during realspectype
+
     [sim_objects] = load(["sim_objects"], stringtoobjects=False)
 
-    stars = sim_objects[np.where(sim_objects["type"] == "st")]
+    stars = sim_objects[np.where(sim_objects["type"] != "pl")]
+
+
     life_helptab = join(stars, life["star_basic"])
     life_helptab = spec(
         life_helptab[
@@ -473,7 +480,6 @@ def create_life_helpertable(life):
             "class_temp_nr",
         ]
     )
-    # if I take only st objects from sim_star_basic I don't loose objects during realspectype
     return life_helptab
 
 
