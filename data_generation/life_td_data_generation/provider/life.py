@@ -14,7 +14,7 @@ from provider.utils import (
     replace_value,
 )
 from sdata import empty_dict
-from utils.io import Path, load, save
+from utils.io import Path, load, save, stringtoobject
 
 
 def extract_lum_class(nr, sptype):
@@ -469,6 +469,8 @@ def create_life_helpertable(life):
 
     stars = sim_objects[np.where(sim_objects["type"] != "pl")]
 
+    life["star_basic"] = stringtoobject(life["star_basic"])
+    stars = stringtoobject(stars)
 
     life_helptab = join(stars, life["star_basic"])
     life_helptab = spec(
