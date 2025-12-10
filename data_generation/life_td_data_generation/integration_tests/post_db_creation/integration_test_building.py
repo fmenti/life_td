@@ -126,11 +126,24 @@ def test_data_makes_sense_main_id():
     # plt.savefig(Path().plot+path, dpi=300)
     plt.show()
 
-    total = len(data) ** (1 / 3) / distance_cut
-    st = len(data[np.where(data["type"] == "st")]) ** (1 / 3) / distance_cut
-    sy = len(data[np.where(data["type"] == "sy")]) ** (1 / 3) / distance_cut
-    pl = len(data[np.where(data["type"] == "pl")]) ** (1 / 3) / distance_cut
-    di = len(data[np.where(data["type"] == "di")]) ** (1 / 3) / distance_cut
+    number_total = len(data)
+    number_st = len(data[np.where(data["type"] == "st")])
+    number_sy = len(data[np.where(data["type"] == "sy")])
+    number_pl = len(data[np.where(data["type"] == "pl")])
+    number_di = len(data[np.where(data["type"] == "di")])
+
+    print('distance: ', distance_cut)
+    print('total: ', number_total)
+    print('stars: ', number_st)
+    print('systems: ', number_sy)
+    print('planets: ', number_pl)
+    print('disks: ', number_di)
+
+    total = number_total ** (1 / 3) / distance_cut
+    st = number_st ** (1 / 3) / distance_cut
+    sy = number_sy ** (1 / 3) / distance_cut
+    pl = number_pl ** (1 / 3) / distance_cut
+    di = number_di ** (1 / 3) / distance_cut
 
     assert total < 2 and total > 0.5
     assert st < 1.5 and st > 0.5

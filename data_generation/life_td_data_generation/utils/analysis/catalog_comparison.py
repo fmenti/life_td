@@ -7,25 +7,138 @@ import astropy as ap  # votables
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 
+from utils.io import stringtoobject
 
-def type_system(cat_h, lists_dict, main_id, name, verbose):
-    if len(cat_h[np.where(cat_h["parent_main_id"] == main_id)]) > 0:
-        if verbose:
-            print("system object but with found child object", main_id)
-            print(
-                cat_h["child_main_id"][
-                    np.where(cat_h["parent_main_id"] == main_id)
-                ]
+
+def testobject_dropout(test_objects, parent_sample, silent=False):
+    """
+    Find objects in test_objects that are not in parent_sample.
+
+    :param test_objects: Array/column of object identifiers to test
+    :param parent_sample: Array/column of parent sample identifiers
+    :param silent: If True, suppress print output
+    :return: Tuple of (dropout objects, test objects without dropout)
+    """
+    if len(test_objects) > 0:
+        # Find objects in test_objects that are NOT in parent_sample
+        drop_out = test_objects[
+            np.where(
+                np.isin(test_objects, parent_sample, invert=True)
             )
-        for child in cat_h["child_main_id"][
-            np.where(cat_h["parent_main_id"] == main_id)
-        ]:
-            lists_dict["children"].append(child)
+        ]
+
+        # Find objects in test_objects that ARE in parent_sample
+        # (i.e., objects that did NOT drop out)
+        test_objects_without_dropout = test_objects[
+            np.where(
+                np.isin(test_objects, parent_sample, invert=False)
+            )
+        ]
+
+        if not silent:
+            print("The following objects are not part of the parent sample: \n")
+            print(drop_out)
+    else:
+        print("test objects sample is empty")
+        drop_out = np.array([])  # Return empty array instead of empty list
+        test_objects_without_dropout = np.array([])
+
+    return drop_out, test_objects_without_dropout
+
+def type_system(cat_h,cat_o, lists_dict, main_id, name, verbose):
+    """
+    Process a system-type object and categorize it based on its children.
+
+    This function checks if a system object (type='sy') has non planet or disk
+    child objects in the hierarchical link table. If children are found, they
+    are added to the 'children' list. If no children are found, the system is added
+    to the 'system_without_child' list for tracking.
+
+    This is part of the catalog comparison workflow that analyzes why certain
+    objects may not be included in StarCat4.
+
+    :param cat_h: Hierarchical link table containing parent-child relationships
+            with columns 'parent_main_id' and 'child_main_id'.
+    :type cat_h: astropy.table.table.Table
+    :param lists_dict: Mutable dictionary containing categorized object lists.
+            Expected keys include 'children' and 'system_without_child'.
+    :type lists_dict: dict
+    :param main_id: Main identifier of the system object being processed.
+    :type main_id: str
+    :param name: Name/identifier of the object for tracking purposes.
+    :type name: str
+    :param verbose: If True, prints diagnostic information about found children.
+    :type verbose: bool
+    :returns: None. Modifies lists_dict in place.
+    :rtype: None
+    """
+    parent_clause = np.where(cat_h["parent_main_id"] == main_id)
+
+    if len(cat_h[parent_clause]) > 0:
+        if verbose:
+            reason=f"system object but with found child object, {main_id}"
+            #TBD have reason as something to be given back by the function
+            # and do the same for the other functions
+            print(reason)
+            print(
+                cat_h["child_main_id"][parent_clause]
+            )
+        n = 0
+        for child in cat_h["child_main_id"][parent_clause]:
+            if cat_o["type"][np.where(child == cat_o["main_id"])][0] != "pl":
+                lists_dict["children"].append(child)
+            else:
+                n+=1
+        if n==len(cat_h[parent_clause]):
+            # only planet type children which we are not interested in here
+            lists_dict["system_without_child"].append(name)
     else:
         lists_dict["system_without_child"].append(name)
 
 
 def type_star(lists_dict, cat_h, cat_o, main_id, name, verbose):
+    """
+    Process a star-type object and categorize it based on its hierarchical relationships.
+
+    This function analyzes a star object (type='st') to determine its multiplicity status
+    by examining its parent-child relationships in the hierarchical link table. Stars are
+    categorized as:
+    - star_without_parent: Single stars with no parent system
+    - single_child: Stars with exactly one stellar sibling
+    - binary: Stars in a binary system (2 stellar siblings, no nested systems)
+    - higher_order_multiple: Stars in systems with >2 stellar components or nested systems
+    - multiple_parents: Stars that appear to have multiple parent systems (unusual case)
+
+    This categorization helps explain why certain objects may not be included in StarCat4,
+    particularly those in complex multiple systems that don't meet binary criteria.
+
+    :param lists_dict: Mutable dictionary containing categorized object lists.
+            Expected keys include 'star_without_parent', 'multiple_parents', 'single_child',
+            'binary', 'higher_order_multiple', and 'siblings'.
+    :type lists_dict: dict
+    :param cat_h: Hierarchical link table containing parent-child relationships
+            with columns 'parent_main_id' and 'child_main_id'.
+    :type cat_h: astropy.table.table.Table
+    :param cat_o: Objects table containing object types with columns 'main_id' and 'type'
+            (where type can be 'st' for star or 'sy' for system).
+    :type cat_o: astropy.table.table.Table
+    :param main_id: Main identifier of the star object being processed.
+    :type main_id: str
+    :param name: Name/identifier of the object for tracking purposes.
+    :type name: str
+    :param verbose: If True, prints diagnostic information about parent relationships,
+            siblings, and complex multiplicity cases.
+    :type verbose: bool
+    :returns: None. Modifies lists_dict in place by appending the object name to
+            appropriate categorization lists.
+    :rtype: None
+
+    Note:
+        The function counts stellar siblings (st_sib) and detects nested hierarchies
+        (nestled=True when a sibling is a system). A star with exactly 2 stellar
+        siblings and no nesting is classified as a binary; more complex configurations
+        are classified as higher_order_multiple.
+    """
     # if it has parents:
     if len(cat_h[np.where(cat_h["child_main_id"] == main_id)]) > 0:
         # print('system object but with found child object',main_id)
@@ -79,9 +192,48 @@ def type_star(lists_dict, cat_h, cat_o, main_id, name, verbose):
 
 
 def object_in_db(lists_dict, cat_h, cat_i, cat_o, name, verbose):
+    """
+    Route an object to appropriate type-specific analysis based on its database type.
+
+    This function serves as a dispatcher that looks up an object by its identifier name,
+    determines its type from the objects table, and delegates to the appropriate handler:
+    - Systems (type='sy') are processed by type_system()
+    - Stars (type='st') are processed by type_star()
+    - Other types trigger a warning message
+
+    This is used in the catalog comparison workflow to analyze why objects may not be
+    included in StarCat4 by categorizing them based on their hierarchical structure
+    and multiplicity.
+
+    :param lists_dict: Mutable dictionary containing categorized object lists that will
+        be populated by the type-specific handlers. Expected keys depend on object type
+        (e.g., 'children', 'system_without_child', 'star_without_parent', 'binary', etc.).
+    :type lists_dict: dict
+    :param cat_h: Hierarchical link table containing parent-child relationships
+        with columns 'parent_main_id' and 'child_main_id'.
+    :type cat_h: astropy.table.table.Table
+    :param cat_i: Identifier table used to resolve the given name to a main_id,
+        with columns 'id' and 'main_id'.
+    :type cat_i: astropy.table.table.Table
+    :param cat_o: Objects table containing object types with columns 'main_id' and 'type'
+        (where type can be 'st' for star, 'sy' for system, or other types).
+    :type cat_o: astropy.table.table.Table
+    :param name: Identifier/alias of the object to be analyzed (will be resolved to main_id).
+    :type name: str
+    :param verbose: If True, prints diagnostic information via the type-specific handlers.
+    :type verbose: bool
+    :returns: None. Delegates to type_system() or type_star() which modify lists_dict in place.
+        Prints a warning for unrecognized object types.
+    :rtype: None
+
+    Note:
+        This function assumes the identifier exists in cat_i. If the name is not found,
+        an IndexError will be raised. Use this function as part of the detail_criteria()
+        workflow which filters objects first.
+    """
     main_id = cat_i["main_id"][np.where(cat_i["id"] == name)][0]
     if cat_o["type"][np.where(cat_o["main_id"] == main_id)][0] == "sy":
-        type_system(cat_h, lists_dict, main_id, name, verbose)
+        type_system(cat_h, cat_o, lists_dict, main_id, name, verbose)
     elif cat_o["type"][np.where(cat_o["main_id"] == main_id)][0] == "st":
         type_star(lists_dict, cat_h, cat_o, main_id, name, verbose)
     else:
@@ -93,6 +245,30 @@ def object_in_db(lists_dict, cat_h, cat_i, cat_o, name, verbose):
 
 
 def result(lists_dict, l):
+    """
+    Print a formatted summary of object categorization results.
+
+    This function displays the categorization results from detail_criteria analysis,
+    showing why objects may not be included in StarCat4. Results are organized by
+    category with counts and object lists.
+
+    :param lists_dict: Dictionary containing categorized object lists with keys like
+            'system_without_child', 'star_without_parent', 'not_found', 'children',
+            'multiple_parents', 'higher_order_multiple', 'siblings', 'single_child', 'binary'.
+    :type lists_dict: dict
+    :param l: Original list of input objects for context in the summary.
+    :type l: list
+    :returns: None. Prints formatted results to stdout.
+    :rtype: None
+    """
+    # Convert all lists to regular Python strings for clean output
+    for key in lists_dict:
+        if key == "siblings":
+            # Special handling for nested lists
+            lists_dict[key] = [[str(item) for item in sublist] for sublist in
+                               lists_dict[key]]
+        else:
+            lists_dict[key] = [str(item) for item in lists_dict[key]]
     print("\n \n Of the", len(l), "objects given:")
     print("Some are not in cat 4 because they are either:")
     print(
@@ -130,7 +306,7 @@ def result(lists_dict, l):
             len(lists_dict["single_child"]),
         )
     print(
-        "And the reminder have conpanions that don t fit the spectral type requirements"
+        "And the reminder have companions that don t fit the spectral type requirements"
     )
     print("trivial binary", lists_dict["binary"], len(lists_dict["binary"]))
 

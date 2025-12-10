@@ -3,14 +3,14 @@ import numpy as np  # Used for arrays
 from astropy import io
 from astropy.table import Table
 from utils.io import Path, load
-from utils.starcat4 import starcat_creation
+from catalog.starcat4 import starcat_creation
+
+path = Path().additional_data + "catalogs/"
 
 
 def test_star_cat_looks_fine():
-    starcat4 = starcat_creation(30)
-    # why do I have difficulties running
-    # this function and why do I not get the print I want? because was called integration test instead of test...
-    # print(starcat4)
+    starcat4 = starcat_creation(30,path=path)
+
     K_in_30 = starcat4[np.where(starcat4["class_temp"] == "K")]
     K_in_20 = K_in_30[np.where(K_in_30["dist_st_value"] < 20.0)]
     print(
@@ -21,11 +21,36 @@ def test_star_cat_looks_fine():
     G_in_20 = G_in_30[np.where(G_in_30["dist_st_value"] < 20.0)]
     print(len(G_in_20))  # 34 felix reports 35 and in ltcv 65
 
+    # formatting (csv file is correctly readable)
+    # number of stars
     assert type(starcat4) == type(Table())
 
 
 def test_star_cat_contains_specific_objects():
-    starcat4 = starcat_creation(30)
+    starcat4 = starcat_creation(30,path=path)
+
+    # list of important stars
+    l_golden_targets = ['* alf Cen A', '* alf Cen B', '* alf Cen C',
+                        'NAME Teegarden\'s Star', '* tau Cet', '* eps Eri',
+                        '* eps Ind', 'HD  88230', '* omi02 Eri', '* sig Dra',
+                        'HD 131977', '* eta Cas A', '* eta Cas B', 'TRAPPIST-1']
+    # list of reasons why excluded
+    # tbd read it out directly from code detail_criteria instead of copy pasting from hand
+    dropout_reasons = ['has more than one sibling',
+                       'has more than one sibling',
+                       'has more than one sibling',
+                       'system object but with found child object',
+                       'companion does not fit spectral type criteria',
+                       'multiple parents',
+                       'companion does not fit spectral type criteria',
+                       'system without child',
+                       'multiple parents',
+                       'multiple parents',
+                       'multiple parents',
+                       'system without child',
+                       'system without child',
+                       '']
+    # check remaining stars present
 
     assert len(starcat4[np.where(starcat4["main_id"] == "TRAPPIST-1")]) == 1
 

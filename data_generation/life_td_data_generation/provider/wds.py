@@ -433,6 +433,10 @@ def create_objects_table(wds_helptab, wds, test_objects):
     """
     Creates object table.
 
+    - All objects start as systems
+    - We find which objects have no children in the hierarchical link table
+    - Those without children are reclassified as stars
+
     :param wds_helptab: WDS helper table.
     :type wds_helptab: astropy.table.table.Table
     :param wds: Dictionary of database table names and tables.
@@ -443,32 +447,20 @@ def create_objects_table(wds_helptab, wds, test_objects):
     :returns: Object table.
     :rtype: astropy.table.table.Table
     """
-    # create ids
+    # Create object table with identifiers
     wds_objects = Table(names=["main_id", "ids"], dtype=[object, object])
     wds_objects = ids_from_ident(wds["ident"]["main_id", "id"], wds_objects)
-    # if it has children, it is type system
-    # if it has no children it can either be star or close in system
+
+    # Initialize all objects as systems ('sy')
     wds_objects["type"] = ["sy" for j in range(len(wds_objects))]
-    # change to st for those that have no children
-    wds_objects["type"][
-        np.invert(
-            np.isin(wds_objects["main_id"], wds["h_link"]["parent_main_id"])
-        )
-    ] = [
-        "st"
-        for j in range(
-            len(
-                [
-                    np.invert(
-                        np.isin(
-                            wds_objects["main_id"],
-                            wds["h_link"]["parent_main_id"],
-                        )
-                    )
-                ]
-            )
-        )
-    ]
+
+    # Identify objects that are NOT parents (i.e., they have no children)
+    has_no_children = np.invert(
+        np.isin(wds_objects["main_id"], wds["h_link"]["parent_main_id"])
+    )
+
+    # Objects with no children are stars ('st'), not systems
+    wds_objects["type"][has_no_children] = "st"
 
     if len(test_objects) > 0:
         print(
