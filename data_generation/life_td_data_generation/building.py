@@ -1,30 +1,42 @@
 """Combines the data from the individual data providers."""
 
+from collections.abc import Iterable
 from itertools import islice
 
-import numpy as np  # arrays
-from astropy.table import Column, MaskedColumn, column, join, unique, vstack
+import numpy as np
+from astropy.table import (
+    Column,
+    MaskedColumn,
+    Row,
+    Table,
+    column,
+    join,
+    unique,
+    vstack,
+)
 from provider.utils import nullvalues, replace_value
 from sdata import empty_dict, empty_dict_wit_columns, paras_dict
 from utils.io import Path, save
 
 
-def idsjoin(cat, column_ids1, column_ids2):
+def idsjoin(cat: Table, column_ids1: str, column_ids2: str) -> Table:
     """
     Merges two identifier columns into one, removing duplicates.
 
     - Merge identifiers across both columns per row.
     - Remove duplicate identifiers within the same row.
     - Return the result in a row-wise manner, where all identifiers for that
-        row are sorted.
+      row are sorted.
 
     :param cat: Astropy Table containing two identifier columns.
-    :type cat: astropy.table.Table
-    :param str column_ids1: Name of the first identifier column.
-    :param str column_ids2: Name of the second identifier column.
+    :type cat: Table
+    :param column_ids1: Name of the first identifier column.
+    :type column_ids1: str
+    :param column_ids2: Name of the second identifier column.
+    :type column_ids2: str
     :return: Table with a unified 'ids' column containing merged, unique
         identifiers.
-    :rtype: astropy.table.Table
+    :rtype: Table
     """
     # Step 1: Replace masked/empty values in both columns with empty strings
     ids1 = (
@@ -39,53 +51,60 @@ def idsjoin(cat, column_ids1, column_ids2):
     )
 
     # Step 2: Vectorized merging of identifiers using set operations
-    merged_ids = []
+    merged_ids: list[str] = []
     for val1, val2 in zip(ids1, ids2):
-        ids1_list = (
-            val1.split("|") if val1 not in (None, "") else []
-        )  # Split strings on '|'
+        # Split strings on '|'
+        ids1_list = val1.split("|") if val1 not in (None, "") else []
         ids2_list = val2.split("|") if val2 not in (None, "") else []
-        unique_ids = set(ids1_list + ids2_list) - {
-            ""
-        }  # Merge and remove duplicates
-        merged_ids.append(
-            "|".join(sorted(unique_ids))
-        )  # Join unique ids back to a single string
+
+        # Merge and remove duplicates/empty strings
+        unique_ids = set(ids1_list + ids2_list) - {""}
+        merged_ids.append("|".join(sorted(unique_ids)))
 
     # Step 3: Add the merged identifiers column to the table
     cat["ids"] = Column(data=merged_ids, dtype=object)
     return cat
 
 
-def assign_type(cat, i):
+def assign_type(cat: Table, i: int) -> str:
+    """
+    Assigns an object type based on two potential type columns.
+
+    Priority is given to 'type_2' unless it is masked or 'None'.
+
+    :param cat: The table containing type columns.
+    :type cat: Table
+    :param i: Index of the row to process.
+    :type i: int
+    :return: The assigned type string.
+    :rtype: str
+    """
     # Check if 'type_2' is masked or equal to 'None', then fall back to
     # 'type_1', otherwise use 'type_2'
-    cat["type"][i] = (
-        cat["type_1"][i]
-        if isinstance(cat["type_2"][i], np.ma.core.MaskedConstant)
-        or cat["type_2"][i] == "None"
-        else cat["type_2"][i]
-    )
+    val_2 = cat["type_2"][i]
+    if isinstance(val_2, np.ma.core.MaskedConstant) or val_2 == "None":
+        cat["type"][i] = cat["type_1"][i]
+    else:
+        cat["type"][i] = val_2
     return cat["type"][i]
 
 
-def objectmerging(cat):
+def objectmerging(cat: Table) -> Table:
     """
     Merges the data of each object given in the different providers.
 
     The object is the same physical one but the data is provided by
     different providers and merged into one entry.
 
-    :param cat: Astropy table containing multiple entries for the same
-        physical objects due to data from different providers.
-    :type cat: astropy.table.table.Table
-    :returns: Like cat with unique object entries.
-    :rtype: astropy.table.table.Table
+    :param cat: Table containing multiple entries for the same objects.
+    :type cat: Table
+    :returns: Table with unique object entries.
+    :rtype: Table
     """
     cat = idsjoin(cat, "ids_1", "ids_2")
     cat.remove_columns(["ids_1", "ids_2"])
-    # merging types
-    # initializing column
+
+    # Initializing merged type column if it doesn't exist
     if "type" not in cat.colnames:
         cat["type"] = Column(dtype=object, length=len(cat))
         cat["type_1"] = cat["type_1"].astype(object)
@@ -96,30 +115,32 @@ def objectmerging(cat):
     return cat
 
 
-def assign_source_idref(cat, sources, paras, provider):
+def assign_source_idref(
+    cat: Table, sources: Table, paras: list[str], provider: str
+) -> Table:
     """
-    This function joins source identifiers to parameters in a catalog table.
+    Joins source identifiers to parameters in a catalog table.
 
     For each parameter that has a reference column, this function:
-    1. Validates and handles existing source ID columns
-    2. Processes null values in reference columns
-    3. Links reference data with source identifiers
-    4. Manages masked parameter values
+    1. Validates and handles existing source ID columns.
+    2. Processes null values in reference columns.
+    3. Links reference data with source identifiers.
+    4. Manages masked parameter values.
 
-    :param cat: Astropy table with empty para_source_id columns
-    :type cat: astropy.table.table.Table
-    :param sources: Contains reference data
-    :type sources: astropy.table.table.Table
-    :param paras: List of parameters to process
-    :type paras: list
-    :param provider: Name of the data provider
+    :param cat: Table with empty para_source_id columns.
+    :type cat: Table
+    :param sources: Table containing reference data.
+    :type sources: Table
+    :param paras: List of parameters to process.
+    :type paras: list[str]
+    :param provider: Name of the data provider.
     :type provider: str
-    :returns: Catalog table with parameter source IDs added
-    :rtype: astropy.table.table.Table
+    :returns: Catalog table with parameter source IDs added.
+    :rtype: Table
     """
     for para in paras:
         ref_column = para + "_ref"
-        source_id_column = f"{para}_source_idref"
+        source_id_col = f"{para}_source_idref"
         value_column = para + "_value"
 
         # Skip if no reference column exists
@@ -127,18 +148,17 @@ def assign_source_idref(cat, sources, paras, provider):
             continue
 
         # Check for existing source ID column
-        if source_id_column in cat.colnames:
+        if source_id_col in cat.colnames:
             print(
-                "warning, ",
-                {source_id_column},
-                "already in table. something went wrong with loading",
+                f"warning, {source_id_col} already in table. "
+                "something went wrong with loading"
             )
-            cat.remove_column(source_id_column)
+            cat.remove_column(source_id_col)
 
         # Replace null values in reference column
         cat = nullvalues(cat, ref_column, "None")
 
-        # Join with sources table to get source IDs
+        # Join with sources table to get source IDs for this provider
         source_subset = sources["ref", "source_id"][
             np.where(sources["provider_name"] == provider)
         ]
@@ -150,62 +170,69 @@ def assign_source_idref(cat, sources, paras, provider):
             join_type="left",
         )
 
-        # Rename source_id column to parameter-specific name
-        cat.rename_column("source_id", source_id_column)
+        # Rename generic source_id column to parameter-specific name
+        cat.rename_column("source_id", source_id_col)
         cat.remove_columns("ref")
 
-        # Handle masked values in parameter column
+        # Handle masked values in parameter column: assign 999999 to ref ID
         if value_column in cat.colnames:
-            if type(cat[value_column]) == column.MaskedColumn:
+            if isinstance(cat[value_column], column.MaskedColumn):
                 for i in cat[value_column].mask.nonzero()[0]:
-                    cat[source_id_column][i] = 999999
+                    cat[source_id_col][i] = 999999
 
     return cat
 
 
-def merge_table(cat1, cat2):
+def merge_table(cat1: Table, cat2: Table) -> Table:
     """
     Merges two tables.
 
-    :param cat1: Table 1
-    :type cat1: astropy.table.table.Table
-    :param cat2: Table 2
-    :type cat2: astropy.table.table.Table
+    If one table is empty, vstack is used as join would fail.
+
+    :param cat1: First table to merge.
+    :type cat1: Table
+    :param cat2: Second table to merge.
+    :type cat2: Table
     :returns: Merged table.
-    :rtype: astropy.table.table.Table
+    :rtype: Table
     """
     if len(cat1) == 0 or len(cat2) == 0:
-        # in this case astropy join function wouldn't work
-        merged_cat = vstack([cat1, cat2])
-    # elif #some columns being empty, others not:
-    # remove empty columns
-    # make sure merged_cat has all colnames it needs
-    else:
-        merged_cat = join(cat1, cat2)
-
-    return merged_cat
+        return vstack([cat1, cat2])
+    return join(cat1, cat2)
 
 
-def best_para_id(mes_table):
+def best_para_id(mes_table: Table) -> Table:
+    """
+    Selects the best identifier for each object based on reference priority.
+
+    :param mes_table: Measurement table for identifiers.
+    :type mes_table: Table
+    :returns: Table with prioritized identifier rows.
+    :rtype: Table
+    """
     grouped_mes_table = mes_table.group_by("id_ref")
+
     # 1. Making simbad identifiers the default best parameters
-    mask = grouped_mes_table.groups.keys["id_ref"] == "2000A&AS..143....9W"
+    simbad_ref = "2000A&AS..143....9W"
+    mask = grouped_mes_table.groups.keys["id_ref"] == simbad_ref
     best_para_table = grouped_mes_table.groups[mask]
+
     # 2. Adding identifiers that are not in the best_para_table yet.
-    # Order of the provider identifier references as which gets seen as having
-    # higher quality.
+    # Higher quality priority order for provider identifier references.
     # TBD: use id_ref as variable from provider_bibcode
     #        instad of constant""")
-    for ref in [
+    priority_refs = [
         "2022A&A...664A..21Q",
         "2016A&A...595A...1G",
         "priv. comm.",
         "2020A&C....3100370A",
         "2001AJ....122.3466M",
-    ]:
-        # priority of id best para:
+    ]
+
+    for ref in priority_refs:
         mask = grouped_mes_table.groups.keys["id_ref"] == ref
         all_ref_ids = grouped_mes_table.groups[mask]
+
         # removing those already in best_para_table
         new_ids = all_ref_ids[
             np.where(
@@ -213,97 +240,107 @@ def best_para_id(mes_table):
             )
         ]
         best_para_table = vstack([best_para_table, new_ids])
+
     best_para_table.remove_column("id_ref")
     return best_para_table
 
 
-def best_para_membership(mes_table):
+def best_para_membership(mes_table: Table) -> Table:
+    """
+    Selects the best membership measurement for parent-child pairs.
+
+    Chooses the row with the maximum membership value.
+
+    :param mes_table: Measurement table for membership.
+    :type mes_table: Table
+    :returns: Table with best membership entries.
+    :rtype: Table
+    """
     para = "membership"
     best_para_table = mes_table[:0].copy()
     grouped_mes_table = mes_table.group_by(
         ["child_object_idref", "parent_object_idref"]
     )
-    ind = grouped_mes_table.groups.indices
-    for i in range(len(ind) - 1):
-        number_of_entries_per_pair = ind[i + 1] - ind[i]
-        if number_of_entries_per_pair == 1:
-            best_para_table.add_row(grouped_mes_table[ind[i]])
+    indices = grouped_mes_table.groups.indices
+
+    for i in range(len(indices) - 1):
+        idx_start, idx_end = indices[i], indices[i + 1]
+        group = grouped_mes_table[idx_start:idx_end]
+
+        if len(group) == 1:
+            best_para_table.add_row(group[0])
         else:
-            h_link_pair = grouped_mes_table[ind[i] : ind[i + 1]]
-            h_link_pair_with_value = h_link_pair[
-                np.where(h_link_pair[para] != 999999)
-            ]
-            if len(h_link_pair_with_value) > 0:
-                for j in range(ind[i], ind[i + 1]):
-                    if grouped_mes_table[para][j] == max(
-                        h_link_pair_with_value[para]
-                    ):
-                        best_para_table.add_row(grouped_mes_table[j])
-                        break  # make sure not multiple of same max
+            with_value = group[np.where(group[para] != 999999)]
+            if len(with_value) > 0:
+                max_val = max(with_value[para])
+                # Add first row matching the max value
+                for row in group:
+                    if row[para] == max_val:
+                        best_para_table.add_row(row)
+                        break # make sure not multiple of same max
                         # value are added
             else:
                 # if none of the objects has a membership entry
                 # then pick just first one
-                best_para_table.add_row(grouped_mes_table[ind[i]])
+                best_para_table.add_row(group[0])
+
     return best_para_table
 
 
-def _get_parameter_columns(para):
+def _get_parameter_columns(para: str) -> list[str]:
     """
-    Helper function to determine which columns to include based on parameter type.
+    Helper function to determine which columns to include based on parameter.
 
-    :param para: Parameter name
+    :param para: Parameter name.
     :type para: str
-    :returns: List of column names to include
-    :rtype: list
+    :returns: List of column names to include.
+    :rtype: list[str]
     """
+    cols = ["main_id"]
     if para == "binary":
-        return [
-            "main_id",
-            f"{para}_flag",
-            f"{para}_qual",
-            f"{para}_source_idref",
-        ]
+        cols.extend([f"{para}_flag", f"{para}_qual", f"{para}_source_idref"])
     elif para == "mass_pl":
-        return [
-            "main_id",
-            f"{para}_value",
-            f"{para}_rel",
-            f"{para}_err_max",
-            f"{para}_err_min",
-            f"{para}_qual",
-            f"{para}_sini_flag",
-            f"{para}_source_idref",
-        ]
+        cols.extend(
+            [
+                f"{para}_value",
+                f"{para}_rel",
+                f"{para}_err_max",
+                f"{para}_err_min",
+                f"{para}_qual",
+                f"{para}_sini_flag",
+                f"{para}_source_idref",
+            ]
+        )
     elif para == "sep_ang":
-        return [
-            "main_id",
-            f"{para}_value",
-            f"{para}_err",
-            f"{para}_obs_date",
-            f"{para}_qual",
-            f"{para}_source_idref",
-        ]
+        cols.extend(
+            [
+                f"{para}_value",
+                f"{para}_err",
+                f"{para}_obs_date",
+                f"{para}_qual",
+                f"{para}_source_idref",
+            ]
+        )
     else:
-        return [
-            "main_id",
-            f"{para}_value",
-            f"{para}_err",
-            f"{para}_qual",
-            f"{para}_source_idref",
-        ]
+        cols.extend(
+            [f"{para}_value", f"{para}_err", f"{para}_qual",
+             f"{para}_source_idref"]
+        )
+    return cols
 
 
-def _find_best_quality_measurement(group, para):
+def _find_best_quality_measurement(group: Table, para: str) -> Row | None:
     """
     Helper function to find the highest quality measurement in a group.
 
-    :param group: Group of measurements for a single object
-    :type group: astropy.table.Table
-    :param para: Parameter name
+    Quality levels: A > B > C > D > E > ?.
+
+    :param group: Group of measurements for a single object.
+    :type group: Table
+    :param para: Parameter name.
     :type para: str
-    :returns: Row with highest quality measurement or None if no valid measurement
-    :rtype: astropy.table.Row or None
+    :returns: Row with highest quality measurement or None.
+    :rtype: Row or None
     """
     quality_levels = ["A", "B", "C", "D", "E", "?"]
     qual_column = f"{para}_qual"
@@ -315,21 +352,21 @@ def _find_best_quality_measurement(group, para):
     return None
 
 
-def best_para(para, mes_table):
+def best_para(para: str, mes_table: Table) -> Table:
     """
-    Selects the highest quality measurement for each object in the measurement table.
+    Selects the highest quality measurement for each object in the table.
 
-    :param para: Describes parameter e.g. mass
+    :param para: Parameter name (e.g., 'mass', 'id').
     :type para: str
-    :param mes_table: Contains only columns needed for this function
-    :type mes_table: astropy.table.Table
-    :returns: Table like mes_table but only highest quality rows for each object
-    :rtype: astropy.table.Table
+    :param mes_table: Table containing measurements.
+    :type mes_table: Table
+    :returns: Table with highest quality rows for each unique object.
+    :rtype: Table
     """
     # Special case handlers
     if para == "id":
         return best_para_id(mes_table)
-    elif para == "membership":
+    if para == "membership":
         return best_para_membership(mes_table)
 
     # Define columns based on parameter type
@@ -350,55 +387,63 @@ def best_para(para, mes_table):
     return best_para_table
 
 
-def best_parameters_ingestion(cat_mes, cat_basic, para, columns=[]):
+def best_parameters_ingestion(
+    cat_mes: Table, cat_basic: Table, para: str, columns: list[str] | None = None
+) -> Table:
     """
-    Takes from the multiple measurement table best parameters for basic table.
+    Updates a basic table with the best measurements from a measurement table.
 
-    :para cat_mes:
-    :type cat_mes: astropy.table.table.Table
-    :para cat_basic:
-    :type cat_basic: astropy.table.table.Table
-    :para str para: Parameter name
-    :para columns: List of column names of the parameter.
-    :type columns: list(str)
-    :returns:
-    :rtype: astropy.table.table.Table
+    :param cat_mes: Table containing multiple measurements.
+    :type cat_mes: Table
+    :param cat_basic: Table to be updated.
+    :type cat_basic: Table
+    :param para: Parameter name.
+    :type para: str
+    :param columns: Columns to remove from cat_basic before joining.
+    :type columns: list[str] or None
+    :returns: Updated basic table.
+    :rtype: Table
     """
     best_para_cat_mes = best_para(para, cat_mes)
-    if columns != []:
+    if columns:
         cat_basic.remove_columns(columns)
-    cat_basic = join(cat_basic, best_para_cat_mes, join_type="left")
-    return cat_basic
+    return join(cat_basic, best_para_cat_mes, join_type="left")
 
 
 def provider_data_merging(
-    cat, table_name, prov_tables_dict, o_merging=False, para_match=False
-):
+    cat: dict[str, Table],
+    table_name: str,
+    prov_tables_dict: dict[str, dict[str, Table]],
+    o_merging: bool = False,
+    para_match: bool = False,
+) -> dict[str, Table]:
     """
-    Merges the data from the different providers.
+    Merges the data from the different providers for a specific table.
 
-    :para cat:
-    :type cat: astropy.table.table.Table
-    :para str table_name:
-    :param prov_tables_dict: Containing simbad, grant kennedy, exomercat, gaia
-        and wds data.
-    :type prov_tables_dict: dict(astropy.table.table.Table)
-    :para bool o_merging:
-    :para bool para_match:
-    :returns:
-    :rtype: astropy.table.table.Table
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param table_name: Name of the table to build/merge.
+    :type table_name: str
+    :param prov_tables_dict: Dictionary mapping providers to their tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :param o_merging: Whether to perform object-level merging (ids and types).
+    :type o_merging: bool
+    :param para_match: Whether to perform source ID matching.
+    :type para_match: bool
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
     """
-    print(f"Building {table_name} table ...")  # sources
-
-    for prov_table in list(prov_tables_dict.keys()):
+    print(f"Building {table_name} table ...")
+    for prov_name, prov_data in prov_tables_dict.items():
         if para_match:
-            matching_parameters(cat, prov_table, prov_tables_dict, table_name)
-        if len(cat[table_name]) > 0:
-            join_different_provider_data(
-                cat, o_merging, prov_table, prov_tables_dict, table_name
-            )
+            matching_parameters(cat, prov_name, prov_tables_dict, table_name)
+
+        if table_name not in cat or len(cat[table_name]) == 0:
+            cat[table_name] = prov_data[table_name]
         else:
-            cat[table_name] = prov_tables_dict[prov_table][table_name]
+            join_different_provider_data(
+                cat, o_merging, prov_name, prov_tables_dict, table_name
+            )
     return cat
 
 
@@ -500,16 +545,20 @@ def build_sources_table(prov_tables_dict):
     # keeping only unique values then create identifiers for the tables
     cat["sources"] = unique(cat["sources"], silent=True)
     cat["sources"]["source_id"] = [j + 1 for j in range(len(cat["sources"]))]
+    print("meta: ", cat["sources"].meta)
     return cat
 
 
 def build_objects_table(cat, prov_tables_dict):
+    print("meta: ", cat["objects"].meta)
+    print("meta: ", prov_tables_dict["exo"]["objects"].meta)
     cat = provider_data_merging(
         cat, "objects", prov_tables_dict, o_merging=True
     )
 
     # assigning object_id
     cat["objects"]["object_id"] = [j + 1 for j in range(len(cat["objects"]))]
+    print("meta: ", cat["objects"].meta)
 
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
