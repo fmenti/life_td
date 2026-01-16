@@ -448,11 +448,11 @@ def provider_data_merging(
 
 
 def join_different_provider_data(
-        cat: dict[str, Table],
-        o_merging: bool,
-        prov_name: str,
-        prov_tables_dict: dict[str, dict[str, Table]],
-        table_name: str,
+    cat: dict[str, Table],
+    o_merging: bool,
+    prov_name: str,
+    prov_tables_dict: dict[str, dict[str, Table]],
+    table_name: str,
 ) -> dict[str, Table]:
     """
     Joins data from a specific provider into the main table.
@@ -488,11 +488,12 @@ def join_different_provider_data(
             )
     return cat
 
+
 def matching_parameters(
-        cat: dict[str, Table],
-        prov_name: str,
-        prov_tables_dict: dict[str, dict[str, Table]],
-        table_name: str,
+    cat: dict[str, Table],
+    prov_name: str,
+    prov_tables_dict: dict[str, dict[str, Table]],
+    table_name: str,
 ) -> dict[str, Table]:
     """
     Redefines source reference columns with their corresponding IDs.
@@ -515,7 +516,7 @@ def matching_parameters(
         prov_tables_dict[prov_name][table_name] = assign_source_idref(
             prov_table, cat["sources"], paras[table_name], provider_name
         )
-        return cat
+    return cat
 
 
 def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
@@ -571,7 +572,7 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
 
 
 def build_sources_table(
-        prov_tables_dict: dict[str, dict[str, Table]]
+    prov_tables_dict: dict[str, dict[str, Table]]
 ) -> dict[str, Table]:
     """
     Initializes the catalog and builds the unique sources table.
@@ -597,7 +598,7 @@ def build_sources_table(
 
 
 def build_objects_table(
-        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+    cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
 ) -> dict[str, Table]:
     """
     Builds the objects table and assigns unique object IDs.
@@ -623,7 +624,7 @@ def build_objects_table(
 
 
 def build_provider_table(
-        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+    cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
 ) -> dict[str, Table]:
     """
     Builds the provider table.
@@ -642,6 +643,7 @@ def build_provider_table(
     cat["provider"] = vstack([cat["provider"], empty["provider"]])
     return cat
 
+
 def _handle_object_id_linking(table: Table, objects: Table) -> Table:
     """
     Helper to join object_id from objects table into another table.
@@ -658,6 +660,7 @@ def _handle_object_id_linking(table: Table, objects: Table) -> Table:
     table = join(table, objects["object_id", "main_id"], join_type="left")
     table.rename_column("object_id", "object_idref")
     return table
+
 
 def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
     """
@@ -699,6 +702,7 @@ def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
     cat["best_h_link"] = best_para("membership", h_link)
     return cat
 
+
 def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
     """
     Specialized processing for star_basic and planet_basic.
@@ -729,8 +733,9 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
     cat["planet_basic"] = planets
     return cat
 
+
 def build_rest_of_tables(
-        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+    cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
 ) -> dict[str, Table]:
     """
     Builds all remaining tables (basic, measurements, etc.) and performs links.
@@ -763,9 +768,9 @@ def build_rest_of_tables(
         if table_name == "ident":
             cat[table_name] = best_para("id", cat[table_name])
         elif table_name == "h_link":
-            _process_h_link(cat)
-        elif table_name == "star_basic":
-            _process_basic_tables(cat)
+            cat = _process_h_link(cat)
+        elif table_name == "planet_basic":
+            cat = _process_basic_tables(cat)
         elif table_name == "mes_teff_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
