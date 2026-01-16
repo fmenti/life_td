@@ -436,26 +436,46 @@ def provider_data_merging(
     print(f"Building {table_name} table ...")
     for prov_name, prov_data in prov_tables_dict.items():
         if para_match:
-            matching_parameters(cat, prov_name, prov_tables_dict, table_name)
+            cat = matching_parameters(cat, prov_name, prov_tables_dict, table_name)
 
         if table_name not in cat or len(cat[table_name]) == 0:
             cat[table_name] = prov_data[table_name]
         else:
-            join_different_provider_data(
+            cat = join_different_provider_data(
                 cat, o_merging, prov_name, prov_tables_dict, table_name
             )
     return cat
 
 
 def join_different_provider_data(
-    cat, o_merging, prov_table, prov_tables_dict, table_name
-):
-    # joining data from different providers (simbad,...,wds)
-    if len(prov_tables_dict[prov_table][table_name]) > 0:
+        cat: dict[str, Table],
+        o_merging: bool,
+        prov_name: str,
+        prov_tables_dict: dict[str, dict[str, Table]],
+        table_name: str,
+) -> dict[str, Table]:
+    """
+    Joins data from a specific provider into the main table.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param o_merging: Whether to perform object-level merging.
+    :type o_merging: bool
+    :param prov_name: Name of the provider.
+    :type prov_name: str
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :param table_name: Name of the table to merge.
+    :type table_name: str
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    prov_table = prov_tables_dict[prov_name][table_name]
+    if len(prov_table) > 0:
         if o_merging:
             cat[table_name] = join(
                 cat[table_name],
-                prov_tables_dict[prov_table][table_name],
+                prov_table,
                 keys="main_id",
                 join_type="outer",
             )
@@ -463,45 +483,62 @@ def join_different_provider_data(
         else:
             cat[table_name] = join(
                 cat[table_name],
-                prov_tables_dict[prov_table][table_name],
+                prov_table,
                 join_type="outer",
             )
+    return cat
 
+def matching_parameters(
+        cat: dict[str, Table],
+        prov_name: str,
+        prov_tables_dict: dict[str, dict[str, Table]],
+        table_name: str,
+) -> dict[str, Table]:
+    """
+    Redefines source reference columns with their corresponding IDs.
 
-def matching_parameters(cat, prov_table, prov_tables_dict, table_name):
-    # redefining of paras multiple times is not optimal but easier to
-    # read the code if I don't have to define them globally or pass
-    # them to the function.
-    # print('careful, I have here hardcoded parameter and table order')
-    if len(prov_tables_dict[prov_table][table_name]) > 0:
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param prov_name: Name of the provider.
+    :type prov_name: str
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :param table_name: Name of the table to process.
+    :type table_name: str
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    prov_table = prov_tables_dict[prov_name][table_name]
+    if len(prov_table) > 0:
         paras = paras_dict.copy()
-        # prov_tables_list[j] is a table containing the two columns ref
-        # and provider name. replacing ref columns with
-        # corresponding source_idref one. issue is that order
-        # prov_tables_list and provider_name not the same
-        prov_tables_dict[prov_table][table_name] = assign_source_idref(
-            prov_tables_dict[prov_table][table_name],
-            cat["sources"],
-            paras[table_name],
-            prov_tables_dict[prov_table]["provider"]["provider_name"][0],
+        provider_name = prov_tables_dict[prov_name]["provider"]["provider_name"][0]
+        prov_tables_dict[prov_name][table_name] = assign_source_idref(
+            prov_table, cat["sources"], paras[table_name], provider_name
         )
+        return cat
 
 
-def unify_null_values(cat):
+def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
+    """
+    Unifies null values ('N', 'N/A') to '?' across specific tables/columns.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
     print("Unifying null values...")
-    # unify null values (had 'N' and '?' because of astropy default
-    # fill_value and type conversion string vs object)
-    tables = [
-        cat["star_basic"],
-        cat["planet_basic"],
-        cat["disk_basic"],
-        cat["mes_mass_pl"],
-        cat["mes_teff_st"],
-        cat["mes_radius_st"],
-        cat["mes_mass_st"],
-        cat["mes_binary"],
+    table_keys = [
+        "star_basic",
+        "planet_basic",
+        "disk_basic",
+        "mes_mass_pl",
+        "mes_teff_st",
+        "mes_radius_st",
+        "mes_mass_st",
+        "mes_binary",
     ]
-    columns = [
+    columns_map = [
         [
             "coo_qual",
             "coo_gal_qual",
@@ -525,38 +562,58 @@ def unify_null_values(cat):
         ["mass_st_qual"],
         ["binary_qual"],
     ]
-    for i in range(len(tables)):
-        for col in columns[i]:
-            tables[i] = replace_value(tables[i], col, "N", "?")
-            tables[i] = replace_value(tables[i], col, "N/A", "?")
+    for key, cols in zip(table_keys, columns_map):
+        if key in cat:
+            for col in cols:
+                cat[key] = replace_value(cat[key], col, "N", "?")
+                cat[key] = replace_value(cat[key], col, "N/A", "?")
     return cat
 
 
-def build_sources_table(prov_tables_dict):
-    # Initialization
+def build_sources_table(
+        prov_tables_dict: dict[str, dict[str, Table]]
+) -> dict[str, Table]:
+    """
+    Initializes the catalog and builds the unique sources table.
+
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Dictionary containing the initialized sources table.
+    :rtype: dict[str, Table]
+    """
     cat = empty_dict.copy()
     empty = empty_dict_wit_columns.copy()
 
-    # for the sources and objects joins tables from different prov_tables_list
+    # for the sources and objects joins tables from different prov_tables_dict
     cat = provider_data_merging(cat, "sources", prov_tables_dict)
 
-    # adding empty columns for later being able to join tables
+    # Adding empty template columns and keeping unique entries
     cat["sources"] = vstack([cat["sources"], empty["sources"]])
-    # keeping only unique values then create identifiers for the tables
     cat["sources"] = unique(cat["sources"], silent=True)
     cat["sources"]["source_id"] = [j + 1 for j in range(len(cat["sources"]))]
+
     print("meta: ", cat["sources"].meta)
     return cat
 
 
-def build_objects_table(cat, prov_tables_dict):
+def build_objects_table(
+        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+) -> dict[str, Table]:
+    """
+    Builds the objects table and assigns unique object IDs.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
     print("meta: ", cat["objects"].meta)
     print("meta: ", prov_tables_dict["exo"]["objects"].meta)
     cat = provider_data_merging(
         cat, "objects", prov_tables_dict, o_merging=True
     )
-
-    # assigning object_id
     cat["objects"]["object_id"] = [j + 1 for j in range(len(cat["objects"]))]
     print("meta: ", cat["objects"].meta)
 
@@ -565,7 +622,19 @@ def build_objects_table(cat, prov_tables_dict):
     return cat
 
 
-def build_provider_table(cat, prov_tables_dict):
+def build_provider_table(
+        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+) -> dict[str, Table]:
+    """
+    Builds the provider table.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
     empty = empty_dict_wit_columns.copy()
     cat = provider_data_merging(cat, "provider", prov_tables_dict)
 
@@ -573,102 +642,131 @@ def build_provider_table(cat, prov_tables_dict):
     cat["provider"] = vstack([cat["provider"], empty["provider"]])
     return cat
 
+def _handle_object_id_linking(table: Table, objects: Table) -> Table:
+    """
+    Helper to join object_id from objects table into another table.
 
-def build_rest_of_tables(cat, prov_tables_dict):
-    empty = empty_dict_wit_columns.copy()
+    :param table: Table needing object_idref.
+    :type table: Table
+    :param objects: Main objects table.
+    :type objects: Table
+    :returns: Table with object_idref added.
+    :rtype: Table
+    """
+    if "object_idref" in table.colnames:
+        table.remove_column("object_idref")
+    table = join(table, objects["object_id", "main_id"], join_type="left")
+    table.rename_column("object_id", "object_idref")
+    return table
+
+def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
+    """
+    Processes h_link table to link parent/child IDs and find best memberships.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    h_link = cat["h_link"]
+    objects = cat["objects"]
+
+    # Link child_object_idref
+    if "child_object_idref" in h_link.colnames:
+        h_link.remove_column("child_object_idref")
+    h_link = join(
+        h_link, objects["object_id", "main_id"],
+        keys="main_id", join_type="left")
+    h_link.rename_columns(
+        ["object_id", "main_id"],
+        ["child_object_idref", "child_main_id"]
+    )
+
+    # Link parent_object_idref
+    if "parent_object_idref" in h_link.colnames:
+        h_link.remove_column("parent_object_idref")
+    # Only keep links where parent is also in our objects table
+    h_link = join(
+        h_link,
+        objects["object_id", "main_id"],
+        keys_left="parent_main_id",
+        keys_right="main_id",
+    )
+    h_link.remove_column("main_id")
+    h_link.rename_column("object_id", "parent_object_idref")
+
+    cat["h_link"] = h_link
+    cat["best_h_link"] = best_para("membership", h_link)
+    return cat
+
+def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
+    """
+    Specialized processing for star_basic and planet_basic.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    objects = cat["objects"]
+
+    # Star basic: include all objects typed as stars or systems
+    stars = objects["object_id", "main_id"][np.where(objects["type"] == "st")]
+    systems = objects["object_id", "main_id"][np.where(objects["type"] == "sy")]
+    temp = vstack([stars, systems])
+    temp.rename_column("object_id", "object_idref")
+
+    cat["star_basic"] = join(
+        cat["star_basic"],
+        temp,
+        join_type="outer",
+        keys=["object_idref", "main_id"],
+    )
+
+    # Planet basic: include all objects typed as planets
+    planets = objects["object_id", "main_id"][np.where(objects["type"] == "pl")]
+    planets.rename_column("object_id", "object_idref")
+    cat["planet_basic"] = planets
+    return cat
+
+def build_rest_of_tables(
+        cat: dict[str, Table], prov_tables_dict: dict[str, dict[str, Table]]
+) -> dict[str, Table]:
+    """
+    Builds all remaining tables (basic, measurements, etc.) and performs links.
+
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    empty_dict_cols = empty_dict_wit_columns.copy()
+
+    # Skip first 3 tables (sources, objects, provider)
     for table_name in islice(cat, 3, None):
-        # for the tables star_basic,...,mes_mass_st
         cat = provider_data_merging(
             cat, table_name, prov_tables_dict, para_match=True
         )
 
-        # I do this to get those columns that are empty in the data
-
-        cat[table_name] = vstack([cat[table_name], empty[table_name]])
-        # filling so when I run unique it doesn't neglect previously masked columns
+        cat[table_name] = vstack([cat[table_name], empty_dict_cols[table_name]])
         cat[table_name] = cat[table_name].filled()
 
-        if (
-            "object_idref" in cat[table_name].colnames
-            and len(cat[table_name]) > 0
-        ):
-            # add object_idref
-            # first remove the object_idref we got from empty
-            # initialization though I would prefer a more elegant way
-            # to do this. Is needed as empty columns don't work for join
-            cat[table_name].remove_column("object_idref")
-            cat[table_name] = join(
-                cat[table_name],
-                cat["objects"]["object_id", "main_id"],
-                join_type="left",
-            )
-            cat[table_name].rename_column("object_id", "object_idref")
+        # Link object_idrefs if applicable
+        if ("object_idref" in cat[table_name].colnames
+            and len(cat[table_name]) > 0):
+            cat[table_name] = _handle_object_id_linking(cat[table_name],
+                                                        cat["objects"])
+
+        # Specialized handling by table name
         if table_name == "ident":
             cat[table_name] = best_para("id", cat[table_name])
-        if table_name == "h_link":
-            # expanding from child_main_id to object_idref
-            # first remove the child_object_idref we got from empty
-            # initialization. Would prefer a more elegant way to do this
-            cat[table_name].remove_column("child_object_idref")
-            cat[table_name] = join(
-                cat[table_name],
-                cat["objects"]["object_id", "main_id"],
-                keys="main_id",
-                join_type="left",
-            )
-            cat[table_name].rename_columns(
-                ["object_id", "main_id"],
-                ["child_object_idref", "child_main_id"],
-            )
-
-            # expanding from parent_main_id to parent_object_idref
-            cat[table_name].remove_column("parent_object_idref")
-            # kick out any h_link rows where parent_main_id not in
-            # objects (e.g. clusters)
-            cat[table_name] = join(
-                cat[table_name],
-                cat["objects"]["object_id", "main_id"],
-                keys_left="parent_main_id",
-                keys_right="main_id",
-            )
-            # removing because same as parent_main_id
-            cat[table_name].remove_column("main_id")
-            cat[table_name].rename_column("object_id", "parent_object_idref")
-            cat["best_h_link"] = best_para("membership", cat["h_link"])
-        if table_name == "star_basic":
-            # choosing all objects with type star or system. this I use
-            # to join the object_id parameter from objects table to
-            # star_basic. what about gaia stuff where I don't know
-            # this? there I also don't have star_basic info.
-            # Note: main_id was only added because I have not found out
-            # how to do join with just one column of a table
-            stars = cat["objects"]["object_id", "main_id"][
-                np.where(cat["objects"]["type"] == "st")
-            ]
-            systems = cat["objects"]["object_id", "main_id"][
-                np.where(cat["objects"]["type"] == "sy")
-            ]
-            temp = vstack([stars, systems])
-            temp.rename_column("object_id", "object_idref")
-
-            # cat[i] are all the star_cat tables from prov_tables_list where
-            # those are given the new objects are needed to join the
-            # best parameters from mes_ tables later on
-            cat[table_name] = join(
-                cat[table_name],
-                temp,
-                join_type="outer",
-                keys=["object_idref", "main_id"],
-            )
-        if table_name == "planet_basic":
-            planets = cat["objects"]["object_id", "main_id"][
-                np.where(cat["objects"]["type"] == "pl")
-            ]
-            planets.rename_column("object_id", "object_idref")
-            cat[table_name] = (
-                planets  # can't use join below because cat[i] has no rows
-            )
-        if table_name == "mes_teff_st":
+        elif table_name == "h_link":
+            _process_h_link(cat)
+        elif table_name == "star_basic":
+            _process_basic_tables(cat)
+        elif table_name == "mes_teff_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
                 cat["star_basic"],
@@ -681,7 +779,7 @@ def build_rest_of_tables(cat, prov_tables_dict):
                     "teff_st_ref",
                 ],
             )
-        if table_name == "mes_radius_st":
+        elif table_name == "mes_radius_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
                 cat["star_basic"],
@@ -694,7 +792,7 @@ def build_rest_of_tables(cat, prov_tables_dict):
                     "radius_st_ref",
                 ],
             )
-        if table_name == "mes_mass_st":
+        elif table_name == "mes_mass_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
                 cat["star_basic"],
@@ -707,23 +805,19 @@ def build_rest_of_tables(cat, prov_tables_dict):
                     "mass_st_ref",
                 ],
             )
-        if table_name == "mes_mass_pl":
+        elif table_name == "mes_mass_pl":
             cat["planet_basic"] = best_parameters_ingestion(
                 cat[table_name], cat["planet_basic"], "mass_pl"
             )
-        if table_name == "mes_binary":
+        elif table_name == "mes_binary":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
                 cat["star_basic"],
                 "binary",
-                [
-                    "binary_flag",
-                    "binary_qual",
-                    "binary_source_idref",
-                    "binary_ref",
-                ],
+                ["binary_flag", "binary_qual", "binary_source_idref",
+                 "binary_ref"],
             )
-        if table_name == "mes_sep_ang":
+        elif table_name == "mes_sep_ang":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
                 cat["star_basic"],
@@ -739,16 +833,25 @@ def build_rest_of_tables(cat, prov_tables_dict):
             )
 
         cat[table_name] = cat[table_name].filled()
-
         if len(cat[table_name]) == 0:
-            print("warning: empty table", table_name)
+            print(f"warning: empty table {table_name}")
         else:
-            # only keeping unique entries
             cat[table_name] = unique(cat[table_name], silent=True)
+
     return cat
 
 
-def build_tables(prov_tables_dict):
+def build_tables(
+    prov_tables_dict: dict[str, dict[str, Table]]
+) -> dict[str, Table]:
+    """
+    Orchestrates the building of all database tables.
+
+    :param prov_tables_dict: Dictionary of provider tables.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Dictionary of built tables.
+    :rtype: dict[str, Table]
+    """
     cat = build_sources_table(prov_tables_dict)
     cat = build_objects_table(cat, prov_tables_dict)
     cat = build_provider_table(cat, prov_tables_dict)
@@ -756,20 +859,19 @@ def build_tables(prov_tables_dict):
     return cat
 
 
-# ------------------------provider combining----------------------------
-def building(prov_tables_dict):
+def building(prov_tables_dict: dict[str, dict[str, Table]]) -> dict[str, Table]:
     """
-    This function builds the tables for the LIFE database.
+    Builds the complete LIFE database from provider tables and saves it.
 
-    :param prov_tables_dict: Containing simbad, grant kennedy, exomercat, gaia
-        and wds data.
-    :type prov_tables_dict: dict(dict(astropy.table.table.Table))
-    :returns: Containing data combined from the different prov_tables_list.
-    :rtype: list containing objects of type astropy.table.table.Table
+    :param prov_tables_dict: Dictionary containing data from providers
+        Simbad, Grant Kennedy, Exo-MerCat, Gaia and WDS.
+    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :returns: Dictionary of processed tables.
+    :rtype: dict[str, Table]
     """
     cat = build_tables(prov_tables_dict)
 
-    # next line is needed as multimeasurement adaptions lead to potentially masked entries
+    # Ensure star_basic has no masked entries after multi-measurement ingestions
     cat["star_basic"] = cat["star_basic"].filled()
 
     cat = unify_null_values(cat)
@@ -780,7 +882,7 @@ def building(prov_tables_dict):
     print("Saving data...")
     save(
         list(cat.values()),
-        [element for element in list(cat.keys())],
+        list(cat.keys()),
         location=Path().data,
     )
     return cat
