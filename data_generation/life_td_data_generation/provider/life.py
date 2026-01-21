@@ -470,7 +470,7 @@ def create_life_helpertable(life):
     stars = sim_objects[np.where(sim_objects["type"] != "pl")]
 
     life["star_basic"] = stringtoobject(life["star_basic"])
-    stars = stringtoobject(stars)
+    #stars = stringtoobject(stars)
 
     life_helptab = join(stars, life["star_basic"])
     life_helptab = spec(
