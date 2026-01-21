@@ -114,8 +114,7 @@ def query(
         for col in cat.colnames:
             cat[col].description = ""
         cat.meta={}
-    # does not seem to work properly yet, getting warndings for WDS, exomercat and gaia
-    print("meta query function: ", cat.meta)
+    # does not seem to work properly yet, getting warndings for exomercat/building
     return cat
 
 

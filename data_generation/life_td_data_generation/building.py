@@ -593,7 +593,6 @@ def build_sources_table(
     cat["sources"] = unique(cat["sources"], silent=True)
     cat["sources"]["source_id"] = [j + 1 for j in range(len(cat["sources"]))]
 
-    print("meta: ", cat["sources"].meta)
     return cat
 
 
@@ -610,13 +609,10 @@ def build_objects_table(
     :returns: Updated dictionary of cumulative tables.
     :rtype: dict[str, Table]
     """
-    print("meta: ", cat["objects"].meta)
-    print("meta: ", prov_tables_dict["exo"]["objects"].meta)
     cat = provider_data_merging(
         cat, "objects", prov_tables_dict, o_merging=True
     )
     cat["objects"]["object_id"] = [j + 1 for j in range(len(cat["objects"]))]
-    print("meta: ", cat["objects"].meta)
 
     # At one point I would like to be able to merge objects with main_id
     # NAME Proxima Centauri b and Proxima Centauri b
