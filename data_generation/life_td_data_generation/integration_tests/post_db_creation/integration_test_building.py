@@ -159,6 +159,10 @@ def test_data_makes_sense_mass_st():
 
     plot_data_and_fit("Stellar Mass", data, [1, 8, 0])
 
+    #add one function that plots the masses binned by temperature class
+    #ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
+    #should have a lot already programmed in the analysis file
+
     # assert
     assert max(data) < 60  # O3V
     assert min(data) > 0.074  # brown dwarf
