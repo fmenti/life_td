@@ -179,6 +179,8 @@ def test_data_makes_sense_mass_st_class():
     #ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
     #should have a lot already programmed in the analysis file
 
+    #would also be nice to do it for all masses not just bestmass. need a join for that
+
     temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
     maxlist=[60.,18.,2.7,1.75,1.10,0.92,0.6]
     minlist=[17.,2.,1.5,1.,0.85,0.55,0.074]
