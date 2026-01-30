@@ -5,6 +5,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import norm
 from utils.analysis.analysis import different_data
 from utils.io import Path, load
+from utils.analysis.analysis import parameter_by_temperature_class
 
 # not showing plots
 # show_kw=True #<--- added
@@ -176,8 +177,8 @@ def test_data_makes_sense_mass_st_class():
     data = arr2[np.where(arr2["class_temp"] != "?")]
 
     #add one function that plots the masses binned by temperature class
-    #ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
-    #should have a lot already programmed in the analysis file
+    parameter_by_temperature_class(data, "mass_st_value",
+                                   "Stellar Mass [Msun]")
 
     #would also be nice to do it for all masses not just bestmass. need a join for that
 

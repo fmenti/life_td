@@ -17,6 +17,26 @@ from utils.analysis.histogram_utils import (
 from utils.io import Path, stringtoobject
 
 
+def parameter_by_temperature_class(data, para_name, ylabel):
+    ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
+
+    # map class -> index in desired order
+    order_map = {c: i for i, c in enumerate(ms_tempclass)}
+
+    x = np.array(
+        [order_map[c] for c in data["class_temp"]])  # numeric positions
+
+    plt.figure()
+    plt.scatter(x, data[para_name])
+    plt.xlabel("Stellar Temperature Class")
+    plt.ylabel(ylabel)
+
+    plt.xticks(np.arange(len(ms_tempclass)),
+               ms_tempclass)  # enforce tick order + labels
+    plt.xlim(-0.5, len(ms_tempclass) - 0.5)  # optional: nicer margins
+
+    plt.show()
+
 def linfit(x_data, y_data, x):
     poly = np.polyfit(x_data, y_data, 1)
     return poly[0] * x + poly[1]
