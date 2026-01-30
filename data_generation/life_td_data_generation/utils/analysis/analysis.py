@@ -14,10 +14,15 @@ from utils.analysis.histogram_utils import (
 )
 
 # self created modules
-from utils.io import Path, stringtoobject
+from utils.io import Path, stringtoobject, load
 
 
-def parameter_by_temperature_class(data, para_name, ylabel):
+def parameter_by_temperature_class(table, para_name, ylabel):
+    # exctracting the correct columns
+    arr = table["class_temp", para_name]
+    arr2 = arr[np.where(arr[para_name] != 1e20)]
+    data = arr2[np.where(arr2["class_temp"] != "?")]
+
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
 
     # map class -> index in desired order
@@ -125,7 +130,6 @@ def array_only_fill_values(arr):
 def remove_fill_values(arr):
     return arr[np.where(arr != 1e20)]
 
-
 def different_data(arr):
     if is_starnames(arr):
         pass
@@ -135,6 +139,15 @@ def different_data(arr):
         if max(arr) == 1e20:
             arr = remove_fill_values(arr)
     return arr
+
+def get_data(table_name, colname):
+    # loading the correct table
+    [table] = load([table_name], location=Path().data)
+    # exctracting the correct columns
+    arr_with_potential_fill_values = table[colname]
+    # removing fill values
+    data = different_data(arr_with_potential_fill_values)
+    return data
 
 
 # TBD: durch funktionalen test ersetzen
