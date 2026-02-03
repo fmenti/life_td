@@ -16,12 +16,16 @@ from utils.analysis.histogram_utils import (
 # self created modules
 from utils.io import Path, stringtoobject, load
 
-
-def parameter_by_temperature_class(table, para_name, ylabel):
+def database_para_temp_class_plot_prep(table, para_name, ylabel):
     # exctracting the correct columns
     arr = table["class_temp", para_name]
     arr2 = arr[np.where(arr[para_name] != 1e20)]
     data = arr2[np.where(arr2["class_temp"] != "?")]
+
+    parameter_by_temperature_class(data["class_temp"],data[para_name], ylabel)
+    return data
+
+def parameter_by_temperature_class(temp_class, parameter, ylabel):
 
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
 
@@ -29,17 +33,16 @@ def parameter_by_temperature_class(table, para_name, ylabel):
     order_map = {c: i for i, c in enumerate(ms_tempclass)}
 
     x = np.array(
-        [order_map[c] for c in data["class_temp"]])  # numeric positions
+        [order_map[c] for c in temp_class])  # numeric positions
 
     plt.figure()
-    plt.scatter(x, data[para_name])
+    plt.scatter(x, parameter)
     plt.xlabel("Stellar Temperature Class")
     plt.ylabel(ylabel)
 
     plt.xticks(np.arange(len(ms_tempclass)),
                ms_tempclass)  # enforce tick order + labels
     plt.xlim(-0.5, len(ms_tempclass) - 0.5)  # optional: nicer margins
-
     plt.show()
 
 def linfit(x_data, y_data, x):

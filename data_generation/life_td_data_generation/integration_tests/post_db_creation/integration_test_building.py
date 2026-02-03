@@ -3,7 +3,7 @@ import numpy as np
 from astropy.table import Table
 from scipy.optimize import curve_fit
 from scipy.stats import norm
-from utils.analysis.analysis import get_data, parameter_by_temperature_class
+from utils.analysis.analysis import get_data, database_para_temp_class_plot_prep
 from utils.io import Path, load
 
 # not showing plots
@@ -161,9 +161,7 @@ def test_data_makes_sense_mass_st_class():
     # data
     [table] = load(["star_basic"], location=Path().data)
 
-
-    #add one function that plots the masses binned by temperature class
-    parameter_by_temperature_class(table, "mass_st_value",
+    data = database_para_temp_class_plot_prep(table, "mass_st_value",
                                    "Stellar Mass [Msun]")
 
     #would also be nice to do it for all masses not just bestmass. need a join for that
@@ -172,11 +170,6 @@ def test_data_makes_sense_mass_st_class():
     maxlist=[60.,18.,2.7,1.75,1.10,0.92,0.6]
     minlist=[17.,2.,1.5,1.,0.85,0.55,0.074]
     #wait, those are ms numbers. -> masses shouldn't change much with age just radii
-
-    # exctracting the correct columns
-    arr = table["class_temp", "mass_st_value"]
-    arr2 = arr[np.where(arr["mass_st_value"] != 1e20)]
-    data = arr2[np.where(arr2["class_temp"] != "?")]
 
     for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
         testcase = data["mass_st_value"][np.where(data["class_temp"] == tempclass)]
@@ -208,12 +201,41 @@ def test_data_makes_sense_temp_st():
     ax.set_xlabel("Distance [pc]")
     ax.set_ylabel("Temperature [K]")
 
-    parameter_by_temperature_class(table, "teff_st_value",
+    database_para_temp_class_plot_prep(table, "teff_st_value",
                                    "Stellar Temperature [K]")
 
     # assert
     assert max(data["teff_st_value"]) < 45000  # O3V
     assert min(data["teff_st_value"]) > 2300  # brown dwarf
+
+def test_data_makes_sense_radius_st():
+    # want a scatter plot x axis distance and y axis temperature
+    # not sure what to assert
+    # not sure how to get data -> what to do about fill values?
+    # data
+    # loading the correct table
+    [table] = load(["star_basic"], location=Path().data)
+    # exctracting the correct columns
+    arr = table["dist_st_value", "radius_st_value"]
+    arr2 = arr[np.where(arr["dist_st_value"] != 1e20)]
+    data = arr2[np.where(arr2["radius_st_value"] != 1e20)]
+
+    # plt.figure()
+    fig, ax = plt.subplots(
+        figsize=(9, 6)
+    )  # subplots so that I can overplot old version?
+
+    ax.scatter(data["dist_st_value"], data["radius_st_value"], s=2)
+    ax.set_yscale("log")
+
+    ax.set_xlabel("Distance [pc]")
+    ax.set_ylabel("Radius [Rsun]")
+
+    database_para_temp_class_plot_prep(table, "radius_st_value",
+                                       "Stellar Radius [Rsun]")
+
+    # assert
+    assert min(data["radius_st_value"]) > 0.095  # brown dwarf
 
 
 def test_data_makes_sense_mass_pl():
