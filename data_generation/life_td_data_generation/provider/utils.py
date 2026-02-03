@@ -15,7 +15,7 @@ from astropy.table import (
     unique,
     vstack,
 )
-from pyvo.dal import TAPService
+from pyvo.dal import TAPService,DALServiceError
 
 from utils.io import load
 
@@ -94,27 +94,33 @@ def query(
     :returns: Result table returned by the TAP service.
     :rtype: astropy.table.table.Table
     """
-    service = TAPService(link)
-    if upload_tables == []:
-        result = service.run_async(
-            adql_query.format(**locals()), maxrec=1600000
-        )
-    else:
-        tables = {}
-        for i, t in enumerate(upload_tables, start=1):
-            tables[f"t{i}"] = t
-        result = service.run_async(
-            adql_query, uploads=tables, timeout=None, maxrec=1600000
-        )
+    try:
+        service = TAPService(link)
+        if upload_tables == []:
+            result = service.run_async(
+                adql_query.format(**locals()), maxrec=1600000
+            )
+        else:
+            tables = {}
+            for i, t in enumerate(upload_tables, start=1):
+                tables[f"t{i}"] = t
+            result = service.run_async(
+                adql_query, uploads=tables, timeout=None, maxrec=1600000
+            )
 
-    cat = result.to_table()
+        cat = result.to_table()
 
-    # removing descriptions because merging of data leaves wrong description
-    if no_description:
-        for col in cat.colnames:
-            cat[col].description = ""
-        cat.meta={}
-    # does not seem to work properly yet, getting warndings for exomercat/building
+        # removing descriptions because merging of data leaves wrong description
+        if no_description:
+            for col in cat.colnames:
+                cat[col].description = ""
+            cat.meta={}
+        # does not seem to work properly yet, getting warndings for exomercat/building
+        print("Service is UP and running.")
+    except DALServiceError as e:
+        print(f"Service is DOWN or unreachable. Error: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
     return cat
 
 
