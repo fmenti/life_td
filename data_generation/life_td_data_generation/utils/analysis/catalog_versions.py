@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np #arrays
 import astropy as ap #votables
 import importlib #reloading external functions after modification
@@ -214,7 +216,63 @@ def distance_boxplot_catalog_comparison(ax2):
     df=seaborn_join.to_pandas()
 
     snsplot(df,'dist_st_value')
+    return
 
+def boxplot_all_objects(catalogs: list[Any], labels, paras):
+    y_axis = ['Stellar_Distance', 'Stellar_Mass',
+              'Stellar_Radius', 'Stellar_Effective_Temperature']
+    for i in range(len(y_axis)):
+        # comparing all objects in the catalogs -> wait, I want only two cats -> add very old
+        data = [catalogs[0][paras[0][i]], catalogs[1][paras[1][i]]]
+        threecatboxplot(data, y_axis[i], labels)
+
+
+def boxplot_common_objects(common_0_1, common_1_0, labels, paras):
+    # comparing only objects that are in both catalogs
+
+    # preparing the data frame
+    if paras[0] != paras[1]:
+        join_0_1 = ap.table.join(common_0_1, common_1_0, keys='main_id')
+        save([join_0_1], [f'join_{labels[0]}_{labels[1]}'],
+             location="../" + Path().additional_data)
+        df_0_1 = prepare_dataframe_for_sns(join_0_1, [paras[0], paras[1]],
+                                           [labels[0], labels[1]])
+    else:
+        common_0_1['catalog'] = [labels[0] for j in range(len(common_0_1))]
+        common_1_0['catalog'] = [labels[1] for j in range(len(common_1_0))]
+        df_0_1 = ap.table.vstack([common_0_1, common_1_0])
+        df_0_1 = df_0_1.to_pandas()
+
+    for y in paras[0]:
+        snsplot(df_0_1, y,
+                '../' + Path().plot + f'/sns_{labels[0]}_{labels[1]}{y}')
+
+def ltc_compare( labels, paras,catalogs=[],paths=[]):
+    """
+    This function compares StarCat4 to StarCat3 and HWO catalog SPORES.
+
+    :param bool load: Defaults to True, determines if tables are created or loaded.
+    :param float distance_cut_in_pc: Defaults to 30., determines distance cut of StarCat4 if load=False.
+    """
+
+    if catalogs==[]:
+        for path in paths:
+            catalogs.append(load([path],location=Path().additional_data)[0])
+
+    common_0_1, common_1_0 = create_common(catalogs[0], catalogs[1])
+
+    boxplot_common_objects(common_0_1, common_1_0, labels, paras)
+
+    boxplot_all_objects(catalogs, labels, paras)
+
+    la.final_plot([catalogs[0]['class_temp','dist_st_value'],
+                   catalogs[1]['class_temp','dist_st_value']],
+              labels,path='../'+Path().plot+f'final_plot_{labels[0]}_{labels[1]}.png')
+
+    la.final_plot([common_0_1['class_temp','dist_st_value'],
+                   common_1_0['class_temp','dist_st_value']],
+              ['common'+labels[0],'common'+labels[1]],
+                  path='../'+Path().plot+f'final_plot_common_{labels[0]}_{labels[1]}.png')
 
     return
 
@@ -225,60 +283,3 @@ def compare():
     labels=['StarCat5','StarCat4']
     paths=['catalogs/StarCat5','StarCat4']
     ltc_compare(labels, paras,paths=paths)
-
-def ltc_compare( labels, paras,catalogs=[],paths=[]):
-    """
-    This function compares StarCat4 to StarCat3 and HWO catalog SPORES.
-
-    :param bool load: Defaults to True, determines if tables are created or loaded.
-    :param float distance_cut_in_pc: Defaults to 30., determines distance cut of StarCat4 if load=False.
-    """
-
-    boxplots = True
-    finalplots = True
-
-    if catalogs==[]:
-        for path in paths:
-            catalogs.append(load([path],location=Path().additional_data)[0])
-
-    common_0_1, common_1_0 = create_common(catalogs[0], catalogs[1])
-    join_0_1 = ap.table.join(common_0_1, common_1_0, keys='main_id')
-    save([join_0_1], [f'join_{labels[0]}_{labels[1]}'],
-         location="../"+Path().additional_data)
-
-
-    if boxplots:
-        #comparing only objects that are in both catalogs
-
-        #preparing the data frame
-        if paras[0]!=paras[1]:
-            df_0_1=prepare_dataframe_for_sns(join_0_1,[paras[0],paras[1]],
-                                             [labels[0],labels[1]])
-        else:
-            common_0_1['catalog']=[labels[0] for j in range(len(common_0_1))]
-            common_1_0['catalog']=[labels[1] for j in range(len(common_1_0))]
-            df_0_1=ap.table.vstack([common_0_1,common_1_0])
-            df_0_1=df_0_1.to_pandas()
-
-        for y in paras[0]:
-            snsplot(df_0_1,y,'../'+Path().plot+f'/sns_{labels[0]}_{labels[1]}{y}')
-
-        y_axis=['Stellar_Distance','Stellar_Mass',
-                'Stellar_Radius','Stellar_Effective_Temperature']
-        for i in range(len(y_axis)):
-        #comparing all objects in the catalogs -> wait, I want only two cats -> add very old
-            data = [catalogs[0][paras[0][i]],catalogs[1][paras[1][i]]]
-            threecatboxplot(data,y_axis[i],labels)
-
-    if finalplots:
-
-        la.final_plot([catalogs[0]['class_temp','dist_st_value'],
-                       catalogs[1]['class_temp','dist_st_value']],
-                  labels,path='../'+Path().plot+f'final_plot_{labels[0]}_{labels[1]}.png')
-
-        la.final_plot([common_0_1['class_temp','dist_st_value'],
-                       common_1_0['class_temp','dist_st_value']],
-                  ['common'+labels[0],'common'+labels[1]],
-                      path='../'+Path().plot+f'final_plot_common_{labels[0]}_{labels[1]}.png')
-
-    return
