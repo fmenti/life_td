@@ -4,8 +4,14 @@ from astropy import io
 from astropy.table import Table
 from utils.io import Path, load
 from catalog.starcat4 import starcat_creation
+from catalog.starcat5 import (
+    query_stars,
+    query_children
+)
 
 path = Path().additional_data + "catalogs/"
+
+
 
 
 def test_star_cat_looks_fine():
@@ -121,3 +127,29 @@ def test_teff_vs_dist():
     teff_vs_dist_plot(
         ltc4_data[ltc4_dist_colname], ltc4_data[ltc4_temp_colname]
     )
+
+
+#starcat5
+def test_query_stars():
+    #data
+    colnames = ['main_id', 'coo_ra', 'coo_dec', 'sptype_string', 'plx_value',
+                'dist_st_value', 'coo_gal_l', 'coo_gal_b', 'teff_st_value',
+                'teff_ref', 'mass_st_value', 'mass_ref', 'radius_st_value',
+                'radius_ref', 'binary_flag', 'binary_ref', 'mag_i_value',
+                'mag_j_value', 'class_lum', 'class_temp', 'parent_main_id',
+                'sep_ang_value']
+    #execute
+    query = query_stars("http://localhost:8080/tap",30)
+    #assert
+    assert len(query)>9000
+    assert query.colnames == colnames
+
+def test_query_children():
+    #data
+    colnames = ['child_main_id', 'child_type', 'parent_object_idref']
+    #execute
+    query = query_children("http://localhost:8080/tap")
+    #assert
+    assert len(query)>6000
+    assert query.colnames == colnames
+
