@@ -6,7 +6,22 @@ import pyvo as vo  # Used for catalog query
 from provider.utils import query
 from utils.io import save, objecttostring
 
-def unresolved_binaries(systems,children,stars):
+def flag_non_main_sequence_stars(catalog):
+    ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
+
+    catalog["ms_temp_class"] = np.where(
+        np.isin(catalog["class_temp"], ms_tempclass), "True", "False")
+
+    ms_lumclass = np.array(["V"])
+
+    catalog["ms_lum_class"] = np.where(
+        np.isin(catalog["class_lum"], ms_lumclass), "True", "False")
+
+    catalog["mass_flag"] = np.invert(catalog["mass_st_value"].mask)
+
+    return catalog
+
+def add_unresolved_binaries(systems,children,stars):
     systems_with_child_info = ap.table.join(systems, children,
                                             keys_left="object_id",
                                             keys_right="parent_object_idref",
@@ -125,5 +140,12 @@ if __name__ == "__main__":
     queried_stars = query_stars(service, 30.0)
     queried_children = query_children(service)
     queried_systems = query_systems(service, 30.0)
+
+    stars_with_ub = add_unresolved_binaries(queried_systems,
+                                      queried_children,
+                                      queried_stars)
+
+    #process the result
+    catalog = flag_non_main_sequence_stars(stars_with_ub)
 
 
