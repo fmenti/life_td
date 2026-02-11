@@ -6,6 +6,165 @@ import pyvo as vo  # Used for catalog query
 from provider.utils import query
 from utils.io import save, objecttostring
 
+def apply_stability_constraint(HZstability,a_max):
+    final = HZstability[:0].copy()  # only columns
+    # wait, didn't I already define this? -> was before removing some
+    ind = HZstability.group_by("parent_main_id").groups.indices
+
+    for i in range(len(ind) - 1):
+        if a_max < min(HZstability["a_crit_s"][ind[i]],
+                       HZstability["a_crit_s"][ind[i] + 1]):
+            final.add_row(HZstability[ind[i]])
+            final.add_row(HZstability[ind[i] + 1])
+        else:
+            print(HZstability["parent_main_id", "main_id", "a_crit_s"][ind[i]])
+            print(HZstability["parent_main_id", "main_id", "a_crit_s"][
+                      ind[i] + 1])
+
+    return final
+
+def assign_critical_separation(multiples):
+    multiples.sort("parent_main_id")
+    HZstability = multiples[multiples["suitable_companions"] == True]
+
+    # initializing column a... like sep...
+    HZstability["a_crit_s"] = HZstability["sep_phys_value"]
+
+    for i in range(len(HZstability)):
+        m_p = HZstability["mass_st_value"][i]
+        if i % 2 == 0:
+            m_s = HZstability["mass_st_value"][i + 1]
+        else:
+            m_s = HZstability["mass_st_value"][i - 1]
+        mu = m_s / (m_p + m_s)
+        HZstability["a_crit_s"][i] = \
+            crit_sep(0, mu, HZstability["sep_phys_value"][i])[0]
+        # assumed circular orbit and sep_phys = a_bin
+    return multiples, HZstability
+
+def crit_sep(eps, mu, a_bin):
+    """
+    Computes critical semimajor-axis for planet orbit stability.
+
+    For binary system as described in Holman and Wiegert 1999.
+
+    :param eps: Binary orbit excentricity.
+    :type eps:
+    :param mu: mass fraction with mu=m_s/(m_p+m_s), with m_s the mass
+        of the star considered as perturbing binary companion and m_p
+        the mass of the star the planet is orbiting.
+    :type mu:
+    :param a_bin: semimajor-axis of the binary stars.
+    :type a_bin:
+    :returns: Critical separation beyond which a planet on a S-type
+        orbit (circumstellar) and on a P-type orbit (circumbinary) is
+        not stable any more.
+    :rtype:
+    """
+    a_crit_s = (
+        0.464
+        - 0.38 * mu
+        - 0.631 * eps
+        + 0.586 * mu * eps
+        + 0.15 * eps**2
+        - 0.198 * mu * eps**2
+    ) * a_bin
+    a_crit_p = (
+        1.6
+        + 5.1 * eps
+        - 2.22 * eps**2
+        + 4.12 * mu
+        - 4.27 * eps * mu
+        - 5.09 * mu**2
+        + 4.61 * eps**2 * mu**2
+    ) * a_bin
+    return a_crit_s, a_crit_p
+
+def deal_with_separation(multiples):
+    multiples["sep_flag"] = np.invert(multiples["sep_ang_value"].mask)
+
+    # just initiating new column with same properties
+    multiples["sep_phys_value"] = multiples["sep_ang_value"]
+
+    multiples["sep_phys_value"].unit = ap.units.AU
+    for i in range(len(multiples)):
+        if multiples["sep_flag"][i] == True:
+            multiples["sep_phys_value"][i] = np.round(
+                multiples["sep_ang_value"][i] * multiples["dist_st_value"][
+                    i], 1
+            )
+    return multiples
+
+def sorting_number_of_id(input_column,occurences,match_column):
+    """
+
+    :param input_column:
+    :param occurences:
+    :param match_column: Column to with the return flag_array will belong
+    """
+
+    unique_id,number_of_repetitions=np.unique(
+        input_column,return_counts=True)
+    subset=unique_id[number_of_repetitions==occurences]
+    flag_array=np.isin(match_column,subset)
+    return flag_array
+
+def flag_hz_orbit_stability(multiples):
+    # do I need to refacture this function?
+
+    #there is some print statement in this that I want to get rid off, look at it in jupyter notebook
+
+    multiples = deal_with_separation(multiples)
+
+    multiples["requirement_flag"] = (
+        multiples["sep_flag"]
+        & (multiples["ms_temp_class"] == "True")
+        & (multiples["ms_lum_class"] == "True")
+        & multiples["mass_flag"]
+        & multiples["trivial_binaries"]
+    )
+
+    multiples["suitable_companions"] = sorting_number_of_id(
+        multiples["parent_main_id"][multiples["requirement_flag"]],
+        2, multiples["parent_main_id"])
+
+    multiples,HZstability = assign_critical_separation(multiples)
+
+    final = apply_stability_constraint(HZstability,a_max=10.0)
+
+    # final["stableHZ"]
+    # need to rewrite into flag not cut
+    # do I use catalog or multiples?
+    multiples["stableHZ"] = np.where(
+        np.isin(multiples["main_id"], final["main_id"]), "True", "False")
+
+    return multiples
+
+
+def flag_trivial_binaries(catalog,children):
+    # do I need to refacture this function?
+    singles = catalog[np.where(catalog["binary_flag"] == "False")]
+    multiples = catalog[np.where(catalog["binary_flag"] == "True")]
+
+    multiples["higher_order_multiples"] = np.isin(
+        multiples["parent_main_id"], children["child_main_id"]
+    )
+
+    multiples["single_parent"] = sorting_number_of_id(
+        multiples["main_id"], 1, multiples["main_id"])
+
+    # flag stuff like *  16 Cyg A , B, and C who all have parent *  16 Cyg
+    binaries_in_multiples_table = sorting_number_of_id(
+        multiples["parent_main_id"], 2, multiples["parent_main_id"])
+
+    multiples["trivial_binaries"] = (
+        (multiples["higher_order_multiples"] == False)
+        & multiples["single_parent"]
+        & binaries_in_multiples_table
+    )
+    return singles,multiples
+
+
 def flag_non_main_sequence_stars(catalog):
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
 
@@ -146,6 +305,15 @@ if __name__ == "__main__":
                                       queried_stars)
 
     #process the result
-    catalog = flag_non_main_sequence_stars(stars_with_ub)
+    flag_non_ms = flag_non_main_sequence_stars(stars_with_ub)
+    singles,multiples = flag_trivial_binaries(flag_non_ms,
+                                                    queried_children)
+    multiples = flag_hz_orbit_stability(multiples)
+
+    StarCat5 = ap.table.vstack([singles, multiples])
+
+    #ecliptic
+    #plots
+
 
 

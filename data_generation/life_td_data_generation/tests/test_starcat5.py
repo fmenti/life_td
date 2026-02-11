@@ -2,6 +2,9 @@ from catalog.starcat5 import (
     choose_service,
     add_unresolved_binaries,
     flag_non_main_sequence_stars,
+    sorting_number_of_id,
+    flag_trivial_binaries,
+    flag_hz_orbit_stability,
 )
 from astropy.table import Table, MaskedColumn
 import numpy as np
@@ -72,4 +75,50 @@ def test_flag_non_main_sequence_stars():
     assert len(match_table(catalog,'ms_temp_class','True'))==4
     assert len(match_table(catalog,'ms_lum_class','True'))==4
     assert len(match_table(catalog,'mass_flag',True))==5
+
+def test_sorting_number_of_id():
+    input_column = np.array(['test','test','test2','test3'])
+    match_column = np.array(['test','test2','test3','test4','test'])
+
+    flag_array = sorting_number_of_id(input_column,1,match_column)
+    print(flag_array)
+    assert match_column[flag_array][0]=='test2'
+    assert match_column[flag_array][1] == 'test3'
+    assert len(match_column[flag_array])==2
+
+def test_flag_trivial_binaries():
+    #data
+    main_id = np.array(['star1','star2','single_star',
+                               'starA','multiparent_star','multiparent_star',
+                               'tripleA','tripleB','tripleC'])
+    parent_main_id = np.array(['system1','system1','',
+                               'systemAB','parent1','parent2',
+                               'triple_parent','triple_parent','triple_parent'])
+    catalog = Table((main_id,parent_main_id,
+                     np.array(['True','True','False','True','True','True',
+                               'True','True','True'])),
+                names=('main_id', 'parent_main_id', 'binary_flag'),
+                dtype=[object, object, object])
+    children = Table((np.array(['star1','star2','systemAB','star',
+                                'tripleA','tripleB','tripleC']),
+                     np.array(['st','st','sy','st','st','st','st'])),
+                names=('child_main_id','child_type'),
+                dtype=[object, object])
+
+    singles, multiples = flag_trivial_binaries(catalog,children)
+
+    cols = ['higher_order_multiples','single_parent','trivial_binaries']
+    assert multiples.colnames == catalog.colnames + cols
+    assert singles.colnames == catalog.colnames
+    assert len(singles)==1
+    assert len(singles[np.where(singles['binary_flag']=='True')])==0
+    assert len(multiples[np.where(multiples['binary_flag']=='False')])==0
+    assert match_table(multiples,'higher_order_multiples',
+                       True)['main_id']=='starA'
+    assert match_table(multiples, 'single_parent',
+                       False)['main_id'][0] == 'multiparent_star'
+    assert len(match_table(multiples, 'single_parent',
+                       False)) == 2
+    assert len(match_table(multiples, 'trivial_binaries',
+                       True)) == 2
 
