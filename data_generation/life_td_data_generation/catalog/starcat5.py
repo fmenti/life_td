@@ -16,11 +16,6 @@ def apply_stability_constraint(HZstability,a_max):
                        HZstability["a_crit_s"][ind[i] + 1]):
             final.add_row(HZstability[ind[i]])
             final.add_row(HZstability[ind[i] + 1])
-        else:
-            print(HZstability["parent_main_id", "main_id", "a_crit_s"][ind[i]])
-            print(HZstability["parent_main_id", "main_id", "a_crit_s"][
-                      ind[i] + 1])
-
     return final
 
 def assign_critical_separation(multiples):

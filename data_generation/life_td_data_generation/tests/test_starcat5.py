@@ -4,6 +4,10 @@ from catalog.starcat5 import (
     flag_non_main_sequence_stars,
     sorting_number_of_id,
     flag_trivial_binaries,
+    deal_with_separation,
+    assign_critical_separation,
+    crit_sep,
+    apply_stability_constraint,
     flag_hz_orbit_stability,
 )
 from astropy.table import Table, MaskedColumn
@@ -122,3 +126,61 @@ def test_flag_trivial_binaries():
     assert len(match_table(multiples, 'trivial_binaries',
                        True)) == 2
 
+def test_deal_with_separation():
+    # data
+    multiples = Table((MaskedColumn([1.,100.,np.ma.masked]),
+                            np.array([True,True, False]),
+                            np.array([5.,20.,10.])),
+                names=('sep_ang_value','sep_flag','dist_st_value'),
+                dtype=[float, bool, float])
+
+    # execute
+    result = deal_with_separation(multiples)
+
+    # assert
+    assert result.colnames == ['sep_ang_value','sep_flag','dist_st_value','sep_phys_value']
+    assert result['sep_phys_value'][0] == 5.
+    assert result['sep_phys_value'][1] == 2000.
+    assert result['sep_phys_value'].mask[2] == True
+
+def test_assign_critical_separation():
+    # data
+    multiples = Table((np.array(['B_parent', 'A_parent','A_parent',
+                                 'B_parent','C_parent']),
+                       np.array([True, True, True, True, False]),
+                       np.array([5., 20., 10.,3., 1.]),
+                       np.array([1., 2., 3.,4.,5.])),
+                      names=('parent_main_id', 'suitable_companions',
+                             'sep_phys_value', 'mass_st_value'),
+                      dtype=[object, bool, float,float])
+
+    # execute
+    result, HZstability = assign_critical_separation(multiples)
+
+    # assert
+    crit_sep_B_mass1 = crit_sep(0,4/(1+4),5)[0]
+    row_B_mass_1 = match_table(HZstability,'mass_st_value',1.)
+
+    assert result.colnames == ['parent_main_id', 'suitable_companions',
+                             'sep_phys_value', 'mass_st_value']
+    assert HZstability.colnames == ['parent_main_id', 'suitable_companions',
+                               'sep_phys_value', 'mass_st_value', 'a_crit_s']
+    assert len(HZstability) == 4
+    assert result['parent_main_id'][0] == 'A_parent'
+    assert HZstability['parent_main_id'][0] == 'A_parent'
+    assert row_B_mass_1['a_crit_s'][0] == crit_sep_B_mass1
+
+def test_apply_stability_constraint():
+    # data
+    HZstability = Table((np.array(['A_parent', 'A_parent','B_parent',
+                                 'B_parent']),
+                       np.array(['star1','star2','star3','star4']),
+                       np.array([25., 20., 19.,3.])),
+                      names=('parent_main_id', 'main_id','a_crit_s'),
+                      dtype=[object, object, float])
+
+    # execute
+    result = apply_stability_constraint(HZstability,a_max=10.0)
+
+    # verify
+    assert len(result)==2
