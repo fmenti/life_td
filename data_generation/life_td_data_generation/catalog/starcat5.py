@@ -6,9 +6,37 @@ import pyvo as vo  # Used for catalog query
 from provider.utils import query
 from utils.io import save, objecttostring
 
+def ecliptic(ang, ra, dec):
+    """
+    Computes if position is within angle from the ecliptic.
+
+    Flag any object whose declination is contained within the region
+    between -(23.4+angle)*sin(RA) and +(23.4+angle)*sin(RA) with the
+    object's RA in degrees.
+
+    :param ang: Angle in degrees.
+    :type ang:
+    :param ra: Right ascention in degrees.
+    :type ra: np.array
+    :param dec: Array of declination in degrees.
+    :type dec: np.array
+    :returns: Flags.
+    :rtype: np.array
+    """
+    ecliptic = (23.4) * np.sin(2 * np.pi * ra / 360)
+    flag = [
+        "True"
+        if dec[j] > -ang + ecliptic[j] and dec[j] < ang + ecliptic[j]
+        else "False"
+        for j in range(len(ra))
+    ]
+    return flag
+
 def apply_stability_constraint(HZstability,a_max):
+    """
+    we look at objects where <10 AU planet orbits are stable
+    """
     final = HZstability[:0].copy()  # only columns
-    # wait, didn't I already define this? -> was before removing some
     ind = HZstability.group_by("parent_main_id").groups.indices
 
     for i in range(len(ind) - 1):
@@ -19,6 +47,11 @@ def apply_stability_constraint(HZstability,a_max):
     return final
 
 def assign_critical_separation(multiples):
+    """
+    assuming circular orbits and neglect projection effects of the bianry
+    separations
+
+    """
     multiples.sort("parent_main_id")
     HZstability = multiples[multiples["suitable_companions"] == True]
 
@@ -34,14 +67,15 @@ def assign_critical_separation(multiples):
         mu = m_s / (m_p + m_s)
         HZstability["a_crit_s"][i] = \
             crit_sep(0, mu, HZstability["sep_phys_value"][i])[0]
-        # assumed circular orbit and sep_phys = a_bin
     return multiples, HZstability
 
 def crit_sep(eps, mu, a_bin):
     """
     Computes critical semimajor-axis for planet orbit stability.
 
-    For binary system as described in Holman and Wiegert 1999.
+    For binary system as described in Holman and Wiegert 1999. Computes the
+    critical separation beyond which a planet on a S-type orbit is not stable
+    any more.
 
     :param eps: Binary orbit excentricity.
     :type eps:
@@ -76,6 +110,9 @@ def crit_sep(eps, mu, a_bin):
     return a_crit_s, a_crit_p
 
 def deal_with_separation(multiples):
+    """
+    transform the separation values from angular into physical
+    """
     multiples["sep_flag"] = np.invert(multiples["sep_ang_value"].mask)
 
     # just initiating new column with same properties
@@ -105,9 +142,6 @@ def sorting_number_of_id(input_column,occurences,match_column):
     return flag_array
 
 def flag_hz_orbit_stability(multiples):
-    # do I need to refacture this function?
-
-    #there is some print statement in this that I want to get rid off, look at it in jupyter notebook
 
     multiples = deal_with_separation(multiples)
 
@@ -127,9 +161,6 @@ def flag_hz_orbit_stability(multiples):
 
     final = apply_stability_constraint(HZstability,a_max=10.0)
 
-    # final["stableHZ"]
-    # need to rewrite into flag not cut
-    # do I use catalog or multiples?
     multiples["stableHZ"] = np.where(
         np.isin(multiples["main_id"], final["main_id"]), "True", "False")
 
@@ -137,14 +168,15 @@ def flag_hz_orbit_stability(multiples):
 
 
 def flag_trivial_binaries(catalog,children):
-    # do I need to refacture this function?
     singles = catalog[np.where(catalog["binary_flag"] == "False")]
     multiples = catalog[np.where(catalog["binary_flag"] == "True")]
 
+    # flag those objects, where the parent object is a child object as well
     multiples["higher_order_multiples"] = np.isin(
         multiples["parent_main_id"], children["child_main_id"]
     )
 
+    # flag objects that have multiple parent objects
     multiples["single_parent"] = sorting_number_of_id(
         multiples["main_id"], 1, multiples["main_id"])
 
@@ -176,6 +208,11 @@ def flag_non_main_sequence_stars(catalog):
     return catalog
 
 def add_unresolved_binaries(systems,children,stars):
+    """
+    add children info to systems. call systems without children unresolved binaries
+    Next we add a flag for unresolved binaries and add them to the stars to form our underlying catalog.
+
+    """
     systems_with_child_info = ap.table.join(systems, children,
                                             keys_left="object_id",
                                             keys_right="parent_object_idref",
@@ -195,6 +232,9 @@ def add_unresolved_binaries(systems,children,stars):
 
 
 def query_systems(service, distance_cut):
+    """
+    get all systems including oid parameter
+    """
     adql_query = """
     SELECT o.object_id,
         o.main_id, sb.coo_ra, sb.coo_dec, sb.sptype_string,
@@ -226,6 +266,10 @@ def query_systems(service, distance_cut):
 
 
 def query_children(service):
+    """
+    get all parent pairs children merged with child object type.
+
+    """
     adql_query = """
     SELECT o.main_id as child_main_id, o.type as child_type, h.parent_object_idref
     FROM life_td.h_link AS h
@@ -280,6 +324,9 @@ def query_stars(service, distance_cut):
     return query(service,adql_query)
 
 def choose_service(service):
+    """
+    Two different services where the LIFE Target Database is hosted.
+    """
     if service == "heid":
         return "http://dc.zah.uni-heidelberg.de/tap"
     elif service == "gvo":
@@ -307,7 +354,11 @@ if __name__ == "__main__":
 
     StarCat5 = ap.table.vstack([singles, multiples])
 
-    #ecliptic
+    angle=45
+    StarCat5[f'ecliptic_pm{angle}deg'] = ecliptic(
+        angle, StarCat5["coo_ra"], StarCat5["coo_dec"]
+    )
+    # save
     #plots
 
 
