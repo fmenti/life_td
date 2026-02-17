@@ -93,6 +93,15 @@ def decimal_sptype(i, sptype, table):
 
 
 def assign_diff_lum_classes(i, sptype, table):
+    """
+    Note that the class_lum parameter from the LIFE Target Database assumes V
+    if no luminosity class is given in the sptype_string parameter. This is
+    justified as the main sequence is the longest lasting evolutionary period
+    of a star leaving the great majority of stars in this stage. This
+    assumption was previously neccessary as the in previous LIFE-StarCat
+    versions estimated stellar effective temperature, mass and radius values
+    use a relation requiring luminosity class V.
+    """
     if len(sptype) > 1 and sptype[1] in [
         "0",
         "1",
