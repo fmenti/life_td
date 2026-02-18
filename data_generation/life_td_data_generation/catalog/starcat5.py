@@ -1,6 +1,7 @@
 import astropy as ap  # Used for votables
 import numpy as np  # Used for arrays
-import pyvo as vo  # Used for catalog query
+import os
+from pathlib import Path
 
 # Self created modules
 from provider.utils import query
@@ -335,7 +336,7 @@ def choose_service(service):
         #development_service
         return "http://localhost:8080/tap"
 
-if __name__ == "__main__":
+def main():
     service = choose_service("")
 
     queried_stars = query_stars(service, 30.0)
@@ -359,17 +360,26 @@ if __name__ == "__main__":
         angle, StarCat5["coo_ra"], StarCat5["coo_dec"]
     )
     # save
-    StarCat4 = objecttostring(StarCat5)
-    StarCat5.write(
-        "../../../additional_data/catalogs/StarCat5.ecsv", delimiter=",",
-        overwrite=True
-    )
+    StarCat5 = objecttostring(StarCat5)
+
+    project_root = Path(__file__).resolve().parents[3]  # .../life_td
+    additional_data_dir = project_root / "additional_data"
+    catalogs_dir = additional_data_dir / "catalogs"
+    catalogs_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = catalogs_dir / "StarCat5.ecsv"
+    StarCat5.write(str(out_path), delimiter=",", overwrite=True)
+
     save(
         [StarCat5],
         ["StarCat5"],
-        location="../../../additional_data/",
+        location=str(additional_data_dir) + "/",
     )
-    #plots
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 
 
 

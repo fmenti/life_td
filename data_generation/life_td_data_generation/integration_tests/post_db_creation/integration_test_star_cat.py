@@ -5,13 +5,9 @@ from astropy.table import Table
 from utils.io import Path, load
 from catalog.starcat4 import starcat_creation
 from catalog.starcat5 import (
-    choose_service,
     query_stars,
     query_children,
     query_systems,
-    add_unresolved_binaries,
-    flag_non_main_sequence_stars,
-    flag_trivial_binaries,
 )
 
 path = Path().additional_data + "catalogs/"
@@ -172,24 +168,32 @@ def test_query_systems():
     assert len(query)>2000
     assert query.colnames == colnames
 
+
+import subprocess
+import sys
+from pathlib import Path as pp
+
+
+def test_runs_as_script():
+    here = pp(__file__).resolve().parent  # .../integration_tests/post_db_creation
+    script = here.parents[
+                 1] / "catalog" / "starcat5.py"  # up 2 levels, then catalog/starcat5.py
+
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=here,  # run "as if" you launched it from post_db_creation
+        check=False,
+    )
+    assert result.returncode == 0
+
 def test_processing_doesnt_loose_objects():
-    #probably could do it in an unit test too, but covers more this way
-    #maybe do it (e.g. in plots) after creation instead of doubling code from main
-    service = choose_service("")
+    # rewrite this into plots instead of doubling code from main
+    # run starcat5 then plot tables with different flags and assert lengths
 
-    queried_stars = query_stars(service, 30.0)
-    queried_children = query_children(service)
-    queried_systems = query_systems(service, 30.0)
+    #StarCat5 = how to run main?
 
-    stars_with_ub = add_unresolved_binaries(queried_systems,
-                                            queried_children,
-                                            queried_stars)
 
-    flag_non_ms = flag_non_main_sequence_stars(stars_with_ub)
-    singles, multiples = flag_trivial_binaries(flag_non_ms,
-                                                     queried_children)
-
-    assert len(flag_non_ms)==len(stars_with_ub)
-    assert len(singles) > 6000
-    assert len(multiples) > 4000
-
+    #assert len(flag_non_ms)==len(stars_with_ub)
+    #assert len(singles) > 6000
+    #assert len(multiples) > 4000
+    assert False
