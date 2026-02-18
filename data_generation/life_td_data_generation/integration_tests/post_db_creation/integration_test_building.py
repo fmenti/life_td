@@ -63,6 +63,10 @@ def ravsdec(x_label, y_label, x, y):
     plt.scatter(x, y, s=2)
     # plt.scatter(within45deg['coo_ra'],within45deg['coo_dec'],s=2)
     # ecliptic plane in equatorial coordinates
+    if x_label == "coo_ra":
+        ecliptic = (23.4) * np.sin(2 * np.pi * ra / 360)
+        plt.plot(ra, ecliptic, color="k",label='ecliptic')
+        plt.legend()
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title("coordinate distribution")
