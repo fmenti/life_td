@@ -10,13 +10,13 @@ from catalog.starcat5 import (
     query_systems,
 )
 
-path = Path().additional_data + "catalogs/"
+c_path = Path().additional_data + "catalogs/"
 
 
 
 
 def test_star_cat_looks_fine():
-    starcat4 = starcat_creation(30,path=path)
+    starcat4 = starcat_creation(30,path=c_path)
 
     K_in_30 = starcat4[np.where(starcat4["class_temp"] == "K")]
     K_in_20 = K_in_30[np.where(K_in_30["dist_st_value"] < 20.0)]
@@ -34,7 +34,7 @@ def test_star_cat_looks_fine():
 
 
 def test_star_cat_contains_specific_objects():
-    starcat4 = starcat_creation(30,path=path)
+    starcat4 = starcat_creation(30,path=c_path)
 
     # list of important stars
     l_golden_targets = ['* alf Cen A', '* alf Cen B', '* alf Cen C',
@@ -186,14 +186,31 @@ def test_runs_as_script():
     )
     assert result.returncode == 0
 
-def test_processing_doesnt_loose_objects():
-    # rewrite this into plots instead of doubling code from main
-    # run starcat5 then plot tables with different flags and assert lengths
+def test_outcome_looks_fine():
 
-    #StarCat5 = how to run main?
+    [StarCat5] = load(['catalogs/StarCat5'])
 
+    # plot it
+    from utils.analysis.finalplot import starcat_distribution_plot
 
-    #assert len(flag_non_ms)==len(stars_with_ub)
-    #assert len(singles) > 6000
-    #assert len(multiples) > 4000
+    starcat_distribution_plot(
+        [StarCat5["class_temp", "dist_st_value"]], ["StarCat5"])
+
+    from utils.analysis.catalog_comparison_plot import (
+        spectral_type_histogram_catalog_comparison,
+    )
+
+    spectral_type_histogram_catalog_comparison(
+        [StarCat5["class_temp", "dist_st_value"]],
+        ["StarCat5"],
+        distance_colname="dist_st_value",
+        spectral_type_colname="class_temp"
+    )
+
+    assert len(StarCat5) > 10000
+    assert len(StarCat5[np.where(StarCat5['binary_flag']=='False')]) > 6000
+    assert len(StarCat5[np.where(StarCat5['unresolved_binaries'] == 'True')]) > 1500
+    assert len(StarCat5[np.where(StarCat5['stableHZ'] == 'True')]) > 400
+
+    # compare to cat 4
     assert False
