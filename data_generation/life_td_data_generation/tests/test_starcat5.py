@@ -8,7 +8,7 @@ from catalog.starcat5 import (
     assign_critical_separation,
     crit_sep,
     apply_stability_constraint,
-    flag_hz_orbit_stability,
+    flag_ecliptic,
 )
 from astropy.table import Table, MaskedColumn
 import numpy as np
@@ -184,3 +184,20 @@ def test_apply_stability_constraint():
 
     # verify
     assert len(result)==2
+    assert result['parent_main_id'][0] == 'A_parent'
+
+def test_flag_ecliptic():
+    StarCat5 = Table((np.array(['star1','star2','star3','star4']),
+                      np.array([0., 0., 90., 90.]),
+                       np.array([0., 50., 0.,-25.])),
+                      names=('main_id', 'coo_ra','coo_dec'),
+                      dtype=[object, float, float])
+    angle = 45
+    StarCat5[f'ecliptic_pm{angle}deg'] = flag_ecliptic(
+        angle, StarCat5["coo_ra"], StarCat5["coo_dec"]
+    )
+    assert 'ecliptic_pm45deg' in StarCat5.colnames
+    assert StarCat5['ecliptic_pm45deg'][0]=='True'
+    assert StarCat5['ecliptic_pm45deg'][1]=='False'
+    assert StarCat5['ecliptic_pm45deg'][2]=='True'
+    assert StarCat5['ecliptic_pm45deg'][3]=='False'

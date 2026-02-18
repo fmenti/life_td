@@ -6,7 +6,7 @@ import pyvo as vo  # Used for catalog query
 from provider.utils import query
 from utils.io import save, objecttostring
 
-def ecliptic(ang, ra, dec):
+def flag_ecliptic(ang, ra, dec):
     """
     Computes if position is within angle from the ecliptic.
 
@@ -355,10 +355,20 @@ if __name__ == "__main__":
     StarCat5 = ap.table.vstack([singles, multiples])
 
     angle=45
-    StarCat5[f'ecliptic_pm{angle}deg'] = ecliptic(
+    StarCat5[f'ecliptic_pm{angle}deg'] = flag_ecliptic(
         angle, StarCat5["coo_ra"], StarCat5["coo_dec"]
     )
     # save
+    StarCat4 = objecttostring(StarCat5)
+    StarCat5.write(
+        "../../../additional_data/catalogs/StarCat5.ecsv", delimiter=",",
+        overwrite=True
+    )
+    save(
+        [StarCat5],
+        ["StarCat5"],
+        location="../../../additional_data/",
+    )
     #plots
 
 
