@@ -352,7 +352,7 @@ def save_catalog(StarCat5):
     save(
         [StarCat5],
         ["StarCat5"],
-        location=str(additional_data_dir) + "/",
+        location=str(catalogs_dir) + "/",
     )
 
 
