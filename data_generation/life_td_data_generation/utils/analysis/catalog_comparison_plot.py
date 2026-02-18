@@ -89,4 +89,5 @@ def spectral_type_histogram_catalog_comparison(
     plt.xlabel("Spectral types")
     plt.legend(loc="upper left")
     plt.savefig(path, dpi=300)
+    plt.show()
     return

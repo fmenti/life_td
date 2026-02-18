@@ -266,4 +266,5 @@ def starcat_distribution_plot(
     ax2.set_title("Spectral type and distance distribution")
 
     plt.savefig(path, dpi=300)
+    plt.show()
     return
