@@ -336,6 +336,26 @@ def choose_service(service):
         #development_service
         return "http://localhost:8080/tap"
 
+
+
+def save_catalog(StarCat5):
+    StarCat5 = objecttostring(StarCat5)
+
+    project_root = Path(__file__).resolve().parents[3]  # .../life_td
+    additional_data_dir = project_root / "additional_data"
+    catalogs_dir = additional_data_dir / "catalogs"
+    catalogs_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = catalogs_dir / "StarCat5.ecsv"
+    StarCat5.write(str(out_path), delimiter=",", overwrite=True)
+
+    save(
+        [StarCat5],
+        ["StarCat5"],
+        location=str(additional_data_dir) + "/",
+    )
+
+
 def main():
     service = choose_service("")
 
@@ -359,22 +379,9 @@ def main():
     StarCat5[f'ecliptic_pm{angle}deg'] = flag_ecliptic(
         angle, StarCat5["coo_ra"], StarCat5["coo_dec"]
     )
-    # save
-    StarCat5 = objecttostring(StarCat5)
 
-    project_root = Path(__file__).resolve().parents[3]  # .../life_td
-    additional_data_dir = project_root / "additional_data"
-    catalogs_dir = additional_data_dir / "catalogs"
-    catalogs_dir.mkdir(parents=True, exist_ok=True)
+    save_catalog(StarCat5)
 
-    out_path = catalogs_dir / "StarCat5.ecsv"
-    StarCat5.write(str(out_path), delimiter=",", overwrite=True)
-
-    save(
-        [StarCat5],
-        ["StarCat5"],
-        location=str(additional_data_dir) + "/",
-    )
     return 0
 
 
