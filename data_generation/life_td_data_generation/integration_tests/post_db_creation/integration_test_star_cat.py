@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np  # Used for arrays
 from astropy import io
-from astropy.table import Table
+from astropy.table import Table, vstack
 from utils.io import Path, load
 from catalog.starcat4 import starcat_creation
 from catalog.starcat5 import (
@@ -9,6 +9,7 @@ from catalog.starcat5 import (
     query_children,
     query_systems,
 )
+from utils.analysis import catalog_versions
 
 c_path = Path().additional_data + "catalogs/"
 
@@ -212,5 +213,47 @@ def test_outcome_looks_fine():
     assert len(StarCat5[np.where(StarCat5['unresolved_binaries'] == 'True')]) > 1500
     assert len(StarCat5[np.where(StarCat5['stableHZ'] == 'True')]) > 400
 
+def test_rmt_spread():
+    [StarCat5] = load(['catalogs/StarCat5'])
+    paras = ['radius_st_value', 'mass_st_value', 'teff_st_value']
+
+    def plotting(paras):
+        arr = StarCat5[paras[0], paras[1]]
+        arr2 = arr[np.where(arr[paras[0]] != 1e20)]
+        data = arr2[np.where(arr2[paras[1]] != 1e20)]
+
+        fig, ax = plt.subplots(
+            figsize=(9, 6)
+        )  # subplots so that I can overplot old version?
+
+        ax.scatter(data[paras[0]], data[paras[1]], s=2)
+        # ax.set_yscale("log")
+
+        ax.set_xlabel(paras[0])
+        ax.set_ylabel(paras[1])
+        plt.show()
+
+    for i in paras:
+        for j in paras:
+            if i != j:
+                plotting([i, j])
+
+def test_like4_in_starcat5():
+
+    [StarCat5] = load(['catalogs/StarCat5'])
+    [StarCat4] = load(['StarCat4'])
+
     # compare to cat 4
-    assert False
+    like4_singles_prep = StarCat5[np.where(StarCat5["ms_lum_class"] == "True")]
+    like4_singles = like4_singles_prep[
+        np.where(like4_singles_prep["binary_flag"] == "False")]
+    # might need to add class criterion
+    StarCat5_like4 = vstack(
+        [StarCat5[np.where(StarCat5["stableHZ"] == "True")], like4_singles])
+
+    para4 = ['coo_ra', 'coo_dec', 'plx_value', 'dist_st_value', 'coo_gal_l',
+             'coo_gal_b',
+             'teff_st_value', 'radius_st_value', 'mass_st_value',
+             'sep_phys_value', 'mag_i_value', 'mag_j_value']
+    catalog_versions.ltc_compare(["cat4_2025", "cat5_like4"], [para4, para4],
+                   catalogs=[StarCat4, StarCat5_like4])
