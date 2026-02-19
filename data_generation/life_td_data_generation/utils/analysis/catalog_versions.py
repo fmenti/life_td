@@ -14,9 +14,6 @@ from utils.io import save, load, stringtoobject, Path
 from utils.analysis.catalog_comparison import create_common
 import utils.analysis.analysis as la
 importlib.reload(la)#reload module after changing it
-#import starcat4 as ltc4
-#import LIFE_StarCat4 as ltc4
-#importlib.reload(ltc4)#reload module after changing it
 import provider as p
 importlib.reload(p)#reload module after changing it
 
@@ -117,7 +114,7 @@ def threecatboxplot(data,para,labels):
     plt.ylabel(para)
     # Creating plot
     bp = ax.boxplot(data, labels=labels)
-    plt.savefig('../'+Path().plot+para+'allcat_total.png', bbox_inches = 'tight')
+    plt.savefig(Path().plot+para+'_allcat_total.png', bbox_inches = 'tight')
     # show plot
     plt.show()
     return
@@ -167,7 +164,7 @@ def boxplot_common_objects(common_0_1, common_1_0, labels, paras):
 
     for y in paras[0]:
         snsplot(df_0_1, y,
-                '../' + Path().plot + f'/sns_{labels[0]}_{labels[1]}{y}')
+                 Path().plot + f'sns_{labels[0]}_{labels[1]}{y}')
 
 def ltc_compare( labels, paras,catalogs=[],paths=[]):
     """
@@ -189,12 +186,12 @@ def ltc_compare( labels, paras,catalogs=[],paths=[]):
 
     la.final_plot([catalogs[0]['class_temp','dist_st_value'],
                    catalogs[1]['class_temp','dist_st_value']],
-              labels,path='../'+Path().plot+f'final_plot_{labels[0]}_{labels[1]}.png')
+              labels,path=Path().plot+f'final_plot_{labels[0]}_{labels[1]}.png')
 
     la.final_plot([common_0_1['class_temp','dist_st_value'],
                    common_1_0['class_temp','dist_st_value']],
               ['common'+labels[0],'common'+labels[1]],
-                  path='../'+Path().plot+f'final_plot_common_{labels[0]}_{labels[1]}.png')
+                  path=Path().plot+f'final_plot_common_{labels[0]}_{labels[1]}.png')
 
     return
 
