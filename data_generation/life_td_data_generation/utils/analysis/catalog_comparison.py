@@ -527,8 +527,8 @@ def create_common(cat1, cat2):
     :rtype: list(astropy.table.table.Table)
     """
     common_stars = np.intersect1d(list(cat1["main_id"]), list(cat2["main_id"]))
-    common_cat1 = cat1[np.where(np.in1d(cat1["main_id"], common_stars))]
-    common_cat2 = cat2[np.where(np.in1d(cat2["main_id"], common_stars))]
+    common_cat1 = cat1[np.where(np.isin(cat1["main_id"], common_stars))]
+    common_cat2 = cat2[np.where(np.isin(cat2["main_id"], common_stars))]
     common_cat2 = stringtoobject(common_cat2, number=1000)
     common_cat1 = stringtoobject(common_cat1, number=1000)
     return common_cat1, common_cat2
