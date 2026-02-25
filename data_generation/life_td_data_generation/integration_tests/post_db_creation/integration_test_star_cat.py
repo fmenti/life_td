@@ -231,6 +231,7 @@ def test_rmt_spread():
 
         ax.set_xlabel(paras[0])
         ax.set_ylabel(paras[1])
+        plt.savefig(Path().plot+'/rmt_spread_'+paras[0]+paras[1], dpi=300)
         plt.show()
 
     for i in paras:
