@@ -168,12 +168,13 @@ def test_data_makes_sense_mass_st_class():
     data = database_para_temp_class_plot_prep(table, "mass_st_value",
                                    "Stellar Mass [Msun]")
 
-    #would also be nice to do it for all masses not just bestmass. need a join for that
+    # would also be nice to do it for all masses not just bestmass. need a join for that
 
     temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
     maxlist=[60.,18.,2.7,1.75,1.10,0.92,0.6]
     minlist=[17.,2.,1.5,1.,0.85,0.55,0.074]
-    #wait, those are ms numbers. -> masses shouldn't change much with age just radii
+    # wait, those are ms numbers.
+    # -> masses shouldn't change much with age just radii
 
     for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
         testcase = data["mass_st_value"][np.where(data["class_temp"] == tempclass)]
@@ -249,9 +250,10 @@ def test_data_makes_sense_mass_pl():
     plot_data_and_fit("Planetary Mass", data, [1, 1, 0])
 
     # assert
-    assert max(data) < 75  # m star
+    assert max(data) < 75  # m star (in jupiter masses)
     assert min(data) > 0
     # not working for distance cut 20
+    # one object with 515 Mjup which would actually be a m star
     # looks like they have 0 values in there
 
 
