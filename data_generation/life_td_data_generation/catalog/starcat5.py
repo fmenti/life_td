@@ -357,7 +357,7 @@ def save_catalog(StarCat5):
 
 
 def main():
-    service = choose_service("")
+    service = choose_service("gvo")
 
     queried_stars = query_stars(service, 30.0)
     queried_children = query_children(service)
