@@ -11,6 +11,7 @@ tables may change at any time without prior warning.
 </macDef>
 
     <meta name="title">The LIFE Target Star Database LIFETD</meta>
+    <meta name="version">1.3</meta>
     <meta name="description" format="rst">
     The LIFE Target Star Database contains information useful
     for the planned `LIFE mission`_ (mid-ir, nulling
@@ -1426,7 +1427,7 @@ tables may change at any time without prior warning.
             The input catalog for the LIFE yield estimations (LIFE-StarCat) is
             created using the following query in addition to some postprocessing
             in regards of multiplicity afterwards. If you want to access the latest version of the catalog go to `LIFE-StarCat`_
-            
+
             .. _LIFE-StarCat: https://drive.google.com/file/d/12F7N0w3kGHJw3FBbf_P6xF9Pers38wbu/view?usp=sharing
 
             .. tapquery::
