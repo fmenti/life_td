@@ -182,6 +182,27 @@ def test_data_makes_sense_mass_st_class():
             assert max(testcase) < maxvalue
             assert min(testcase) > minvalue
 
+def test_data_makes_sense_teff_st_class():
+    # data
+    [table] = load(["star_basic"], location=Path().data)
+
+    data = database_para_temp_class_plot_prep(table, "teff_st_value",
+                                   "Stellar Temperature [K]")
+
+    # would also be nice to do it for all masses not just bestmass. need a join for that
+
+    temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
+    maxlist=[45000.,31500.,10000.,7300,5950.,5300.,3900.]
+    minlist=[31500.,10000.,7300.,5950.,5300.,3900.,2300.]
+    # wait, those are ms numbers.
+    # even around 10 MS M stars currently have too high temps from gaia-gspec
+
+    for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
+        testcase = data["teff_st_value"][np.where(data["class_temp"] == tempclass)]
+        if len(testcase)>0:
+            assert max(testcase) < maxvalue
+            assert min(testcase) > minvalue
+
 
 def test_data_makes_sense_temp_st():
     # want a scatter plot x axis distance and y axis temperature
