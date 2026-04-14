@@ -1,10 +1,12 @@
-"""
-Generates the data for the database for each of the data providers separately.
-"""
+"""Generate WDS provider data for the database."""
 
+from __future__ import annotations
+
+from typing import Any, Sequence
 
 import numpy as np  # arrays
 from astropy.table import Table, join, unique, vstack
+
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
     create_provider_table,
@@ -16,128 +18,122 @@ from provider.utils import (
 from sdata import empty_dict
 from utils.io import load, save
 
+def _print_test_matches(label: str, values: Sequence[Any],
+                        candidates: Table, column: str) -> None:
+    """Print matching test objects for a given candidate column."""
+    if len(values) == 0:
+        return
+    print(
+        label,
+        values[np.where(np.isin(values, candidates[column]))],
+    )
 
-def load_wds_helptab():
+def load_wds_helptab() -> Table:
+    """Load the cached WDS helper table.
+
+    :returns: Cached WDS helper table.
+    :rtype: astropy.table.Table
+    """
     print(" loading...")
     [wds_helptab] = load(["wds_helptab"])
     # currently temp=True not giving same result because
     # wds['system_main_id'][j] are '' and not masked
     for col in ["system_main_id", "primary_main_id", "secondary_main_id"]:
         wds_helptab[col][np.where(wds_helptab[col] == "")] = np.ma.masked
+
     # tbd: add provider_access of last query
     return wds_helptab
 
 
-def assign_names(wds_helptab):
+def assign_names(wds_helptab: Table) -> Table:
+    """Assign WDS system/component names.
+
+    :param wds_helptab: Raw WDS helper table.
+    :type wds_helptab: astropy.table.Table
+    :returns: Helper table with name columns populated.
+    :rtype: astropy.table.Table
+    """
     for j in range(len(wds_helptab)):
-        if wds_helptab["wds_comp"][j] == "":  # trivial binaries
-            wds_helptab["system_name"][j] = (
-                "WDS J" + wds_helptab["wds_name"][j] + "AB"
-            )
-            # AB added since simbad calls trivial binary system AB too
-            wds_helptab["primary"][j] = (
-                "WDS J" + wds_helptab["wds_name"][j] + "A"
-            )
-            wds_helptab["secondary"][j] = (
-                "WDS J" + wds_helptab["wds_name"][j] + "B"
-            )
-        else:  # higer order multiples
-            wds_helptab["system_name"][j] = (
-                "WDS J"
-                + wds_helptab["wds_name"][j]
-                + wds_helptab["wds_comp"][j]
-            )
-            if len(wds_helptab["wds_comp"][j]) == 2:
-                wds_helptab["primary"][j] = (
-                    "WDS J"
-                    + wds_helptab["wds_name"][j]
-                    + wds_helptab["wds_comp"][j][0]
-                )
-                wds_helptab["secondary"][j] = (
-                    "WDS J"
-                    + wds_helptab["wds_name"][j]
-                    + wds_helptab["wds_comp"][j][1]
-                )
-            else:
-                if "," in wds_helptab["wds_comp"][j]:
-                    components = wds_helptab["wds_comp"][j].split(",")
-                    wds_helptab["primary"][j] = (
-                        "WDS J" + wds_helptab["wds_name"][j] + components[0]
-                    )
-                    wds_helptab["secondary"][j] = (
-                        "WDS J" + wds_helptab["wds_name"][j] + components[1]
-                    )
-                else:
-                    print(
-                        "not sure how to handle: ", wds_helptab["wds_comp"][j]
-                    )
+        wds_name = wds_helptab["wds_name"][j]
+        wds_comp = wds_helptab["wds_comp"][j]
+
+        if wds_comp == "":  # trivial binaries
+            wds_helptab["system_name"][j] = f"WDS J{wds_name}AB"
+            # AB added since SIMBAD calls trivial binary system AB too.
+            wds_helptab["primary"][j] = f"WDS J{wds_name}A"
+            wds_helptab["secondary"][j] = f"WDS J{wds_name}B"
+            continue
+
+        # Higher-order multiples.
+        wds_helptab["system_name"][j] = f"WDS J{wds_name}{wds_comp}"
+        if len(wds_comp) == 2:
+            wds_helptab["primary"][j] = f"WDS J{wds_name}{wds_comp[0]}"
+            wds_helptab["secondary"][j] = f"WDS J{wds_name}{wds_comp[1]}"
+        elif "," in wds_comp:
+            comp_a, comp_b = wds_comp.split(",", maxsplit=1)
+            wds_helptab["primary"][j] = f"WDS J{wds_name}{comp_a}"
+            wds_helptab["secondary"][j] = f"WDS J{wds_name}{comp_b}"
+        else:
+            print("not sure how to handle:", wds_comp)
+
     return wds_helptab
 
 
-def look_at_test_objects_after_name_assignment(test_objects, wds_helptab):
-    if len(test_objects) > 0:
-        print(
-            "in wds as system_name",
-            test_objects[
-                np.where(np.isin(test_objects, wds_helptab["system_name"]))
-            ],
-        )
-        print(
-            "in wds as primary",
-            test_objects[
-                np.where(np.isin(test_objects, wds_helptab["primary"]))
-            ],
-        )
-        print(
-            "in wds as secondary",
-            test_objects[
-                np.where(np.isin(test_objects, wds_helptab["secondary"]))
-            ],
-        )
+def look_at_test_objects_after_name_assignment(
+    test_objects: np.ndarray,
+    wds_helptab: Table,
+) -> None:
+    """Print which test objects match the derived WDS name columns."""
+    _print_test_matches("in wds as system_name", test_objects, wds_helptab,
+                        "system_name")
+    _print_test_matches("in wds as primary", test_objects, wds_helptab,
+                        "primary")
+    _print_test_matches("in wds as secondary", test_objects, wds_helptab,
+                        "secondary")
 
 
-def look_at_test_objects_after_wds_creation(test_objects, wds_helptab):
-    if len(test_objects) > 0:
-        print(
-            wds_helptab[
-                "system_main_id", "primary_main_id", "secondary_main_id"
-            ]
-        )
-        print(
-            "in wds as system_main_id",
-            test_objects[
-                np.where(np.isin(test_objects, wds_helptab["system_main_id"]))
-            ],
-        )
-        print(
-            "in wds as primary_main_id",
-            test_objects[
-                np.where(np.isin(test_objects, wds_helptab["primary_main_id"]))
-            ],
-        )
-        print(
-            "in wds as secondary_main_id",
-            test_objects[
-                np.where(
-                    np.isin(test_objects, wds_helptab["secondary_main_id"])
-                )
-            ],
-        )
+def look_at_test_objects_after_wds_creation(
+    test_objects: np.ndarray,
+    wds_helptab: Table,
+) -> None:
+    """Print which test objects match the main-id columns after creation."""
+    if len(test_objects) == 0:
+        return
+
+    print(wds_helptab["system_main_id", "primary_main_id",
+                      "secondary_main_id"])
+    _print_test_matches("in wds as system_main_id", test_objects, wds_helptab,
+                        "system_main_id")
+    _print_test_matches("in wds as primary_main_id", test_objects,
+                        wds_helptab, "primary_main_id")
+    _print_test_matches("in wds as secondary_main_id", test_objects,
+                        wds_helptab, "secondary_main_id")
 
 
-def create_wds_helptab(adql_query, test_objects, wds):
+def create_wds_helptab(
+    adql_query: list[str],
+    test_objects: np.ndarray,
+    wds: dict[str, Table],
+) -> Table:
+    """Query WDS and build the helper table.
+
+    :param adql_query: Query list; the first query is used here.
+    :type adql_query: list[str]
+    :param test_objects: Objects used for debug prints.
+    :type test_objects: numpy.ndarray
+    :param wds: Provider table dictionary.
+    :type wds: dict[str, astropy.table.Table]
+    :returns: WDS helper table.
+    :rtype: astropy.table.Table
+    """
     print(" querying VizieR for WDS...")
     wds_helptab = query(wds["provider"]["provider_url"][0], adql_query[0])
-    # I need to match the wds objects with the simbad ones to inforce the
-    # distance cut since wds does not have distance information.
-    # initializing and setting type for object comparison in later join
+
+    # Match WDS objects with SIMBAD-derived objects to enforce the distance cut.
     for col in ["sim_wds_id", "system_name", "primary", "secondary"]:
         wds_helptab[col] = wds_helptab["wds_name"].astype(object)
-    # assigning correct name of system, primary and secondary for each
-    # wds object
+
     wds_helptab = assign_names(wds_helptab)
-    # print('number of trivial binary systems:',
-    #   len(wds[np.where(wds['wds_comp']=='')]))
     look_at_test_objects_after_name_assignment(test_objects, wds_helptab)
     # an alternative would be to query simbad for the main id and then cut
     # by distance
@@ -145,18 +141,15 @@ def create_wds_helptab(adql_query, test_objects, wds):
     #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
     #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
     print(" performing distance cut...")
-    # assigning main_id for system using sim_hlink and cutting on the system
-    #  or the components
-    wds_system_cut = distance_cut(
-        wds_helptab, colname="system_name", main_id=False
-    )
+    wds_system_cut = distance_cut(wds_helptab, colname="system_name",
+                                  main_id=False)
     wds_system_cut.rename_column("main_id", "system_main_id")
-    wds_primary_cut = distance_cut(
-        wds_helptab, colname="primary", main_id=False
-    )
-    wds_secondary_cut = distance_cut(
-        wds_helptab, colname="secondary", main_id=False
-    )
+
+    wds_primary_cut = distance_cut(wds_helptab, colname="primary",
+                                   main_id=False)
+    wds_secondary_cut = distance_cut(wds_helptab, colname="secondary",
+                                     main_id=False)
+
     [sim_h_link] = load(["sim_h_link"])
     # joining parent object
     wds_primary_cut = join(
@@ -166,8 +159,10 @@ def create_wds_helptab(adql_query, test_objects, wds):
         join_type="left",
     )
     wds_primary_cut.rename_columns(
-        ["main_id", "parent_main_id"], ["primary_main_id", "system_main_id"]
+        ["main_id", "parent_main_id"],
+        ["primary_main_id", "system_main_id"],
     )
+
     wds_secondary_cut = join(
         wds_secondary_cut,
         sim_h_link["main_id", "parent_main_id"],
@@ -175,7 +170,8 @@ def create_wds_helptab(adql_query, test_objects, wds):
         join_type="left",
     )
     wds_secondary_cut.rename_columns(
-        ["main_id", "parent_main_id"], ["secondary_main_id", "system_main_id"]
+        ["main_id", "parent_main_id"],
+        ["secondary_main_id", "system_main_id"],
     )
     # here some empty ones when child is known in simbad but no parent. in
     # this case would I want to assign system_name in system main_id? do it
@@ -187,72 +183,70 @@ def create_wds_helptab(adql_query, test_objects, wds):
     return wds_helptab
 
 
-def create_wds_helpertable(temp, test_objects):
-    """
-    Creates helper table.
+def create_wds_helpertable(
+        temp: bool,
+        test_objects: Sequence[str],
+) -> tuple[Table, dict[str, Table]]:
+    """Create the WDS helper table and provider metadata.
 
-    If temp is True load instead of query data to save time.
-
-    :param bool temp: Wether to load or query WDS.
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Helper table and dictionary of database table names and tables.
-    :rtype: astropy.table.table.Table, dict(str,astropy.table.table.Table)
+    :param temp: If ``True``, load the cached helper table.
+    :type temp: bool
+    :param test_objects: Debug object identifiers.
+    :type test_objects: collections.abc.Sequence[str]
+    :returns: Helper table and provider dictionary.
+    :rtype: tuple[astropy.table.Table, dict[str, astropy.table.Table]]
     """
-    wds = empty_dict.copy()
+    wds: dict[str, Table] = empty_dict.copy()
     wds["provider"] = create_provider_table(
         "WDS",
         "http://tapvizier.u-strasbg.fr/TAPVizieR/tap",
         "2001AJ....122.3466M",
     )
-    # define queries
+
     adql_query = [
-        """SELECT
-                    WDS as wds_name, Comp as wds_comp,
-                    sep1 as wds_sep1, sep2 as wds_sep2,
-                    Obs1 as wds_obs1, Obs2 as wds_obs2
-                    FROM "B/wds/wds" """
+        """SELECT WDS  as wds_name,
+                  Comp as wds_comp,
+                  sep1 as wds_sep1,
+                  sep2 as wds_sep2,
+                  Obs1 as wds_obs1,
+                  Obs2 as wds_obs2
+           FROM "B/wds/wds" """
     ]
 
     print("Creating ", wds["provider"]["provider_name"][0], " tables ...")
-    # perform query for objects with parallax >50mas
-    test_objects = np.array(test_objects)
+    test_objects_arr = np.array(test_objects)
+
     if temp:
         wds_helptab = load_wds_helptab()
     else:
-        wds_helptab = create_wds_helptab(adql_query, test_objects, wds)
+        wds_helptab = create_wds_helptab(adql_query, test_objects_arr, wds)
 
     wds_helptab["system_main_id"] = wds_helptab["system_main_id"].astype(object)
     wds_helptab["system_name"] = wds_helptab["system_name"].astype(object)
-
     return wds_helptab, wds
 
 
-def create_ident_and_h_link_table(wds_helptab, wds, test_objects):
-    """
-    Creates identifier and hierarchical link tables.
+def create_ident_and_h_link_table(
+        wds_helptab: Table,
+        wds: dict[str, Table],
+        test_objects: Sequence[str],
+) -> tuple[Table, Table]:
+    """Create identifier and hierarchical-link tables.
 
     :param wds_helptab: WDS helper table.
-    :type wds_helptab: astropy.table.table.Table
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Identifier and hierarchical link tables.
-    :rtype: astropy.table.table.Table, astropy.table.table.Table
+    :type wds_helptab: astropy.table.Table
+    :param wds: Provider dictionary.
+    :type wds: dict[str, astropy.table.Table]
+    :param test_objects: Debug object identifiers.
+    :type test_objects: collections.abc.Sequence[str]
+    :returns: Identifier and hierarchical-link tables.
+    :rtype: tuple[astropy.table.Table, astropy.table.Table]
     """
-    # -----------------creating output table wds_ident and wds_h_link
-    wds_ident = Table(
-        names=["main_id", "id"], dtype=[object, object], masked=True
-    )
-    # create wds_h_link (for systems)
-    wds_h_link = Table(
-        names=["main_id", "parent_main_id"], dtype=[object, object]
-    )
-    # add all relevant invormation
-    # about identifiers
+    wds_ident = Table(names=["main_id", "id"], dtype=[object, object],
+                      masked=True)
+    wds_h_link = Table(names=["main_id", "parent_main_id"],
+                       dtype=[object, object])
+
     table_main = [
         "system_name",
         "system_main_id",
@@ -275,6 +269,7 @@ def create_ident_and_h_link_table(wds_helptab, wds, test_objects):
         "secondary_main_id",
         "secondary",
     ]
+
     empty = Table(names=["main_id"], dtype=[object], masked=True)
     for id1, id2 in zip(table_main, table_id):
         temp = empty.copy()
@@ -282,7 +277,6 @@ def create_ident_and_h_link_table(wds_helptab, wds, test_objects):
         temp["id"] = wds_helptab[id2].astype(object)
         wds_ident = vstack([wds_ident, temp])
 
-    # about relations of objects
     table_main_id = [
         "primary",
         "primary",
@@ -314,7 +308,6 @@ def create_ident_and_h_link_table(wds_helptab, wds, test_objects):
     wds_h_link.remove_rows(wds_h_link["main_id"].mask.nonzero()[0])
     wds_h_link.remove_rows(wds_h_link["parent_main_id"].mask.nonzero()[0])
 
-    # uniqueness
     wds_ident = unique(wds_ident)
     wds_h_link = unique(wds_h_link)
 
@@ -341,226 +334,184 @@ def create_ident_and_h_link_table(wds_helptab, wds, test_objects):
     if len(test_objects) > 0:
         print(
             "number of test objects that are in h_link main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_h_link["main_id"]))
-            ],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_h_link["main_id"]))],
         )
         print(
             "number of test objects that are in h_link parent_main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_h_link["parent_main_id"]))
-            ],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_h_link["parent_main_id"]))],
         )
         print(
             "number of test objects that are in main_id of ident table \n",
-            test_objects[np.where(np.isin(test_objects, wds_ident["main_id"]))],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_ident["main_id"]))],
         )
         print(
-            "number of test objects that are in main_id of h_link but not ident table \n",
+            "number of test objects that are in main_id of h_link but not "
+            "ident table \n",
             test_objects[
-                np.where(
-                    np.isin(test_objects, wds_h_link["main_id"][not_main_id])
-                )
+                np.where(np.isin(test_objects,
+                                 wds_h_link["main_id"][not_main_id]))
             ],
         )
 
-    # replace it with the corresponding  ident main_id
-    for j in range(len(wds_h_link["main_id"][not_main_id])):
-        temp = wds_h_link["main_id"][not_main_id][j]
-        # why is this line not working? am I assigning stuff to a copy instead
-        # of alias?
+    for temp in wds_h_link["main_id"][not_main_id]:
         wds_h_link["main_id"][np.where(wds_h_link["main_id"] == temp)] = (
             wds_ident["main_id"][np.where(wds_ident["id"] == temp)]
         )
 
-    if len(test_objects) > 0:
-        print(
-            "number of test objects that are in h_link main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_h_link["main_id"]))
-            ],
-        )
-        print(
-            "number of test objects that are in main_id of ident table \n",
-            test_objects[np.where(np.isin(test_objects, wds_ident["main_id"]))],
-        )
-
-    # where h_link parent_main_id not in ident_main_id
     not_parent_main_id = np.invert(
         np.isin(wds_h_link["parent_main_id"], wds_ident["main_id"])
     )
 
-    # replace it with the corresponding  ident main_id
-    for j in range(len(wds_h_link["parent_main_id"][not_parent_main_id])):
-        if (
-            len(
-                wds_ident["main_id"][
-                    np.where(
-                        wds_ident["id"]
-                        == wds_h_link["parent_main_id"][not_parent_main_id][j]
-                    )
-                ]
-            )
-            == 1
-        ):
-            temp = wds_h_link["parent_main_id"][not_parent_main_id][j]
+    for temp in wds_h_link["parent_main_id"][not_parent_main_id]:
+        if len(wds_ident["main_id"][np.where(wds_ident["id"] == temp)]) == 1:
             wds_h_link["parent_main_id"][
                 np.where(wds_h_link["parent_main_id"] == temp)
             ] = wds_ident["main_id"][np.where(wds_ident["id"] == temp)]
-        # else:
-        # nestled multiples with non hierarchical measurements e.g. AC component
-        # when A and B are closest and C further away
-        # print(wds_ident['main_id'][np.where(
-        #        wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])])
-        # print(wds_h_link['parent_main_id'][not_parent_main_id][j])
-        # print(wds_h_link['main_id'][not_parent_main_id][j])
-        # wds_h_link['parent_main_id'][not_parent_main_id][j]=wds_ident['main_id'][np.where(
-        #        wds_ident['id']==wds_h_link['parent_main_id'][not_parent_main_id][j])][0]
 
     wds_h_link = unique(wds_h_link)
 
-    # refs
     wds_ident["id_ref"] = [
-        wds["provider"]["provider_bibcode"][0] for j in range(len(wds_ident))
+        wds["provider"]["provider_bibcode"][0] for _ in range(len(wds_ident))
     ]
     wds_h_link["h_link_ref"] = [
-        wds["provider"]["provider_bibcode"][0] for j in range(len(wds_h_link))
+        wds["provider"]["provider_bibcode"][0] for _ in range(len(wds_h_link))
     ]
     return wds_ident, wds_h_link
 
 
-def create_objects_table(wds_helptab, wds, test_objects):
-    """
-    Creates object table.
+def create_objects_table(
+        wds_helptab: Table,
+        wds: dict[str, Table],
+        test_objects: Sequence[str],
+) -> Table:
+    """Create the object table.
 
-    - All objects start as systems
-    - We find which objects have no children in the hierarchical link table
-    - Those without children are reclassified as stars
+    Objects start as systems, then objects without children are reclassified
+    as stars.
 
     :param wds_helptab: WDS helper table.
-    :type wds_helptab: astropy.table.table.Table
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
+    :type wds_helptab: astropy.table.Table
+    :param wds: Provider dictionary.
+    :type wds: dict[str, astropy.table.Table]
+    :param test_objects: Debug object identifiers.
+    :type test_objects: collections.abc.Sequence[str]
     :returns: Object table.
-    :rtype: astropy.table.table.Table
+    :rtype: astropy.table.Table
     """
-    # Create object table with identifiers
     wds_objects = Table(names=["main_id", "ids"], dtype=[object, object])
     wds_objects = ids_from_ident(wds["ident"]["main_id", "id"], wds_objects)
+    wds_objects["type"] = ["sy" for _ in range(len(wds_objects))]
 
-    # Initialize all objects as systems ('sy')
-    wds_objects["type"] = ["sy" for j in range(len(wds_objects))]
-
-    # Identify objects that are NOT parents (i.e., they have no children)
     has_no_children = np.invert(
         np.isin(wds_objects["main_id"], wds["h_link"]["parent_main_id"])
     )
-
-    # Objects with no children are stars ('st'), not systems
     wds_objects["type"][has_no_children] = "st"
 
     if len(test_objects) > 0:
         print(
             "number of test objects that are in objects main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_objects["main_id"]))
-            ],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_objects["main_id"]))],
         )
     return wds_objects
 
 
-def create_mes_binary_table(wds_helptab, wds, test_objects):
-    """
-    Creates binarity table.
+def create_mes_binary_table(
+        wds_helptab: Table,
+        wds: dict[str, Table],
+        test_objects: Sequence[str],
+) -> Table:
+    """Create the binary measurement table.
 
     :param wds_helptab: WDS helper table.
-    :type wds_helptab: astropy.table.table.Table
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Binarity table.
-    :rtype: astropy.table.table.Table
+    :type wds_helptab: astropy.table.Table
+    :param wds: Provider dictionary.
+    :type wds: dict[str, astropy.table.Table]
+    :param test_objects: Debug object identifiers.
+    :type test_objects: collections.abc.Sequence[str]
+    :returns: Binary measurement table.
+    :rtype: astropy.table.Table
     """
-    wds_mes_binary = wds["objects"][
-        "main_id", "type"
-    ]  # [np.where(wds_objects['type']=='sy')]
+    wds_mes_binary = wds["objects"]["main_id", "type"]
     wds_mes_binary.rename_column("type", "binary_flag")
     wds_mes_binary["binary_flag"] = wds_mes_binary["binary_flag"].astype(object)
-    wds_mes_binary["binary_flag"] = ["True" for j in range(len(wds_mes_binary))]
+    wds_mes_binary["binary_flag"] = [
+        "True" for _ in range(len(wds_mes_binary))
+    ]
     wds_mes_binary["binary_ref"] = [
         wds["provider"]["provider_bibcode"][0]
-        for j in range(len(wds_mes_binary))
+        for _ in range(len(wds_mes_binary))
     ]
     wds_mes_binary = assign_quality(
-        wds_mes_binary, "binary_qual", special_mode="wds_binary"
+        wds_mes_binary,
+        "binary_qual",
+        special_mode="wds_binary",
     )
 
     if len(test_objects) > 0:
         print(
             "number of test objects that are in mes_binary main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_mes_binary["main_id"]))
-            ],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_mes_binary["main_id"]))],
         )
     return wds_mes_binary
 
 
-def create_mes_sep_ang_table(wds_helptab, wds, test_objects):
-    """
-    Creates angular separation table.
+def create_mes_sep_ang_table(
+        wds_helptab: Table,
+        wds: dict[str, Table],
+        test_objects: Sequence[str],
+) -> Table:
+    """Create the angular-separation measurement table.
 
     :param wds_helptab: WDS helper table.
-    :type wds_helptab: astropy.table.table.Table
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: Angular separation table.
-    :rtype: astropy.table.table.Table
+    :type wds_helptab: astropy.table.Table
+    :param wds: Provider dictionary.
+    :type wds: dict[str, astropy.table.Table]
+    :param test_objects: Debug object identifiers.
+    :type test_objects: collections.abc.Sequence[str]
+    :returns: Angular-separation measurement table.
+    :rtype: astropy.table.Table
     """
     wds_mes_sep_ang0 = join(
-        wds_helptab[
-            "system_name", "wds_sep1", "wds_obs1", "wds_sep2", "wds_obs2"
-        ],
+        wds_helptab["system_name", "wds_sep1", "wds_obs1", "wds_sep2",
+        "wds_obs2"],
         wds["ident"]["main_id", "id"],
         keys_left="system_name",
         keys_right="id",
     )
-    # replacing empty system_main_id with main_id from ident using system_name column
-    # masked_system_main_id=wds['system_main_id'].mask.nonzero()[0]
-    # for j in range(len(wds[masked_system_main_id])):
-    #   wds['system_main_id'][masked_system_main_id][j]=wds_ident['main_id'][np.where(
-    #          wds_ident['id']==wds['system_name'][masked_system_main_id][j])]
+
     wds_mes_sep_ang1 = wds_mes_sep_ang0["main_id", "wds_sep1", "wds_obs1"]
     wds_mes_sep_ang1.rename_columns(
-        ["wds_sep1", "wds_obs1"], ["sep_ang_value", "sep_ang_obs_date"]
+        ["wds_sep1", "wds_obs1"],
+        ["sep_ang_value", "sep_ang_obs_date"],
     )
     wds_mes_sep_ang1 = assign_quality(
-        wds_mes_sep_ang1, "sep_ang_qual", special_mode="wds_sep1"
+        wds_mes_sep_ang1,
+        "sep_ang_qual",
+        special_mode="wds_sep1",
     )
-    # issue, what if system_main_id is empty?
 
     wds_mes_sep_ang2 = wds_mes_sep_ang0["main_id", "wds_sep2", "wds_obs2"]
     wds_mes_sep_ang2.rename_columns(
-        ["wds_sep2", "wds_obs2"], ["sep_ang_value", "sep_ang_obs_date"]
+        ["wds_sep2", "wds_obs2"],
+        ["sep_ang_value", "sep_ang_obs_date"],
     )
     wds_mes_sep_ang2 = assign_quality(
-        wds_mes_sep_ang2, "sep_ang_qual", special_mode="wds_sep2"
+        wds_mes_sep_ang2,
+        "sep_ang_qual",
+        special_mode="wds_sep2",
     )
-    wds_mes_sep_ang = vstack([wds_mes_sep_ang1, wds_mes_sep_ang2])
 
+    wds_mes_sep_ang = vstack([wds_mes_sep_ang1, wds_mes_sep_ang2])
     wds_mes_sep_ang["sep_ang_ref"] = [
         wds["provider"]["provider_bibcode"][0]
-        for j in range(len(wds_mes_sep_ang))
+        for _ in range(len(wds_mes_sep_ang))
     ]
-    # wds_mes_sep_ang.rename_column('system_main_id','main_id')
-    # remove columns where sep_ang_value is masked
+
     wds_mes_sep_ang.remove_columns(
         wds_mes_sep_ang["sep_ang_value"].mask.nonzero()[0]
     )
@@ -575,9 +526,7 @@ def create_mes_sep_ang_table(wds_helptab, wds, test_objects):
         unique_known_obs_date = unique(
             wds_mes_sep_ang[
                 np.where(
-                    np.invert(
-                        wds_mes_sep_ang["sep_ang_obs_date"].mask.nonzero()[0]
-                    )
+                    np.invert(wds_mes_sep_ang["sep_ang_obs_date"].mask.nonzero()[0])
                 )
             ],
             keys=["main_id", "sep_ang_value", "sep_ang_obs_date"],
@@ -591,54 +540,52 @@ def create_mes_sep_ang_table(wds_helptab, wds, test_objects):
     if len(test_objects) > 0:
         print(
             "number of test objects that are in mes_sep_ang main_id \n",
-            test_objects[
-                np.where(np.isin(test_objects, wds_mes_sep_ang["main_id"]))
-            ],
+            test_objects[np.where(np.isin(test_objects,
+                                          wds_mes_sep_ang["main_id"]))],
         )
 
     return wds_mes_sep_ang
 
 
-def create_wds_sources_table(wds):
-    """
-    Creates sources table.
+def create_wds_sources_table(wds: dict[str, Table]) -> Table:
+    """Create the sources table.
 
-    :param wds: Dictionary of database table names and tables.
-    :type wds: dict(str,astropy.table.table.Table)
+    :param wds: Provider dictionary.
+    :type wds: dict[str, astropy.table.Table]
     :returns: Sources table.
-    :rtype: astropy.table.table.Table
+    :rtype: astropy.table.Table
     """
     tables = [wds["provider"], wds["ident"]]
-    # define header name of columns containing references data
     ref_columns = [["provider_bibcode"], ["id_ref"]]
-    wds_sources = create_sources_table(
-        tables, ref_columns, wds["provider"]["provider_name"][0]
+    return create_sources_table(
+        tables,
+        ref_columns,
+        wds["provider"]["provider_name"][0],
     )
-    return wds_sources
 
 
-def provider_wds(temp=False, test_objects=[]):
+def provider_wds(temp: bool = False,
+                 test_objects: Sequence[str] | None = None) -> dict[str, Table]:
+    """Build all WDS provider tables.
+
+    :param temp: If ``True``, load cached helper data instead of querying.
+    :type temp: bool
+    :param test_objects: Debug object identifiers. Defaults to an empty list.
+    :type test_objects: collections.abc.Sequence[str] | None
+    :returns: Provider table dictionary.
+    :rtype: dict[str, astropy.table.Table]
     """
-    This function obtains and arranges wds data.
+    if test_objects is None:
+        test_objects = []
 
-    :param bool temp: Defaults to False. Used for debugging. saves querrying time.
-    :param test_objects: Objects to be tested where they drop out of the
-        criteria or make it till the end.
-    :type test_objects: list(str)
-    :returns: List of astropy tables containing
-        reference data, provider data, object data, identifier data, object to
-        object relation data, basic stellar data and binarity data.
-    :rtype:  list(astropy.table.table.Table)
-    """
     wds_helptab, wds = create_wds_helpertable(temp, test_objects)
     wds["ident"], wds["h_link"] = create_ident_and_h_link_table(
         wds_helptab, wds, test_objects
     )
     wds["objects"] = create_objects_table(wds_helptab, wds, test_objects)
     wds["mes_binary"] = create_mes_binary_table(wds_helptab, wds, test_objects)
-    wds["mes_sep_ang"] = create_mes_sep_ang_table(
-        wds_helptab, wds, test_objects
-    )
+    wds["mes_sep_ang"] = create_mes_sep_ang_table(wds_helptab, wds,
+                                                  test_objects)
     wds["sources"] = create_wds_sources_table(wds)
 
     save(list(wds.values()), ["wds_" + element for element in list(wds.keys())])
