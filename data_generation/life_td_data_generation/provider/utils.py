@@ -19,6 +19,19 @@ from pyvo.dal import TAPService,DALServiceError
 
 from utils.io import load
 
+def sorting_number_of_id(input_column,occurences,match_column):
+    """
+
+    :param input_column:
+    :param occurences:
+    :param match_column: Column to with the return flag_array will belong
+    """
+
+    unique_id,number_of_repetitions=np.unique(
+        input_column,return_counts=True)
+    subset=unique_id[number_of_repetitions==occurences]
+    flag_array=np.isin(match_column,subset)
+    return flag_array
 
 def initiate_columns(
     table_obj: Table, columns: list[str], types: list[type], mask: list[bool]
