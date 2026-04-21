@@ -99,7 +99,7 @@ def look_at_test_objects_after_wds_creation(
     """Print which test objects match the main-id columns after creation."""
     if len(test_objects) == 0:
         return
-
+    print("test objects matching main-id columns after creation:")
     print(wds_helptab["system_main_id", "primary_main_id",
                       "secondary_main_id"])
     _print_test_matches("in wds as system_main_id", test_objects, wds_helptab,
@@ -247,7 +247,7 @@ def create_ident_and_h_link_table(
     wds_h_link = Table(names=["main_id", "parent_main_id"],
                        dtype=[object, object])
 
-    table_main = [
+    id_cols_1 = [
         "system_name",
         "system_main_id",
         "system_main_id",
@@ -258,7 +258,7 @@ def create_ident_and_h_link_table(
         "secondary_main_id",
         "secondary_main_id",
     ]
-    table_id = [
+    id_cols_2 = [
         "system_name",
         "system_main_id",
         "system_name",
@@ -271,13 +271,13 @@ def create_ident_and_h_link_table(
     ]
 
     empty = Table(names=["main_id"], dtype=[object], masked=True)
-    for id1, id2 in zip(table_main, table_id):
+    for id1, id2 in zip(id_cols_1, id_cols_2):
         temp = empty.copy()
         temp["main_id"] = wds_helptab[id1].astype(object)
         temp["id"] = wds_helptab[id2].astype(object)
         wds_ident = vstack([wds_ident, temp])
 
-    table_main_id = [
+    relation_cols_1 = [
         "primary",
         "primary",
         "primary_main_id",
@@ -287,7 +287,7 @@ def create_ident_and_h_link_table(
         "secondary_main_id",
         "secondary_main_id",
     ]
-    table_parent = [
+    relation_cols_2 = [
         "system_name",
         "system_main_id",
         "system_name",
@@ -297,7 +297,7 @@ def create_ident_and_h_link_table(
         "system_name",
         "system_main_id",
     ]
-    for id1, id2 in zip(table_main_id, table_parent):
+    for id1, id2 in zip(relation_cols_1, relation_cols_2):
         temp = empty.copy()
         temp["main_id"] = wds_helptab[id1].astype(object)
         temp["parent_main_id"] = wds_helptab[id2].astype(object)
@@ -332,6 +332,7 @@ def create_ident_and_h_link_table(
     )
 
     if len(test_objects) > 0:
+        test_objects=np.array(test_objects)
         print(
             "number of test objects that are in h_link main_id \n",
             test_objects[np.where(np.isin(test_objects,
@@ -411,6 +412,7 @@ def create_objects_table(
     wds_objects["type"][has_no_children] = "st"
 
     if len(test_objects) > 0:
+        test_objects=np.array(test_objects)
         print(
             "number of test objects that are in objects main_id \n",
             test_objects[np.where(np.isin(test_objects,
@@ -452,6 +454,7 @@ def create_mes_binary_table(
     )
 
     if len(test_objects) > 0:
+        test_objects=np.array(test_objects)
         print(
             "number of test objects that are in mes_binary main_id \n",
             test_objects[np.where(np.isin(test_objects,
@@ -538,6 +541,7 @@ def create_mes_sep_ang_table(
         wds_mes_sep_ang = unique(wds_mes_sep_ang)
 
     if len(test_objects) > 0:
+        test_objects=np.array(test_objects)
         print(
             "number of test objects that are in mes_sep_ang main_id \n",
             test_objects[np.where(np.isin(test_objects,
