@@ -12,6 +12,7 @@ from provider.utils import (
     create_sources_table,
     initiate_columns,
     replace_value,
+    sorting_number_of_id
 )
 from sdata import empty_dict
 from utils.io import Path, load, save, stringtoobject
@@ -583,6 +584,14 @@ def create_life_sources_table(life):
     )
     return life_sources
 
+def triple_star_handling():
+    #load wds ident and h_link
+
+    print(ident[sorting_number_of_id(ident["main_id"],3,ident["main_id"])])
+    #update ident and h_link
+    #in building, prioritize live over wds and simbad
+    return
+
 
 def provider_life():
     """
@@ -606,6 +615,8 @@ def provider_life():
     life["mes_radius_st"] = create_mes_radius_st_table(life_helptab)
     life["mes_mass_st"] = create_mes_mass_st_table(life_helptab)
     life["sources"] = create_life_sources_table(life)
+
+    triple_star_handling()
 
     save(
         list(life.values()),
