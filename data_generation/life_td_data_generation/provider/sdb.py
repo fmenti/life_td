@@ -9,6 +9,7 @@ from provider.utils import (
     create_provider_table,
     create_sources_table,
     fetch_main_id,
+    replace_value,
 )
 from sdata import empty_dict
 from utils.io import save, stringtoobject
@@ -143,7 +144,11 @@ def create_disk_basic_table(sdb_helptab):
         ["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"],
         ["main_id", "rad_value", "rad_err", "rad_ref"],
     )
-    disk_basic = disk_basic[np.where(np.isfinite(disk_basic["rad_value"]))]
+    for column in ["rad_value", "rad_err"]:
+        disk_basic[column].fill_value='1e+20'
+        disk_basic = replace_value(disk_basic,column,'None','1e+20')
+        disk_basic[column] = disk_basic[column].astype(float)
+    disk_basic = disk_basic[np.where(disk_basic["rad_value"]!=1e+20)]
     return disk_basic
 
 
@@ -163,7 +168,7 @@ def provider_sdb(distance_cut_in_pc, data):
         "Grant Kennedy Disks",
         "http://drgmk.com/sdb/",
         "priv. comm.",
-        "2024-02-09",
+        "2026-04-28",
     )
     sdb_helptab = create_sdb_helpertable(
         distance_cut_in_pc, sdb["provider"]["provider_bibcode"][0], data

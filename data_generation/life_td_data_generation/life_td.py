@@ -85,7 +85,7 @@ def partial_create(distance_cut_in_pc, create=[]):
 
     provider_tables_dict = empty_provider_tables_dict.copy()
     data = io.votable.parse_single_table(
-        Path().additional_data + "sdb_30pc_09_02_2024.xml"
+        Path().additional_data + "sdb_200pc_28_04_2026.xml"
     ).to_table()
     functions = [
         provider_simbad,
