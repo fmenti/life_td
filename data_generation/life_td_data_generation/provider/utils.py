@@ -90,7 +90,7 @@ def create_provider_table(
 
 def query(
     link: str, adql_query: str, upload_tables: list[table.Table] = [],
-    no_description=True
+    no_description=True, sync=False
 ) -> table.Table:
     """
     Perform a TAP query against a service.
@@ -109,15 +109,23 @@ def query(
     """
     try:
         service = TAPService(link)
+
+        if sync:
+            print("Running synchronously")
+            run_query = service.run_sync
+        else:
+            print("Running asynchronously")
+            run_query = service.run_async
+
         if upload_tables == []:
-            result = service.run_async(
+            result = run_query(
                 adql_query.format(**locals()), maxrec=1600000
             )
         else:
             tables = {}
             for i, t in enumerate(upload_tables, start=1):
                 tables[f"t{i}"] = t
-            result = service.run_async(
+            result = run_query(
                 adql_query, uploads=tables, timeout=None, maxrec=1600000
             )
 
