@@ -21,7 +21,7 @@ def model_exp_decay(x, a, b, c):
     return a * np.exp(-b * x) + c
 
 
-def plot_data_and_fit(title, data, p0):
+def plot_data_and_fit(title, data, p0,fit=True, bins = 10):
     """
     Plot histogram of data with an exponential decay fit.
 
@@ -34,22 +34,23 @@ def plot_data_and_fit(title, data, p0):
     plt.title(title)
 
     # Create histogram
-    bins = 10
     bin_heights, bin_borders, _ = plt.hist(
         data, bins=bins, density=True, label="pdf of data"
     )
     bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
 
-    # Fit exponential decay model
-    popt, _ = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)
-    a_opt, b_opt, c_opt = popt
+    if fit:
+        # Fit exponential decay model
+        popt, _ = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)
+        a_opt, b_opt, c_opt = popt
 
-    # Create fitted curve
-    x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
-    y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
+        # Create fitted curve
+        x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
+        y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
 
-    # Plot fitted curve
-    plt.plot(x_model, y_model, color="r", label="fit")
+
+        # Plot fitted curve
+        plt.plot(x_model, y_model, color="r", label="fit")
 
     # Add labels and legend
     plt.ylabel("amount of objects")
@@ -97,11 +98,11 @@ def test_data_makes_sense_main_id():
     dist_dist = Table(
         data=[
             [5, 10, 30],
-            [420, 1728, 22107],
+            [420, 1728, 22107],# does not scale beyond
             [205, 931, 15869],
             [101, 413, 4625],
             [113, 366, 1464],
-            [6, 18, 149],
+            [6, 18, 149], # does not scale beyond
         ],
         names=["dist", "total", "st", "sy", "pl", "di"],
         dtype=[float, float, float, float, float, float],
@@ -142,8 +143,11 @@ def test_data_makes_sense_main_id():
     assert total < 2 and total > 0.5
     assert st < 1.5 and st > 0.5
     assert sy < 1.5 and sy > 0.4
-    assert pl < 1.5 and pl > 0.3
-    assert di < 0.4 and di > 0.1
+    if distance_cut <= 30.:
+        assert pl < 1.5 and pl > 0.3
+        assert di < 0.4 and di > 0.1
+    else:
+        print('behavior <30pc not scalable for disks and planets')
     # tbd make this via analytical and not just experimental numbers
 
 
@@ -151,7 +155,9 @@ def test_data_makes_sense_mass_st():
     # data
     data = get_data("mes_mass_st", "mass_st_value")
 
-    plot_data_and_fit("Stellar Mass", data, [1, 8, 0])
+    plot_data_and_fit("Stellar Mass", data, [1, 8, 0],
+                      bins = 100
+)
 
     #add one function that plots the masses binned by temperature class
     #ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
@@ -175,6 +181,10 @@ def test_data_makes_sense_mass_st_class():
     minlist=[17.,2.,1.5,1.,0.85,0.55,0.074]
     # wait, those are ms numbers.
     # -> masses shouldn't change much with age just radii
+
+    # issues, gaia mass vs simbad sptype?
+    # mass A star too low -> find object in db and have closer look
+    #bad qual sptype and gaia flame mass -> does gaia offer sptype?
 
     for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
         testcase = data["mass_st_value"][np.where(data["class_temp"] == tempclass)]
@@ -268,7 +278,7 @@ def test_data_makes_sense_mass_pl():
     # data
     data = get_data("mes_mass_pl", "mass_pl_value")
 
-    plot_data_and_fit("Planetary Mass", data, [1, 1, 0])
+    plot_data_and_fit("Planetary Mass", data, [1, 0.1, 0.1])
 
     # assert
     assert max(data) < 75  # m star (in jupiter masses)
@@ -337,19 +347,32 @@ def test_data_makes_sense_plx():
     # data
     data = get_data("star_basic", "plx_value")
 
-    plot_data_and_fit("Stellar Parallax", data, [0.03, 0.01, 0.001])
+    plot_data_and_fit("Stellar Parallax", data, [1, 0.1, 0.1],fit = False)
 
     # assert
-    assert min(data) > 28  # 35 pc equivalent marcsec
+    assert min(data) > 1/(distance_cut+distance_cut/10.)*1000
     assert min(data) < 1000  # 1 pc equivalent marcsec
-
+# not working, doin it differently in simbad:     plx_cut = plx_in_mas_cut - plx_in_mas_cut / 10.0
+# maybe instead do a sharp cut and deal with boundary objects later?
 
 def test_data_makes_sense_dist_st():
     # data
     data = get_data("star_basic", "dist_st_value")
 
-    plot_data_and_fit("Stellar Distance", data, [1, -1, 0])
+    plot_data_and_fit("Stellar Distance", data, [1, -0.5, 0])
 
     # assert
-    assert min(data) < 35
+    assert min(data) < distance_cut+distance_cut/10.
     assert min(data) > 1
+
+def test_data_makes_sense_dist_rad():
+    # data
+    data = get_data("disk_basic", "rad_value")
+    data=data.astype(float)
+
+    plot_data_and_fit("Disk Radius", data, [1, 0.1, 0.1])
+
+    #stuff not working yet because vertical lines and no other parameter in disk
+    # assert
+    #assert min(data) < distance_cut+distance_cut/10.
+    #assert min(data) > 1
