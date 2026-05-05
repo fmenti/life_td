@@ -137,18 +137,29 @@ def create_disk_basic_table(sdb_helptab):
     :rtype: astropy.table.table.Table
     """
     disk_basic = sdb_helptab["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"]
+    missing_value = 1e20
+
     for column in ["rdisk_bb", "e_rdisk_bb"]:
-        if len(sdb_helptab[column].mask.nonzero()[0]) > 0:
-            print("careful, masked entries in ", column)
+        if hasattr(sdb_helptab[column], "mask"):
+            if len(sdb_helptab[column].mask.nonzero()[0]) > 0:
+                print(
+                    "careful, masked entries in ",
+                    column,
+                    " filling them with 1e+20",
+                )
+
+        disk_basic = replace_value(disk_basic, column, "None",
+                                   str(missing_value))
+
+        filled_column = disk_basic[column].filled(str(missing_value))
+        disk_basic[column] = np.asarray(filled_column, dtype=float)
+
     disk_basic.rename_columns(
         ["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"],
         ["main_id", "rad_value", "rad_err", "rad_ref"],
     )
-    for column in ["rad_value", "rad_err"]:
-        disk_basic[column].fill_value='1e+20'
-        disk_basic = replace_value(disk_basic,column,'None','1e+20')
-        disk_basic[column] = disk_basic[column].astype(float)
-    disk_basic = disk_basic[np.where(disk_basic["rad_value"]!=1e+20)]
+
+    disk_basic = disk_basic[np.where(disk_basic["rad_value"] != missing_value)]
     return disk_basic
 
 
