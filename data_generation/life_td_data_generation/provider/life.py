@@ -586,10 +586,26 @@ def create_life_sources_table(life):
 
 def triple_star_handling():
     #load wds ident and h_link
+    [wds_ident,wds_h_link] = load(["wds_ident","wds_h_link"])
 
-    print(ident[sorting_number_of_id(ident["main_id"],3,ident["main_id"])])
+    triple_ident = wds_ident[sorting_number_of_id(wds_ident["main_id"],
+                                         3,wds_ident["main_id"])]
+    print(triple_ident)
+    triple_systems = unique(triple_ident,keys ='main_id')['main_id']
+    print(triple_systems)
+
+    print(wds_h_link[np.where(np.isin(wds_h_link["parent_main_id"],
+                                      triple_systems))])
+
+    temp_ident = triple_ident
+    for i in range(len(triple_ident)):
+        if triple_ident["id"][i][-2:] =='AB':
+            temp_ident["main_id"][i] = f'{triple_ident["main_id"][i]}{triple_ident['id'][i][-2:]}'
+    print(temp_ident)
     #update ident and h_link
     #in building, prioritize live over wds and simbad
+    # not really working, each system has their own special cases.
+    #better make first sure that I really need this.
     return
 
 
@@ -616,7 +632,7 @@ def provider_life():
     life["mes_mass_st"] = create_mes_mass_st_table(life_helptab)
     life["sources"] = create_life_sources_table(life)
 
-    triple_star_handling()
+    #triple_star_handling()
 
     save(
         list(life.values()),
