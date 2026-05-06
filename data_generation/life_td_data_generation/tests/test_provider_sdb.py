@@ -1,10 +1,10 @@
+# import pytest
+import numpy as np  # arrays
 from astropy.io.votable import parse_single_table
 from astropy.table import Table
 from provider.sdb import create_sdb_helpertable, provider_sdb
 from utils.io import Path
 
-# import pytest
-import numpy as np  # arrays
 
 # @pytest.mark.dependency(depends=["test_fetch_main_id"])
 def test_create_sdb_helpertable():

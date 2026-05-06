@@ -1,10 +1,11 @@
 import numpy as np
 from astropy.table import Table, setdiff
+from life_td import load_cat
 
 # self created modules
 from sdata import empty_dict_wit_columns
-from utils.io import string_to_object_whole_dict, save
-from life_td import load_cat
+from utils.io import save, string_to_object_whole_dict
+
 
 def test_load_cat():
     # data

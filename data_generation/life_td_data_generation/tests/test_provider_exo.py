@@ -5,31 +5,31 @@ Covers data access (query/load) and downstream table builders.
 """
 
 import numpy as np
-from astropy.table import MaskedColumn, Table, Column
-from provider.utils import create_provider_table
-from provider.exo import (
-    create_ident_table,
-    create_objects_table,
-    create_object_main_id,
-    deal_with_mass_nullvalues,
-    create_para_exo_mes_mass_pl,
-    bestmass_better_qual,
-    assign_new_qual,
-    betterthan,
-    align_quality_with_bestmass,
-    create_mes_mass_pl_table,
-    create_exo_helpertable,
-    create_h_link_table,
-    create_exo_sources_table,
-)
-from sdata import empty_dict
-import pytest
 import provider.exo as exo_module
-
+import pytest
+from astropy.table import Column, MaskedColumn, Table
+from provider.exo import (
+    align_quality_with_bestmass,
+    assign_new_qual,
+    bestmass_better_qual,
+    betterthan,
+    create_exo_helpertable,
+    create_exo_sources_table,
+    create_h_link_table,
+    create_ident_table,
+    create_mes_mass_pl_table,
+    create_object_main_id,
+    create_objects_table,
+    create_para_exo_mes_mass_pl,
+    deal_with_mass_nullvalues,
+)
+from provider.utils import create_provider_table
+from sdata import empty_dict
 
 # -----------------
 # Local test helpers
 # -----------------
+
 
 def _mk_base_with_spaces() -> Table:
     """
@@ -224,8 +224,9 @@ def _mk_full_mass_fixture() -> Table:
     )
     return exo_helptab
 
+
 def test_create_exo_helpertable(
-        monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """
     Verify helper-table creation, distance cut, stripping, SIMBAD join,
@@ -245,7 +246,9 @@ def test_create_exo_helpertable(
 
     captured_distance_args: dict[str, object] = {}
 
-    def fake_distance_cut(cat: Table, colname: str, main_id: bool = True) -> Table:
+    def fake_distance_cut(
+        cat: Table, colname: str, main_id: bool = True
+    ) -> Table:
         captured_distance_args["colname"] = colname
         captured_distance_args["main_id"] = main_id
         return cat[:1].copy()
@@ -469,7 +472,7 @@ def test_create_object_main_id() -> None:
 
 
 def test_create_exo_helpertable(
-        monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """
     Verify helper-table creation, distance cut, stripping, SIMBAD join,
@@ -491,7 +494,9 @@ def test_create_exo_helpertable(
     # 2) Mock distance_cut to drop the second row (simulate outside distance).
     captured_distance_args: dict[str, object] = {}
 
-    def fake_distance_cut(cat: Table, colname: str, main_id: bool = True) -> Table:
+    def fake_distance_cut(
+        cat: Table, colname: str, main_id: bool = True
+    ) -> Table:
         captured_distance_args["colname"] = colname
         captured_distance_args["main_id"] = main_id
         # Keep only the first row
@@ -549,6 +554,7 @@ def test_create_exo_helpertable(
     removed = saved["removed_objects"]
     assert "exomercat_name" in removed.colnames
     assert "HD 2 c" in set(removed["exomercat_name"])
+
 
 def test_exo_create_ident_table():
     # data
@@ -681,22 +687,22 @@ def test_create_para_exo_mes_mass_pl() -> None:
     sinitable = create_para_exo_mes_mass_pl(exo_helptab, "msini", "True")
 
     assert (
-            sinitable["mass_pl_value"][
-                np.where(sinitable["main_id"] == "*   3 Cnc b")
-            ]
-            == 20.76
+        sinitable["mass_pl_value"][
+            np.where(sinitable["main_id"] == "*   3 Cnc b")
+        ]
+        == 20.76
     )
     assert (
-            sinitable["mass_pl_err_max"][
-                np.where(sinitable["main_id"] == "*   6 Lyn b")
-            ]
-            == 0.873
+        sinitable["mass_pl_err_max"][
+            np.where(sinitable["main_id"] == "*   6 Lyn b")
+        ]
+        == 0.873
     )
     assert (
-            sinitable["mass_pl_err_min"][
-                np.where(sinitable["main_id"] == "*   6 Lyn b")
-            ]
-            == 1.067
+        sinitable["mass_pl_err_min"][
+            np.where(sinitable["main_id"] == "*   6 Lyn b")
+        ]
+        == 1.067
     )
 
 
@@ -787,29 +793,30 @@ def test_create_mes_mass_pl_table() -> None:
         np.where(exo_mes_mass_pl["mass_pl_sini_flag"] == "False")
     ]
     assert (
-            table["mass_pl_value"][np.where(table["main_id"] == "*   3 Cnc b")]
-            == 20.76
+        table["mass_pl_value"][np.where(table["main_id"] == "*   3 Cnc b")]
+        == 20.76
     )
     assert (
-            table["mass_pl_err_max"][np.where(table["main_id"] == "*   6 Lyn b")]
-            == 0.873
+        table["mass_pl_err_max"][np.where(table["main_id"] == "*   6 Lyn b")]
+        == 0.873
     )
     assert (
-            table["mass_pl_err_min"][np.where(table["main_id"] == "*   6 Lyn b")]
-            == 1.067
+        table["mass_pl_err_min"][np.where(table["main_id"] == "*   6 Lyn b")]
+        == 1.067
     )
     assert (
-            table["mass_pl_err_max"][
-                np.where(table["main_id"] == "*   4 Mon B .01")
-            ]
-            == 1e20
+        table["mass_pl_err_max"][
+            np.where(table["main_id"] == "*   4 Mon B .01")
+        ]
+        == 1e20
     )
     assert (
-            table["bestmass_provenance"][
-                np.where(table["main_id"] == "*   4 Mon B .01")
-            ]
-            == "Mass"
+        table["bestmass_provenance"][
+            np.where(table["main_id"] == "*   4 Mon B .01")
+        ]
+        == "Mass"
     )
+
 
 def test_create_h_link_table() -> None:
     """
@@ -842,6 +849,7 @@ def test_create_h_link_table() -> None:
     assert list(result["main_id"]) == ["Planet-1", "Planet-2"]
     assert list(result["parent_main_id"]) == ["Host-A", "Host-B"]
     assert list(result["h_link_ref"]) == ["2025Test.Bib", "2025Test.Bib"]
+
 
 def test_create_exo_sources_table() -> None:
     """
@@ -886,4 +894,3 @@ def test_create_exo_sources_table() -> None:
     assert expected_refs.issubset(set(sources["ref"]))
     # all provider_name entries should match the single provider
     assert set(sources["provider_name"]) == {"ExoMercat"}
-

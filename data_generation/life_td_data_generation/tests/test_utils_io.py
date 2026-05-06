@@ -4,9 +4,10 @@ from sdata import empty_dict_wit_columns
 from utils.io import (
     objecttostring,
     save,
+    string_to_object_whole_dict,
     stringtoobject,
-    string_to_object_whole_dict
 )
+
 
 def test_objecttostring():
     # data

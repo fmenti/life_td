@@ -1,6 +1,6 @@
-from astropy.table import Table
-from provider.wds import query, create_objects_table, assign_names
 import numpy as np
+from astropy.table import Table
+from provider.wds import assign_names, create_objects_table, query
 
 
 def test_wds_columns_queryable():
@@ -153,7 +153,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B", "System AB"],
                 ["Star B", "Star B", "System AB"],
-            ]
+            ],
         )
 
         wds_h_link = Table(
@@ -162,7 +162,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B"],
                 ["System AB", "System AB"],
-            ]
+            ],
         )
 
         wds = {
@@ -191,7 +191,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B", "System AB"],
                 ["Star B", "Star B", "System AB"],
-            ]
+            ],
         )
 
         wds_h_link = Table(
@@ -200,7 +200,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B"],
                 ["System AB", "System AB"],
-            ]
+            ],
         )
 
         wds = {
@@ -225,7 +225,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B", "System AB"],
                 ["Star A", "Star B", "System AB"],
-            ]
+            ],
         )
 
         wds_h_link = Table(
@@ -234,7 +234,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B"],
                 ["System AB", "System AB"],
-            ]
+            ],
         )
 
         wds = {
@@ -264,7 +264,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star 1", "Star 2", "Star 3"],
                 ["Star 2", "Star 2", "Star 3"],
-            ]
+            ],
         )
 
         wds_h_link = Table(
@@ -293,7 +293,7 @@ class TestCreateObjectsTable:
             data=[
                 ["System 1", "System 2"],
                 ["System 1", "System 2"],
-            ]
+            ],
         )
 
         # Mock h_link where both systems have children (not in ident table)
@@ -301,9 +301,9 @@ class TestCreateObjectsTable:
             names=["main_id", "parent_main_id"],
             dtype=[object, object],
             data=[
-                ["Child A", "Child B" ],
+                ["Child A", "Child B"],
                 ["System 1", "System 2"],
-            ]
+            ],
         )
 
         wds = {
@@ -327,16 +327,16 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B", "Star C", "Binary AB", "Triple ABC"],
                 ["Star A", "Star B", "Star C", "Binary AB", "Triple ABC"],
-            ]
+            ],
         )
 
         wds_h_link = Table(
             names=["main_id", "parent_main_id"],
             dtype=[object, object],
             data=[
-                ["Star A", "Star B","Binary AB","Star C"],
-                ["Binary AB", "Binary AB","Triple ABC","Triple ABC"],
-            ]
+                ["Star A", "Star B", "Binary AB", "Star C"],
+                ["Binary AB", "Binary AB", "Triple ABC", "Triple ABC"],
+            ],
         )
 
         wds = {
@@ -353,14 +353,16 @@ class TestCreateObjectsTable:
         # Individual stars should be type 'st'
         for star in ["Star A", "Star B", "Star C"]:
             star_row = result[result["main_id"] == star]
-            assert star_row["type"][
-                       0] == "st", f"{star} should be classified as star"
+            assert star_row["type"][0] == "st", (
+                f"{star} should be classified as star"
+            )
 
         # Systems should be type 'sy'
         for system in ["Binary AB", "Triple ABC"]:
             system_row = result[result["main_id"] == system]
-            assert system_row["type"][
-                       0] == "sy", f"{system} should be classified as system"
+            assert system_row["type"][0] == "sy", (
+                f"{system} should be classified as system"
+            )
 
     def test_with_test_objects(self, capsys):
         """Test that test_objects are properly reported when present."""
@@ -371,7 +373,7 @@ class TestCreateObjectsTable:
             data=[
                 ["Star A", "Star B"],
                 ["Star A", "Star B"],
-            ]
+            ],
         )
 
         wds_h_link = Table(

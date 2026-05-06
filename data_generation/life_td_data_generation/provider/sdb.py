@@ -148,8 +148,9 @@ def create_disk_basic_table(sdb_helptab):
                     " filling them with 1e+20",
                 )
 
-        disk_basic = replace_value(disk_basic, column, "None",
-                                   str(missing_value))
+        disk_basic = replace_value(
+            disk_basic, column, "None", str(missing_value)
+        )
 
         filled_column = disk_basic[column].filled(str(missing_value))
         disk_basic[column] = np.asarray(filled_column, dtype=float)

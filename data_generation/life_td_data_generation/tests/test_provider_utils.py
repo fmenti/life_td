@@ -1,21 +1,20 @@
+from datetime import datetime
+
+import numpy as np  # arrays
+import provider.utils as utils_module
+import pytest
+from astropy.table import Table, setdiff
 from provider.utils import (
-    fill_sources_table,
-    create_sources_table,
-    create_provider_table,
-    fetch_main_id,
-    lower_quality,
     IdentifierCreator,
     OidCreator,
-    distance_cut
+    create_provider_table,
+    create_sources_table,
+    distance_cut,
+    fetch_main_id,
+    fill_sources_table,
+    lower_quality,
 )
-import pytest
-import provider.utils as utils_module
-from datetime import datetime
-import numpy as np  # arrays
-from astropy.table import (
-    Table,
-    setdiff
-)
+
 
 def test_fill_sources_table():
     # Data
@@ -154,8 +153,8 @@ def _make_sim_ident() -> Table:
     """
     return Table(
         {
-            "id": np.array(["A","A1", "B1","B", "C1","C"], dtype=object),
-            "main_id": np.array(["A", "A","B", "B","C","C"], dtype=object),
+            "id": np.array(["A", "A1", "B1", "B", "C1", "C"], dtype=object),
+            "main_id": np.array(["A", "A", "B", "B", "C", "C"], dtype=object),
         }
     )
 
@@ -226,4 +225,3 @@ def test_distance_cut_by_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
 
     # Temp column removed
     assert "temp1" not in out.colnames
-

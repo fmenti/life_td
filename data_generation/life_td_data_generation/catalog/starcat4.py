@@ -1,8 +1,8 @@
 import astropy as ap  # Used for votables
 import numpy as np  # Used for arrays
 from provider.utils import query
-from utils.io import Path, save, objecttostring
 from utils.analysis.catalog_comparison import testobject_dropout
+from utils.io import Path, objecttostring, save
 
 
 def crit_sep(eps, mu, a_bin):
@@ -67,8 +67,11 @@ def ecliptic(ang, ra, dec):
     return flag
 
 
-def starcat_creation(distance_cut,test_objects=None,
-                     path="../"+Path().additional_data + "catalogs/"):
+def starcat_creation(
+    distance_cut,
+    test_objects=None,
+    path="../" + Path().additional_data + "catalogs/",
+):
     """
     LIFE-StarCat4 creation
 
@@ -119,8 +122,10 @@ def starcat_creation(distance_cut,test_objects=None,
     catalog = query(service, adql_query)
 
     if test_objects is not None and len(test_objects) > 0:
-        print('in step query:')
-        drop_out, test_objects= testobject_dropout(test_objects, catalog['main_id'])
+        print("in step query:")
+        drop_out, test_objects = testobject_dropout(
+            test_objects, catalog["main_id"]
+        )
 
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
     cat_ms_tempclass = catalog[
@@ -128,8 +133,10 @@ def starcat_creation(distance_cut,test_objects=None,
     ]
 
     if test_objects is not None and len(test_objects) > 0:
-        print('in step main sequence temperature class:')
-        drop_out, test_objects= testobject_dropout(test_objects, cat_ms_tempclass['main_id'])
+        print("in step main sequence temperature class:")
+        drop_out, test_objects = testobject_dropout(
+            test_objects, cat_ms_tempclass["main_id"]
+        )
 
     ms_lumclass = np.array(["V"])
     cat_ms_lumclass = cat_ms_tempclass[
@@ -141,8 +148,10 @@ def starcat_creation(distance_cut,test_objects=None,
     )
 
     if test_objects is not None and len(test_objects) > 0:
-        print('in step main sequence luminocity class:')
-        drop_out, test_objects= testobject_dropout(test_objects, cat_ms_lumclass['main_id'])
+        print("in step main sequence luminocity class:")
+        drop_out, test_objects = testobject_dropout(
+            test_objects, cat_ms_lumclass["main_id"]
+        )
 
     singles = cat_ms_lumclass[
         np.where(cat_ms_lumclass["binary_flag"] == "False")
@@ -229,8 +238,10 @@ def starcat_creation(distance_cut,test_objects=None,
     StarCat4 = ap.table.vstack([singles, final])
 
     if test_objects is not None and len(test_objects) > 0:
-        print('in step multiplicity:')
-        drop_out, test_objects= testobject_dropout(test_objects, StarCat4['main_id'])
+        print("in step multiplicity:")
+        drop_out, test_objects = testobject_dropout(
+            test_objects, StarCat4["main_id"]
+        )
 
     # flag any object whose declination is contained within the region
     # between -(23.4+45)*sin(RA) and +(23.4+45)*sin(RA) with the
@@ -244,10 +255,9 @@ def starcat_creation(distance_cut,test_objects=None,
         ["integration_test_StarCat4"],
         location=path,
     )
-    StarCat4=objecttostring(StarCat4)
+    StarCat4 = objecttostring(StarCat4)
     StarCat4.write(
-        path+"integration_test_StarCat4.ecsv",delimiter=",",
-        overwrite=True
+        path + "integration_test_StarCat4.ecsv", delimiter=",", overwrite=True
     )
 
     return StarCat4

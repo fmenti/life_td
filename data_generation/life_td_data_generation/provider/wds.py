@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np  # arrays
 from astropy.table import Table, join, unique, vstack
-
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
     create_provider_table,
@@ -18,8 +18,10 @@ from provider.utils import (
 from sdata import empty_dict
 from utils.io import load, save
 
-def _print_test_matches(label: str, values: Sequence[Any],
-                        candidates: Table, column: str) -> None:
+
+def _print_test_matches(
+    label: str, values: Sequence[Any], candidates: Table, column: str
+) -> None:
     """Print matching test objects for a given candidate column."""
     if len(values) == 0:
         return
@@ -27,6 +29,7 @@ def _print_test_matches(label: str, values: Sequence[Any],
         label,
         values[np.where(np.isin(values, candidates[column]))],
     )
+
 
 def load_wds_helptab() -> Table:
     """Load the cached WDS helper table.
@@ -84,12 +87,15 @@ def look_at_test_objects_after_name_assignment(
     wds_helptab: Table,
 ) -> None:
     """Print which test objects match the derived WDS name columns."""
-    _print_test_matches("in wds as system_name", test_objects, wds_helptab,
-                        "system_name")
-    _print_test_matches("in wds as primary", test_objects, wds_helptab,
-                        "primary")
-    _print_test_matches("in wds as secondary", test_objects, wds_helptab,
-                        "secondary")
+    _print_test_matches(
+        "in wds as system_name", test_objects, wds_helptab, "system_name"
+    )
+    _print_test_matches(
+        "in wds as primary", test_objects, wds_helptab, "primary"
+    )
+    _print_test_matches(
+        "in wds as secondary", test_objects, wds_helptab, "secondary"
+    )
 
 
 def look_at_test_objects_after_wds_creation(
@@ -100,14 +106,22 @@ def look_at_test_objects_after_wds_creation(
     if len(test_objects) == 0:
         return
     print("test objects matching main-id columns after creation:")
-    print(wds_helptab["system_main_id", "primary_main_id",
-                      "secondary_main_id"])
-    _print_test_matches("in wds as system_main_id", test_objects, wds_helptab,
-                        "system_main_id")
-    _print_test_matches("in wds as primary_main_id", test_objects,
-                        wds_helptab, "primary_main_id")
-    _print_test_matches("in wds as secondary_main_id", test_objects,
-                        wds_helptab, "secondary_main_id")
+    print(wds_helptab["system_main_id", "primary_main_id", "secondary_main_id"])
+    _print_test_matches(
+        "in wds as system_main_id", test_objects, wds_helptab, "system_main_id"
+    )
+    _print_test_matches(
+        "in wds as primary_main_id",
+        test_objects,
+        wds_helptab,
+        "primary_main_id",
+    )
+    _print_test_matches(
+        "in wds as secondary_main_id",
+        test_objects,
+        wds_helptab,
+        "secondary_main_id",
+    )
 
 
 def create_wds_helptab(
@@ -141,14 +155,17 @@ def create_wds_helptab(
     #    wds=fetch_main_id(wds,colname='wds_full_name',name='main_id',oid=False)
     #    wds=distance_cut(wds,colname='wds_full_name',main_id=True)
     print(" performing distance cut...")
-    wds_system_cut = distance_cut(wds_helptab, colname="system_name",
-                                  main_id=False)
+    wds_system_cut = distance_cut(
+        wds_helptab, colname="system_name", main_id=False
+    )
     wds_system_cut.rename_column("main_id", "system_main_id")
 
-    wds_primary_cut = distance_cut(wds_helptab, colname="primary",
-                                   main_id=False)
-    wds_secondary_cut = distance_cut(wds_helptab, colname="secondary",
-                                     main_id=False)
+    wds_primary_cut = distance_cut(
+        wds_helptab, colname="primary", main_id=False
+    )
+    wds_secondary_cut = distance_cut(
+        wds_helptab, colname="secondary", main_id=False
+    )
 
     [sim_h_link] = load(["sim_h_link"])
     # joining parent object
@@ -184,8 +201,8 @@ def create_wds_helptab(
 
 
 def create_wds_helpertable(
-        temp: bool,
-        test_objects: Sequence[str],
+    temp: bool,
+    test_objects: Sequence[str],
 ) -> tuple[Table, dict[str, Table]]:
     """Create the WDS helper table and provider metadata.
 
@@ -227,9 +244,9 @@ def create_wds_helpertable(
 
 
 def create_ident_and_h_link_table(
-        wds_helptab: Table,
-        wds: dict[str, Table],
-        test_objects: Sequence[str],
+    wds_helptab: Table,
+    wds: dict[str, Table],
+    test_objects: Sequence[str],
 ) -> tuple[Table, Table]:
     """Create identifier and hierarchical-link tables.
 
@@ -242,10 +259,12 @@ def create_ident_and_h_link_table(
     :returns: Identifier and hierarchical-link tables.
     :rtype: tuple[astropy.table.Table, astropy.table.Table]
     """
-    wds_ident = Table(names=["main_id", "id"], dtype=[object, object],
-                      masked=True)
-    wds_h_link = Table(names=["main_id", "parent_main_id"],
-                       dtype=[object, object])
+    wds_ident = Table(
+        names=["main_id", "id"], dtype=[object, object], masked=True
+    )
+    wds_h_link = Table(
+        names=["main_id", "parent_main_id"], dtype=[object, object]
+    )
 
     id_cols_1 = [
         "system_name",
@@ -332,28 +351,30 @@ def create_ident_and_h_link_table(
     )
 
     if len(test_objects) > 0:
-        test_objects=np.array(test_objects)
+        test_objects = np.array(test_objects)
         print(
             "number of test objects that are in h_link main_id \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_h_link["main_id"]))],
+            test_objects[
+                np.where(np.isin(test_objects, wds_h_link["main_id"]))
+            ],
         )
         print(
             "number of test objects that are in h_link parent_main_id \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_h_link["parent_main_id"]))],
+            test_objects[
+                np.where(np.isin(test_objects, wds_h_link["parent_main_id"]))
+            ],
         )
         print(
             "number of test objects that are in main_id of ident table \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_ident["main_id"]))],
+            test_objects[np.where(np.isin(test_objects, wds_ident["main_id"]))],
         )
         print(
             "number of test objects that are in main_id of h_link but not "
             "ident table \n",
             test_objects[
-                np.where(np.isin(test_objects,
-                                 wds_h_link["main_id"][not_main_id]))
+                np.where(
+                    np.isin(test_objects, wds_h_link["main_id"][not_main_id])
+                )
             ],
         )
 
@@ -384,9 +405,9 @@ def create_ident_and_h_link_table(
 
 
 def create_objects_table(
-        wds_helptab: Table,
-        wds: dict[str, Table],
-        test_objects: Sequence[str],
+    wds_helptab: Table,
+    wds: dict[str, Table],
+    test_objects: Sequence[str],
 ) -> Table:
     """Create the object table.
 
@@ -412,19 +433,20 @@ def create_objects_table(
     wds_objects["type"][has_no_children] = "st"
 
     if len(test_objects) > 0:
-        test_objects=np.array(test_objects)
+        test_objects = np.array(test_objects)
         print(
             "number of test objects that are in objects main_id \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_objects["main_id"]))],
+            test_objects[
+                np.where(np.isin(test_objects, wds_objects["main_id"]))
+            ],
         )
     return wds_objects
 
 
 def create_mes_binary_table(
-        wds_helptab: Table,
-        wds: dict[str, Table],
-        test_objects: Sequence[str],
+    wds_helptab: Table,
+    wds: dict[str, Table],
+    test_objects: Sequence[str],
 ) -> Table:
     """Create the binary measurement table.
 
@@ -440,9 +462,7 @@ def create_mes_binary_table(
     wds_mes_binary = wds["objects"]["main_id", "type"]
     wds_mes_binary.rename_column("type", "binary_flag")
     wds_mes_binary["binary_flag"] = wds_mes_binary["binary_flag"].astype(object)
-    wds_mes_binary["binary_flag"] = [
-        "True" for _ in range(len(wds_mes_binary))
-    ]
+    wds_mes_binary["binary_flag"] = ["True" for _ in range(len(wds_mes_binary))]
     wds_mes_binary["binary_ref"] = [
         wds["provider"]["provider_bibcode"][0]
         for _ in range(len(wds_mes_binary))
@@ -454,19 +474,20 @@ def create_mes_binary_table(
     )
 
     if len(test_objects) > 0:
-        test_objects=np.array(test_objects)
+        test_objects = np.array(test_objects)
         print(
             "number of test objects that are in mes_binary main_id \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_mes_binary["main_id"]))],
+            test_objects[
+                np.where(np.isin(test_objects, wds_mes_binary["main_id"]))
+            ],
         )
     return wds_mes_binary
 
 
 def create_mes_sep_ang_table(
-        wds_helptab: Table,
-        wds: dict[str, Table],
-        test_objects: Sequence[str],
+    wds_helptab: Table,
+    wds: dict[str, Table],
+    test_objects: Sequence[str],
 ) -> Table:
     """Create the angular-separation measurement table.
 
@@ -480,8 +501,9 @@ def create_mes_sep_ang_table(
     :rtype: astropy.table.Table
     """
     wds_mes_sep_ang0 = join(
-        wds_helptab["system_name", "wds_sep1", "wds_obs1", "wds_sep2",
-        "wds_obs2"],
+        wds_helptab[
+            "system_name", "wds_sep1", "wds_obs1", "wds_sep2", "wds_obs2"
+        ],
         wds["ident"]["main_id", "id"],
         keys_left="system_name",
         keys_right="id",
@@ -529,7 +551,9 @@ def create_mes_sep_ang_table(
         unique_known_obs_date = unique(
             wds_mes_sep_ang[
                 np.where(
-                    np.invert(wds_mes_sep_ang["sep_ang_obs_date"].mask.nonzero()[0])
+                    np.invert(
+                        wds_mes_sep_ang["sep_ang_obs_date"].mask.nonzero()[0]
+                    )
                 )
             ],
             keys=["main_id", "sep_ang_value", "sep_ang_obs_date"],
@@ -541,11 +565,12 @@ def create_mes_sep_ang_table(
         wds_mes_sep_ang = unique(wds_mes_sep_ang)
 
     if len(test_objects) > 0:
-        test_objects=np.array(test_objects)
+        test_objects = np.array(test_objects)
         print(
             "number of test objects that are in mes_sep_ang main_id \n",
-            test_objects[np.where(np.isin(test_objects,
-                                          wds_mes_sep_ang["main_id"]))],
+            test_objects[
+                np.where(np.isin(test_objects, wds_mes_sep_ang["main_id"]))
+            ],
         )
 
     return wds_mes_sep_ang
@@ -568,8 +593,9 @@ def create_wds_sources_table(wds: dict[str, Table]) -> Table:
     )
 
 
-def provider_wds(temp: bool = False,
-                 test_objects: Sequence[str] | None = None) -> dict[str, Table]:
+def provider_wds(
+    temp: bool = False, test_objects: Sequence[str] | None = None
+) -> dict[str, Table]:
     """Build all WDS provider tables.
 
     :param temp: If ``True``, load cached helper data instead of querying.
@@ -588,8 +614,9 @@ def provider_wds(temp: bool = False,
     )
     wds["objects"] = create_objects_table(wds_helptab, wds, test_objects)
     wds["mes_binary"] = create_mes_binary_table(wds_helptab, wds, test_objects)
-    wds["mes_sep_ang"] = create_mes_sep_ang_table(wds_helptab, wds,
-                                                  test_objects)
+    wds["mes_sep_ang"] = create_mes_sep_ang_table(
+        wds_helptab, wds, test_objects
+    )
     wds["sources"] = create_wds_sources_table(wds)
 
     save(list(wds.values()), ["wds_" + element for element in list(wds.keys())])

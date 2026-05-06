@@ -2,8 +2,13 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from astropy.table import Table, setdiff, MaskedColumn
-from provider.assign_quality_funcs import teff_st_spec_assign_quality, assign_quality_elementwise, assign_quality, exo_assign_quality
+from astropy.table import MaskedColumn, Table, setdiff
+from provider.assign_quality_funcs import (
+    assign_quality,
+    assign_quality_elementwise,
+    exo_assign_quality,
+    teff_st_spec_assign_quality,
+)
 
 
 def test_teff_st_spec_assign_quality():
@@ -154,7 +159,9 @@ def test_default_fallback_logic(table_with_column_data):
 
     # Test 'teff_st_phot'
     result_teff = assign_quality(
-        table_with_column_data, column="teff_st_qual", special_mode="teff_st_phot"
+        table_with_column_data,
+        column="teff_st_qual",
+        special_mode="teff_st_phot",
     )
     assert result_teff["teff_st_qual"].tolist() == [
         "?",

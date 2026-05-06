@@ -15,11 +15,11 @@ from astropy.table import (
     unique,
     vstack,
 )
-from pyvo.dal import TAPService,DALServiceError
-
+from pyvo.dal import DALServiceError, TAPService
 from utils.io import load
 
-def sorting_number_of_id(input_column,occurences,match_column):
+
+def sorting_number_of_id(input_column, occurences, match_column):
     """
 
     :param input_column:
@@ -27,11 +27,13 @@ def sorting_number_of_id(input_column,occurences,match_column):
     :param match_column: Column to with the return flag_array will belong
     """
 
-    unique_id,number_of_repetitions=np.unique(
-        input_column,return_counts=True)
-    subset=unique_id[number_of_repetitions==occurences]
-    flag_array=np.isin(match_column,subset)
+    unique_id, number_of_repetitions = np.unique(
+        input_column, return_counts=True
+    )
+    subset = unique_id[number_of_repetitions == occurences]
+    flag_array = np.isin(match_column, subset)
     return flag_array
+
 
 def initiate_columns(
     table_obj: Table, columns: list[str], types: list[type], mask: list[bool]
@@ -56,7 +58,6 @@ def initiate_columns(
         else:
             table_obj[name] = Column(dtype=dtype, length=len(table_obj))
     return table_obj
-
 
 
 def create_provider_table(
@@ -89,8 +90,11 @@ def create_provider_table(
 
 
 def query(
-    link: str, adql_query: str, upload_tables: list[table.Table] = [],
-    no_description=True, sync=False
+    link: str,
+    adql_query: str,
+    upload_tables: list[table.Table] = [],
+    no_description=True,
+    sync=False,
 ) -> table.Table:
     """
     Perform a TAP query against a service.
@@ -118,9 +122,7 @@ def query(
             run_query = service.run_async
 
         if upload_tables == []:
-            result = run_query(
-                adql_query.format(**locals()), maxrec=1600000
-            )
+            result = run_query(adql_query.format(**locals()), maxrec=1600000)
         else:
             tables = {}
             for i, t in enumerate(upload_tables, start=1):
@@ -135,7 +137,7 @@ def query(
         if no_description:
             for col in cat.colnames:
                 cat[col].description = ""
-            cat.meta={}
+            cat.meta = {}
         # does not seem to work properly yet, getting warndings for exomercat/building
         print("Service is UP and running.")
     except DALServiceError as e:
@@ -145,7 +147,9 @@ def query(
     return cat
 
 
-def remove_catalog_description(cat: table.Table, no_description: bool) -> table.Table:
+def remove_catalog_description(
+    cat: table.Table, no_description: bool
+) -> table.Table:
     """
     Remove description metadata from all columns of a table.
 
@@ -302,7 +306,8 @@ class IdentifierCreator:
 
 
 def fetch_main_id(
-        cat: table.Table, id_creator: object = OidCreator(name="main_id", colname="oid")
+    cat: table.Table,
+    id_creator: object = OidCreator(name="main_id", colname="oid"),
 ) -> table.Table:
     """
     Attach SIMBAD main_id to a table via an ADQL join strategy.
@@ -326,7 +331,7 @@ def fetch_main_id(
 
 
 def distance_cut(
-        cat: table.Table, colname: str, main_id: bool = True
+    cat: table.Table, colname: str, main_id: bool = True
 ) -> table.Table:
     """
     Filter a table by matching against SIMBAD objects inside the cut.
@@ -361,7 +366,7 @@ def distance_cut(
 
 
 def nullvalues(
-        cat: table.Table, colname: str, nullvalue: object, verbose: bool = False
+    cat: table.Table, colname: str, nullvalue: object, verbose: bool = False
 ) -> table.Table:
     """
     Fill masked entries in a given column with a specified value.
@@ -386,7 +391,7 @@ def nullvalues(
 
 
 def replace_value(
-        cat: table.Table, colname: str, value: object, replace_by: object
+    cat: table.Table, colname: str, value: object, replace_by: object
 ) -> table.Table:
     """
     Replace all occurrences of a value in a column with another value.

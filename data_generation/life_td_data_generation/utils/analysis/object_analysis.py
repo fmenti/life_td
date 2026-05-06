@@ -1,8 +1,8 @@
 import numpy as np
 from astropy.io.ascii import read
+from catalog.starcat4 import starcat_creation
 from provider.utils import IdentifierCreator, fetch_main_id
 from utils.io import Path
-from catalog.starcat4 import starcat_creation
 
 
 def detail_info_object(database_tables, starname):
