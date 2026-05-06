@@ -1,10 +1,10 @@
+import numpy as np
 from provider.exo import (
     create_exo_helpertable,
     lower_quality,
     query_or_load_exomercat,
 )
 from utils.io import load
-import numpy as np
 
 
 def test_query_or_load_exomercat():

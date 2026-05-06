@@ -3,7 +3,7 @@ import numpy as np
 from astropy.table import Table
 from scipy.optimize import curve_fit
 from scipy.stats import norm
-from utils.analysis.analysis import get_data, database_para_temp_class_plot_prep
+from utils.analysis.analysis import database_para_temp_class_plot_prep, get_data
 from utils.io import Path, load
 
 # not showing plots
@@ -21,7 +21,7 @@ def model_exp_decay(x, a, b, c):
     return a * np.exp(-b * x) + c
 
 
-def plot_data_and_fit(title, data, p0,fit=True, bins = 10):
+def plot_data_and_fit(title, data, p0, fit=True, bins=10):
     """
     Plot histogram of data with an exponential decay fit.
 
@@ -48,7 +48,6 @@ def plot_data_and_fit(title, data, p0,fit=True, bins = 10):
         x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
         y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
 
-
         # Plot fitted curve
         plt.plot(x_model, y_model, color="r", label="fit")
 
@@ -66,7 +65,7 @@ def ravsdec(x_label, y_label, x, y):
     # ecliptic plane in equatorial coordinates
     if x_label == "coo_ra":
         ecliptic = (23.4) * np.sin(2 * np.pi * ra / 360)
-        plt.plot(ra, ecliptic, color="k",label='ecliptic')
+        plt.plot(ra, ecliptic, color="k", label="ecliptic")
         plt.legend()
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -98,11 +97,11 @@ def test_data_makes_sense_main_id():
     dist_dist = Table(
         data=[
             [5, 10, 30],
-            [420, 1728, 22107],# does not scale beyond
+            [420, 1728, 22107],  # does not scale beyond
             [205, 931, 15869],
             [101, 413, 4625],
             [113, 366, 1464],
-            [6, 18, 149], # does not scale beyond
+            [6, 18, 149],  # does not scale beyond
         ],
         names=["dist", "total", "st", "sy", "pl", "di"],
         dtype=[float, float, float, float, float, float],
@@ -127,12 +126,12 @@ def test_data_makes_sense_main_id():
     number_pl = len(data[np.where(data["type"] == "pl")])
     number_di = len(data[np.where(data["type"] == "di")])
 
-    print('distance: ', distance_cut)
-    print('total: ', number_total)
-    print('stars: ', number_st)
-    print('systems: ', number_sy)
-    print('planets: ', number_pl)
-    print('disks: ', number_di)
+    print("distance: ", distance_cut)
+    print("total: ", number_total)
+    print("stars: ", number_st)
+    print("systems: ", number_sy)
+    print("planets: ", number_pl)
+    print("disks: ", number_di)
 
     total = number_total ** (1 / 3) / distance_cut
     st = number_st ** (1 / 3) / distance_cut
@@ -143,11 +142,11 @@ def test_data_makes_sense_main_id():
     assert total < 2 and total > 0.5
     assert st < 1.5 and st > 0.5
     assert sy < 1.5 and sy > 0.4
-    if distance_cut <= 30.:
+    if distance_cut <= 30.0:
         assert pl < 1.5 and pl > 0.3
         assert di < 0.4 and di > 0.1
     else:
-        print('behavior <30pc not scalable for disks and planets')
+        print("behavior <30pc not scalable for disks and planets")
     # tbd make this via analytical and not just experimental numbers
 
 
@@ -155,61 +154,67 @@ def test_data_makes_sense_mass_st():
     # data
     data = get_data("mes_mass_st", "mass_st_value")
 
-    plot_data_and_fit("Stellar Mass", data, [1, 8, 0],
-                      bins = 100
-)
+    plot_data_and_fit("Stellar Mass", data, [1, 8, 0], bins=100)
 
-    #add one function that plots the masses binned by temperature class
-    #ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
-    #should have a lot already programmed in the analysis file
+    # add one function that plots the masses binned by temperature class
+    # ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
+    # should have a lot already programmed in the analysis file
 
     # assert
     assert max(data) < 60  # O3V
     assert min(data) > 0.074  # brown dwarf
 
+
 def test_data_makes_sense_mass_st_class():
     # data
     [table] = load(["star_basic"], location=Path().data)
 
-    data = database_para_temp_class_plot_prep(table, "mass_st_value",
-                                   "Stellar Mass [Msun]")
+    data = database_para_temp_class_plot_prep(
+        table, "mass_st_value", "Stellar Mass [Msun]"
+    )
 
     # would also be nice to do it for all masses not just bestmass. need a join for that
 
     temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
-    maxlist=[60.,18.,2.7,1.75,1.10,0.92,0.6]
-    minlist=[17.,2.,1.5,1.,0.85,0.55,0.074]
+    maxlist = [60.0, 18.0, 2.7, 1.75, 1.10, 0.92, 0.6]
+    minlist = [17.0, 2.0, 1.5, 1.0, 0.85, 0.55, 0.074]
     # wait, those are ms numbers.
     # -> masses shouldn't change much with age just radii
 
     # issues, gaia mass vs simbad sptype?
     # mass A star too low -> find object in db and have closer look
-    #bad qual sptype and gaia flame mass -> does gaia offer sptype?
+    # bad qual sptype and gaia flame mass -> does gaia offer sptype?
 
-    for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
-        testcase = data["mass_st_value"][np.where(data["class_temp"] == tempclass)]
-        if len(testcase)>0:
+    for tempclass, maxvalue, minvalue in zip(temp_class_list, maxlist, minlist):
+        testcase = data["mass_st_value"][
+            np.where(data["class_temp"] == tempclass)
+        ]
+        if len(testcase) > 0:
             assert max(testcase) < maxvalue
             assert min(testcase) > minvalue
+
 
 def test_data_makes_sense_teff_st_class():
     # data
     [table] = load(["star_basic"], location=Path().data)
 
-    data = database_para_temp_class_plot_prep(table, "teff_st_value",
-                                   "Stellar Temperature [K]")
+    data = database_para_temp_class_plot_prep(
+        table, "teff_st_value", "Stellar Temperature [K]"
+    )
 
     # would also be nice to do it for all masses not just bestmass. need a join for that
 
     temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
-    maxlist=[45000.,31500.,10000.,7300,5950.,5300.,3900.]
-    minlist=[31500.,10000.,7300.,5950.,5300.,3900.,2300.]
+    maxlist = [45000.0, 31500.0, 10000.0, 7300, 5950.0, 5300.0, 3900.0]
+    minlist = [31500.0, 10000.0, 7300.0, 5950.0, 5300.0, 3900.0, 2300.0]
     # wait, those are ms numbers.
     # even around 10 MS M stars currently have too high temps from gaia-gspec
 
-    for tempclass,maxvalue,minvalue in zip(temp_class_list,maxlist,minlist):
-        testcase = data["teff_st_value"][np.where(data["class_temp"] == tempclass)]
-        if len(testcase)>0:
+    for tempclass, maxvalue, minvalue in zip(temp_class_list, maxlist, minlist):
+        testcase = data["teff_st_value"][
+            np.where(data["class_temp"] == tempclass)
+        ]
+        if len(testcase) > 0:
             assert max(testcase) < maxvalue
             assert min(testcase) > minvalue
 
@@ -237,12 +242,14 @@ def test_data_makes_sense_temp_st():
     ax.set_xlabel("Distance [pc]")
     ax.set_ylabel("Temperature [K]")
 
-    database_para_temp_class_plot_prep(table, "teff_st_value",
-                                   "Stellar Temperature [K]")
+    database_para_temp_class_plot_prep(
+        table, "teff_st_value", "Stellar Temperature [K]"
+    )
 
     # assert
     assert max(data["teff_st_value"]) < 45000  # O3V
     assert min(data["teff_st_value"]) > 2300  # brown dwarf
+
 
 def test_data_makes_sense_radius_st():
     # want a scatter plot x axis distance and y axis temperature
@@ -267,8 +274,9 @@ def test_data_makes_sense_radius_st():
     ax.set_xlabel("Distance [pc]")
     ax.set_ylabel("Radius [Rsun]")
 
-    database_para_temp_class_plot_prep(table, "radius_st_value",
-                                       "Stellar Radius [Rsun]")
+    database_para_temp_class_plot_prep(
+        table, "radius_st_value", "Stellar Radius [Rsun]"
+    )
 
     # assert
     assert min(data["radius_st_value"]) > 0.095  # brown dwarf
@@ -347,13 +355,16 @@ def test_data_makes_sense_plx():
     # data
     data = get_data("star_basic", "plx_value")
 
-    plot_data_and_fit("Stellar Parallax", data, [1, 0.1, 0.1],fit = False)
+    plot_data_and_fit("Stellar Parallax", data, [1, 0.1, 0.1], fit=False)
 
     # assert
-    assert min(data) > 1/(distance_cut+distance_cut/10.)*1000
+    assert min(data) > 1 / (distance_cut + distance_cut / 10.0) * 1000
     assert min(data) < 1000  # 1 pc equivalent marcsec
+
+
 # not working, doin it differently in simbad:     plx_cut = plx_in_mas_cut - plx_in_mas_cut / 10.0
 # maybe instead do a sharp cut and deal with boundary objects later?
+
 
 def test_data_makes_sense_dist_st():
     # data
@@ -362,17 +373,18 @@ def test_data_makes_sense_dist_st():
     plot_data_and_fit("Stellar Distance", data, [1, -0.5, 0])
 
     # assert
-    assert min(data) < distance_cut+distance_cut/10.
+    assert min(data) < distance_cut + distance_cut / 10.0
     assert min(data) > 1
+
 
 def test_data_makes_sense_dist_rad():
     # data
     data = get_data("disk_basic", "rad_value")
-    data=data.astype(float)
+    data = data.astype(float)
 
     plot_data_and_fit("Disk Radius", data, [1, 0.1, 0.1])
 
-    #stuff not working yet because vertical lines and no other parameter in disk
+    # stuff not working yet because vertical lines and no other parameter in disk
     # assert
-    #assert min(data) < distance_cut+distance_cut/10.
-    #assert min(data) > 1
+    # assert min(data) < distance_cut+distance_cut/10.
+    # assert min(data) > 1

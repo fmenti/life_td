@@ -1,6 +1,8 @@
-import numpy as np
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+
+import numpy as np
+
 
 @dataclass
 class Plotparas:
@@ -16,6 +18,7 @@ class SpectralType(Enum):
     G = "G"
     K = "K"
     M = "M"
+
 
 def spectral_type_histogram(spectypes):
     """
@@ -36,6 +39,7 @@ def spectral_type_histogram(spectypes):
     specdist = specdist.astype(int)
     return specdist
 
+
 def x_position(x, n_samples, sample_index):
     """
     Calculates x position for plots so that not all samples plotted over each other.
@@ -44,5 +48,3 @@ def x_position(x, n_samples, sample_index):
     sample_location = sample_index * Plotparas.width
     # if I change sign in front of sample_location result is that catalogs get shown in order backwards
     return x - width_of_samples / 2 + sample_location
-
-

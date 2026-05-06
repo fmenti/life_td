@@ -52,10 +52,11 @@ def create_gaia_helpertable(distance_cut_in_pc):
     WHERE s.parallax >=""" + str(plx_in_mas_cut)
 
     try:
-        gaia_helptab = query(gaia["provider"]["provider_url"][0], adql_query,
-                             sync=True)
+        gaia_helptab = query(
+            gaia["provider"]["provider_url"][0], adql_query, sync=True
+        )
         if len(gaia_helptab) > 1500000:
-            print('query might be truncated',len(gaia_helptab))
+            print("query might be truncated", len(gaia_helptab))
 
     except:
         # because of bug in gaia server where async not working currently
