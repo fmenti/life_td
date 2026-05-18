@@ -15,6 +15,7 @@ c_path = Path().additional_data + "catalogs/"
 
 
 def test_star_cat_looks_fine():
+    # outdated?
     starcat4 = starcat_creation(30, path=c_path)
 
     K_in_30 = starcat4[np.where(starcat4["class_temp"] == "K")]
@@ -33,6 +34,7 @@ def test_star_cat_looks_fine():
 
 
 def test_star_cat_contains_specific_objects():
+    # outdated?
     starcat4 = starcat_creation(30, path=c_path)
 
     # list of important stars
@@ -76,6 +78,7 @@ def test_star_cat_contains_specific_objects():
 
 
 def teff_vs_dist_plot(dist_data, teff_data):
+    # outdated?
     # plt.figure()
     fig, ax = plt.subplots(figsize=(9, 6))
     # TBD take two data sets and use different colors -> tell AI to do so
