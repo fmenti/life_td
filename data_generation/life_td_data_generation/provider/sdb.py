@@ -137,6 +137,8 @@ def create_disk_basic_table(sdb_helptab):
     :rtype: astropy.table.table.Table
     """
     disk_basic = sdb_helptab["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"]
+    # careful, because 30pc and 50pc use different input files and therefore
+    # have different types in rdisk_bb and e_rdisk_bb, test also not working
     missing_value = 1e20
 
     for column in ["rdisk_bb", "e_rdisk_bb"]:
@@ -147,12 +149,15 @@ def create_disk_basic_table(sdb_helptab):
                     column,
                     " filling them with 1e+20",
                 )
-
+        if disk_basic[column].dtype == "object":
+            type_corrected_missing_value = str(missing_value)
+        else:
+            type_corrected_missing_value = missing_value
         disk_basic = replace_value(
-            disk_basic, column, "None", str(missing_value)
+            disk_basic, column, "None", type_corrected_missing_value
         )
 
-        filled_column = disk_basic[column].filled(str(missing_value))
+        filled_column = disk_basic[column].filled(type_corrected_missing_value)
         disk_basic[column] = np.asarray(filled_column, dtype=float)
 
     disk_basic.rename_columns(

@@ -376,12 +376,12 @@ def save_catalog(StarCat5):
     )
 
 
-def main():
-    service = choose_service("")
+def main(distance_cut=30.0, service_type=""):
+    service = choose_service(service_type)
 
-    queried_stars = query_stars(service, 30.0)
+    queried_stars = query_stars(service, distance_cut)
     queried_children = query_children(service)
-    queried_systems = query_systems(service, 30.0)
+    queried_systems = query_systems(service, distance_cut)
 
     stars_with_ub = add_unresolved_binaries(
         queried_systems, queried_children, queried_stars
