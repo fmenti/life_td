@@ -10,6 +10,7 @@ from catalog.starcat5 import (
 )
 from utils.analysis import catalog_versions
 from utils.io import Path, load
+from utils.analysis.catalog_versions import plot_cat_paras
 
 c_path = Path().additional_data + "catalogs/"
 
@@ -28,7 +29,6 @@ def test_star_cat_looks_fine():
     G_in_20 = G_in_30[np.where(G_in_30["dist_st_value"] < 20.0)]
     print(len(G_in_20))  # 34 felix reports 35 and in ltcv 65
 
-    # formatting (csv file is correctly readable)
     # number of stars
     assert type(starcat4) == type(Table())
 
@@ -275,33 +275,6 @@ def test_outcome_looks_fine():
     assert len(StarCat5[np.where(StarCat5["stableHZ"] == "True")]) > 400
 
 
-def test_rmt_spread():
-    [StarCat5] = load(["catalogs/StarCat5"])
-    paras = ["radius_st_value", "mass_st_value", "teff_st_value"]
-
-    def plotting(paras):
-        arr = StarCat5[paras[0], paras[1]]
-        arr2 = arr[np.where(arr[paras[0]] != 1e20)]
-        data = arr2[np.where(arr2[paras[1]] != 1e20)]
-
-        fig, ax = plt.subplots(
-            figsize=(9, 6)
-        )  # subplots so that I can overplot old version?
-
-        ax.scatter(data[paras[0]], data[paras[1]], s=2)
-        # ax.set_yscale("log")
-
-        ax.set_xlabel(paras[0])
-        ax.set_ylabel(paras[1])
-        plt.savefig(Path().plot + "/rmt_spread_" + paras[0] + paras[1], dpi=300)
-        plt.show()
-
-    for i in paras:
-        for j in paras:
-            if i != j:
-                plotting([i, j])
-
-
 def test_like4_in_starcat5():
     [StarCat5] = load(["catalogs/StarCat5"])
     [StarCat4] = load(["StarCat4"])
@@ -335,3 +308,23 @@ def test_like4_in_starcat5():
         [para4, para4],
         catalogs=[StarCat4, StarCat5_like4],
     )
+
+def test_compare_old_to_new():
+    [old_catalog] = load(["catalogs/StarCat5_30pc"])
+    #[new_catalog] = load(["catalogs/StarCat5_50pc"])
+    [new_catalog] = load(["catalogs/StarCat5"])
+
+    paras = ["coo_ra",
+             "coo_dec",
+             "radius_st_value",
+             "mass_st_value",
+             "teff_st_value",
+             "dist_st_value",
+             "mag_i_value"]
+
+    for i in range(len(paras)):
+        for j in range(i + 1, len(paras)):
+            plot_cat_paras([paras[i], paras[j]],
+                     [new_catalog, old_catalog])
+            plot_cat_paras([paras[i], paras[j]],
+                           [old_catalog, new_catalog])
