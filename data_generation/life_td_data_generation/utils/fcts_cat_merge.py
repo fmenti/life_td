@@ -68,9 +68,9 @@ def nearest_neighbor_distances_units(ra, dec):
     Parameters
     ----------
     ra : array_like
-        Right ascension values in degrees.
+        Right ascension values in degrees, or Astropy quantities/columns with angular units.
     dec : array_like
-        Declination values in degrees.
+        Declination values in degrees, or Astropy quantities/columns with angular units.
 
     Returns
     -------
@@ -78,17 +78,16 @@ def nearest_neighbor_distances_units(ra, dec):
         Array of nearest-neighbor distances in arcseconds,
         same length as input arrays.
     """
-    # Create SkyCoord object
-    stars = SkyCoord(ra=ra*u.deg, dec=dec*u.deg)
+    stars = SkyCoord(
+        ra=_as_degree_quantity(ra),
+        dec=_as_degree_quantity(dec),
+    )
 
-    # Pairwise separation matrix, converted to arcsec
-    sep_matrix = stars[:, None].separation(stars[None, :]).arcsec
+    if len(stars) < 2:
+        return np.full(len(stars), np.nan)
 
-    # Set self-separations to infinity to ignore them
-    np.fill_diagonal(sep_matrix, np.inf)
+    # nthneighbor=2 because the closest match in the same catalog is the object itself.
+    _, sep2d, _ = stars.match_to_catalog_sky(stars, nthneighbor=2)
 
-    # Find minimum separation for each star
-    min_sep = np.min(sep_matrix, axis=1)
-
-    return min_sep
+    return sep2d.arcsec
 
