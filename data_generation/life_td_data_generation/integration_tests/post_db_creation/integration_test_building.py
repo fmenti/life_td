@@ -3,7 +3,10 @@ import numpy as np
 from astropy.table import Table
 from scipy.optimize import curve_fit
 from scipy.stats import norm
-from utils.analysis.analysis import database_para_temp_class_plot_prep, get_data
+from utils.analysis.analysis import (database_para_temp_class_plot_prep,
+                                     get_data,
+                                     parameter_by_temperature_class,
+                                     scatterplot)
 from utils.io import Path, load
 
 # not showing plots
@@ -21,7 +24,7 @@ def model_exp_decay(x, a, b, c):
     return a * np.exp(-b * x) + c
 
 
-def plot_data_and_fit(title, data, p0, fit=True, bins=10):
+def plot_data_and_fit(title, data, p0, fit=True, bins=10, reference_data=[]):
     """
     Plot histogram of data with an exponential decay fit.
 
@@ -32,24 +35,37 @@ def plot_data_and_fit(title, data, p0, fit=True, bins=10):
     # Setup plot
     plt.figure()
     plt.title(title)
+    explanation = ["data", "reference data"]
+    dataset = [data, reference_data]
+
+    if len(reference_data) > 0:
+        l = len(explanation)
+    else:
+        l=1
+    for i in range(l):
 
     # Create histogram
-    bin_heights, bin_borders, _ = plt.hist(
-        data, bins=bins, density=True, label="pdf of data"
-    )
-    bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
+        bin_heights, bin_borders, _ = plt.hist(
+            dataset[i],
+            bins=bins,
+            density=True,
+            label=f'pdf of {explanation[i]}',
+            stacked=True,
+            alpha = 0.5
+        )
+        bin_centers = bin_borders[:-1] + np.diff(bin_borders) / 2
+        if fit:
+            # Fit exponential decay model
 
-    if fit:
-        # Fit exponential decay model
-        popt, _ = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)
-        a_opt, b_opt, c_opt = popt
+            popt, _ = curve_fit(model_exp_decay, bin_centers, bin_heights, p0=p0)
+            a_opt, b_opt, c_opt = popt
 
-        # Create fitted curve
-        x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
-        y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
+            # Create fitted curve
+            x_model = np.linspace(bin_centers[0], max(bin_borders), 100)
+            y_model = model_exp_decay(x_model, a_opt, b_opt, c_opt)
 
-        # Plot fitted curve
-        plt.plot(x_model, y_model, color="r", label="fit")
+            # Plot fitted curve
+            plt.plot(x_model, y_model, label=f'fit of {explanation[i]}')
 
     # Add labels and legend
     plt.ylabel("amount of objects")
@@ -108,16 +124,28 @@ def test_data_makes_sense_main_id():
     )
 
     [table] = load(["objects"], location=Path().data)
+    [reference_table] = load(["reference_data/objects"])
     data = table["main_id", "type"]
+    reference_data = reference_table["main_id", "type"]
 
     spec = np.array(["System", "Star", "Exoplanet", "Disk"])
 
     plt.figure()
     plt.title(f"Object type distribution up to {distance_cut} pc")
     plt.xlabel("Number of objects")
-    plt.hist(data["type"], histtype="bar", log=True, orientation="horizontal")
+    plt.hist(data["type"],
+             histtype="bar",
+             log=True,
+             orientation="horizontal",
+             label = f'{distance_cut} pc')
+    plt.hist(reference_data["type"],
+             histtype="bar",
+             log=True,
+             orientation="horizontal",
+             label="reference data")
     plt.yticks(np.arange(4), spec)
     # plt.savefig(Path().plot+path, dpi=300)
+    plt.legend()
     plt.show()
 
     number_total = len(data)
@@ -153,13 +181,22 @@ def test_data_makes_sense_main_id():
 def test_data_makes_sense_mass_st():
     # data
     data = get_data("mes_mass_st", "mass_st_value")
+    reference_data = get_data("mes_mass_st", "mass_st_value",
+                              reference_data=True)
 
-    plot_data_and_fit("Stellar Mass", data, [1, 8, 0], bins=100)
+    plot_data_and_fit("Stellar Mass",
+                      data,
+                      [1, 8, 0],
+                      bins=50,
+                      reference_data=reference_data)
+    #something strange is happening, am getting more objects in reference data
+    # which should have fewer as only 30pc. maybe just because of very few high mass ones
 
     # add one function that plots the masses binned by temperature class
     # ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
     # should have a lot already programmed in the analysis file
-
+    print(data)
+    print(reference_data)
     # assert
     assert max(data) < 60  # O3V
     assert min(data) > 0.074  # brown dwarf
@@ -167,11 +204,21 @@ def test_data_makes_sense_mass_st():
 
 def test_data_makes_sense_mass_st_class():
     # data
-    [table] = load(["star_basic"], location=Path().data)
+    table_name = "star_basic"
+    para_name = "mass_st_value"
+    [table] = load([table_name], location=Path().data)
+    [ref_table] = load(["reference_data/" + table_name])
 
     data = database_para_temp_class_plot_prep(
-        table, "mass_st_value", "Stellar Mass [Msun]"
+        table, para_name
     )
+    ref_data = database_para_temp_class_plot_prep(
+        ref_table, para_name
+    )
+    parameter_by_temperature_class([data["class_temp"],ref_data["class_temp"]],
+                                   [data[para_name],ref_data[para_name]],
+                                   "Stellar Mass [Msun]",
+                                   label=["data", "reference data"])
 
     # would also be nice to do it for all masses not just bestmass. need a join for that
 
@@ -196,12 +243,22 @@ def test_data_makes_sense_mass_st_class():
 
 def test_data_makes_sense_teff_st_class():
     # data
+    table_name = "star_basic"
+    para_name = "teff_st_value"
     [table] = load(["star_basic"], location=Path().data)
+    [ref_table] = load(["reference_data/" + table_name])
 
     data = database_para_temp_class_plot_prep(
-        table, "teff_st_value", "Stellar Temperature [K]"
+        table, para_name
+    )
+    ref_data = database_para_temp_class_plot_prep(
+        ref_table, para_name
     )
 
+    parameter_by_temperature_class([data["class_temp"], ref_data["class_temp"]],
+                                   [data[para_name], ref_data[para_name]],
+                                   "Stellar Temperature [K]",
+                                   label=["data", "reference data"])
     # would also be nice to do it for all masses not just bestmass. need a join for that
 
     temp_class_list = np.array(["O", "B", "A", "F", "G", "K", "M"])
@@ -225,27 +282,10 @@ def test_data_makes_sense_temp_st():
     # not sure how to get data -> what to do about fill values?
     # data
     # loading the correct table
-    [table] = load(["star_basic"], location=Path().data)
-    # exctracting the correct columns
-    arr = table["dist_st_value", "teff_st_value"]
-    arr2 = arr[np.where(arr["dist_st_value"] != 1e20)]
-    data = arr2[np.where(arr2["teff_st_value"] != 1e20)]
 
-    # plt.figure()
-    fig, ax = plt.subplots(
-        figsize=(9, 6)
-    )  # subplots so that I can overplot old version?
-
-    ax.scatter(data["dist_st_value"], data["teff_st_value"], s=2)
-    ax.set_yscale("log")
-
-    ax.set_xlabel("Distance [pc]")
-    ax.set_ylabel("Temperature [K]")
-
-    database_para_temp_class_plot_prep(
-        table, "teff_st_value", "Stellar Temperature [K]"
-    )
-
+    data = scatterplot("star_basic",
+                       "teff_st_value",
+                       "Stellar Temperature [K]")
     # assert
     assert max(data["teff_st_value"]) < 45000  # O3V
     assert min(data["teff_st_value"]) > 2300  # brown dwarf
@@ -257,26 +297,9 @@ def test_data_makes_sense_radius_st():
     # not sure how to get data -> what to do about fill values?
     # data
     # loading the correct table
-    [table] = load(["star_basic"], location=Path().data)
-    # exctracting the correct columns
-    arr = table["dist_st_value", "radius_st_value"]
-    arr2 = arr[np.where(arr["dist_st_value"] != 1e20)]
-    data = arr2[np.where(arr2["radius_st_value"] != 1e20)]
-
-    # plt.figure()
-    fig, ax = plt.subplots(
-        figsize=(9, 6)
-    )  # subplots so that I can overplot old version?
-
-    ax.scatter(data["dist_st_value"], data["radius_st_value"], s=2)
-    ax.set_yscale("log")
-
-    ax.set_xlabel("Distance [pc]")
-    ax.set_ylabel("Radius [Rsun]")
-
-    database_para_temp_class_plot_prep(
-        table, "radius_st_value", "Stellar Radius [Rsun]"
-    )
+    data = scatterplot("star_basic",
+                       "radius_st_value",
+                       "Stellar Radius [Rsun]")
 
     # assert
     assert min(data["radius_st_value"]) > 0.095  # brown dwarf
@@ -285,8 +308,9 @@ def test_data_makes_sense_radius_st():
 def test_data_makes_sense_mass_pl():
     # data
     data = get_data("mes_mass_pl", "mass_pl_value")
+    reference_data = get_data("mes_mass_pl", "mass_pl_value", reference_data=True)
 
-    plot_data_and_fit("Planetary Mass", data, [1, 0.1, 0.1])
+    plot_data_and_fit("Planetary Mass", data, [1, 0.1, 0.1],reference_data = reference_data)
 
     # assert
     assert max(data) < 75  # m star (in jupiter masses)
@@ -354,8 +378,14 @@ def test_data_makes_sense_mag_k():
 def test_data_makes_sense_plx():
     # data
     data = get_data("star_basic", "plx_value")
+    reference_data = get_data("star_basic", "dist_st_value", reference_data=True)
 
-    plot_data_and_fit("Stellar Parallax", data, [1, 0.1, 0.1], fit=False)
+    plot_data_and_fit("Stellar Parallax",
+                      data,
+                      [1, 0.1, 0.1],
+                      bins = 50,
+                      fit=False,
+                      reference_data = reference_data)
 
     # assert
     assert min(data) > 1 / (distance_cut + distance_cut / 10.0) * 1000
@@ -369,8 +399,9 @@ def test_data_makes_sense_plx():
 def test_data_makes_sense_dist_st():
     # data
     data = get_data("star_basic", "dist_st_value")
+    reference_data = get_data("star_basic", "dist_st_value", reference_data=True)
 
-    plot_data_and_fit("Stellar Distance", data, [1, -0.5, 0])
+    plot_data_and_fit("Stellar Distance", data, [1, -0.5, 0],reference_data = reference_data)
 
     # assert
     assert min(data) < distance_cut + distance_cut / 10.0
