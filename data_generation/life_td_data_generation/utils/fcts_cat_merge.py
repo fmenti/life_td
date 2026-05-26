@@ -43,8 +43,10 @@ def get_mask_cat2_in_cat1(name_cat1, ra_cat1, dec_cat1, name_cat2, ra_cat2, dec_
     mask_cat2_in_cat1_name = np.isin(name_cat2, name_cat1)
 
     # 2) Coordinates
-    coords_cat1 = SkyCoord(ra=ra_cat1*u.deg, dec=dec_cat1*u.deg)
-    coords_cat2 = SkyCoord(ra=ra_cat2*u.deg, dec=dec_cat2*u.deg)
+    coords_cat1 = SkyCoord(ra=_as_degree_quantity(ra_cat1),
+                           dec=_as_degree_quantity(dec_cat1))
+    coords_cat2 = SkyCoord(ra=_as_degree_quantity(ra_cat2),
+                           dec=_as_degree_quantity(dec_cat2))
 
     mask_cat2_in_cat1_coords = np.zeros(len(name_cat2), dtype=bool)
 
