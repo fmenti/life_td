@@ -378,7 +378,7 @@ def test_data_makes_sense_mag_k():
 def test_data_makes_sense_plx():
     # data
     data = get_data("star_basic", "plx_value")
-    reference_data = get_data("star_basic", "dist_st_value", reference_data=True)
+    reference_data = get_data("star_basic", "plx_value", reference_data=True)
 
     plot_data_and_fit("Stellar Parallax",
                       data,
