@@ -11,6 +11,7 @@ tables may change at any time without prior warning.
 </macDef>
 
     <meta name="title">The LIFE Target Star Database LIFETD</meta>
+    <meta name="version">1.3</meta>
     <meta name="description" format="rst">
     The LIFE Target Star Database contains information useful
     for the planned `LIFE mission`_ (mid-ir, nulling
