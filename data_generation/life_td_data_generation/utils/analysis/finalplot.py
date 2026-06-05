@@ -194,7 +194,7 @@ def starcat_distribution_plot(
 
     # Shared configuration
     width = 0.15  # width of the bars
-    colors = ["tab:blue", "tab:orange", "tab:green"]  # limited palette
+    colors = ["tab:blue", "tab:gray", "tab:green" , ]  # limited palette "tab:orange"
 
     # Initialize spectral labels and containers
     spec = [spectraltype.name for spectraltype in SpectralType]
