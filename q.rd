@@ -46,6 +46,9 @@ tables may change at any time without prior warning.
     data from provider better. Concretely removed mass_pl_rel parameter and
     replaced mass_pl_err with mass_pl_err_max and mass_pl_err_min.</meta>
 
+    <meta name="_news" author="FM" date="2026-06-05">Expanded distance cut of
+    database from 30pc to 50pc.</meta>
+
     <table id="source" onDisk="True" adql="True">
         <meta name="title">Source Table</meta>
         <meta name="description">
