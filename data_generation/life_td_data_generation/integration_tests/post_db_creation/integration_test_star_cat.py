@@ -2,22 +2,22 @@ import matplotlib.pyplot as plt
 import numpy as np  # Used for arrays
 from astropy import io
 from astropy.table import Table, vstack
-from utils.io import Path, load
 from catalog.starcat4 import starcat_creation
 from catalog.starcat5 import (
-    query_stars,
     query_children,
+    query_stars,
     query_systems,
 )
 from utils.analysis import catalog_versions
+from utils.io import Path, load
+from utils.analysis.catalog_versions import plot_cat_paras
 
 c_path = Path().additional_data + "catalogs/"
 
 
-
-
 def test_star_cat_looks_fine():
-    starcat4 = starcat_creation(30,path=c_path)
+    # outdated?
+    starcat4 = starcat_creation(30, path=c_path)
 
     K_in_30 = starcat4[np.where(starcat4["class_temp"] == "K")]
     K_in_20 = K_in_30[np.where(K_in_30["dist_st_value"] < 20.0)]
@@ -29,41 +29,56 @@ def test_star_cat_looks_fine():
     G_in_20 = G_in_30[np.where(G_in_30["dist_st_value"] < 20.0)]
     print(len(G_in_20))  # 34 felix reports 35 and in ltcv 65
 
-    # formatting (csv file is correctly readable)
     # number of stars
     assert type(starcat4) == type(Table())
 
 
 def test_star_cat_contains_specific_objects():
-    starcat4 = starcat_creation(30,path=c_path)
+    # outdated?
+    starcat4 = starcat_creation(30, path=c_path)
 
     # list of important stars
-    l_golden_targets = ['* alf Cen A', '* alf Cen B', '* alf Cen C',
-                        'NAME Teegarden\'s Star', '* tau Cet', '* eps Eri',
-                        '* eps Ind', 'HD  88230', '* omi02 Eri', '* sig Dra',
-                        'HD 131977', '* eta Cas A', '* eta Cas B', 'TRAPPIST-1']
+    l_golden_targets = [
+        "* alf Cen A",
+        "* alf Cen B",
+        "* alf Cen C",
+        "NAME Teegarden's Star",
+        "* tau Cet",
+        "* eps Eri",
+        "* eps Ind",
+        "HD  88230",
+        "* omi02 Eri",
+        "* sig Dra",
+        "HD 131977",
+        "* eta Cas A",
+        "* eta Cas B",
+        "TRAPPIST-1",
+    ]
     # list of reasons why excluded
     # tbd read it out directly from code detail_criteria instead of copy pasting from hand
-    dropout_reasons = ['has more than one sibling',
-                       'has more than one sibling',
-                       'has more than one sibling',
-                       'system object but with found child object',
-                       'companion does not fit spectral type criteria',
-                       'multiple parents',
-                       'companion does not fit spectral type criteria',
-                       'system without child',
-                       'multiple parents',
-                       'multiple parents',
-                       'multiple parents',
-                       'system without child',
-                       'system without child',
-                       '']
+    dropout_reasons = [
+        "has more than one sibling",
+        "has more than one sibling",
+        "has more than one sibling",
+        "system object but with found child object",
+        "companion does not fit spectral type criteria",
+        "multiple parents",
+        "companion does not fit spectral type criteria",
+        "system without child",
+        "multiple parents",
+        "multiple parents",
+        "multiple parents",
+        "system without child",
+        "system without child",
+        "",
+    ]
     # check remaining stars present
 
     assert len(starcat4[np.where(starcat4["main_id"] == "TRAPPIST-1")]) == 1
 
 
 def teff_vs_dist_plot(dist_data, teff_data):
+    # outdated?
     # plt.figure()
     fig, ax = plt.subplots(figsize=(9, 6))
     # TBD take two data sets and use different colors -> tell AI to do so
@@ -131,42 +146,81 @@ def test_teff_vs_dist():
     )
 
 
-#starcat5
+# starcat5
 def test_query_stars():
-    #data
-    colnames = ['main_id', 'coo_ra', 'coo_dec', 'sptype_string', 'plx_value',
-                'dist_st_value', 'coo_gal_l', 'coo_gal_b', 'teff_st_value',
-                'teff_ref', 'mass_st_value', 'mass_ref', 'radius_st_value',
-                'radius_ref', 'binary_flag', 'binary_ref', 'mag_i_value',
-                'mag_j_value', 'class_lum', 'class_temp', 'parent_main_id',
-                'sep_ang_value']
-    #execute
-    query = query_stars("http://localhost:8080/tap",30)
-    #assert
-    assert len(query)>9000
+    # data
+    colnames = [
+        "main_id",
+        "coo_ra",
+        "coo_dec",
+        "sptype_string",
+        "plx_value",
+        "dist_st_value",
+        "coo_gal_l",
+        "coo_gal_b",
+        "teff_st_value",
+        "teff_ref",
+        "mass_st_value",
+        "mass_ref",
+        "radius_st_value",
+        "radius_ref",
+        "binary_flag",
+        "binary_ref",
+        "mag_i_value",
+        "mag_j_value",
+        "class_lum",
+        "class_temp",
+        "parent_main_id",
+        "sep_ang_value",
+    ]
+    # execute
+    query = query_stars("http://localhost:8080/tap", 30)
+    # assert
+    assert len(query) > 9000
     assert query.colnames == colnames
+
 
 def test_query_children():
-    #data
-    colnames = ['child_main_id', 'child_type', 'parent_object_idref']
-    #execute
+    # data
+    colnames = ["child_main_id", "child_type", "parent_object_idref"]
+    # execute
     query = query_children("http://localhost:8080/tap")
-    #assert
-    assert len(query)>6000
+    # assert
+    assert len(query) > 6000
     assert query.colnames == colnames
 
+
 def test_query_systems():
-    #data
-    colnames = ['object_id', 'main_id', 'coo_ra', 'coo_dec', 'sptype_string',
-                'plx_value', 'dist_st_value', 'coo_gal_l', 'coo_gal_b',
-                'teff_st_value', 'teff_ref', 'mass_st_value', 'mass_ref',
-                'radius_st_value', 'radius_ref', 'binary_flag', 'binary_ref',
-                'mag_i_value', 'mag_j_value', 'class_lum', 'class_temp',
-                'parent_main_id', 'sep_ang_value']
-    #execute
-    query = query_systems("http://localhost:8080/tap",30)
-    #assert
-    assert len(query)>2000
+    # data
+    colnames = [
+        "object_id",
+        "main_id",
+        "coo_ra",
+        "coo_dec",
+        "sptype_string",
+        "plx_value",
+        "dist_st_value",
+        "coo_gal_l",
+        "coo_gal_b",
+        "teff_st_value",
+        "teff_ref",
+        "mass_st_value",
+        "mass_ref",
+        "radius_st_value",
+        "radius_ref",
+        "binary_flag",
+        "binary_ref",
+        "mag_i_value",
+        "mag_j_value",
+        "class_lum",
+        "class_temp",
+        "parent_main_id",
+        "sep_ang_value",
+    ]
+    # execute
+    query = query_systems("http://localhost:8080/tap", 30)
+    # assert
+    assert len(query) > 2000
     assert query.colnames == colnames
 
 
@@ -176,9 +230,12 @@ from pathlib import Path as pp
 
 
 def test_runs_as_script():
-    here = pp(__file__).resolve().parent  # .../integration_tests/post_db_creation
-    script = here.parents[
-                 1] / "catalog" / "starcat5.py"  # up 2 levels, then catalog/starcat5.py
+    here = (
+        pp(__file__).resolve().parent
+    )  # .../integration_tests/post_db_creation
+    script = (
+        here.parents[1] / "catalog" / "starcat5.py"
+    )  # up 2 levels, then catalog/starcat5.py
 
     result = subprocess.run(
         [sys.executable, str(script)],
@@ -187,15 +244,16 @@ def test_runs_as_script():
     )
     assert result.returncode == 0
 
-def test_outcome_looks_fine():
 
-    [StarCat5] = load(['catalogs/StarCat5'])
+def test_outcome_looks_fine():
+    [StarCat5] = load(["catalogs/StarCat5"])
 
     # plot it
     from utils.analysis.finalplot import starcat_distribution_plot
 
     starcat_distribution_plot(
-        [StarCat5["class_temp", "dist_st_value"]], ["StarCat5"])
+        [StarCat5["class_temp", "dist_st_value"]], ["StarCat5"]
+    )
 
     from utils.analysis.catalog_comparison_plot import (
         spectral_type_histogram_catalog_comparison,
@@ -205,56 +263,68 @@ def test_outcome_looks_fine():
         [StarCat5["class_temp", "dist_st_value"]],
         ["StarCat5"],
         distance_colname="dist_st_value",
-        spectral_type_colname="class_temp"
+        spectral_type_colname="class_temp",
     )
 
     assert len(StarCat5) > 10000
-    assert len(StarCat5[np.where(StarCat5['binary_flag']=='False')]) > 6000
-    assert len(StarCat5[np.where(StarCat5['unresolved_binaries'] == 'True')]) > 1500
-    assert len(StarCat5[np.where(StarCat5['stableHZ'] == 'True')]) > 400
+    assert len(StarCat5[np.where(StarCat5["binary_flag"] == "False")]) > 6000
+    assert (
+        len(StarCat5[np.where(StarCat5["unresolved_binaries"] == "True")])
+        > 1500
+    )
+    assert len(StarCat5[np.where(StarCat5["stableHZ"] == "True")]) > 400
 
-def test_rmt_spread():
-    [StarCat5] = load(['catalogs/StarCat5'])
-    paras = ['radius_st_value', 'mass_st_value', 'teff_st_value']
-
-    def plotting(paras):
-        arr = StarCat5[paras[0], paras[1]]
-        arr2 = arr[np.where(arr[paras[0]] != 1e20)]
-        data = arr2[np.where(arr2[paras[1]] != 1e20)]
-
-        fig, ax = plt.subplots(
-            figsize=(9, 6)
-        )  # subplots so that I can overplot old version?
-
-        ax.scatter(data[paras[0]], data[paras[1]], s=2)
-        # ax.set_yscale("log")
-
-        ax.set_xlabel(paras[0])
-        ax.set_ylabel(paras[1])
-        plt.savefig(Path().plot+'/rmt_spread_'+paras[0]+paras[1], dpi=300)
-        plt.show()
-
-    for i in paras:
-        for j in paras:
-            if i != j:
-                plotting([i, j])
 
 def test_like4_in_starcat5():
-
-    [StarCat5] = load(['catalogs/StarCat5'])
-    [StarCat4] = load(['StarCat4'])
+    [StarCat5] = load(["catalogs/StarCat5"])
+    [StarCat4] = load(["StarCat4"])
 
     # compare to cat 4
     like4_singles_prep = StarCat5[np.where(StarCat5["ms_lum_class"] == "True")]
     like4_singles = like4_singles_prep[
-        np.where(like4_singles_prep["binary_flag"] == "False")]
+        np.where(like4_singles_prep["binary_flag"] == "False")
+    ]
     # might need to add class criterion
     StarCat5_like4 = vstack(
-        [StarCat5[np.where(StarCat5["stableHZ"] == "True")], like4_singles])
+        [StarCat5[np.where(StarCat5["stableHZ"] == "True")], like4_singles]
+    )
 
-    para4 = ['coo_ra', 'coo_dec', 'plx_value', 'dist_st_value', 'coo_gal_l',
-             'coo_gal_b',
-             'teff_st_value', 'radius_st_value', 'mass_st_value',
-             'sep_phys_value', 'mag_i_value', 'mag_j_value']
-    catalog_versions.ltc_compare(["cat4_2025", "cat5_like4"], [para4, para4],
-                   catalogs=[StarCat4, StarCat5_like4])
+    para4 = [
+        "coo_ra",
+        "coo_dec",
+        "plx_value",
+        "dist_st_value",
+        "coo_gal_l",
+        "coo_gal_b",
+        "teff_st_value",
+        "radius_st_value",
+        "mass_st_value",
+        "sep_phys_value",
+        "mag_i_value",
+        "mag_j_value",
+    ]
+    catalog_versions.ltc_compare(
+        ["cat4_2025", "cat5_like4"],
+        [para4, para4],
+        catalogs=[StarCat4, StarCat5_like4],
+    )
+
+def test_compare_old_to_new():
+    [old_catalog] = load(["catalogs/StarCat5_30pc"])
+    #[new_catalog] = load(["catalogs/StarCat5_50pc"])
+    [new_catalog] = load(["catalogs/StarCat5"])
+
+    paras = ["coo_ra",
+             "coo_dec",
+             "radius_st_value",
+             "mass_st_value",
+             "teff_st_value",
+             "dist_st_value",
+             "mag_i_value"]
+
+    for i in range(len(paras)):
+        for j in range(i + 1, len(paras)):
+            plot_cat_paras([paras[i], paras[j]],
+                     [new_catalog, old_catalog])
+            plot_cat_paras([paras[i], paras[j]],
+                           [old_catalog, new_catalog])

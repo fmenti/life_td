@@ -3,18 +3,16 @@ from collections.abc import Sequence  # typing helpers
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 
-from typing import List, Sequence, Tuple  # typing helpers
+# from typing import List, Sequence, Tuple  # typing helpers
 from numpy.typing import ArrayLike  # NumPy array protocol types
+from utils.analysis.histogram_utils import (
+    SpectralType,
+    spectral_type_histogram,
+    x_position,
+)
 
 # self created modules
 from utils.io import Path
-from utils.analysis.histogram_utils import (
-    spectral_type_histogram,
-    x_position,
-    SpectralType,
-)
-from utils.io import Path
-
 
 
 def get_distance_cut(
@@ -196,7 +194,7 @@ def starcat_distribution_plot(
 
     # Shared configuration
     width = 0.15  # width of the bars
-    colors = ["tab:blue", "tab:orange", "tab:green"]  # limited palette
+    colors = ["tab:blue", "tab:gray", "tab:green" , ]  # limited palette "tab:orange"
 
     # Initialize spectral labels and containers
     spec = [spectraltype.name for spectraltype in SpectralType]

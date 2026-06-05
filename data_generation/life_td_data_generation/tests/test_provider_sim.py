@@ -16,6 +16,7 @@ from provider.simbad import (
 )
 from provider.utils import nullvalues
 
+
 @pytest.fixture
 def query_returns(monkeypatch):
     """
@@ -193,7 +194,9 @@ def query_returns(monkeypatch):
     return result_sim_helptab, result_sim, t0, result_sim["ident"]
 
 
-def normalize_table_nulls(tab: Table, columns: list[str], values: list[object]) -> Table:
+def normalize_table_nulls(
+    tab: Table, columns: list[str], values: list[object]
+) -> Table:
     """
     Normalize masked/null values across multiple columns.
 
@@ -451,9 +454,9 @@ def expanded_helptab_stars(expected_stars: Table, ref: str) -> Table:
     expected_stars["binary_qual"] = ["D", "D", "D", "D"]
 
     # stars in multiple systems function result
-    expected_stars["type"][
-        np.where(expected_stars["main_id"] == "star1")
-    ] = "st"
+    expected_stars["type"][np.where(expected_stars["main_id"] == "star1")] = (
+        "st"
+    )
 
     return expected_stars
 

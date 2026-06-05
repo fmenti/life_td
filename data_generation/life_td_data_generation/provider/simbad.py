@@ -468,7 +468,8 @@ def create_h_link_table(
     Create the hierarchical link (parent-child) table.
 
     Filters to hierarchical multiples (i.e., removes cluster/association
-    parents), resolves parent oids to main_ids, normalizes null values,
+    although there shouldn't be any in this distance cut anyways),
+    resolves parent oids to main_ids, normalizes null values,
     and adds reference information.
 
     :param sim_helptab: Main SIMBAD helper table.

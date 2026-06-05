@@ -1,16 +1,13 @@
-import importlib #reloading external functions after modification
+import importlib  # reloading external functions after modification
 
-#self created modules
+# self created modules
 import life_td as ltd
-importlib.reload(ltd)#reload module after changing it
 
-
-
+importlib.reload(ltd)  # reload module after changing it
 
 
 def test_warnings():
-
-    provider_tables_dict, database_tables= ltd.create_life_td(5)
+    provider_tables_dict, database_tables = ltd.create_life_td(5)
 
     def metachecking_prov(prov_tables_dict):
         for prov_name, prov_tables in prov_tables_dict.items():

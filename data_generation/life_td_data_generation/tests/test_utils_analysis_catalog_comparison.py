@@ -1,17 +1,22 @@
-from utils.analysis.catalog_comparison import testobject_dropout
 from astropy.table import Table
+from utils.analysis.catalog_comparison import testobject_dropout
+
 
 def test_testobject_dropout():
     test_objects = Table(
-        data=[['name 2', 'name 3'], [1e20, 90]],
+        data=[["name 2", "name 3"], [1e20, 90]],
         names=["main_id", "coo_err_angle"],
-        dtype=[object, float],)
+        dtype=[object, float],
+    )
     parent_sample = Table(
-        data=[['name 1', 'name 2', 'name 4'], [1e20, 90, 81]],
+        data=[["name 1", "name 2", "name 4"], [1e20, 90, 81]],
         names=["main_id", "coo_err_angle"],
-        dtype=[object, float],)
+        dtype=[object, float],
+    )
 
-    dropout, test_without_dropout = testobject_dropout(test_objects['main_id'],parent_sample['main_id'])
+    dropout, test_without_dropout = testobject_dropout(
+        test_objects["main_id"], parent_sample["main_id"]
+    )
 
-    assert dropout == ['name 3']
-    assert test_without_dropout == ['name 2']
+    assert dropout == ["name 3"]
+    assert test_without_dropout == ["name 2"]

@@ -541,7 +541,7 @@ def save_catalog(starcat5: Table) -> None:
     save([starcat5], ["StarCat5"], location=str(catalogs_dir) + "/")
 
 
-def main() -> int:
+def main(distance_cut = 30.0, service_type = "") -> int:
     """
     Build and save the StarCat5 catalog.
 
@@ -558,12 +558,11 @@ def main() -> int:
     :returns: Exit code (0 for success).
     :rtype: int
     """
-    service = choose_service("gvo")
+    service = choose_service(service_type)
 
-    distance_cut_pc = 30.0
-    queried_stars = query_stars(service, distance_cut_pc)
+    queried_stars = query_stars(service, distance_cut)
     queried_children = query_children(service)
-    queried_systems = query_systems(service, distance_cut_pc)
+    queried_systems = query_systems(service, distance_cut)
 
     stars_with_ub = add_unresolved_binaries(
         queried_systems,

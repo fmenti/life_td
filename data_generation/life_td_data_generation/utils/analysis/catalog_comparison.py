@@ -6,7 +6,6 @@ Helper functions for the creation and analysis of the LIFE Target
 import astropy as ap  # votables
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
-
 from utils.io import stringtoobject
 
 
@@ -22,17 +21,13 @@ def testobject_dropout(test_objects, parent_sample, silent=False):
     if len(test_objects) > 0:
         # Find objects in test_objects that are NOT in parent_sample
         drop_out = test_objects[
-            np.where(
-                np.isin(test_objects, parent_sample, invert=True)
-            )
+            np.where(np.isin(test_objects, parent_sample, invert=True))
         ]
 
         # Find objects in test_objects that ARE in parent_sample
         # (i.e., objects that did NOT drop out)
         test_objects_without_dropout = test_objects[
-            np.where(
-                np.isin(test_objects, parent_sample, invert=False)
-            )
+            np.where(np.isin(test_objects, parent_sample, invert=False))
         ]
 
         if not silent:
@@ -45,7 +40,8 @@ def testobject_dropout(test_objects, parent_sample, silent=False):
 
     return drop_out, test_objects_without_dropout
 
-def type_system(cat_h,cat_o, lists_dict, main_id, name, verbose):
+
+def type_system(cat_h, cat_o, lists_dict, main_id, name, verbose):
     """
     Process a system-type object and categorize it based on its children.
 
@@ -76,20 +72,18 @@ def type_system(cat_h,cat_o, lists_dict, main_id, name, verbose):
 
     if len(cat_h[parent_clause]) > 0:
         if verbose:
-            reason=f"system object but with found child object, {main_id}"
-            #TBD have reason as something to be given back by the function
+            reason = f"system object but with found child object, {main_id}"
+            # TBD have reason as something to be given back by the function
             # and do the same for the other functions
             print(reason)
-            print(
-                cat_h["child_main_id"][parent_clause]
-            )
+            print(cat_h["child_main_id"][parent_clause])
         n = 0
         for child in cat_h["child_main_id"][parent_clause]:
             if cat_o["type"][np.where(child == cat_o["main_id"])][0] != "pl":
                 lists_dict["children"].append(child)
             else:
-                n+=1
-        if n==len(cat_h[parent_clause]):
+                n += 1
+        if n == len(cat_h[parent_clause]):
             # only planet type children which we are not interested in here
             lists_dict["system_without_child"].append(name)
     else:
@@ -265,8 +259,9 @@ def result(lists_dict, l):
     for key in lists_dict:
         if key == "siblings":
             # Special handling for nested lists
-            lists_dict[key] = [[str(item) for item in sublist] for sublist in
-                               lists_dict[key]]
+            lists_dict[key] = [
+                [str(item) for item in sublist] for sublist in lists_dict[key]
+            ]
         else:
             lists_dict[key] = [str(item) for item in lists_dict[key]]
     print("\n \n Of the", len(l), "objects given:")

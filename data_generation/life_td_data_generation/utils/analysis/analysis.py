@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np  # arrays
 from astropy import io
@@ -8,42 +7,76 @@ from scipy.stats import norm
 from sdata import empty_dict
 from utils.analysis.finalplot import starcat_distribution_plot as final_plot
 from utils.analysis.histogram_utils import (
-    spectral_type_histogram,
-    SpectralType,
     Plotparas,
+    SpectralType,
+    spectral_type_histogram,
 )
 
 # self created modules
-from utils.io import Path, stringtoobject, load
+from utils.io import Path, load, stringtoobject
 
-def database_para_temp_class_plot_prep(table, para_name, ylabel):
+
+def scatterplot(table_name, para_name, ylabel):
+    [table] = load([table_name], location=Path().data)
+    # exctracting the correct columns
+    arr = table["dist_st_value", para_name]
+    arr2 = arr[np.where(arr["dist_st_value"] != 1e20)]
+    data = arr2[np.where(arr2[para_name] != 1e20)]
+
+    [ref_table] = load(["reference_data/" + table_name])
+    # exctracting the correct columns
+    ref_arr = ref_table["dist_st_value", para_name]
+    ref_arr2 = ref_arr[np.where(ref_arr["dist_st_value"] != 1e20)]
+    ref_data = ref_arr2[np.where(ref_arr2[para_name] != 1e20)]
+
+    # plt.figure()
+    fig, ax = plt.subplots(
+        figsize=(9, 6)
+    )  # subplots so that I can overplot old version?
+
+    ax.scatter(data["dist_st_value"], data[para_name], s=2, alpha=0.5)
+    ax.scatter(ref_data["dist_st_value"], ref_data[para_name], s=2, alpha=0.5)
+    ax.set_yscale("log")
+
+    ax.set_xlabel("Distance [pc]")
+    ax.set_ylabel(ylabel)
+    plt.show()
+
+    return data
+
+def database_para_temp_class_plot_prep(table, para_name):
     # exctracting the correct columns
     arr = table["class_temp", para_name]
     arr2 = arr[np.where(arr[para_name] != 1e20)]
     data = arr2[np.where(arr2["class_temp"] != "?")]
 
-    parameter_by_temperature_class(data["class_temp"],data[para_name], ylabel)
     return data
 
-def parameter_by_temperature_class(temp_class, parameter, ylabel):
 
+def parameter_by_temperature_class(temp_class,
+                                   parameter,
+                                   ylabel,
+                                   label=["data"]):
     ms_tempclass = np.array(["O", "B", "A", "F", "G", "K", "M"])
 
     # map class -> index in desired order
     order_map = {c: i for i, c in enumerate(ms_tempclass)}
 
-    x = np.array(
-        [order_map[c] for c in temp_class])  # numeric positions
 
     plt.figure()
-    plt.scatter(x, parameter)
+    for i in range(len(temp_class)):
+        x = np.array([order_map[c] for c in temp_class[i]])  # numeric positions
+        plt.scatter(x, parameter[i],alpha=0.5,label=label[i])
     plt.xlabel("Stellar Temperature Class")
+    plt.legend()
     plt.ylabel(ylabel)
 
-    plt.xticks(np.arange(len(ms_tempclass)),
-               ms_tempclass)  # enforce tick order + labels
+    plt.xticks(
+        np.arange(len(ms_tempclass)), ms_tempclass
+    )  # enforce tick order + labels
     plt.xlim(-0.5, len(ms_tempclass) - 0.5)  # optional: nicer margins
     plt.show()
+
 
 def linfit(x_data, y_data, x):
     poly = np.polyfit(x_data, y_data, 1)
@@ -133,6 +166,7 @@ def array_only_fill_values(arr):
 def remove_fill_values(arr):
     return arr[np.where(arr != 1e20)]
 
+
 def different_data(arr):
     if is_starnames(arr):
         pass
@@ -143,9 +177,13 @@ def different_data(arr):
             arr = remove_fill_values(arr)
     return arr
 
-def get_data(table_name, colname):
+
+def get_data(table_name, colname,reference_data=False):
     # loading the correct table
-    [table] = load([table_name], location=Path().data)
+    if reference_data:
+        [table] = load(["reference_data/"+table_name])
+    else:
+        [table] = load([table_name], location = Path().data)
     # exctracting the correct columns
     arr_with_potential_fill_values = table[colname]
     # removing fill values
@@ -195,9 +233,6 @@ def stellar_distance_histogram(arr, names, path, max_dist, xaxis):
     # plt.savefig(path)
     plt.show()
     return
-
-
-
 
 
 def tight_plot(x, spec):

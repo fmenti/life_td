@@ -2,14 +2,14 @@ import numpy as np
 from astropy.table import Table
 from provider.life import (
     assign_null_values,
+    create_star_basic_table,
     deal_with_leading_d_sptype,
     extract_lum_class,
     initiate_columns,
     modeled_param,
+    realspectype,
     spec,
     sptype_string_to_class,
-    create_star_basic_table,
-    realspectype
 )
 from utils.io import load
 
@@ -138,24 +138,37 @@ def test_modeled_param():
 
 
 def test_assign_teff():
-    temp = np.array(['M', 'M', 'M', 'M', 'M','K'])
-    temp_nr = np.array(['5.0', '3.5', '5.5', '6.5', '4.0','2.5'])
-    lum = np.array(['V', 'V', 'V', 'V', 'V','V'])
-    main_id = np.array(['test', 'test2', 'test3', 'test4', 'test5','test6'])
-    cat = Table((main_id, temp, temp_nr, lum),
-                names=('main_id', 'class_temp', 'class_temp_nr', 'class_lum'),
-                dtype=[object, object, object, object])
+    temp = np.array(["M", "M", "M", "M", "M", "K"])
+    temp_nr = np.array(["5.0", "3.5", "5.5", "6.5", "4.0", "2.5"])
+    lum = np.array(["V", "V", "V", "V", "V", "V"])
+    main_id = np.array(["test", "test2", "test3", "test4", "test5", "test6"])
+    cat = Table(
+        (main_id, temp, temp_nr, lum),
+        names=("main_id", "class_temp", "class_temp_nr", "class_lum"),
+        dtype=[object, object, object, object],
+    )
 
     result = spec(cat)
 
     # assert
-    assert result['mod_Teff'][
-               np.where(result['class_temp_nr'] == '2.5')] == 5100 # should use the one from 2.0
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '3.5')] == 3270
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '4.0')] == 3210
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '5.0')] == 3060
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '5.5')] == 2930
-    assert result['mod_Teff'][np.where(result['class_temp_nr'] == '6.5')] == 2740
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "2.5")] == 5100
+    )  # should use the one from 2.0
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "3.5")] == 3270
+    )
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "4.0")] == 3210
+    )
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "5.0")] == 3060
+    )
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "5.5")] == 2930
+    )
+    assert (
+        result["mod_Teff"][np.where(result["class_temp_nr"] == "6.5")] == 2740
+    )
 
 
 def test_spec():
@@ -177,23 +190,28 @@ def test_spec():
         result["mod_Teff"][np.where(result["class_temp_nr"] == "6.5")] == 2740
     )
 
+
 def test_assign_mass():
-    temp = np.array(['A', 'K', 'M', 'K' ])
-    temp_nr = np.array(['1.5', '3', '3', '2.5'])
-    lum = np.array(['V', 'V', 'V', 'V'])
-    main_id = np.array(['test', 'test2', 'test3', 'test4'])
-    cat = Table((main_id, temp, temp_nr, lum),
-                names=('main_id', 'class_temp', 'class_temp_nr', 'class_lum'),
-                dtype=[object, object, object, object])
+    temp = np.array(["A", "K", "M", "K"])
+    temp_nr = np.array(["1.5", "3", "3", "2.5"])
+    lum = np.array(["V", "V", "V", "V"])
+    main_id = np.array(["test", "test2", "test3", "test4"])
+    cat = Table(
+        (main_id, temp, temp_nr, lum),
+        names=("main_id", "class_temp", "class_temp_nr", "class_lum"),
+        dtype=[object, object, object, object],
+    )
 
     result = spec(cat)
 
     # assert
-    assert result['mod_M'][
-               np.where(result['main_id'] == 'test')] == 2.05 # should use the one from 1.0
-    assert result['mod_M'][np.where(result['main_id'] == 'test2')] == 0.78
-    assert result['mod_M'][np.where(result['main_id'] == 'test3')] == 0.37
-    assert result['mod_M'][np.where(result['main_id'] == 'test4')] == 0.82
+    assert (
+        result["mod_M"][np.where(result["main_id"] == "test")] == 2.05
+    )  # should use the one from 1.0
+    assert result["mod_M"][np.where(result["main_id"] == "test2")] == 0.78
+    assert result["mod_M"][np.where(result["main_id"] == "test3")] == 0.37
+    assert result["mod_M"][np.where(result["main_id"] == "test4")] == 0.82
+
 
 def test_no_stas_lost():
     [sim_star_basic] = load(["sim_star_basic"])
@@ -202,17 +220,20 @@ def test_no_stas_lost():
 
     assert len(life["star_basic"]) == len(sim_star_basic)
 
+
 def test_realspectype():
     # cat: Table containing class_temp and class_lum column
-    temp = np.array(['A', 'K', 'M', 'K',''])
-    temp_nr = np.array(['1.5', '3', '3', '2.5',''])
-    lum = np.array(['V', 'V', 'V', 'V',''])
-    main_id = np.array(['test', 'test2', 'test3', 'test4','test5'])
-    cat = Table((main_id, temp, temp_nr, lum),
-                names=('main_id', 'class_temp', 'class_temp_nr', 'class_lum'),
-                dtype=[object, object, object, object])
+    temp = np.array(["A", "K", "M", "K", ""])
+    temp_nr = np.array(["1.5", "3", "3", "2.5", ""])
+    lum = np.array(["V", "V", "V", "V", ""])
+    main_id = np.array(["test", "test2", "test3", "test4", "test5"])
+    cat = Table(
+        (main_id, temp, temp_nr, lum),
+        names=("main_id", "class_temp", "class_temp_nr", "class_lum"),
+        dtype=[object, object, object, object],
+    )
 
     ms = realspectype(cat)
 
     # actually, it should kick out the nan values
-    assert len(cat)-1 == len(ms)
+    assert len(cat) - 1 == len(ms)

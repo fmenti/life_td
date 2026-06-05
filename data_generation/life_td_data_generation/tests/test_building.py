@@ -1,14 +1,14 @@
+import numpy as np  # arrays
 from astropy.table import MaskedColumn, Table, setdiff
 from building import (
-    idsjoin,
-    best_para_id,
-    best_para,
-    assign_type,
     assign_source_idref,
+    assign_type,
+    best_para,
+    best_para_id,
+    best_para_membership,
+    idsjoin,
     provider_data_merging,
-    best_para_membership
 )
-import numpy as np  # arrays
 from sdata import empty_dict
 
 
@@ -468,4 +468,3 @@ def test_provider_data_merging():
     assert (
         len(result["sources"]) == initial_length
     )  # Should not change when merging empty data
-

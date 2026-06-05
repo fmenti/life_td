@@ -12,6 +12,7 @@ from provider.utils import (
     create_sources_table,
     initiate_columns,
     replace_value,
+    sorting_number_of_id,
 )
 from sdata import empty_dict
 from utils.io import Path, load, save, stringtoobject
@@ -307,7 +308,7 @@ def _match_spectral_type_to_model(sptype, model_param):
             return {
                 "Teff": model_param["Teff"][i],
                 "Radius": model_param["Radius"][i],
-                "Mass": model_param["Mass"][i]
+                "Mass": model_param["Mass"][i],
             }
 
     # For half-subtypes (e.g., 'K5.5V'), try matching first 4 characters
@@ -318,18 +319,19 @@ def _match_spectral_type_to_model(sptype, model_param):
                 return {
                     "Teff": model_param["Teff"][i],
                     "Radius": model_param["Radius"][i],
-                    "Mass": model_param["Mass"][i]
+                    "Mass": model_param["Mass"][i],
                 }
 
         # If no .5 match found, fall back to the integer value (e.g., K2.5V -> K2V)
-        fallback_sptype = sptype[0] + sptype[1] + sptype[
-            4:]  # e.g., 'K' + '2' + 'V'
+        fallback_sptype = (
+            sptype[0] + sptype[1] + sptype[4:]
+        )  # e.g., 'K' + '2' + 'V'
         for i in range(len(model_param["SpT"])):
             if model_param["SpT"][i][:3] == fallback_sptype[:3]:
                 return {
                     "Teff": model_param["Teff"][i],
                     "Radius": model_param["Radius"][i],
-                    "Mass": model_param["Mass"][i]
+                    "Mass": model_param["Mass"][i],
                 }
 
     # No match found
@@ -479,7 +481,7 @@ def create_life_helpertable(life):
     stars = sim_objects[np.where(sim_objects["type"] != "pl")]
 
     life["star_basic"] = stringtoobject(life["star_basic"])
-    #stars = stringtoobject(stars)
+    # stars = stringtoobject(stars)
 
     life_helptab = join(stars, life["star_basic"])
     life_helptab = spec(
@@ -584,6 +586,37 @@ def create_life_sources_table(life):
     return life_sources
 
 
+def triple_star_handling():
+    # load wds ident and h_link
+    [wds_ident, wds_h_link] = load(["wds_ident", "wds_h_link"])
+
+    triple_ident = wds_ident[
+        sorting_number_of_id(wds_ident["main_id"], 3, wds_ident["main_id"])
+    ]
+    print(triple_ident)
+    triple_systems = unique(triple_ident, keys="main_id")["main_id"]
+    print(triple_systems)
+
+    print(
+        wds_h_link[
+            np.where(np.isin(wds_h_link["parent_main_id"], triple_systems))
+        ]
+    )
+
+    temp_ident = triple_ident
+    for i in range(len(triple_ident)):
+        if triple_ident["id"][i][-2:] == "AB":
+            temp_ident["main_id"][i] = (
+                f"{triple_ident['main_id'][i]}{triple_ident['id'][i][-2:]}"
+            )
+    print(temp_ident)
+    # update ident and h_link
+    # in building, prioritize live over wds and simbad
+    # not really working, each system has their own special cases.
+    # better make first sure that I really need this.
+    return
+
+
 def provider_life():
     """
     Loads SIMBAD data and postprocesses it.
@@ -606,6 +639,8 @@ def provider_life():
     life["mes_radius_st"] = create_mes_radius_st_table(life_helptab)
     life["mes_mass_st"] = create_mes_mass_st_table(life_helptab)
     life["sources"] = create_life_sources_table(life)
+
+    # triple_star_handling()
 
     save(
         list(life.values()),

@@ -1,6 +1,5 @@
 """Combines the data from the individual data providers."""
 
-from collections.abc import Iterable
 from itertools import islice
 
 import numpy as np
@@ -277,7 +276,7 @@ def best_para_membership(mes_table: Table) -> Table:
                 for row in group:
                     if row[para] == max_val:
                         best_para_table.add_row(row)
-                        break # make sure not multiple of same max
+                        break  # make sure not multiple of same max
                         # value are added
             else:
                 # if none of the objects has a membership entry
@@ -323,8 +322,12 @@ def _get_parameter_columns(para: str) -> list[str]:
         )
     else:
         cols.extend(
-            [f"{para}_value", f"{para}_err", f"{para}_qual",
-             f"{para}_source_idref"]
+            [
+                f"{para}_value",
+                f"{para}_err",
+                f"{para}_qual",
+                f"{para}_source_idref",
+            ]
         )
     return cols
 
@@ -388,7 +391,10 @@ def best_para(para: str, mes_table: Table) -> Table:
 
 
 def best_parameters_ingestion(
-    cat_mes: Table, cat_basic: Table, para: str, columns: list[str] | None = None
+    cat_mes: Table,
+    cat_basic: Table,
+    para: str,
+    columns: list[str] | None = None,
 ) -> Table:
     """
     Updates a basic table with the best measurements from a measurement table.
@@ -436,7 +442,9 @@ def provider_data_merging(
     print(f"Building {table_name} table ...")
     for prov_name, prov_data in prov_tables_dict.items():
         if para_match:
-            cat = matching_parameters(cat, prov_name, prov_tables_dict, table_name)
+            cat = matching_parameters(
+                cat, prov_name, prov_tables_dict, table_name
+            )
 
         if table_name not in cat or len(cat[table_name]) == 0:
             cat[table_name] = prov_data[table_name]
@@ -512,7 +520,9 @@ def matching_parameters(
     prov_table = prov_tables_dict[prov_name][table_name]
     if len(prov_table) > 0:
         paras = paras_dict.copy()
-        provider_name = prov_tables_dict[prov_name]["provider"]["provider_name"][0]
+        provider_name = prov_tables_dict[prov_name]["provider"][
+            "provider_name"
+        ][0]
         prov_tables_dict[prov_name][table_name] = assign_source_idref(
             prov_table, cat["sources"], paras[table_name], provider_name
         )
@@ -572,7 +582,7 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
 
 
 def build_sources_table(
-    prov_tables_dict: dict[str, dict[str, Table]]
+    prov_tables_dict: dict[str, dict[str, Table]],
 ) -> dict[str, Table]:
     """
     Initializes the catalog and builds the unique sources table.
@@ -674,11 +684,13 @@ def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
     if "child_object_idref" in h_link.colnames:
         h_link.remove_column("child_object_idref")
     h_link = join(
-        h_link, objects["object_id", "main_id"],
-        keys="main_id", join_type="left")
+        h_link,
+        objects["object_id", "main_id"],
+        keys="main_id",
+        join_type="left",
+    )
     h_link.rename_columns(
-        ["object_id", "main_id"],
-        ["child_object_idref", "child_main_id"]
+        ["object_id", "main_id"], ["child_object_idref", "child_main_id"]
     )
 
     # Link parent_object_idref
@@ -755,10 +767,13 @@ def build_rest_of_tables(
         cat[table_name] = cat[table_name].filled()
 
         # Link object_idrefs if applicable
-        if ("object_idref" in cat[table_name].colnames
-            and len(cat[table_name]) > 0):
-            cat[table_name] = _handle_object_id_linking(cat[table_name],
-                                                        cat["objects"])
+        if (
+            "object_idref" in cat[table_name].colnames
+            and len(cat[table_name]) > 0
+        ):
+            cat[table_name] = _handle_object_id_linking(
+                cat[table_name], cat["objects"]
+            )
 
         # Specialized handling by table name
         if table_name == "ident":
@@ -815,8 +830,12 @@ def build_rest_of_tables(
                 cat[table_name],
                 cat["star_basic"],
                 "binary",
-                ["binary_flag", "binary_qual", "binary_source_idref",
-                 "binary_ref"],
+                [
+                    "binary_flag",
+                    "binary_qual",
+                    "binary_source_idref",
+                    "binary_ref",
+                ],
             )
         elif table_name == "mes_sep_ang":
             cat["star_basic"] = best_parameters_ingestion(
@@ -843,7 +862,7 @@ def build_rest_of_tables(
 
 
 def build_tables(
-    prov_tables_dict: dict[str, dict[str, Table]]
+    prov_tables_dict: dict[str, dict[str, Table]],
 ) -> dict[str, Table]:
     """
     Orchestrates the building of all database tables.

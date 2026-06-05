@@ -9,6 +9,7 @@ from provider.utils import (
     create_provider_table,
     create_sources_table,
     fetch_main_id,
+    replace_value,
 )
 from sdata import empty_dict
 from utils.io import save, stringtoobject
@@ -136,14 +137,35 @@ def create_disk_basic_table(sdb_helptab):
     :rtype: astropy.table.table.Table
     """
     disk_basic = sdb_helptab["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"]
+    # careful, because 30pc and 50pc use different input files and therefore
+    # have different types in rdisk_bb and e_rdisk_bb, test also not working
+    missing_value = 1e20
+
     for column in ["rdisk_bb", "e_rdisk_bb"]:
-        if len(sdb_helptab[column].mask.nonzero()[0]) > 0:
-            print("careful, masked entries in ", column)
+        if hasattr(sdb_helptab[column], "mask"):
+            if len(sdb_helptab[column].mask.nonzero()[0]) > 0:
+                print(
+                    "careful, masked entries in ",
+                    column,
+                    " filling them with 1e+20",
+                )
+        if disk_basic[column].dtype == "object":
+            type_corrected_missing_value = str(missing_value)
+        else:
+            type_corrected_missing_value = missing_value
+        disk_basic = replace_value(
+            disk_basic, column, "None", type_corrected_missing_value
+        )
+
+        filled_column = disk_basic[column].filled(type_corrected_missing_value)
+        disk_basic[column] = np.asarray(filled_column, dtype=float)
+
     disk_basic.rename_columns(
         ["id", "rdisk_bb", "e_rdisk_bb", "disks_ref"],
         ["main_id", "rad_value", "rad_err", "rad_ref"],
     )
-    disk_basic = disk_basic[np.where(np.isfinite(disk_basic["rad_value"]))]
+
+    disk_basic = disk_basic[np.where(disk_basic["rad_value"] != missing_value)]
     return disk_basic
 
 
@@ -163,7 +185,7 @@ def provider_sdb(distance_cut_in_pc, data):
         "Grant Kennedy Disks",
         "http://drgmk.com/sdb/",
         "priv. comm.",
-        "2024-02-09",
+        "2026-04-28",
     )
     sdb_helptab = create_sdb_helpertable(
         distance_cut_in_pc, sdb["provider"]["provider_bibcode"][0], data
