@@ -151,11 +151,11 @@ def snsplot(df, y, path):
     sns.boxplot(
         data=df, x="class_temp", y=y, hue="catalog", order=["F", "G", "K", "M"]
     )
-    plt.savefig(path + ".png")
+    #plt.savefig(path + ".png")
     plt.show()
     plt.figure(figsize=(2, 3))
     sns.boxplot(data=df, y=y, hue="catalog", legend=False)
-    plt.savefig(path + "total.png", bbox_inches="tight")
+    #plt.savefig(path + "total.png", bbox_inches="tight")
     plt.show()
     return
 
@@ -177,7 +177,7 @@ def threecatboxplot(data, para, labels):
     plt.ylabel(para)
     # Creating plot
     bp = ax.boxplot(data, labels=labels)
-    plt.savefig(Path().plot + para + "_allcat_total.png", bbox_inches="tight")
+    #plt.savefig(Path().plot + para + "_allcat_total.png", bbox_inches="tight")
     # show plot
     plt.show()
     return
