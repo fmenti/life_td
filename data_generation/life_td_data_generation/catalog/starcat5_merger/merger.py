@@ -1,13 +1,13 @@
 from utils.io import load, stringtoobject, save
 from astropy.io.ascii import read
 from utils.io import Path
-from utils.fcts_cat_merge import nearest_neighbor_distances_units, get_mask_cat2_in_cat1
+from catalog.starcat5_merger.fcts_cat_merge import nearest_neighbor_distances_units, get_mask_cat2_in_cat1
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
 from astropy.table import vstack, MaskedColumn
 from provider.utils import nullvalues
-from utils.analysis import catalog_versions
+from utils.analysis import catalog_versions, finalplot
 
 
 
@@ -16,11 +16,12 @@ def model_exp_decay(x, a, b, c):
 
 def get_catalog(name):
     if name == "hpic":
-        catalog = read(Path().additional_data + "/HPICv1.0/full_HPIC.txt",
+        catalog = read("../../../../additional_data/HPICv1.0/full_HPIC.txt",
                     delimiter="|")
 
     if name == "starcat5":
-        [catalog] = load(["catalogs/StarCat5"])
+        [catalog] = load(["catalogs/StarCat5"],
+                         location = "../../../../additional_data/")
 
     return catalog
 
@@ -105,34 +106,32 @@ def deal_with_resto_of_hpic_cols(catalog,binary_flag_col,float_cols):
 
     return catalog
 
-def analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
-    ylabel = "Stellar Temperature [K]"
+def scatter_plot(catalogs,x_values,y_values,ylabel):
 
     fig, ax = plt.subplots(
         figsize=(9, 6)
     )  # subplots so that I can overplot old version?
 
-    ax.scatter(starcat5["dist_st_value"], starcat5["teff_st_value"], s=2,
+    for cat,x,y in zip(catalogs,x_values,y_values):
+        ax.scatter(cat[x], cat[y], s=2,
                alpha=0.5)
-    ax.scatter(pre_merge_hpic_masked["temp_dist_st_value"],
-               pre_merge_hpic_masked["temp_teff_st_value"], s=2, alpha=0.5)
+
     ax.set_yscale("log")
 
     ax.set_xlabel("Distance [pc]")
     ax.set_ylabel(ylabel)
     plt.show()
 
-    fig, ax = plt.subplots(
-        figsize=(9, 6)
-    )  # subplots so that I can overplot old version?
+def merger_analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
+    scatter_plot([starcat5,pre_merge_hpic_masked],
+                 ["dist_st_value","temp_dist_st_value"],
+                 ["teff_st_value","temp_teff_st_value"],
+                 "Stellar Temperature [K]")
 
-    ax.scatter(catalog["temp_dist_st_value"],
-               catalog["temp_teff_st_value"], s=2, alpha=0.5)
-    ax.set_yscale("log")
-
-    ax.set_xlabel("Distance [pc]")
-    ax.set_ylabel(ylabel)
-    plt.show()
+    scatter_plot([catalog],
+                 ["temp_dist_st_value"],
+                 [ "temp_teff_st_value"],
+                 "Stellar Temperature [K]")
 
     for col in float_colnames:
         x = pre_merge_hpic_masked['temp_' + col]
@@ -142,6 +141,29 @@ def analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
         catalog_versions.threecatboxplot([starcat5[col],
                                           hpic_prepped, catalog_prepped],
                                          col, ["starcat5", "hpic", "merger"])
+    return
+
+def starcat5_not_in_hpic(catalog):
+    scatter_plot([catalog],
+                 ["dist_st_value"],
+                 ["teff_st_value"],
+                 "Stellar Temperature [K]")
+
+    scatter_plot([catalog],
+                 ["dist_st_value"],
+                 ["mag_j_value"],
+                 "J Magnitude")
+
+    finalplot.starcat_distribution_plot(
+        [catalog["class_temp", "dist_st_value"]], ["StarCat5_addition_to_HPIC"]
+    )
+
+    print(catalog)
+
+    for temp_class in ["O","B","A","F","G"]:
+        print(catalog["main_id","class_temp"][np.where(
+            catalog["class_temp"] == temp_class)])
+
     return
 
 def hpic_merger():
@@ -158,6 +180,8 @@ def hpic_merger():
                                               r_arcsec=radius)
 
     masked_starcat5 = starcat5[mask_cat2_in_cat1]
+    starcat5_not_in_hpic(masked_starcat5)
+
 
     starcat5_merge_colnames = ["main_id", "coo_ra", "coo_dec", "sptype_string",
                                "plx_value", "dist_st_value", "teff_st_value",
@@ -213,9 +237,14 @@ def hpic_merger():
                                                   temp_float_colnames)
 
     catalog = vstack([pre_merge_hpic, pre_merge_starcat])
-    save([catalog], ["HPIC_StarCat"])
+    print(catalog)
 
-    analysis(pre_merge_hpic, starcat5,catalog,float_colnames)
+    save([catalog,masked_starcat5,pre_merge_hpic],
+         ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic"],
+         location="../../../../additional_data/"
+         )
+
+    merger_analysis(pre_merge_hpic, starcat5,catalog,float_colnames)
 
     return catalog
 
