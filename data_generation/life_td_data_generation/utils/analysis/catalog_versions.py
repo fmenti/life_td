@@ -296,18 +296,19 @@ def compare():
     paths = ["catalogs/StarCat5", "StarCat4"]
     ltc_compare(labels, paras, paths=paths)
 
-def plot_cat_paras(paras,catalog_list):
+def plot_cat_paras(paras,catalog_list,label_list=["cat1","cat2"]):
     fig, ax = plt.subplots(
         figsize=(9, 6)
     )  # subplots so that I can overplot old version?
-    for catalog in catalog_list:
+    for catalog,lab in zip(catalog_list,label_list):
         arr = catalog[paras[0], paras[1]]
         arr2 = arr[np.where(arr[paras[0]] != 1e20)]
         data = arr2[np.where(arr2[paras[1]] != 1e20)]
 
-        ax.scatter(data[paras[0]], data[paras[1]], s=2)
+        ax.scatter(data[paras[0]], data[paras[1]], s=2, label = lab, alpha=0.5)
     # ax.set_yscale("log")
 
     ax.set_xlabel(paras[0])
     ax.set_ylabel(paras[1])
+    plt.legend()
     plt.show()
