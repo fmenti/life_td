@@ -1,0 +1,147 @@
+Starcat5 HPIC merger catalog
+
+Columns:
+['temp_main_id', # main_id if object from starcat5, star_name if from HPIC
+'temp_coo_ra', # coo_ra if object from starcat5, ra if from HPIC
+'temp_coo_dec', # coo_dec if object from starcat5, dec if from HPIC
+'ra_J2016', # HPIC entry, masked if from starcat5
+'dec_J2016', # HPIC entry, masked if from starcat5
+'tic_id', # HPIC entry, masked if from starcat5
+'gaia_dr2_id', # HPIC entry, masked if from starcat5
+'gaia_dr3_id', # HPIC entry, masked if from starcat5
+'hip_name', # HPIC entry, masked if from starcat5
+'tm_name', # HPIC entry, masked if from starcat5
+'tyc_name', # HPIC entry, masked if from starcat5
+'wds_designation', # HPIC entry, masked if from starcat5
+'simbad_name', # HPIC entry, masked if from starcat5
+'source_list_fl', # HPIC entry, masked if from starcat5
+'sy_pmra', # HPIC entry, masked if from starcat5
+'sy_pmraerr', # HPIC entry, masked if from starcat5
+'sy_pmdec', # HPIC entry, masked if from starcat5
+'sy_pmdecerr', # HPIC entry, masked if from starcat5
+'sy_pmsrc', # HPIC entry, masked if from starcat5
+'sy_pm_reflink', # HPIC entry, masked if from starcat5
+'sy_ujmag', # HPIC entry, masked if from starcat5
+'sy_ujmagerr', # HPIC entry, masked if from starcat5
+'sy_ujmagsrc', # HPIC entry, masked if from starcat5
+'sy_ujmag_reflink', # HPIC entry, masked if from starcat5
+'sy_bmag', # HPIC entry, masked if from starcat5
+'sy_bmagerr', # HPIC entry, masked if from starcat5
+'sy_bmagsrc', # HPIC entry, masked if from starcat5
+'sy_bmag_reflink', # HPIC entry, masked if from starcat5
+'sy_vmag', # HPIC entry, masked if from starcat5
+'sy_vmagerr', # HPIC entry, masked if from starcat5
+'sy_vmagsrc', # HPIC entry, masked if from starcat5
+'sy_vmag_reflink', # HPIC entry, masked if from starcat5
+'sy_rcmag', # HPIC entry, masked if from starcat5
+'sy_rcmagerr', # HPIC entry, masked if from starcat5
+'sy_rcmagsrc', # HPIC entry, masked if from starcat5
+'sy_rcmag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_i_value', # mag_i_value if object from starcat5, sy_icmag if from HPIC
+'sy_icmagerr', # HPIC entry, masked if from starcat5
+'sy_icmagsrc', # HPIC entry, masked if from starcat5
+'sy_icmag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_j_value', # mag_j_value if object from starcat5, sy_jmag if from HPIC
+'sy_jmagerr', # HPIC entry, masked if from starcat5
+'sy_jmagsrc', # HPIC entry, masked if from starcat5
+'sy_jmag_reflink', # HPIC entry, masked if from starcat5
+'sy_hmag', # HPIC entry, masked if from starcat5
+'sy_hmagerr', # HPIC entry, masked if from starcat5
+'sy_hmagsrc', # HPIC entry, masked if from starcat5
+'sy_hmag_reflink', # HPIC entry, masked if from starcat5
+'sy_kmag', # HPIC entry, masked if from starcat5
+'sy_kmagmerr', # HPIC entry, masked if from starcat5
+'sy_kmagsrc', # HPIC entry, masked if from starcat5
+'sy_kmag_reflink', # HPIC entry, masked if from starcat5
+'sy_tmag', # HPIC entry, masked if from starcat5
+'sy_tmagerr', # HPIC entry, masked if from starcat5
+'sy_gaiamag', # HPIC entry, masked if from starcat5
+'sy_gaiamagerr', # HPIC entry, masked if from starcat5
+'sy_gaiamagsrc', # HPIC entry, masked if from starcat5
+'sy_gaiamag_reflink', # HPIC entry, masked if from starcat5
+'sy_bpmag', # HPIC entry, masked if from starcat5
+'sy_bpmagerr', # HPIC entry, masked if from starcat5
+'sy_rpmag', # HPIC entry, masked if from starcat5
+'sy_rpmagerr', # HPIC entry, masked if from starcat5
+'temp_plx_value', # plx_value if object from starcat5, sy_plx if from HPIC
+'sy_plxerr', # HPIC entry, masked if from starcat5
+'sy_plxsrc', # HPIC entry, masked if from starcat5
+'sy_plx_reflink', # HPIC entry, masked if from starcat5
+'temp_dist_st_value', # dist_st_value if object from starcat5, sy_dist if from HPIC
+'sy_disterr', # HPIC entry, masked if from starcat5
+'sy_distsrc', # HPIC entry, masked if from starcat5
+'sy_dist_reflink', # HPIC entry, masked if from starcat5
+'ambiguous_dist_fl', # HPIC entry, masked if from starcat5
+'temp_sptype_string', # sptype_string if object from starcat5, st_spectype if from HPIC
+'st_spectype_reflink', # HPIC entry, masked if from starcat5
+'dwarf_fl', # HPIC entry, masked if from starcat5
+'temp_teff_st_value', # teff_st_value if object from starcat5, st_teff if from HPIC
+'st_tefferr', # HPIC entry, masked if from starcat5
+'st_teffsrc', # HPIC entry, masked if from starcat5
+'temp_teff_ref', # teff_ref if object from starcat5, st_teff_reflink if from HPIC
+'st_logg', # HPIC entry, masked if from starcat5
+'st_loggerr', # HPIC entry, masked if from starcat5
+'st_loggsrc', # HPIC entry, masked if from starcat5
+'st_logg_reflink', # HPIC entry, masked if from starcat5
+'st_loggspec', # HPIC entry, masked if from starcat5
+'st_loggspecerr', # HPIC entry, masked if from starcat5
+'st_loggspecsrc', # HPIC entry, masked if from starcat5
+'st_loggspec_reflink', # HPIC entry, masked if from starcat5
+'st_met', # HPIC entry, masked if from starcat5
+'st_meterr', # HPIC entry, masked if from starcat5
+'st_metsrc', # HPIC entry, masked if from starcat5
+'st_met_reflink', # HPIC entry, masked if from starcat5
+'st_lum',
+'st_lumerr',
+'st_lumsrc',
+'st_lum_reflink',
+'temp_radius_st_value',
+'st_raderr',
+'st_radsrc',
+'temp_radius_ref',
+'temp_mass_st_value',
+'st_masserr',
+'st_masssrc',
+'temp_mass_ref',
+'uncertain_M_flag',
+'st_age',
+'st_ageerr',
+'st_agesrc',
+'st_age_reflink',
+'contaminant_fl',
+'brightest_sep',
+'brightest_Gmag',
+'brightest_id',
+'nearest_sep',
+'nearest_Gmag',
+'nearest_id',
+'temp_binary_flag',
+'gaia_binary_fl',
+'wds_comp',
+'temp_sep_ang_value',
+'wds_deltamag',
+'GCNS_companion',
+'GCNS_sep',
+'GCNS_mag_diff',
+'sy_planets_flag',
+'hostname',
+'coo_gal_l',
+'coo_gal_b',
+'binary_ref',
+'class_lum',
+'class_temp',
+'parent_main_id',
+'unresolved_binaries',
+'ms_temp_class',
+'ms_lum_class',
+'mass_flag',
+'higher_order_multiples',
+'single_parent',
+'trivial_binaries',
+'sep_flag',
+'sep_phys_value',
+'requirement_flag',
+'suitable_companions',
+'stableHZ',
+'ecliptic_pm45deg'
+]
