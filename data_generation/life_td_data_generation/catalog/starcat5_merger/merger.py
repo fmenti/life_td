@@ -8,6 +8,8 @@ from scipy.optimize import curve_fit
 from astropy.table import vstack, MaskedColumn
 from provider.utils import nullvalues
 from utils.analysis import catalog_versions, finalplot
+import importlib
+importlib.reload(catalog_versions)
 
 
 
@@ -124,8 +126,8 @@ def scatter_plot(catalogs,x_values,y_values,ylabel):
 
 def merger_analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
     scatter_plot([starcat5,pre_merge_hpic_masked],
-                 ["dist_st_value","temp_dist_st_value"],
-                 ["teff_st_value","temp_teff_st_value"],
+                 ["temp_dist_st_value","temp_dist_st_value"],
+                 ["temp_teff_st_value","temp_teff_st_value"],
                  "Stellar Temperature [K]")
 
     scatter_plot([catalog],
@@ -143,7 +145,26 @@ def merger_analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
                                          col, ["starcat5", "hpic", "merger"])
     return
 
-def starcat5_not_in_hpic(catalog):
+
+def plot_para_vs_para(hpic,starcat5_wo_hpic):
+
+    catalog_versions.plot_cat_paras(["temp_teff_st_value","temp_radius_st_value"],
+                   [hpic,starcat5_wo_hpic],
+                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(["temp_teff_st_value", "temp_mass_st_value"],
+                   [hpic, starcat5_wo_hpic],
+                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(["temp_radius_st_value", "temp_mass_st_value"],
+                   [hpic, starcat5_wo_hpic],
+                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+
+    catalog_versions.plot_cat_paras(["temp_coo_ra", "temp_coo_dec"],
+                   [hpic, starcat5_wo_hpic],
+                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+
+    return
+
+def analysis_starcat5_not_in_hpic(catalog):
     scatter_plot([catalog],
                  ["dist_st_value"],
                  ["teff_st_value"],
@@ -179,9 +200,13 @@ def hpic_merger():
                                               dec_cat2=starcat5["coo_dec"],
                                               r_arcsec=radius)
 
-    masked_starcat5 = starcat5[mask_cat2_in_cat1]
-    starcat5_not_in_hpic(masked_starcat5)
+    starcat5_not_in_hpic = starcat5[mask_cat2_in_cat1].copy()
+    print("not in hpic \n", starcat5_not_in_hpic['main_id', 'coo_ra', 'coo_dec'][
+              np.where(starcat5_not_in_hpic['main_id'] == "LP  137-54")])
 
+    starcat5_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
+    print("in hpic \n", starcat5_in_hpic['main_id', 'coo_ra', 'coo_dec'][
+              np.where(starcat5_in_hpic['main_id'] == "LP  137-54")])
 
     starcat5_merge_colnames = ["main_id", "coo_ra", "coo_dec", "sptype_string",
                                "plx_value", "dist_st_value", "teff_st_value",
@@ -208,7 +233,7 @@ def hpic_merger():
                          "temp_teff_st_value"]
     hpic_null = "null"
 
-    renamed_cols_starcat = rename_cols(masked_starcat5,
+    renamed_cols_starcat = rename_cols(starcat5_not_in_hpic,
                                        starcat5_merge_colnames,
                                        new_colnames)
 
@@ -239,14 +264,14 @@ def hpic_merger():
     catalog = vstack([pre_merge_hpic, pre_merge_starcat])
     print(catalog)
 
-    save([catalog,masked_starcat5,pre_merge_hpic],
+    save([catalog,starcat5_not_in_hpic,pre_merge_hpic],
          ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic"],
          location="../../../../additional_data/"
          )
 
-    merger_analysis(pre_merge_hpic, starcat5,catalog,float_colnames)
+    #merger_analysis(pre_merge_hpic, starcat5,catalog,float_colnames)
 
-    return catalog
+    return catalog, pre_merge_starcat, starcat5, pre_merge_hpic, float_colnames, starcat5_in_hpic
 
 
 
