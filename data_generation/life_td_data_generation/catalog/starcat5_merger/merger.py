@@ -166,23 +166,23 @@ def plot_para_vs_para(hpic,starcat5_wo_hpic):
 
 def analysis_starcat5_not_in_hpic(catalog):
     scatter_plot([catalog],
-                 ["dist_st_value"],
-                 ["teff_st_value"],
+                 ["temp_dist_st_value"],
+                 ["temp_teff_st_value"],
                  "Stellar Temperature [K]")
 
     scatter_plot([catalog],
-                 ["dist_st_value"],
-                 ["mag_j_value"],
+                 ["temp_dist_st_value"],
+                 ["temp_mag_j_value"],
                  "J Magnitude")
 
     finalplot.starcat_distribution_plot(
-        [catalog["class_temp", "dist_st_value"]], ["StarCat5_addition_to_HPIC"]
+        [catalog["class_temp", "temp_dist_st_value"]], ["StarCat5_addition_to_HPIC"]
     )
 
     print(catalog)
 
     for temp_class in ["O","B","A","F","G"]:
-        print(catalog["main_id","class_temp"][np.where(
+        print(catalog["temp_main_id","class_temp"][np.where(
             catalog["class_temp"] == temp_class)])
 
     return
@@ -200,13 +200,13 @@ def hpic_merger():
                                               dec_cat2=starcat5["coo_dec"],
                                               r_arcsec=radius)
 
-    starcat5_not_in_hpic = starcat5[mask_cat2_in_cat1].copy()
+    starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
+    print(" in hpic \n", starcat5_in_hpic['main_id', 'coo_ra', 'coo_dec'][
+              np.where(starcat5_in_hpic['main_id'] == "LP  137-54")])
+
+    starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
     print("not in hpic \n", starcat5_not_in_hpic['main_id', 'coo_ra', 'coo_dec'][
               np.where(starcat5_not_in_hpic['main_id'] == "LP  137-54")])
-
-    starcat5_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
-    print("in hpic \n", starcat5_in_hpic['main_id', 'coo_ra', 'coo_dec'][
-              np.where(starcat5_in_hpic['main_id'] == "LP  137-54")])
 
     starcat5_merge_colnames = ["main_id", "coo_ra", "coo_dec", "sptype_string",
                                "plx_value", "dist_st_value", "teff_st_value",
