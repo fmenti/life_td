@@ -124,11 +124,16 @@ def scatter_plot(catalogs,x_values,y_values,ylabel):
     ax.set_ylabel(ylabel)
     plt.show()
 
-def merger_analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
-    scatter_plot([starcat5,pre_merge_hpic_masked],
+def merger_analysis(pre_merge_hpic_masked,starcat5_not_in_hpic,catalog,float_colnames,):
+    scatter_plot([starcat5_not_in_hpic,pre_merge_hpic_masked],
                  ["temp_dist_st_value","temp_dist_st_value"],
                  ["temp_teff_st_value","temp_teff_st_value"],
                  "Stellar Temperature [K]")
+
+    catalog_versions.plot_cat_paras(
+        ["temp_teff_st_value", "temp_radius_st_value"],
+        [starcat5_not_in_hpic, pre_merge_hpic_masked],
+        label_list=["starcat5_not_in_hpic", "pre_merge_hpic_masked"])
 
     scatter_plot([catalog],
                  ["temp_dist_st_value"],
@@ -140,9 +145,9 @@ def merger_analysis(pre_merge_hpic_masked,starcat5,catalog,float_colnames,):
         hpic_prepped = x[~np.isnan(x)]
         y = catalog['temp_' + col]
         catalog_prepped = y[~np.isnan(y)]
-        catalog_versions.threecatboxplot([starcat5[col],
+        catalog_versions.threecatboxplot([starcat5_not_in_hpic[col],
                                           hpic_prepped, catalog_prepped],
-                                         col, ["starcat5", "hpic", "merger"])
+                                         col, ["starcat5_not_in_hpic", "hpic", "merger"])
     return
 
 
@@ -184,6 +189,29 @@ def analysis_starcat5_not_in_hpic(catalog):
     for temp_class in ["O","B","A","F","G"]:
         print(catalog["temp_main_id","class_temp"][np.where(
             catalog["class_temp"] == temp_class)])
+
+    return
+
+def spec_dist_plot(catalogs,x):
+    plt.figure()
+
+    for cat,label in zip(catalogs,["HPIC","StarCat5_addition_to_HPIC"]):
+        spectype = np.array(cat["temp_sptype_string"]).astype(str)
+
+        # Reduce spectral types to first two characters, e.g. "M3.4" -> "M3"
+        spectype = np.array([s[:2] for s in spectype])
+
+        # Keep only spectral types listed in x
+        spectype = spectype[np.isin(spectype, x)]
+
+
+        plt.hist(spectype, bins=np.arange(len(x) + 1) - 0.5, edgecolor="black",label = label, alpha = 0.5)
+    plt.xticks(range(len(x)), x)
+    plt.xlabel("Spectral Subclass")
+    plt.ylabel("Number of stars")
+    plt.legend()
+
+    plt.show()
 
     return
 
@@ -264,8 +292,8 @@ def hpic_merger():
     catalog = vstack([pre_merge_hpic, pre_merge_starcat])
     print(catalog)
 
-    save([catalog,starcat5_not_in_hpic,pre_merge_hpic],
-         ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic"],
+    save([catalog,starcat5_not_in_hpic,pre_merge_hpic,pre_merge_starcat],
+         ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic","pre_merge_starcat"],
          location="../../../../additional_data/"
          )
 
