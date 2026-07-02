@@ -296,7 +296,8 @@ def compare():
     paths = ["catalogs/StarCat5", "StarCat4"]
     ltc_compare(labels, paras, paths=paths)
 
-def plot_cat_paras(paras,catalog_list,label_list=["cat1","cat2"]):
+def plot_cat_paras(paras,catalog_list,
+                   label_list=["cat1","cat2"]):
     fig, ax = plt.subplots(
         figsize=(9, 6)
     )  # subplots so that I can overplot old version?
