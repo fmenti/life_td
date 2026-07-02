@@ -28,7 +28,8 @@ adql_queries_moduls = {
         b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
         h_link.membership, h_link.parent AS parent_oid,
         h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids,
-        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value
+        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value,
+        f.U as mag_u_value
         """,
     "tables_statement": """
     FROM basic AS b
@@ -377,7 +378,7 @@ def expanding_helpertable_stars(
     stars = replace_value(stars, "plx_qual", "", stars["plx_qual"].fill_value)
 
     # Initialize and fill photometry references if values exist.
-    for band in ["i", "j", "k"]:
+    for band in ["i", "j", "k", "u"]:
         ref_col = f"mag_{band}_ref"
         val_col = f"mag_{band}_value"
 
@@ -562,6 +563,7 @@ def create_sim_sources_table(stars: Table, sim: dict[str, Table]) -> Table:
             "mag_i_ref",
             "mag_j_ref",
             "mag_k_ref",
+            "mag_u_ref",
             "binary_ref",
             "sptype_ref",
         ],
@@ -601,6 +603,8 @@ def create_star_basic_table(stars: Table) -> Table:
         "mag_j_ref",
         "mag_k_value",
         "mag_k_ref",
+        "mag_u_value",
+        "mag_u_ref",
         "sptype_string",
         "sptype_qual",
         "sptype_ref",
