@@ -91,57 +91,57 @@ Columns:
 'st_meterr', # HPIC entry, masked if from starcat5
 'st_metsrc', # HPIC entry, masked if from starcat5
 'st_met_reflink', # HPIC entry, masked if from starcat5
-'st_lum',
-'st_lumerr',
-'st_lumsrc',
-'st_lum_reflink',
-'temp_radius_st_value',
-'st_raderr',
-'st_radsrc',
-'temp_radius_ref',
-'temp_mass_st_value',
-'st_masserr',
-'st_masssrc',
-'temp_mass_ref',
-'uncertain_M_flag',
-'st_age',
-'st_ageerr',
-'st_agesrc',
-'st_age_reflink',
-'contaminant_fl',
-'brightest_sep',
-'brightest_Gmag',
-'brightest_id',
-'nearest_sep',
-'nearest_Gmag',
-'nearest_id',
-'temp_binary_flag',
-'gaia_binary_fl',
-'wds_comp',
-'temp_sep_ang_value',
-'wds_deltamag',
-'GCNS_companion',
-'GCNS_sep',
-'GCNS_mag_diff',
-'sy_planets_flag',
-'hostname',
-'coo_gal_l',
-'coo_gal_b',
-'binary_ref',
-'class_lum',
-'class_temp',
-'parent_main_id',
-'unresolved_binaries',
-'ms_temp_class',
-'ms_lum_class',
-'mass_flag',
-'higher_order_multiples',
-'single_parent',
-'trivial_binaries',
-'sep_flag',
-'sep_phys_value',
-'requirement_flag',
-'suitable_companions',
-'stableHZ',
-'ecliptic_pm45deg'
+'st_lum', # HPIC entry, masked if from starcat5
+'st_lumerr', # HPIC entry, masked if from starcat5
+'st_lumsrc', # HPIC entry, masked if from starcat5
+'st_lum_reflink', # HPIC entry, masked if from starcat5
+'temp_radius_st_value', # radius_st_value if object from starcat5, st_rad if from HPIC
+'st_raderr', # HPIC entry, masked if from starcat5
+'st_radsrc', # HPIC entry, masked if from starcat5
+'temp_radius_ref', # radius_ref if object from starcat5, st_rad_reflink if from HPIC
+'temp_mass_st_value', # mass_st_value if object from starcat5, st_mass if from HPIC
+'st_masserr', # HPIC entry, masked if from starcat5
+'st_masssrc', # HPIC entry, masked if from starcat5
+'temp_mass_ref', # mass_ref if object from starcat5, st_mass_reflink if from HPIC
+'uncertain_M_flag', # HPIC entry, masked if from starcat5
+'st_age', # HPIC entry, masked if from starcat5
+'st_ageerr', # HPIC entry, masked if from starcat5
+'st_agesrc', # HPIC entry, masked if from starcat5
+'st_age_reflink', # HPIC entry, masked if from starcat5
+'contaminant_fl', # HPIC entry, masked if from starcat5
+'brightest_sep', # HPIC entry, masked if from starcat5
+'brightest_Gmag', # HPIC entry, masked if from starcat5
+'brightest_id', # HPIC entry, masked if from starcat5
+'nearest_sep', # HPIC entry, masked if from starcat5
+'nearest_Gmag', # HPIC entry, masked if from starcat5
+'nearest_id', # HPIC entry, masked if from starcat5
+'temp_binary_flag', # binary_flag if object from starcat5, known_binary_fl if from HPIC
+'gaia_binary_fl', # HPIC entry, masked if from starcat5
+'wds_comp', # HPIC entry, masked if from starcat5
+'temp_sep_ang_value', # sep_ang_value if object from starcat5, wds_sep if from HPIC
+'wds_deltamag', # HPIC entry, masked if from starcat5
+'GCNS_companion', # HPIC entry, masked if from starcat5
+'GCNS_sep', # HPIC entry, masked if from starcat5
+'GCNS_mag_diff', # HPIC entry, masked if from starcat5
+'sy_planets_flag', # HPIC entry, masked if from starcat5
+'hostname', # HPIC entry, masked if from starcat5
+'coo_gal_l', # starcat5 entry, masked if from HPIC
+'coo_gal_b', # starcat5 entry, masked if from HPIC
+'binary_ref', # starcat5 entry, masked if from HPIC
+'class_lum', # starcat5 entry, masked if from HPIC
+'class_temp', # starcat5 entry, masked if from HPIC
+'parent_main_id', # starcat5 entry, masked if from HPIC
+'unresolved_binaries', # starcat5 entry, masked if from HPIC
+'ms_temp_class', # starcat5 entry, masked if from HPIC
+'ms_lum_class', # starcat5 entry, masked if from HPIC
+'mass_flag', # starcat5 entry, masked if from HPIC
+'higher_order_multiples', # starcat5 entry, masked if from HPIC
+'single_parent', # starcat5 entry, masked if from HPIC
+'trivial_binaries', # starcat5 entry, masked if from HPIC
+'sep_flag', # starcat5 entry, masked if from HPIC
+'sep_phys_value', # starcat5 entry, masked if from HPIC
+'requirement_flag', # starcat5 entry, masked if from HPIC
+'suitable_companions', # starcat5 entry, masked if from HPIC
+'stableHZ', # starcat5 entry, masked if from HPIC
+'ecliptic_pm45deg' # starcat5 entry, masked if from HPIC
 ]
