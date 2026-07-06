@@ -531,7 +531,7 @@ def matching_parameters(
 
 def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
     """
-    Unifies null values ('N', 'N/A') to '?' across specific tables/columns.
+    Unifies null values ('N', 'N/A', '') to '?' across specific tables/columns.
 
     :param cat: Dictionary of cumulative tables.
     :type cat: dict[str, Table]
@@ -564,6 +564,11 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
             "sptype_qual",
             "class_temp",
             "class_temp_nr",
+            "sptype_ref",
+            "mag_i_ref",
+            "mag_j_ref",
+            "mag_k_ref",
+            "mag_u_ref",
         ],
         ["mass_pl_qual"],
         ["rad_qual", "rad_rel"],
@@ -578,6 +583,7 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
             for col in cols:
                 cat[key] = replace_value(cat[key], col, "N", "?")
                 cat[key] = replace_value(cat[key], col, "N/A", "?")
+                cat[key] = replace_value(cat[key], col, "", "?")
     return cat
 
 
