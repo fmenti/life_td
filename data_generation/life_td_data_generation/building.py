@@ -155,7 +155,7 @@ def assign_source_idref(
             cat.remove_column(source_id_col)
 
         # Replace null values in reference column
-        cat = nullvalues(cat, ref_column, "None")
+        cat = nullvalues(cat, ref_column, "?")
 
         # Join with sources table to get source IDs for this provider
         source_subset = sources["ref", "source_id"][

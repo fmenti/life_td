@@ -385,8 +385,8 @@ def expanding_helpertable_stars(
         stars[ref_col] = MaskedColumn(
             dtype=object, length=len(stars), mask=[True] * len(stars)
         )
-        mask_has_val = np.where(stars[val_col].mask == False)
 
+        mask_has_val = np.where(stars[val_col].mask == False)
         stars[ref_col][mask_has_val] = [
             sim["provider"]["provider_bibcode"][0]
             for _ in range(len(stars[ref_col][mask_has_val]))
