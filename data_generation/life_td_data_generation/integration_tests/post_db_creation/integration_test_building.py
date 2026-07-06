@@ -374,6 +374,14 @@ def test_data_makes_sense_mag_k():
 
     assert mu < 11 and mu > 6  # failed at 5pc
 
+def test_data_makes_sense_mag_u():
+    # data
+    data = get_data("star_basic", "mag_u_value")
+
+    mu = norm_fit(data, "Stellar U-band magnitude")
+
+    assert mu < 11 and mu > 6  # failed at 5pc
+
 
 def test_data_makes_sense_plx():
     # data
