@@ -412,7 +412,8 @@ def _query_star_like(
         sb.mass_st_value, mass_source.ref AS mass_ref,
         sb.radius_st_value, radius_source.ref AS radius_ref,
         sb.binary_flag, binary_source.ref AS binary_ref,
-        sb.mag_i_value, sb.mag_j_value, sb.class_lum, sb.class_temp,
+        sb.mag_i_value, sb.mag_j_value, sb.mag_k_value, sb.mag_u_value,
+        sb.class_lum, sb.class_temp,
         o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
     FROM life_td.star_basic AS sb
     JOIN life_td.object AS o ON sb.object_idref=o.object_id
