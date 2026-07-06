@@ -89,7 +89,7 @@ tables may change at any time without prior warning.
         <voTableGrammar/>
         <make table="source">
             <rowmaker idmaps="*">
-                <map key="ref" nullExpr="'nan'"/>
+                <map key="ref" nullExpr="'?'"/>
                 <map key="source_id" nullExpr="0"/>
             </rowmaker>
         </make>
@@ -299,6 +299,18 @@ tables may change at any time without prior warning.
             tablehead="mag_k_source_id"
             description="Source identifier corresponding
             to the Magnitude in K filter parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="mag_u_value" type="double precision"
+            ucd="phot.mag;em.opt.U" unit=""
+            tablehead="mag_u_value"
+            description="Magnitude in U filter."/>
+        <column name="mag_u_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="mag_u_source_id"
+            description="Source identifier corresponding
+            to the Magnitude in U filter parameters."
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
@@ -552,6 +564,8 @@ tables may change at any time without prior warning.
                 <map key="mag_j_source_idref" nullExpr="999999" />
                 <map key="mag_k_value" nullExpr="1e+20" />
                 <map key="mag_k_source_idref" nullExpr="999999" />
+                <map key="mag_u_value" nullExpr="1e+20" />
+                <map key="mag_u_source_idref" nullExpr="999999" />
                 <map key="dist_st_value" nullExpr="1e+20" />
                 <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
