@@ -20,6 +20,8 @@ def test_simbad_queryable():
     simbad_provider["provider_url"] = [
         "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
     ]
+    # http://simbad.cds.unistra.fr/simbad/sim-tap currently on topcat
+    # http://simbad.u-strasbg.fr:80/simbad/sim-tap old tap I had here
     adql_query = [
         """SELECT top 10 *
                 FROM basic"""

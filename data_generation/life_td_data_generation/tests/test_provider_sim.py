@@ -86,6 +86,7 @@ def query_returns(monkeypatch):
             ),
             "mag_j_value": MaskedColumn([8.0, np.ma.masked, 6.0, np.ma.masked]),
             "mag_k_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+            "mag_u_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
         }
     )
     parents_without_plx = t0[:0].copy()
@@ -115,6 +116,7 @@ def query_returns(monkeypatch):
             np.ma.masked,
             np.ma.masked,
             np.ma.masked,
+            np.ma.masked,
         ]
     )
     children_without_plx = t0[:0].copy()
@@ -141,6 +143,7 @@ def query_returns(monkeypatch):
             "ref_hlink2",
             "Pl",
             "planet1",
+            np.ma.masked,
             np.ma.masked,
             np.ma.masked,
             np.ma.masked,
@@ -252,6 +255,7 @@ def test_creating_helpertable_stars(query_returns):
         "mag_i_value",
         "mag_j_value",
         "mag_k_value",
+        "mag_u_value",
         "coo_ra",
         "coo_dec",
         "plx_value",
@@ -443,6 +447,12 @@ def expanded_helptab_stars(expected_stars: Table, ref: str) -> Table:
         fill_value="N",
     )
 
+    expected_stars["mag_u_ref"] = MaskedColumn(
+        data=np.array([ref, ref, "", ""], dtype=object),
+        mask=[False, False, True, True],
+        fill_value="N",
+    )
+
     for col in ["sptype_ref", "coo_ref", "plx_ref"]:
         expected_stars[col] = MaskedColumn(expected_stars[col])
         expected_stars[col].mask[
@@ -465,6 +475,7 @@ def test_expanding_helpertable_stars(query_returns):
     # Data
     result_sim_helptab, result_sim, t0, return_ident = query_returns
     stars = result_sim_helptab
+    print(f" stars in test \n {stars}")
     expected_stars = expanded_helptab_stars(
         stars.copy(), result_sim["provider"]["provider_bibcode"][0]
     )
@@ -499,6 +510,7 @@ def test_expanding_helpertable_stars(query_returns):
         "mag_i_value",
         "mag_j_value",
         "mag_k_value",
+        "mag_u_value",
         "coo_ra",
         "coo_dec",
         "plx_value",
@@ -507,6 +519,7 @@ def test_expanding_helpertable_stars(query_returns):
         "mag_i_ref",
         "mag_j_ref",
         "mag_k_ref",
+        "mag_u_ref",
         "plx_qual",
         "coo_qual",
         "sptype_string",

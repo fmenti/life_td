@@ -22,6 +22,11 @@ table_names = [
     "best_h_link",
 ]
 
+mags = ["mag_i",
+        "mag_j",
+        "mag_k",
+        "mag_u",]
+
 paras_dict = {
     "sources": [],
     "objects": [],
@@ -32,10 +37,9 @@ paras_dict = {
         "coo",
         "plx",
         "dist_st",
-        "coo_gal",
-        "mag_i",
-        "mag_j",
-        "mag_k",
+        "coo_gal",]
+        + mags
+        + [
         "class",
         "sptype",
     ],
@@ -67,6 +71,18 @@ empty_dict = {
     "mes_sep_ang": Table(),
     "h_link": Table(),
 }
+
+def create_paras():
+    mag_paras =[]
+    mag_types = []
+    for m in mags:
+        mag_paras += [f"{m}_value",
+                    f"{m}_err",
+                    f"{m}_qual",
+                    f"{m}_source_idref",
+                    f"{m}_ref",]
+        mag_types += [float, float, object, int, object]
+    return mag_paras, mag_types
 
 empty_dict_wit_columns = {
     "sources": Table(
@@ -117,21 +133,9 @@ empty_dict_wit_columns = {
             "coo_gal_qual",
             "coo_gal_source_idref",
             "coo_gal_ref",
-            "mag_i_value",
-            "mag_i_err",
-            "mag_i_qual",
-            "mag_i_source_idref",
-            "mag_i_ref",
-            "mag_j_value",
-            "mag_j_err",
-            "mag_j_qual",
-            "mag_j_source_idref",
-            "mag_j_ref",
-            "mag_k_value",
-            "mag_k_err",
-            "mag_k_qual",
-            "mag_k_source_idref",
-            "mag_k_ref",
+              ]
+            + create_paras()[0]
+            +[
             "plx_value",
             "plx_err",
             "plx_qual",
@@ -196,21 +200,9 @@ empty_dict_wit_columns = {
             object,
             int,
             object,
-            float,
-            float,
-            object,
-            int,
-            object,
-            float,
-            float,
-            object,
-            int,
-            object,
-            float,
-            float,
-            object,
-            int,
-            object,
+            ]
+        + create_paras()[1]
+        + [
             float,
             float,
             object,

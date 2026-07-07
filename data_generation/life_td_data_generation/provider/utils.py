@@ -92,7 +92,7 @@ def create_provider_table(
 def query(
     link: str,
     adql_query: str,
-    upload_tables: list[table.Table] = [],
+    upload_tables: list[table.Table] | None = None,
     no_description=True,
     sync=False,
 ) -> table.Table:
@@ -111,6 +111,9 @@ def query(
     :returns: Result table returned by the TAP service.
     :rtype: astropy.table.table.Table
     """
+    if upload_tables is None:
+        upload_tables = []
+
     try:
         service = TAPService(link)
 
@@ -140,11 +143,12 @@ def query(
             cat.meta = {}
         # does not seem to work properly yet, getting warndings for exomercat/building
         print("Service is UP and running.")
+        return cat
+
     except DALServiceError as e:
-        print(f"Service is DOWN or unreachable. Error: {e}")
+        raise RuntimeError(f"Service is DOWN or unreachable: {e}") from e
     except Exception as e:
-        print(f"An error occurred: {e}")
-    return cat
+        raise RuntimeError(f"TAP query failed: {e}") from e
 
 
 def remove_catalog_description(
