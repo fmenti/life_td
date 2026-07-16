@@ -21,7 +21,7 @@ Columns:
 'sy_pmdecerr', # HPIC entry, masked if from starcat5
 'sy_pmsrc', # HPIC entry, masked if from starcat5
 'sy_pm_reflink', # HPIC entry, masked if from starcat5
-'sy_ujmag', # HPIC entry, masked if from starcat5
+'temp_mag_u_value' # mag_u_value if object from starcat5, sy_ujmag if from HPIC
 'sy_ujmagerr', # HPIC entry, masked if from starcat5
 'sy_ujmagsrc', # HPIC entry, masked if from starcat5
 'sy_ujmag_reflink', # HPIC entry, masked if from starcat5
