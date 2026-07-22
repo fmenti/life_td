@@ -1,5 +1,6 @@
 from astropy.table import Table
 from provider.utils import query
+from provider.simbad import main_adql_queries
 
 
 def test_wds_queryable():
@@ -28,6 +29,20 @@ def test_simbad_queryable():
     ]
     simbad = query(simbad_provider["provider_url"][0], adql_query[0])
     assert type(simbad) == type(Table())
+
+def test_simbad_all_queryable():
+        simbad_provider = Table()
+        simbad_provider["provider_url"] = [
+            "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
+        ]
+        # http://simbad.cds.unistra.fr/simbad/sim-tap currently on topcat
+        # http://simbad.u-strasbg.fr:80/simbad/sim-tap old tap I had here
+        adql_query = [
+            'SELECT TOP 100 ' + main_adql_queries(20)[6:]
+        ]
+        simbad = query(simbad_provider["provider_url"][0], adql_query[0])
+        assert type(simbad) == type(Table())
+        assert len(simbad) == 100
 
 
 def test_gaia_queryable():
