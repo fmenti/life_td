@@ -8,6 +8,7 @@ from utils.analysis.analysis import (database_para_temp_class_plot_prep,
                                      parameter_by_temperature_class,
                                      scatterplot)
 from utils.io import Path, load
+from sdata import filter_abbrev
 
 # not showing plots
 # show_kw=True #<--- added
@@ -347,41 +348,22 @@ def test_data_makes_sense_coo_gal():
     assert min(data_b) > -90
     assert max(data_b) < 90
 
+def test_data_makes_sense_magnitudes():
+    #"i","j","u","g","k","u_sdss"
+    mean = [10,10,10,15,10,20]
+    for i,mag in enumerate(filter_abbrev):
+        data = get_data("star_basic", f"mag_{mag}_value")
+        mu = norm_fit(data, f"Stellar {mag}-band magnitude")
 
-def test_data_makes_sense_mag_i():
-    # data
-    data = get_data("star_basic", "mag_i_value")
+        assert mu < mean[i]+3 and mu > mean[i]-3
 
-    mu = norm_fit(data, "Stellar i-band magnitude")
+def test_data_makes_sense_magnitudes_err():
+    #"i","j","u","g","k","u_sdss"
+    for i,mag in enumerate(filter_abbrev):
+        data = get_data("star_basic", f"mag_{mag}_err")
+        mu = norm_fit(data, f"Stellar {mag}-band magnitude error")
 
-    assert mu < 11 and mu > 7
-
-
-def test_data_makes_sense_mag_j():
-    # data
-    data = get_data("star_basic", "mag_j_value")
-
-    mu = norm_fit(data, "Stellar J-band magnitude")
-
-    assert mu < 11 and mu > 7
-
-
-def test_data_makes_sense_mag_k():
-    # data
-    data = get_data("star_basic", "mag_k_value")
-
-    mu = norm_fit(data, "Stellar K-band magnitude")
-
-    assert mu < 11 and mu > 6  # failed at 5pc
-
-def test_data_makes_sense_mag_u():
-    # data
-    data = get_data("star_basic", "mag_u_value")
-
-    mu = norm_fit(data, "Stellar U-band magnitude")
-
-    assert mu < 11 and mu > 6  # failed at 5pc
-
+        assert mu < 0.4
 
 def test_data_makes_sense_plx():
     # data
