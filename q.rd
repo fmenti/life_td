@@ -51,13 +51,13 @@ tables may change at any time without prior warning.
     specific sources.</meta>
 
     <macDef name="mags">
-    short,  shortind,       ucd
-    i,      I,              em.opt.I
-    j,      J,              em.IR.J
-    u,      U,              em.opt.U
-    g,      G,              em.opt
-    k,      K,              em.IR.K
-    u_sdss, U from SDSS,    em.opt.U
+    short,  shortind, ucd,        val,    err,    qual, sys,  id
+    i,      I,   em.opt.I,   i_value, i_err,  i_qual, i_sys, i_source_idref
+    j,      J,   em.IR.J,    j_value, j_err,  j_qual, j_sys, j_source_idref
+    u,      U,   em.opt.U,   u_value, u_err,  u_qual, u_sys, u_source_idref
+    g,      G,   em.opt, g_value, g_err,  g_qual, g_sys, g_source_idref
+    k,      K,   em.IR.K, k_value, k_err,  k_qual, k_sys, k_source_idref
+    u_sdss, U from SDSS,    em.opt.U, u_sdss_value, u_sdss_err, u_sdss_qual, u_sdss_sys, u_sdss_source_idref
     </macDef>
 
     <table id="source" onDisk="True" adql="True">
@@ -280,27 +280,27 @@ tables may change at any time without prior warning.
 
         <LOOP csvItems="\mags">
           <events>
-            <column name="mag_\short _value" type="double precision"
+            <column name="mag_\val" type="double precision"
               ucd="phot.mag;\ucd" unit=""
-              tablehead="mag_\short _value"
+              tablehead="mag_\val"
               description="Magnitude in \shortind filter."/>
-            <column name="mag_\short _err" type="double precision"
+            <column name="mag_\err" type="double precision"
               ucd="stat.error;phot.mag" unit=""
-              tablehead="mag_\short _err"
+              tablehead="mag_\err"
               description="Magnitude uncertainty in \shortind filter."/>
-            <column name="mag_\short _qual" type="text"
+            <column name="mag_\qual" type="text"
               ucd="meta.code.qual;phot.flux"
-              tablehead="mag_\short _qual"
+              tablehead="mag_\qual"
               description="Magnitude quality (A:best, E:worst)"
               verbLevel="1"/>
-            <column name="mag_\short _sys" type="text"
+            <column name="mag_\sys" type="text"
               ucd="meta.id;phot.flux"
-              tablehead="mag_\short _sys"
+              tablehead="mag_\sys"
               description="Magnitude system (A=AB, V=Vega)"
               verbLevel="1"/>
-            <column name="mag_\short _source_idref" type="integer"
+            <column name="mag_\id" type="integer"
               ucd="meta.bib.bibcode;phot.flux"
-              tablehead="mag_\short _source_id"
+              tablehead="mag_\id"
               description="Source identifier corresponding
               to the Magnitude in \shortind filter parameters."
               verbLevel="1">
@@ -556,11 +556,11 @@ tables may change at any time without prior warning.
 
                 <LOOP csvItems="\mags">
                   <events>
-                    <map key="mag_\short _value" nullExpr="1e+20" />
-                    <map key="mag_\short _err" nullExpr="1e+20" />
-                    <map key="mag_\short _qual" nullExpr="'?'" />
-                    <map key="mag_\short _sys" nullExpr="'?'" />
-                    <map key="mag_\short _source_idref" nullExpr="999999" />
+                    <map key="mag_\val" nullExpr="1e+20" />
+                    <map key="mag_\err" nullExpr="1e+20" />
+                    <map key="mag_\qual" nullExpr="'?'" />
+                    <map key="mag_\sys" nullExpr="'?'" />
+                    <map key="mag_\id" nullExpr="999999" />
                   </events>
                 </LOOP>
 
