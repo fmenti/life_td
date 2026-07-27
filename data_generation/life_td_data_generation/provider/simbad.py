@@ -16,10 +16,28 @@ from provider.utils import (
     query,
     replace_value,
 )
-from sdata import empty_dict
+from sdata import empty_dict, filter_abbrev,mag_columns
 from utils.io import save
 
 # ---------------define queries--------------------------------------
+
+def all_magnitudes():
+    def mag_parameters(abbrev, filter):
+        select = (
+            f", {abbrev}.flux as mag_{abbrev}_value, {abbrev}.flux_err as mag_{abbrev}_err,"
+            f" {abbrev}.qual as mag_{abbrev}_qual, {abbrev}.system as mag_{abbrev}_sys, "
+            f"{abbrev}.bibcode as mag_{abbrev}_ref")
+        join = (f"LEFT JOIN flux AS {abbrev} ON b.oid={abbrev}.oidref AND "
+                f"{abbrev}.filter='{filter}'\n")
+        return select, join
+    select=''
+    join=''
+    for abb, f in zip(filter_abbrev,["I","J","U","G","K","u"]):
+        s,j = mag_parameters(abb,f)
+        select += s
+        join += j
+    return select, join
+
 adql_queries_moduls = {
     "select_statement": """SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
         b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
@@ -27,18 +45,14 @@ adql_queries_moduls = {
         b.sp_qual AS sptype_qual, b.sp_bibcode AS sptype_ref,
         b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
         h_link.membership, h_link.parent AS parent_oid,
-        h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids,
-        f.I as mag_i_value, f.J as mag_j_value, f.K as mag_k_value,
-        f.U as mag_u_value
-        """,
+        h_link.link_bibcode AS h_link_ref, a.otypes,ids.ids
+        """ + all_magnitudes()[0],
     "tables_statement": """
     FROM basic AS b
         JOIN ids ON b.oid=ids.oidref
             JOIN alltypes AS a ON b.oid=a.oidref
                 LEFT JOIN h_link ON b.oid=h_link.child
-                    LEFT JOIN allfluxes AS f ON b.oid=f.oidref
-
-    """,
+    """ + all_magnitudes()[1],
 }
 
 
@@ -377,20 +391,6 @@ def expanding_helpertable_stars(
     stars["plx_qual"] = stars["plx_qual"].astype(object)
     stars = replace_value(stars, "plx_qual", "", stars["plx_qual"].fill_value)
 
-    # Initialize and fill photometry references if values exist.
-    for band in ["i", "j", "k", "u"]:
-        ref_col = f"mag_{band}_ref"
-        val_col = f"mag_{band}_value"
-
-        stars[ref_col] = MaskedColumn(
-            dtype=object, length=len(stars), mask=[True] * len(stars)
-        )
-
-        mask_has_val = np.where(stars[val_col].mask == False)
-        stars[ref_col][mask_has_val] = [
-            sim["provider"]["provider_bibcode"][0]
-            for _ in range(len(stars[ref_col][mask_has_val]))
-        ]
 
     # Spectral type reference: fill empty with provider bibcode where value set.
     non_empty_sptype = np.where(stars["sptype_string"] != "")
@@ -560,13 +560,9 @@ def create_sim_sources_table(stars: Table, sim: dict[str, Table]) -> Table:
         [
             "coo_ref",
             "plx_ref",
-            "mag_i_ref",
-            "mag_j_ref",
-            "mag_k_ref",
-            "mag_u_ref",
             "binary_ref",
             "sptype_ref",
-        ],
+        ] + mag_columns[1],
         ["h_link_ref"],
         ["id_ref"],
     ]
@@ -588,8 +584,7 @@ def create_star_basic_table(stars: Table) -> Table:
     :returns: Basic stellar data table.
     :rtype: astropy.table.Table
     """
-    sim_star_basic = stars[
-        "main_id",
+    columns = (["main_id",
         "coo_ra",
         "coo_dec",
         "coo_err_angle",
@@ -597,22 +592,20 @@ def create_star_basic_table(stars: Table) -> Table:
         "coo_err_min",
         "coo_qual",
         "coo_ref",
-        "mag_i_value",
-        "mag_i_ref",
-        "mag_j_value",
-        "mag_j_ref",
-        "mag_k_value",
-        "mag_k_ref",
-        "mag_u_value",
-        "mag_u_ref",
         "sptype_string",
         "sptype_qual",
         "sptype_ref",
         "plx_value",
         "plx_err",
         "plx_qual",
-        "plx_ref",
-    ]
+        "plx_ref"] +
+               mag_columns[0] +
+               mag_columns[1] +
+               mag_columns[2] +
+               mag_columns[3] +
+               mag_columns[4] )
+    sim_star_basic = stars[columns]
+
     # Change type from object to string for later join functions.
     sim_star_basic["sptype_string"] = sim_star_basic["sptype_string"].astype(
         str

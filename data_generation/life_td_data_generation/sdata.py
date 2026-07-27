@@ -22,10 +22,16 @@ table_names = [
     "best_h_link",
 ]
 
-mags = ["mag_i",
-        "mag_j",
-        "mag_k",
-        "mag_u",]
+filter_abbrev = ["i","j","u","g","k","u_sdss"]
+
+mags = [f"mag_{i}" for i in filter_abbrev]
+
+mag_columns = [[f"mag_{i}_value" for i in filter_abbrev],
+               [f"mag_{i}_ref" for i in filter_abbrev],
+                [f"mag_{i}_err" for i in filter_abbrev],
+                [f"mag_{i}_qual" for i in filter_abbrev],
+                [f"mag_{i}_sys" for i in filter_abbrev],
+               ]
 
 paras_dict = {
     "sources": [],
@@ -72,7 +78,7 @@ empty_dict = {
     "h_link": Table(),
 }
 
-def create_paras():
+def create_mag_columns():
     mag_paras =[]
     mag_types = []
     for m in mags:
@@ -80,8 +86,9 @@ def create_paras():
                     f"{m}_err",
                     f"{m}_qual",
                     f"{m}_source_idref",
-                    f"{m}_ref",]
-        mag_types += [float, float, object, int, object]
+                    f"{m}_ref",
+                    f"{m}_sys",  ]
+        mag_types += [float, float, object, int, object,object]
     return mag_paras, mag_types
 
 empty_dict_wit_columns = {
@@ -134,7 +141,7 @@ empty_dict_wit_columns = {
             "coo_gal_source_idref",
             "coo_gal_ref",
               ]
-            + create_paras()[0]
+            + create_mag_columns()[0]
             +[
             "plx_value",
             "plx_err",
@@ -201,7 +208,7 @@ empty_dict_wit_columns = {
             int,
             object,
             ]
-        + create_paras()[1]
+        + create_mag_columns()[1]
         + [
             float,
             float,

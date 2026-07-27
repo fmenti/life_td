@@ -184,7 +184,7 @@ def analysis_starcat5_not_in_hpic(catalog):
         [catalog["class_temp", "temp_dist_st_value"]], ["StarCat5_addition_to_HPIC"]
     )
 
-    print(catalog)
+    # print(catalog)
 
     for temp_class in ["O","B","A","F","G"]:
         print(catalog["temp_main_id","class_temp"][np.where(
@@ -229,23 +229,21 @@ def hpic_merger():
                                               r_arcsec=radius)
 
     starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
-    print(" in hpic \n", starcat5_in_hpic['main_id', 'coo_ra', 'coo_dec'][
-              np.where(starcat5_in_hpic['main_id'] == "LP  137-54")])
 
     starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
-    print("not in hpic \n", starcat5_not_in_hpic['main_id', 'coo_ra', 'coo_dec'][
-              np.where(starcat5_not_in_hpic['main_id'] == "LP  137-54")])
 
     starcat5_merge_colnames = ["main_id", "coo_ra", "coo_dec", "sptype_string",
                                "plx_value", "dist_st_value", "teff_st_value",
                                "teff_ref", "mass_st_value", "mass_ref",
                                "radius_st_value", "radius_ref", "mag_i_value",
-                               "mag_j_value", "binary_flag", "sep_ang_value"]
+                               "mag_j_value", "mag_u_value", "binary_flag",
+                               "sep_ang_value"]
 
     hpic_merge_colnames = ["star_name", "ra", "dec", "st_spectype", "sy_plx",
                            "sy_dist", "st_teff", "st_teff_reflink", "st_mass",
                            "st_mass_reflink", "st_rad", "st_rad_reflink",
-                           "sy_icmag", "sy_jmag", "known_binary_fl", "wds_sep"]
+                           "sy_icmag", "sy_jmag", "sy_ujmag", "known_binary_fl",
+                           "wds_sep"]
 
     new_colnames = ["temp_" + col for col in starcat5_merge_colnames]
 
@@ -256,6 +254,7 @@ def hpic_merger():
     hpic_null_columns = ["temp_sptype_string", "temp_mass_st_value",
                          "temp_radius_st_value", "temp_radius_ref",
                          "temp_mag_i_value", "temp_mag_j_value",
+                         "temp_mag_u_value",
                          "temp_sep_ang_value", "temp_mass_ref",
                          "temp_plx_value", "temp_dist_st_value",
                          "temp_teff_st_value"]
@@ -278,7 +277,7 @@ def hpic_merger():
                                      hpic_null)
 
     # float columns null values
-    float_colnames = ["plx_value", "mag_i_value", "mag_j_value",
+    float_colnames = ["plx_value", "mag_i_value", "mag_j_value", "mag_u_value",
                       "dist_st_value",
                       "teff_st_value", "radius_st_value", "mass_st_value",
                       "sep_ang_value"]

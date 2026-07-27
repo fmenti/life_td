@@ -13,6 +13,7 @@ from provider.simbad import (
     creating_helpertable_stars,
     expanding_helpertable_stars,
     stars_in_multiple_system,
+    mag_columns
 )
 from provider.utils import nullvalues
 
@@ -85,8 +86,41 @@ def query_returns(monkeypatch):
                 [np.ma.masked, np.ma.masked, 7.0, np.ma.masked]
             ),
             "mag_j_value": MaskedColumn([8.0, np.ma.masked, 6.0, np.ma.masked]),
-            "mag_k_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+
             "mag_u_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+            "mag_g_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+            "mag_k_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+            "mag_u_sdss_value": MaskedColumn([9.0, np.ma.masked, 8.0, np.ma.masked]),
+            "mag_i_ref": MaskedColumn(
+                data=np.array(["", "", "ref1", ""], dtype=object),
+                mask=[True, True, False, True],
+                fill_value="N",
+            ),
+            "mag_j_ref":  MaskedColumn(
+        data=np.array(["ref2", "", "ref3", ""], dtype=object),
+        mask=[False, True, False, True],
+        fill_value="N",
+             ),
+            "mag_u_ref":  MaskedColumn(
+        data=np.array(["ref6", "", "ref7", ""], dtype=object),
+        mask=[False, True, False, True],
+        fill_value="N",
+            ),
+            "mag_g_ref":  MaskedColumn(
+        data=np.array(["ref6", "", "ref7", ""], dtype=object),
+        mask=[False, True, False, True],
+        fill_value="N",
+    ),
+            "mag_k_ref": MaskedColumn(
+                data=np.array(["ref4", "", "ref5", ""], dtype=object),
+                mask=[False, True, False, True],
+                fill_value="N",
+            ),
+            "mag_u_sdss_ref": MaskedColumn(
+                data=np.array(["ref4", "", "ref5", ""], dtype=object),
+                mask=[False, True, False, True],
+                fill_value="N",
+            )
         }
     )
     parents_without_plx = t0[:0].copy()
@@ -117,6 +151,14 @@ def query_returns(monkeypatch):
             np.ma.masked,
             np.ma.masked,
             np.ma.masked,
+            np.ma.masked,
+            np.ma.masked,
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
         ]
     )
     children_without_plx = t0[:0].copy()
@@ -147,6 +189,14 @@ def query_returns(monkeypatch):
             np.ma.masked,
             np.ma.masked,
             np.ma.masked,
+            np.ma.masked,
+            np.ma.masked,
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
         ]
     )
 
@@ -230,7 +280,7 @@ def test_create_simbad_helpertable(query_returns):
     # objects got correctly added and removed from helptab
     assert (
         len(result_sim_helptab) == 5
-    )  # stars, systems and planets but removed star2
+    )  # stars, systems and planets but removed star2 because it is BD
     # provider table is correctly filled in
     assert len(result_sim["provider"]) == 1
 
@@ -251,11 +301,7 @@ def test_creating_helpertable_stars(query_returns):
         "coo_err_angle",
         "coo_err_maj",
         "coo_err_min",
-        "parent_oid",
-        "mag_i_value",
-        "mag_j_value",
-        "mag_k_value",
-        "mag_u_value",
+        "parent_oid"] + mag_columns[0] + [
         "coo_ra",
         "coo_dec",
         "plx_value",
@@ -265,6 +311,16 @@ def test_creating_helpertable_stars(query_returns):
     result_stars = normalize_table_nulls(result_stars, cols, vals)
     expected_stars = normalize_table_nulls(expected_stars, cols, vals)
 
+    str_null_cols = mag_columns[1]
+
+    result_stars = normalize_table_nulls(
+        result_stars, str_null_cols, [""] * len(str_null_cols)
+    )
+    expected_stars = normalize_table_nulls(
+        expected_stars, str_null_cols, [""] * len(str_null_cols)
+    )
+
+    # star1, star3, star4, system1
     # stars and systems but removed planets
     assert len(result_stars) == 4
     assert len(setdiff(result_stars, expected_stars)) == 0
@@ -431,27 +487,23 @@ def expanded_helptab_stars(expected_stars: Table, ref: str) -> Table:
 
     expected_stars["plx_qual"] = expected_stars["plx_qual"].astype(object)
 
-    expected_stars["mag_i_ref"] = MaskedColumn(
-        data=np.array(["", ref, "", ""], dtype=object),
-        mask=[True, False, True, True],
-        fill_value="N",
-    )
-    expected_stars["mag_j_ref"] = MaskedColumn(
-        data=np.array([ref, ref, "", ""], dtype=object),
-        mask=[False, False, True, True],
-        fill_value="N",
-    )
-    expected_stars["mag_k_ref"] = MaskedColumn(
-        data=np.array([ref, ref, "", ""], dtype=object),
-        mask=[False, False, True, True],
-        fill_value="N",
-    )
+    # careful, is star1, star3, star4, system1 because star2 was removed as BD
+    mag_data = [
+        ["", "ref1", "", ""],
+        ["ref2", "ref3", "", ""],
+        ["ref6", "ref7", "", ""],
+        ["ref6", "ref7", "", ""],
+        ["ref4", "ref5", "", ""],
+        ["ref4", "ref5", "", ""]
+    ]
 
-    expected_stars["mag_u_ref"] = MaskedColumn(
-        data=np.array([ref, ref, "", ""], dtype=object),
-        mask=[False, False, True, True],
-        fill_value="N",
-    )
+    for col,data in zip(mag_columns[1],mag_data):
+        mag_mask = [True if x == "" else False for x in data]
+        expected_stars[col] = MaskedColumn(
+                data=np.array(data, dtype=object),
+                mask=mag_mask,
+                fill_value="N",
+            )
 
     for col in ["sptype_ref", "coo_ref", "plx_ref"]:
         expected_stars[col] = MaskedColumn(expected_stars[col])
@@ -506,20 +558,12 @@ def test_expanding_helpertable_stars(query_returns):
         "coo_err_angle",
         "coo_err_maj",
         "coo_err_min",
-        "parent_oid",
-        "mag_i_value",
-        "mag_j_value",
-        "mag_k_value",
-        "mag_u_value",
-        "coo_ra",
+        "parent_oid"] + mag_columns[0] + \
+         ["coo_ra",
         "coo_dec",
-        "plx_value",
+        "plx_value"
     ]
-    str_null_cols = [
-        "mag_i_ref",
-        "mag_j_ref",
-        "mag_k_ref",
-        "mag_u_ref",
+    str_null_cols = mag_columns[1]+[
         "plx_qual",
         "coo_qual",
         "sptype_string",
@@ -600,10 +644,7 @@ def test_create_sim_sources_table(query_returns):
     # Execute
     return_sources = create_sim_sources_table(expected_stars, result_sim)
 
-    # Verify
-    expected_sources = Table(
-        {
-            "ref": [
+    refs = [
                 "ref_coo",
                 "ref_coo2",
                 "ref_sptype",
@@ -613,8 +654,19 @@ def test_create_sim_sources_table(query_returns):
                 "ref_hlink",
                 "ref_hlink2",
                 result_sim["provider"]["provider_bibcode"][0],
-            ],
-            "provider_name": ["SIMBAD" for _ in range(9)],
+                "ref1",
+                "ref2",
+                "ref3",
+                "ref4",
+                "ref5",
+                "ref6",
+                "ref7"
+            ]
+    # Verify
+    expected_sources = Table(
+        {
+            "ref": refs,
+            "provider_name": ["SIMBAD" for _ in range(len(refs))],
         }
     )
 

@@ -14,7 +14,7 @@ from astropy.table import (
     vstack,
 )
 from provider.utils import nullvalues, replace_value
-from sdata import empty_dict, empty_dict_wit_columns, paras_dict
+from sdata import empty_dict, empty_dict_wit_columns, paras_dict, mag_columns
 from utils.io import Path, save
 
 
@@ -564,12 +564,11 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
             "sptype_qual",
             "class_temp",
             "class_temp_nr",
-            "sptype_ref",
-            "mag_i_ref",
-            "mag_j_ref",
-            "mag_k_ref",
-            "mag_u_ref",
-        ],
+            "sptype_ref"] +
+            mag_columns[1] +
+            mag_columns[3] +
+            mag_columns[4],
+
         ["mass_pl_qual"],
         ["rad_qual", "rad_rel"],
         ["mass_pl_qual"],
@@ -600,7 +599,6 @@ def build_sources_table(
     """
     cat = empty_dict.copy()
     empty = empty_dict_wit_columns.copy()
-
     # for the sources and objects joins tables from different prov_tables_dict
     cat = provider_data_merging(cat, "sources", prov_tables_dict)
 
