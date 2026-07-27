@@ -39,15 +39,26 @@ tables may change at any time without prior warning.
 
     <meta name="_news" author="FM" date="2024-03-05">Adding mes_h_link table
     containing all links between pair of objects</meta>
-
     <meta name="_news" author="FM" date="2025-09-17">Updated to contain
     Exo-Mercat 2.0 data instead of earlier version. Changed planetary
     parameters from prototype demonstration version into parameters that match
     data from provider better. Concretely removed mass_pl_rel parameter and
     replaced mass_pl_err with mass_pl_err_max and mass_pl_err_min.</meta>
-
     <meta name="_news" author="FM" date="2026-06-05">Expanded distance cut of
     database from 30pc to 50pc.</meta>
+    <meta name="_news" author="FM" date="2026-08-01">Expanded magnitude
+    information by adding more filters as well as errors, quality, system and
+    specific sources.</meta>
+
+    <macDef name="mags">
+    short,  shortind,       ucd
+    i,      I,              em.opt.I
+    j,      J,              em.IR.J
+    u,      U,              em.opt.U
+    g,      G,              em.opt
+    k,      K,              em.IR.K
+    u_sdss, U from SDSS,    em.opt.U
+    </macDef>
 
     <table id="source" onDisk="True" adql="True">
         <meta name="title">Source Table</meta>
@@ -266,54 +277,38 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
-        <column name="mag_i_value" type="double precision"
-            ucd="phot.mag;em.opt.I" unit=""
-            tablehead="mag_i_value"
-            description="Magnitude in I filter."/>
-        <column name="mag_i_source_idref" type="integer"
-            ucd="meta.ref"
-            tablehead="mag_i_source_id"
-            description="Source identifier corresponding
-            to the Magnitude in I filter parameters."
-            verbLevel="1">
-              <values nullLiteral="-1"/>
-        </column>
-        <column name="mag_j_value" type="double precision"
-            ucd="phot.mag;em.IR.J" unit=""
-            tablehead="mag_j_value"
-            description="Magnitude in J filter."/>
-        <column name="mag_j_source_idref" type="integer"
-            ucd="meta.ref"
-            tablehead="mag_j_source_id"
-            description="Source identifier corresponding
-            to the Magnitude in J filter parameters."
-            verbLevel="1">
-              <values nullLiteral="-1"/>
-        </column>
-        <column name="mag_k_value" type="double precision"
-            ucd="phot.mag;em.IR.K" unit=""
-            tablehead="mag_k_value"
-            description="Magnitude in K filter."/>
-        <column name="mag_k_source_idref" type="integer"
-            ucd="meta.ref"
-            tablehead="mag_k_source_id"
-            description="Source identifier corresponding
-            to the Magnitude in K filter parameters."
-            verbLevel="1">
-              <values nullLiteral="-1"/>
-        </column>
-        <column name="mag_u_value" type="double precision"
-            ucd="phot.mag;em.opt.U" unit=""
-            tablehead="mag_u_value"
-            description="Magnitude in U filter."/>
-        <column name="mag_u_source_idref" type="integer"
-            ucd="meta.ref"
-            tablehead="mag_u_source_id"
-            description="Source identifier corresponding
-            to the Magnitude in U filter parameters."
-            verbLevel="1">
-              <values nullLiteral="-1"/>
-        </column>
+
+        <LOOP csvItems="\mags">
+          <events>
+            <column name="mag_\short_value" type="double precision"
+              ucd="phot.mag;\ucd" unit=""
+              tablehead="mag_\short_value"
+              description="Magnitude in \shortind filter."/>
+            <column name="mag_\short_err" type="double precision"
+              ucd="stat.error;phot.mag" unit=""
+              tablehead="mag_\short_err"
+              description="Magnitude uncertainty in \shortind filter."/>
+            <column name="mag_\short_qual" type="text"
+              ucd="meta.code.qual;phot.flux"
+              tablehead="mag_\short_qual"
+              description="Magnitude quality (A:best, E:worst)"
+              verbLevel="1"/>
+            <column name="mag_\short_sys" type="text"
+              ucd="meta.id;phot.flux"
+              tablehead="mag_\short_sys"
+              description="Magnitude system (A=AB, V=Vega)"
+              verbLevel="1"/>
+            <column name="mag_\short_source_idref" type="integer"
+              ucd="meta.bib.bibcode;phot.flux"
+              tablehead="mag_\short_source_id"
+              description="Source identifier corresponding
+              to the Magnitude in \shortind filter parameters."
+              verbLevel="1">
+                <values nullLiteral="-1"/>
+            </column>
+          </events>
+        </LOOP>
+
         <column name="plx_value" type="double precision"
             ucd="pos.parallax" unit="mas"
             tablehead="plx_value"
@@ -558,14 +553,17 @@ tables may change at any time without prior warning.
                 <map key="plx_err" nullExpr="1e+20" />
                 <map key="plx_qual" nullExpr="'?'" />
                 <map key="plx_source_idref" nullExpr="999999" />
-                <map key="mag_i_value" nullExpr="1e+20" />
-                <map key="mag_i_source_idref" nullExpr="999999" />
-                <map key="mag_j_value" nullExpr="1e+20" />
-                <map key="mag_j_source_idref" nullExpr="999999" />
-                <map key="mag_k_value" nullExpr="1e+20" />
-                <map key="mag_k_source_idref" nullExpr="999999" />
-                <map key="mag_u_value" nullExpr="1e+20" />
-                <map key="mag_u_source_idref" nullExpr="999999" />
+
+                <LOOP csvItems="\mags">
+                  <events>
+                    <map key="mag_\short_value" nullExpr="1e+20" />
+                    <map key="mag_\short_err" nullExpr="1e+20" />
+                    <map key="mag_\short_qual" nullExpr="'?'" />
+                    <map key="mag_\short_sys" nullExpr="'?'" />
+                    <map key="mag_\short_source_idref" nullExpr="999999" />
+                  </events>
+                </LOOP>
+
                 <map key="dist_st_value" nullExpr="1e+20" />
                 <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
