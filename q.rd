@@ -280,27 +280,27 @@ tables may change at any time without prior warning.
 
         <LOOP csvItems="\mags">
           <events>
-            <column name="mag_\short_value" type="double precision"
+            <column name="mag_\short _value" type="double precision"
               ucd="phot.mag;\ucd" unit=""
-              tablehead="mag_\short_value"
+              tablehead="mag_\short _value"
               description="Magnitude in \shortind filter."/>
-            <column name="mag_\short_err" type="double precision"
+            <column name="mag_\short _err" type="double precision"
               ucd="stat.error;phot.mag" unit=""
-              tablehead="mag_\short_err"
+              tablehead="mag_\short _err"
               description="Magnitude uncertainty in \shortind filter."/>
-            <column name="mag_\short_qual" type="text"
+            <column name="mag_\short _qual" type="text"
               ucd="meta.code.qual;phot.flux"
-              tablehead="mag_\short_qual"
+              tablehead="mag_\short _qual"
               description="Magnitude quality (A:best, E:worst)"
               verbLevel="1"/>
-            <column name="mag_\short_sys" type="text"
+            <column name="mag_\short _sys" type="text"
               ucd="meta.id;phot.flux"
-              tablehead="mag_\short_sys"
+              tablehead="mag_\short _sys"
               description="Magnitude system (A=AB, V=Vega)"
               verbLevel="1"/>
-            <column name="mag_\short_source_idref" type="integer"
+            <column name="mag_\short _source_idref" type="integer"
               ucd="meta.bib.bibcode;phot.flux"
-              tablehead="mag_\short_source_id"
+              tablehead="mag_\short _source_id"
               description="Source identifier corresponding
               to the Magnitude in \shortind filter parameters."
               verbLevel="1">
@@ -556,11 +556,11 @@ tables may change at any time without prior warning.
 
                 <LOOP csvItems="\mags">
                   <events>
-                    <map key="mag_\short_value" nullExpr="1e+20" />
-                    <map key="mag_\short_err" nullExpr="1e+20" />
-                    <map key="mag_\short_qual" nullExpr="'?'" />
-                    <map key="mag_\short_sys" nullExpr="'?'" />
-                    <map key="mag_\short_source_idref" nullExpr="999999" />
+                    <map key="mag_\short _value" nullExpr="1e+20" />
+                    <map key="mag_\short _err" nullExpr="1e+20" />
+                    <map key="mag_\short _qual" nullExpr="'?'" />
+                    <map key="mag_\short _sys" nullExpr="'?'" />
+                    <map key="mag_\short _source_idref" nullExpr="999999" />
                   </events>
                 </LOOP>
 
