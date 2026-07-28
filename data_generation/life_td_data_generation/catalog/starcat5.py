@@ -404,6 +404,26 @@ def _query_star_like(
     :returns: Query result table.
     :rtype: astropy.table.Table
     """
+
+    def all_magnitudes():
+        def mag_parameters(abbrev):
+            select = (
+                f", sb.mag_{abbrev}_value, sb.mag_{abbrev}_sys, "
+                f"mag_{abbrev}_source.ref AS mag_{abbrev}_ref\n")
+            join = (f"LEFT JOIN life_td.source AS mag_{abbrev}_source ON "
+                    f"sb.mag_{abbrev}_source_idref=mag_{abbrev}_source.source_id\n")
+            return select, join
+
+        select = ''
+        join = ''
+        for abb in ["i","j","g","u","u_sdss"]:
+            s, j = mag_parameters(abb)
+            select += s
+            join += j
+        return select, join
+
+    mag_select, mag_join = all_magnitudes()
+
     object_id_select = "o.object_id,\n        " if include_object_id else ""
     adql_query = f"""
     SELECT {object_id_select}o.main_id, sb.coo_ra, sb.coo_dec, sb.sptype_string,
@@ -411,8 +431,8 @@ def _query_star_like(
         sb.teff_st_value, teff_source.ref AS teff_ref,
         sb.mass_st_value, mass_source.ref AS mass_ref,
         sb.radius_st_value, radius_source.ref AS radius_ref,
-        sb.binary_flag, binary_source.ref AS binary_ref,
-        sb.mag_i_value, sb.mag_j_value, sb.mag_k_value, sb.mag_u_value,
+        sb.binary_flag, binary_source.ref AS binary_ref
+        {mag_select},
         sb.class_lum, sb.class_temp,
         o_parent.main_id AS parent_main_id, sb_parent.sep_ang_value
     FROM life_td.star_basic AS sb
@@ -430,6 +450,7 @@ def _query_star_like(
         sb.teff_st_source_idref=teff_source.source_id
     LEFT JOIN life_td.source AS binary_source ON
         sb.binary_source_idref=binary_source.source_id
+    {mag_join}
     WHERE o.type = '{object_type}' AND sb.dist_st_value < {distance_cut}
     """
     return query(service, adql_query)

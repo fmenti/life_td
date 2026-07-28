@@ -147,37 +147,35 @@ def test_teff_vs_dist():
 
 
 # starcat5
-def test_query_stars():
-    # data
-    colnames = [
+
+starcolumns = [
         "main_id",
-        "coo_ra",
-        "coo_dec",
+        "coo_ra", "coo_dec",
         "sptype_string",
         "plx_value",
         "dist_st_value",
-        "coo_gal_l",
-        "coo_gal_b",
-        "teff_st_value",
-        "teff_ref",
-        "mass_st_value",
-        "mass_ref",
-        "radius_st_value",
-        "radius_ref",
-        "binary_flag",
-        "binary_ref",
-        "mag_i_value",
-        "mag_j_value",
+        "coo_gal_l", "coo_gal_b",
+        "teff_st_value", "teff_ref",
+        "mass_st_value", "mass_ref",
+        "radius_st_value", "radius_ref",
+        "binary_flag", "binary_ref",
+        "mag_i_value", "mag_i_sys","mag_i_ref",
+        "mag_j_value", "mag_j_sys","mag_j_ref",
+        "mag_g_value", "mag_g_sys", "mag_g_ref",
+        "mag_u_value", "mag_u_sys", "mag_u_ref",
+        "mag_u_sdss_value", "mag_u_sdss_sys", "mag_u_sdss_ref",
         "class_lum",
         "class_temp",
         "parent_main_id",
         "sep_ang_value",
-    ]
+]
+
+def test_query_stars():
     # execute
     query = query_stars("http://localhost:8080/tap", 30)
     # assert
     assert len(query) > 9000
-    assert query.colnames == colnames
+    assert query.colnames == starcolumns
 
 
 def test_query_children():
@@ -192,57 +190,13 @@ def test_query_children():
 
 def test_query_systems():
     # data
-    colnames = [
-        "object_id",
-        "main_id",
-        "coo_ra",
-        "coo_dec",
-        "sptype_string",
-        "plx_value",
-        "dist_st_value",
-        "coo_gal_l",
-        "coo_gal_b",
-        "teff_st_value",
-        "teff_ref",
-        "mass_st_value",
-        "mass_ref",
-        "radius_st_value",
-        "radius_ref",
-        "binary_flag",
-        "binary_ref",
-        "mag_i_value",
-        "mag_j_value",
-        "class_lum",
-        "class_temp",
-        "parent_main_id",
-        "sep_ang_value",
-    ]
+    colnames = ["object_id"] + starcolumns
+
     # execute
     query = query_systems("http://localhost:8080/tap", 30)
     # assert
     assert len(query) > 2000
     assert query.colnames == colnames
-
-
-import subprocess
-import sys
-from pathlib import Path as pp
-
-
-def test_runs_as_script():
-    here = (
-        pp(__file__).resolve().parent
-    )  # .../integration_tests/post_db_creation
-    script = (
-        here.parents[1] / "catalog" / "starcat5.py"
-    )  # up 2 levels, then catalog/starcat5.py
-
-    result = subprocess.run(
-        [sys.executable, str(script)],
-        cwd=here,  # run "as if" you launched it from post_db_creation
-        check=False,
-    )
-    assert result.returncode == 0
 
 
 def test_outcome_looks_fine():
@@ -326,5 +280,24 @@ def test_compare_old_to_new():
         for j in range(i + 1, len(paras)):
             plot_cat_paras([paras[i], paras[j]],
                      [new_catalog, old_catalog])
-            plot_cat_paras([paras[i], paras[j]],
-                           [old_catalog, new_catalog])
+
+import subprocess
+import sys
+from pathlib import Path as pp
+
+
+def test_runs_as_script():
+    # careful, reruns starcat with default distance cut
+    here = (
+        pp(__file__).resolve().parent
+    )  # .../integration_tests/post_db_creation
+    script = (
+        here.parents[1] / "catalog" / "starcat5.py"
+    )  # up 2 levels, then catalog/starcat5.py
+
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=here,  # run "as if" you launched it from post_db_creation
+        check=False,
+    )
+    assert result.returncode == 0
