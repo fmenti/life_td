@@ -408,7 +408,8 @@ def _query_star_like(
     def all_magnitudes():
         def mag_parameters(abbrev):
             select = (
-                f", sb.mag_{abbrev}_value, sb.mag_{abbrev}_sys, "
+                f", sb.mag_{abbrev}_value, sb.mag_{abbrev}_err, "
+                f"sb.mag_{abbrev}_sys, "
                 f"mag_{abbrev}_source.ref AS mag_{abbrev}_ref\n")
             join = (f"LEFT JOIN life_td.source AS mag_{abbrev}_source ON "
                     f"sb.mag_{abbrev}_source_idref=mag_{abbrev}_source.source_id\n")

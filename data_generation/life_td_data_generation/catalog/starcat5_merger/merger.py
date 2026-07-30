@@ -1,7 +1,9 @@
 from utils.io import load, stringtoobject, save
 from astropy.io.ascii import read
-from utils.io import Path
-from catalog.starcat5_merger.fcts_cat_merge import nearest_neighbor_distances_units, get_mask_cat2_in_cat1
+from catalog.starcat5_merger.fcts_cat_merge import (
+    nearest_neighbor_distances_units,
+    get_mask_cat2_in_cat1,
+)
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
@@ -145,27 +147,31 @@ def merger_analysis(pre_merge_hpic_masked,starcat5_not_in_hpic,catalog,float_col
         hpic_prepped = x[~np.isnan(x)]
         y = catalog['temp_' + col]
         catalog_prepped = y[~np.isnan(y)]
-        catalog_versions.threecatboxplot([starcat5_not_in_hpic[col],
-                                          hpic_prepped, catalog_prepped],
-                                         col, ["starcat5_not_in_hpic", "hpic", "merger"])
+        catalog_versions.threecatboxplot(
+                [starcat5_not_in_hpic[col], hpic_prepped, catalog_prepped],
+                col, ["starcat5_not_in_hpic", "hpic", "merger"])
     return
 
 
 def plot_para_vs_para(hpic,starcat5_wo_hpic):
 
-    catalog_versions.plot_cat_paras(["temp_teff_st_value","temp_radius_st_value"],
-                   [hpic,starcat5_wo_hpic],
-                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
-    catalog_versions.plot_cat_paras(["temp_teff_st_value", "temp_mass_st_value"],
-                   [hpic, starcat5_wo_hpic],
-                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
-    catalog_versions.plot_cat_paras(["temp_radius_st_value", "temp_mass_st_value"],
-                   [hpic, starcat5_wo_hpic],
-                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(
+            ["temp_teff_st_value","temp_radius_st_value"],
+            [hpic,starcat5_wo_hpic],
+            label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(
+            ["temp_teff_st_value", "temp_mass_st_value"],
+            [hpic, starcat5_wo_hpic],
+            label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(
+            ["temp_radius_st_value", "temp_mass_st_value"],
+            [hpic, starcat5_wo_hpic],
+            label_list = ["HPIC","StarCat5_addition_to_HPIC"])
 
-    catalog_versions.plot_cat_paras(["temp_coo_ra", "temp_coo_dec"],
-                   [hpic, starcat5_wo_hpic],
-                   label_list = ["HPIC","StarCat5_addition_to_HPIC"])
+    catalog_versions.plot_cat_paras(
+            ["temp_coo_ra", "temp_coo_dec"],
+            [hpic, starcat5_wo_hpic],
+            label_list = ["HPIC","StarCat5_addition_to_HPIC"])
 
     return
 
@@ -181,7 +187,8 @@ def analysis_starcat5_not_in_hpic(catalog):
                  "J Magnitude")
 
     finalplot.starcat_distribution_plot(
-        [catalog["class_temp", "temp_dist_st_value"]], ["StarCat5_addition_to_HPIC"]
+        [catalog["class_temp", "temp_dist_st_value"]],
+        ["StarCat5_addition_to_HPIC"]
     )
 
     # print(catalog)
@@ -205,7 +212,8 @@ def spec_dist_plot(catalogs,x):
         spectype = spectype[np.isin(spectype, x)]
 
 
-        plt.hist(spectype, bins=np.arange(len(x) + 1) - 0.5, edgecolor="black",label = label, alpha = 0.5)
+        plt.hist(spectype, bins=np.arange(len(x) + 1) - 0.5,
+                 edgecolor="black",label = label, alpha = 0.5)
     plt.xticks(range(len(x)), x)
     plt.xlabel("Spectral Subclass")
     plt.ylabel("Number of stars")
@@ -235,26 +243,42 @@ def hpic_merger():
     starcat5_merge_colnames = ["main_id", "coo_ra", "coo_dec", "sptype_string",
                                "plx_value", "dist_st_value", "teff_st_value",
                                "teff_ref", "mass_st_value", "mass_ref",
-                               "radius_st_value", "radius_ref", "mag_i_value",
-                               "mag_j_value", "mag_u_value", "binary_flag",
-                               "sep_ang_value"]
+                               "radius_st_value", "radius_ref",
+                               "mag_i_value", "mag_i_err", "mag_i_ref",
+                               "mag_j_value", "mag_j_err", "mag_j_ref",
+                               "mag_u_value", "mag_u_err", "mag_u_ref",
+                               "mag_g_value", "mag_g_err", "mag_g_ref",
+                               "binary_flag", "sep_ang_value"]
 
-    hpic_merge_colnames = ["star_name", "ra", "dec", "st_spectype", "sy_plx",
-                           "sy_dist", "st_teff", "st_teff_reflink", "st_mass",
-                           "st_mass_reflink", "st_rad", "st_rad_reflink",
-                           "sy_icmag", "sy_jmag", "sy_ujmag", "known_binary_fl",
-                           "wds_sep"]
+    hpic_merge_colnames = ["star_name", "ra", "dec", "st_spectype",
+                           "sy_plx", "sy_dist", "st_teff",
+                           "st_teff_reflink", "st_mass", "st_mass_reflink",
+                           "st_rad", "st_rad_reflink",
+                           "sy_icmag", "sy_icmagerr", "sy_icmag_reflink",
+                           "sy_jmag", "sy_jmagerr", "sy_jmag_reflink",
+                           "sy_ujmag", "sy_ujmagerr", "sy_ujmag_reflink",
+                           "sy_gaiamag", "sy_gaiamagerr", "sy_gaiamag_reflink",
+                           "known_binary_fl", "wds_sep"]
 
     new_colnames = ["temp_" + col for col in starcat5_merge_colnames]
 
+    # figuring out null values to mask them later
     starcat5_null_columns = ["temp_sptype_string", "temp_radius_ref",
-                             "temp_teff_ref", "temp_mass_ref"]
+                             "temp_teff_ref", "temp_mass_ref",
+                             "temp_mag_i_ref", "temp_mag_j_ref",
+                             "temp_mag_u_ref",
+                             "temp_mag_g_ref"
+                             ]
     starcat5_null = ""
 
     hpic_null_columns = ["temp_sptype_string", "temp_mass_st_value",
                          "temp_radius_st_value", "temp_radius_ref",
                          "temp_mag_i_value", "temp_mag_j_value",
-                         "temp_mag_u_value",
+                         "temp_mag_u_value", "temp_mag_g_value",
+                         "temp_mag_i_err", "temp_mag_j_err",
+                         "temp_mag_u_err", "temp_mag_g_err",
+                         "temp_mag_i_ref", "temp_mag_j_ref",
+                         "temp_mag_u_ref", "temp_mag_g_ref",
                          "temp_sep_ang_value", "temp_mass_ref",
                          "temp_plx_value", "temp_dist_st_value",
                          "temp_teff_st_value"]
@@ -278,21 +302,24 @@ def hpic_merger():
 
     # float columns null values
     float_colnames = ["plx_value", "mag_i_value", "mag_j_value", "mag_u_value",
-                      "dist_st_value",
+                      "dist_st_value", "mag_g_value",
+                      "mag_i_err", "mag_j_err",
+                      "mag_u_err", "mag_g_err",
                       "teff_st_value", "radius_st_value", "mass_st_value",
                       "sep_ang_value"]
     temp_float_colnames = ['temp_' + float_colnames[j] for j in
                            range(len(float_colnames))]
 
-    pre_merge_hpic = deal_with_resto_of_hpic_cols(pre_merge_hpic,
-                                                  "temp_binary_flag",
-                                                  temp_float_colnames)
+    pre_merge_hpic = deal_with_resto_of_hpic_cols(
+                        pre_merge_hpic,
+           "temp_binary_flag",
+                         temp_float_colnames)
 
     catalog = vstack([pre_merge_hpic, pre_merge_starcat])
-    print(catalog)
 
     save([catalog,starcat5_not_in_hpic,pre_merge_hpic,pre_merge_starcat],
-         ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic","pre_merge_starcat"],
+         ["HPIC_StarCat","starcat5_not_in_hpic","pre_merge_hpic",
+                    "pre_merge_starcat"],
          location="../../../../additional_data/"
          )
 
