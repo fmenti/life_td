@@ -22,9 +22,9 @@ Columns:
 'sy_pmsrc', # HPIC entry, masked if from starcat5
 'sy_pm_reflink', # HPIC entry, masked if from starcat5
 'temp_mag_u_value' # mag_u_value if object from starcat5, sy_ujmag if from HPIC
-'sy_ujmagerr', # HPIC entry, masked if from starcat5
+'temp_mag_u_err', # mag_u_err if object from starcat5, sy_ujmagerr if from HPIC
 'sy_ujmagsrc', # HPIC entry, masked if from starcat5
-'sy_ujmag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_u_ref', # mag_u_ref if object from starcat5, sy_ujmag_reflink if from HPIC
 'sy_bmag', # HPIC entry, masked if from starcat5
 'sy_bmagerr', # HPIC entry, masked if from starcat5
 'sy_bmagsrc', # HPIC entry, masked if from starcat5
@@ -38,13 +38,13 @@ Columns:
 'sy_rcmagsrc', # HPIC entry, masked if from starcat5
 'sy_rcmag_reflink', # HPIC entry, masked if from starcat5
 'temp_mag_i_value', # mag_i_value if object from starcat5, sy_icmag if from HPIC
-'sy_icmagerr', # HPIC entry, masked if from starcat5
+'temp_mag_i_err', # mag_i_err if object from starcat5, sy_icmagerr if from HPIC
 'sy_icmagsrc', # HPIC entry, masked if from starcat5
-'sy_icmag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_i_ref', # mag_i_ref if object from starcat5, sy_icmag_reflink if from HPIC
 'temp_mag_j_value', # mag_j_value if object from starcat5, sy_jmag if from HPIC
-'sy_jmagerr', # HPIC entry, masked if from starcat5
+'temp_mag_j_err', # mag_j_err if object from starcat5, sy_jmagerr if from HPIC
 'sy_jmagsrc', # HPIC entry, masked if from starcat5
-'sy_jmag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_j_ref', # mag_j_ref if object from starcat5, sy_jmag_reflink if from HPIC
 'sy_hmag', # HPIC entry, masked if from starcat5
 'sy_hmagerr', # HPIC entry, masked if from starcat5
 'sy_hmagsrc', # HPIC entry, masked if from starcat5
@@ -55,10 +55,10 @@ Columns:
 'sy_kmag_reflink', # HPIC entry, masked if from starcat5
 'sy_tmag', # HPIC entry, masked if from starcat5
 'sy_tmagerr', # HPIC entry, masked if from starcat5
-'sy_gaiamag', # HPIC entry, masked if from starcat5
-'sy_gaiamagerr', # HPIC entry, masked if from starcat5
+'temp_mag_g_value', # mag_g_value if object from starcat5, sy_gaiamag if from HPIC
+'temp_mag_g_err', # mag_g_err if object from starcat5, sy_gaiamagerr if from HPIC
 'sy_gaiamagsrc', # HPIC entry, masked if from starcat5
-'sy_gaiamag_reflink', # HPIC entry, masked if from starcat5
+'temp_mag_g_ref', # mag_g_ref if object from starcat5, sy_gaiamag_reflink if from HPIC
 'sy_bpmag', # HPIC entry, masked if from starcat5
 'sy_bpmagerr', # HPIC entry, masked if from starcat5
 'sy_rpmag', # HPIC entry, masked if from starcat5
@@ -143,5 +143,13 @@ Columns:
 'requirement_flag', # starcat5 entry, masked if from HPIC
 'suitable_companions', # starcat5 entry, masked if from HPIC
 'stableHZ', # starcat5 entry, masked if from HPIC
-'ecliptic_pm45deg' # starcat5 entry, masked if from HPIC
+'ecliptic_pm45deg', # starcat5 entry, masked if from HPIC
+'mag_u_sys', # starcat5 entry, masked if from HPIC
+'mag_i_sys', # starcat5 entry, masked if from HPIC
+'mag_j_sys', # starcat5 entry, masked if from HPIC
+'mag_g_sys', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_value', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_err', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_sys', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_ref' # starcat5 entry, masked if from HPIC
 ]
