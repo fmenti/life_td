@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any, Literal
 
-import importlib
+#import importlib
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,13 +10,14 @@ from astropy.table import MaskedColumn, Table, vstack
 from catalog.starcat5_merger.fcts_cat_merge import (
     get_mask_cat2_in_cat1,
     nearest_neighbor_distances_units,
+    add_cat2_to_cat1_by_name_or_coords,
 )
 from provider.utils import nullvalues
 from scipy.optimize import curve_fit
 from utils.analysis import catalog_versions, finalplot
 from utils.io import load, save, stringtoobject
 
-importlib.reload(catalog_versions)
+#importlib.reload(catalog_versions)
 
 
 ADDITIONAL_DATA_LOCATION = "../../../../additional_data/"
@@ -657,19 +658,48 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
     starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
     starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
 
+    # adding mag_u_columns to hpic
+    hpic_mag_u_joined = add_cat2_to_cat1_by_name_or_coords(
+        cat1=hpic,
+        cat2=starcat5,
+        name_cat1_col="simbad_name",
+        ra_cat1_col="ra",
+        dec_cat1_col="dec",
+        name_cat2_col="main_id",
+        ra_cat2_col="coo_ra",
+        dec_cat2_col="coo_dec",
+        r_arcsec=radius,
+        cat2_cols=[
+            "main_id",
+            "coo_ra",
+            "coo_dec",
+            "mag_u_sdss_value",
+            "mag_u_sdss_err",
+            "mag_u_sdss_ref",
+            "mag_u_sdss_sys",
+        ],
+    )
+
     pre_merge_starcat, pre_merge_hpic, float_colnames = (
-        prepare_pre_merge_catalogs(hpic, starcat5_not_in_hpic)
+        prepare_pre_merge_catalogs(hpic_mag_u_joined, starcat5_not_in_hpic)
     )
 
     catalog = vstack([pre_merge_hpic, pre_merge_starcat])
 
     save(
-        [catalog, starcat5_not_in_hpic, pre_merge_hpic, pre_merge_starcat],
+        [
+            catalog,
+            starcat5_not_in_hpic,
+            pre_merge_hpic,
+            pre_merge_starcat,
+            starcat5_in_hpic,
+        ],
         [
             "HPIC_StarCat",
             "starcat5_not_in_hpic",
             "pre_merge_hpic",
             "pre_merge_starcat",
+            "starcat5_in_hpic",
         ],
         location=ADDITIONAL_DATA_LOCATION,
     )
