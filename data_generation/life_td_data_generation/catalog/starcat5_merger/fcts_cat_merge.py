@@ -17,51 +17,7 @@ def _as_degree_quantity(values):
 
     return values.to(u.deg)
 
-
-def get_mask_cat2_in_cat1(name_cat1, ra_cat1, dec_cat1, name_cat2, ra_cat2, dec_cat2, r_arcsec):
-    """
-    For each target in cat2, check if in cat1 (first by name, then by coords)
-
-
-    Parameters
-    ----------
-    name_cat1, name_cat1: array_lie
-    	Star name as string
-    ra_cat1, ra_cat2: array_like
-        Right ascension values in degrees.
-    dec_cat1, dec_cat2: array_like
-        Declination values in degrees.
-    r_arcsec: float
-    	Matching radius in arcsec
-
-    Returns
-    -------
-    mask_cat2_in_cat1 : numpy.ndarray, same lenght as cat2
-        Boolean mask. True if a target in cat2 is also in cat1
-    """
-
-    # 1) Names
-    mask_cat2_in_cat1_name = np.isin(name_cat2, name_cat1)
-
-    # 2) Coordinates
-    coords_cat1 = SkyCoord(ra=_as_degree_quantity(ra_cat1),
-                           dec=_as_degree_quantity(dec_cat1))
-    coords_cat2 = SkyCoord(ra=_as_degree_quantity(ra_cat2),
-                           dec=_as_degree_quantity(dec_cat2))
-
-    mask_cat2_in_cat1_coords = np.zeros(len(name_cat2), dtype=bool)
-
-    for ii, c in enumerate(coords_cat2):
-        if not mask_cat2_in_cat1_name[ii]:
-            sep = c.separation(coords_cat1)
-            if np.min(sep.arcsec) <= r_arcsec :
-                mask_cat2_in_cat1_coords[ii] = True
-
-    mask_cat2_in_cat1 = mask_cat2_in_cat1_name | mask_cat2_in_cat1_coords
-
-    return mask_cat2_in_cat1
-
-def get_cat2_match_indices_in_cat1(
+def get_cat2_in_cat1_match_info(
     name_cat1,
     ra_cat1,
     dec_cat1,
@@ -71,40 +27,50 @@ def get_cat2_match_indices_in_cat1(
     r_arcsec,
 ):
     """
-    For each row in cat1, find the matching row in cat2.
+    Match cat2 rows to cat1 rows, first by name and then by sky coordinates.
 
-    Matching is done first by name, then by coordinates for rows that
-    did not get a name match.
+    Parameters
+    ----------
+    name_cat1, name_cat2 : array_like
+        Object names.
+    ra_cat1, ra_cat2 : array_like
+        Right ascension values in degrees, or Astropy quantities/columns
+        with angular units.
+    dec_cat1, dec_cat2 : array_like
+        Declination values in degrees, or Astropy quantities/columns
+        with angular units.
+    r_arcsec : float
+        Matching radius in arcsec.
 
     Returns
     -------
-    cat2_index_for_cat1 : numpy.ndarray
-        Integer array with same length as cat1.
-        Value is the matching row index in cat2, or -1 if no match exists.
-
-    match_by_name : numpy.ndarray
-        Boolean array with same length as cat1. True where match was by name.
-
-    match_by_coords : numpy.ndarray
-        Boolean array with same length as cat1. True where match was by coordinates.
+    match_info : dict
+        Dictionary with one entry per cat2 row:
+        - ``mask_cat2_in_cat1``: True if cat2 row matched cat1.
+        - ``cat1_index_for_cat2``: matched cat1 row index, or -1.
+        - ``match_by_name``: True if matched by name.
+        - ``match_by_coords``: True if matched by coordinates.
+        - ``sep_arcsec``: coordinate separation in arcsec for coordinate
+          nearest-neighbor match. Name-only matches can have non-zero values
+          because this is computed independently from the name matching.
     """
 
-    cat2_index_for_cat1 = np.full(len(name_cat1), -1, dtype=int)
-    match_by_name = np.zeros(len(name_cat1), dtype=bool)
-    match_by_coords = np.zeros(len(name_cat1), dtype=bool)
+    cat1_index_for_cat2 = np.full(len(name_cat2), -1, dtype=int)
+    match_by_name = np.zeros(len(name_cat2), dtype=bool)
+    match_by_coords = np.zeros(len(name_cat2), dtype=bool)
 
-    # 1) Name matching
-    cat2_name_to_index = {}
-    for ii, name in enumerate(name_cat2):
-        if name not in cat2_name_to_index:
-            cat2_name_to_index[name] = ii
-
+    # 1) Name matching: cat2 -> cat1
+    cat1_name_to_index = {}
     for ii, name in enumerate(name_cat1):
-        if name in cat2_name_to_index:
-            cat2_index_for_cat1[ii] = cat2_name_to_index[name]
+        if name not in cat1_name_to_index:
+            cat1_name_to_index[name] = ii
+
+    for ii, name in enumerate(name_cat2):
+        if name in cat1_name_to_index:
+            cat1_index_for_cat2[ii] = cat1_name_to_index[name]
             match_by_name[ii] = True
 
-    # 2) Coordinate matching for rows without name match
+    # 2) Coordinate matching for cat2 rows without name match
     coords_cat1 = SkyCoord(
         ra=_as_degree_quantity(ra_cat1),
         dec=_as_degree_quantity(dec_cat1),
@@ -114,17 +80,59 @@ def get_cat2_match_indices_in_cat1(
         dec=_as_degree_quantity(dec_cat2),
     )
 
-    idx_cat2, sep2d, _ = coords_cat1.match_to_catalog_sky(coords_cat2)
+    # astropy SkyCoord matching
+    idx_cat1, sep2d, _ = coords_cat2.match_to_catalog_sky(coords_cat1)
 
     unmatched_by_name = ~match_by_name
     close_enough = sep2d.arcsec <= r_arcsec
     coord_matches = unmatched_by_name & close_enough
 
-    cat2_index_for_cat1[coord_matches] = idx_cat2[coord_matches]
+    cat1_index_for_cat2[coord_matches] = idx_cat1[coord_matches]
     match_by_coords[coord_matches] = True
 
-    return cat2_index_for_cat1, match_by_name, match_by_coords
+    mask_cat2_in_cat1 = match_by_name | match_by_coords
 
+    return {
+        "mask_cat2_in_cat1": mask_cat2_in_cat1,
+        "cat1_index_for_cat2": cat1_index_for_cat2,
+        "match_by_name": match_by_name,
+        "match_by_coords": match_by_coords,
+        "sep_arcsec": sep2d.arcsec,
+    }
+
+
+def get_mask_cat2_in_cat1(
+    name_cat1,
+    ra_cat1,
+    dec_cat1,
+    name_cat2,
+    ra_cat2,
+    dec_cat2,
+    r_arcsec,
+):
+    """
+    For each target in cat2, check if it is in cat1.
+
+    Matching is done first by name, then by coordinates.
+
+    Returns
+    -------
+    mask_cat2_in_cat1 : numpy.ndarray
+        Boolean mask with same length as cat2. True if a target in cat2 is
+        also in cat1.
+    """
+
+    match_info = get_cat2_in_cat1_match_info(
+        name_cat1=name_cat1,
+        ra_cat1=ra_cat1,
+        dec_cat1=dec_cat1,
+        name_cat2=name_cat2,
+        ra_cat2=ra_cat2,
+        dec_cat2=dec_cat2,
+        r_arcsec=r_arcsec,
+    )
+
+    return match_info["mask_cat2_in_cat1"]
 
 def add_cat2_to_cat1_by_name_or_coords(
     cat1,
@@ -138,6 +146,7 @@ def add_cat2_to_cat1_by_name_or_coords(
     r_arcsec,
     cat2_cols=None,
     cat2_suffix="_cat2",
+    match_info=None,
 ):
     """
     Add columns from cat2 to cat1 using a left-join-like match.
@@ -159,6 +168,9 @@ def add_cat2_to_cat1_by_name_or_coords(
         Columns from cat2 to append. If None, all cat2 columns are appended.
     cat2_suffix : str
         Suffix added to appended cat2 columns to avoid name collisions.
+    match_info : dict or None
+        Optional precomputed output from get_cat2_in_cat1_match_info. If given,
+        matching is not recomputed.
 
     Returns
     -------
@@ -169,15 +181,42 @@ def add_cat2_to_cat1_by_name_or_coords(
     if cat2_cols is None:
         cat2_cols = list(cat2.colnames)
 
-    cat2_index_for_cat1, match_by_name, match_by_coords = get_cat2_match_indices_in_cat1(
-        name_cat1=cat1[name_cat1_col],
-        ra_cat1=cat1[ra_cat1_col],
-        dec_cat1=cat1[dec_cat1_col],
-        name_cat2=cat2[name_cat2_col],
-        ra_cat2=cat2[ra_cat2_col],
-        dec_cat2=cat2[dec_cat2_col],
-        r_arcsec=r_arcsec,
-    )
+    if match_info is None:
+        match_info = get_cat2_in_cat1_match_info(
+            name_cat1=cat1[name_cat1_col],
+            ra_cat1=cat1[ra_cat1_col],
+            dec_cat1=cat1[dec_cat1_col],
+            name_cat2=cat2[name_cat2_col],
+            ra_cat2=cat2[ra_cat2_col],
+            dec_cat2=cat2[dec_cat2_col],
+            r_arcsec=r_arcsec,
+        )
+
+    mask_cat2_in_cat1 = match_info["mask_cat2_in_cat1"]
+    cat1_index_for_cat2 = match_info["cat1_index_for_cat2"]
+
+    cat2_index_for_cat1 = np.full(len(cat1), -1, dtype=int)
+    cat1_has_match = np.zeros(len(cat1), dtype=bool)
+    cat1_match_by_name = np.zeros(len(cat1), dtype=bool)
+    cat1_match_by_coords = np.zeros(len(cat1), dtype=bool)
+    cat1_match_sep_arcsec = np.ma.masked_all(len(cat1), dtype=float)
+
+    for cat2_index in np.where(mask_cat2_in_cat1)[0]:
+        cat1_index = cat1_index_for_cat2[cat2_index]
+
+        if cat1_index < 0:
+            continue
+
+        # Keep the first match if multiple cat2 rows point to the same cat1 row.
+        if cat1_has_match[cat1_index]:
+            # maybe change to keep the first non null match of the value
+            continue
+
+        cat2_index_for_cat1[cat1_index] = cat2_index
+        cat1_has_match[cat1_index] = True
+        cat1_match_by_name[cat1_index] = match_info["match_by_name"][cat2_index]
+        cat1_match_by_coords[cat1_index] = match_info["match_by_coords"][cat2_index]
+        cat1_match_sep_arcsec[cat1_index] = match_info["sep_arcsec"][cat2_index]
 
     cat2_matched = Table(masked=True)
 
@@ -191,11 +230,14 @@ def add_cat2_to_cat1_by_name_or_coords(
             dtype=cat2[col].dtype,
         )
 
-        has_match = cat2_index_for_cat1 >= 0
-        cat2_matched[new_col_name][has_match] = cat2[col][cat2_index_for_cat1[has_match]]
+        cat1_rows_with_match = cat2_index_for_cat1 >= 0
+        cat2_matched[new_col_name][cat1_rows_with_match] = cat2[col][
+            cat2_index_for_cat1[cat1_rows_with_match]
+        ]
 
-    cat2_matched["cat2_match_by_name"] = match_by_name
-    cat2_matched["cat2_match_by_coords"] = match_by_coords
+    cat2_matched["cat2_match_by_name"] = cat1_match_by_name
+    cat2_matched["cat2_match_by_coords"] = cat1_match_by_coords
+    cat2_matched["cat2_match_sep_arcsec"] = cat1_match_sep_arcsec
     cat2_matched["cat2_match_index"] = cat2_index_for_cat1
 
     joined = hstack([cat1, cat2_matched])

@@ -8,6 +8,7 @@ import numpy as np
 from astropy.io.ascii import read
 from astropy.table import MaskedColumn, Table, vstack
 from catalog.starcat5_merger.fcts_cat_merge import (
+    get_cat2_in_cat1_match_info,
     get_mask_cat2_in_cat1,
     nearest_neighbor_distances_units,
     add_cat2_to_cat1_by_name_or_coords,
@@ -645,7 +646,8 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
     starcat5 = get_catalog("starcat5")
 
     radius = get_radius(starcat5["coo_ra"], starcat5["coo_dec"])
-    mask_cat2_in_cat1 = get_mask_cat2_in_cat1(
+
+    match_info = get_cat2_in_cat1_match_info(
         name_cat1=hpic["simbad_name"],
         ra_cat1=hpic["ra"],
         dec_cat1=hpic["dec"],
@@ -654,6 +656,8 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
         dec_cat2=starcat5["coo_dec"],
         r_arcsec=radius,
     )
+
+    mask_cat2_in_cat1 = match_info["mask_cat2_in_cat1"]
 
     starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
     starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
@@ -678,6 +682,7 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
             "mag_u_sdss_ref",
             "mag_u_sdss_sys",
         ],
+        match_info=match_info,
     )
 
     pre_merge_starcat, pre_merge_hpic, float_colnames = (
