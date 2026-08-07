@@ -1,14 +1,25 @@
-from astropy.coordinates import SkyCoord
-from astropy import units as u
+from typing import Any
+
 import numpy as np
-from astropy.table import hstack, Table
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.table import Table, hstack
 
-def _as_degree_quantity(values):
+
+MatchInfo = dict[str, np.ndarray]
+
+
+def _as_degree_quantity(values: Any) -> u.Quantity:
     """
-    Return values as an Astropy Quantity in degrees.
+    Return angular values as an Astropy quantity in degrees.
 
-    If values already has angular units, convert to degrees.
-    If values has no unit, assume it is given in degrees.
+    If ``values`` already has angular units, it is converted to degrees. If it
+    has no unit, it is assumed to be given in degrees.
+
+    :param values: Angular values, either unitless or with Astropy units.
+    :type values: object
+    :returns: Angular values as degree quantity.
+    :rtype: astropy.units.Quantity
     """
     unit = getattr(values, "unit", None)
 
@@ -17,78 +28,141 @@ def _as_degree_quantity(values):
 
     return values.to(u.deg)
 
-def get_cat2_in_cat1_match_info(
-    name_cat1,
-    ra_cat1,
-    dec_cat1,
-    name_cat2,
-    ra_cat2,
-    dec_cat2,
-    r_arcsec,
-):
+
+def _make_skycoord(ra: Any, dec: Any) -> SkyCoord:
     """
-    Match cat2 rows to cat1 rows, first by name and then by sky coordinates.
+    Build a sky coordinate object from right ascension and declination.
 
-    Parameters
-    ----------
-    name_cat1, name_cat2 : array_like
-        Object names.
-    ra_cat1, ra_cat2 : array_like
-        Right ascension values in degrees, or Astropy quantities/columns
-        with angular units.
-    dec_cat1, dec_cat2 : array_like
-        Declination values in degrees, or Astropy quantities/columns
-        with angular units.
-    r_arcsec : float
-        Matching radius in arcsec.
-
-    Returns
-    -------
-    match_info : dict
-        Dictionary with one entry per cat2 row:
-        - ``mask_cat2_in_cat1``: True if cat2 row matched cat1.
-        - ``cat1_index_for_cat2``: matched cat1 row index, or -1.
-        - ``match_by_name``: True if matched by name.
-        - ``match_by_coords``: True if matched by coordinates.
-        - ``sep_arcsec``: coordinate separation in arcsec for coordinate
-          nearest-neighbor match. Name-only matches can have non-zero values
-          because this is computed independently from the name matching.
+    :param ra: Right ascension values in degrees or with angular units.
+    :type ra: object
+    :param dec: Declination values in degrees or with angular units.
+    :type dec: object
+    :returns: Sky coordinates.
+    :rtype: astropy.coordinates.SkyCoord
     """
+    return SkyCoord(
+        ra=_as_degree_quantity(ra),
+        dec=_as_degree_quantity(dec),
+    )
 
+
+def _match_cat2_to_cat1_by_name(
+    name_cat1: Any,
+    name_cat2: Any,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Match rows from catalog 2 to catalog 1 by exact object name.
+
+    If a name occurs multiple times in catalog 1, the first occurrence is used.
+    This preserves the previous first-match behavior.
+
+    :param name_cat1: Object names in catalog 1.
+    :type name_cat1: object
+    :param name_cat2: Object names in catalog 2.
+    :type name_cat2: object
+    :returns: Catalog-1 indices for catalog-2 rows and name-match mask.
+    :rtype: tuple[numpy.ndarray, numpy.ndarray]
+    """
     cat1_index_for_cat2 = np.full(len(name_cat2), -1, dtype=int)
     match_by_name = np.zeros(len(name_cat2), dtype=bool)
-    match_by_coords = np.zeros(len(name_cat2), dtype=bool)
 
-    # 1) Name matching: cat2 -> cat1
-    cat1_name_to_index = {}
-    for ii, name in enumerate(name_cat1):
+    cat1_name_to_index: dict[Any, int] = {}
+    for cat1_index, name in enumerate(name_cat1):
         if name not in cat1_name_to_index:
-            cat1_name_to_index[name] = ii
+            cat1_name_to_index[name] = cat1_index
 
-    for ii, name in enumerate(name_cat2):
+    for cat2_index, name in enumerate(name_cat2):
         if name in cat1_name_to_index:
-            cat1_index_for_cat2[ii] = cat1_name_to_index[name]
-            match_by_name[ii] = True
+            cat1_index_for_cat2[cat2_index] = cat1_name_to_index[name]
+            match_by_name[cat2_index] = True
 
-    # 2) Coordinate matching for cat2 rows without name match
-    coords_cat1 = SkyCoord(
-        ra=_as_degree_quantity(ra_cat1),
-        dec=_as_degree_quantity(dec_cat1),
-    )
-    coords_cat2 = SkyCoord(
-        ra=_as_degree_quantity(ra_cat2),
-        dec=_as_degree_quantity(dec_cat2),
-    )
+    return cat1_index_for_cat2, match_by_name
 
-    # astropy SkyCoord matching
-    idx_cat1, sep2d, _ = coords_cat2.match_to_catalog_sky(coords_cat1)
+
+def _match_cat2_to_cat1_by_coords(
+    ra_cat1: Any,
+    dec_cat1: Any,
+    ra_cat2: Any,
+    dec_cat2: Any,
+    r_arcsec: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Match rows from catalog 2 to nearest catalog-1 coordinates.
+
+    :param ra_cat1: Right ascension values of catalog 1.
+    :type ra_cat1: object
+    :param dec_cat1: Declination values of catalog 1.
+    :type dec_cat1: object
+    :param ra_cat2: Right ascension values of catalog 2.
+    :type ra_cat2: object
+    :param dec_cat2: Declination values of catalog 2.
+    :type dec_cat2: object
+    :param r_arcsec: Maximum accepted matching distance in arcseconds.
+    :type r_arcsec: float
+    :returns: Nearest catalog-1 indices, coordinate-match mask, separations.
+    :rtype: tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
+    """
+    coords_cat1 = _make_skycoord(ra_cat1, dec_cat1)
+    coords_cat2 = _make_skycoord(ra_cat2, dec_cat2)
+
+    cat1_indices, sep2d, _ = coords_cat2.match_to_catalog_sky(coords_cat1)
+    sep_arcsec = sep2d.arcsec
+    match_by_coords = sep_arcsec <= r_arcsec
+
+    return cat1_indices, match_by_coords, sep_arcsec
+
+
+def get_cat2_in_cat1_match_info(
+    name_cat1: Any,
+    ra_cat1: Any,
+    dec_cat1: Any,
+    name_cat2: Any,
+    ra_cat2: Any,
+    dec_cat2: Any,
+    r_arcsec: float,
+) -> MatchInfo:
+    """
+    Match catalog-2 rows to catalog-1 rows by name and sky coordinates.
+
+    Matching is done in two steps:
+
+    1. exact name matching,
+    2. nearest-neighbor coordinate matching for rows not matched by name.
+
+    The returned arrays all have the same length as catalog 2.
+
+    :param name_cat1: Object names in catalog 1.
+    :type name_cat1: object
+    :param ra_cat1: Right ascension values of catalog 1.
+    :type ra_cat1: object
+    :param dec_cat1: Declination values of catalog 1.
+    :type dec_cat1: object
+    :param name_cat2: Object names in catalog 2.
+    :type name_cat2: object
+    :param ra_cat2: Right ascension values of catalog 2.
+    :type ra_cat2: object
+    :param dec_cat2: Declination values of catalog 2.
+    :type dec_cat2: object
+    :param r_arcsec: Maximum coordinate matching distance in arcseconds.
+    :type r_arcsec: float
+    :returns: Dictionary containing match masks, indices, and separations.
+    :rtype: dict[str, numpy.ndarray]
+    """
+    cat1_index_for_cat2, match_by_name = _match_cat2_to_cat1_by_name(
+        name_cat1,
+        name_cat2,
+    )
+    coord_indices, coord_mask, sep_arcsec = _match_cat2_to_cat1_by_coords(
+        ra_cat1,
+        dec_cat1,
+        ra_cat2,
+        dec_cat2,
+        r_arcsec,
+    )
 
     unmatched_by_name = ~match_by_name
-    close_enough = sep2d.arcsec <= r_arcsec
-    coord_matches = unmatched_by_name & close_enough
-
-    cat1_index_for_cat2[coord_matches] = idx_cat1[coord_matches]
-    match_by_coords[coord_matches] = True
+    match_by_coords = unmatched_by_name & coord_mask
+    cat1_index_for_cat2[match_by_coords] = coord_indices[match_by_coords]
 
     mask_cat2_in_cat1 = match_by_name | match_by_coords
 
@@ -97,31 +171,41 @@ def get_cat2_in_cat1_match_info(
         "cat1_index_for_cat2": cat1_index_for_cat2,
         "match_by_name": match_by_name,
         "match_by_coords": match_by_coords,
-        "sep_arcsec": sep2d.arcsec,
+        "sep_arcsec": sep_arcsec,
     }
 
 
 def get_mask_cat2_in_cat1(
-    name_cat1,
-    ra_cat1,
-    dec_cat1,
-    name_cat2,
-    ra_cat2,
-    dec_cat2,
-    r_arcsec,
-):
+    name_cat1: Any,
+    ra_cat1: Any,
+    dec_cat1: Any,
+    name_cat2: Any,
+    ra_cat2: Any,
+    dec_cat2: Any,
+    r_arcsec: float,
+) -> np.ndarray:
     """
-    For each target in cat2, check if it is in cat1.
+    Return a mask showing which catalog-2 rows are present in catalog 1.
 
-    Matching is done first by name, then by coordinates.
+    Matching is done first by exact object name and then by sky coordinates.
 
-    Returns
-    -------
-    mask_cat2_in_cat1 : numpy.ndarray
-        Boolean mask with same length as cat2. True if a target in cat2 is
-        also in cat1.
+    :param name_cat1: Object names in catalog 1.
+    :type name_cat1: object
+    :param ra_cat1: Right ascension values of catalog 1.
+    :type ra_cat1: object
+    :param dec_cat1: Declination values of catalog 1.
+    :type dec_cat1: object
+    :param name_cat2: Object names in catalog 2.
+    :type name_cat2: object
+    :param ra_cat2: Right ascension values of catalog 2.
+    :type ra_cat2: object
+    :param dec_cat2: Declination values of catalog 2.
+    :type dec_cat2: object
+    :param r_arcsec: Maximum coordinate matching distance in arcseconds.
+    :type r_arcsec: float
+    :returns: Boolean mask with one entry per catalog-2 row.
+    :rtype: numpy.ndarray
     """
-
     match_info = get_cat2_in_cat1_match_info(
         name_cat1=name_cat1,
         ra_cat1=ra_cat1,
@@ -134,50 +218,185 @@ def get_mask_cat2_in_cat1(
 
     return match_info["mask_cat2_in_cat1"]
 
+
+def _invert_cat2_matches_to_cat1(
+    match_info: MatchInfo,
+    len_cat1: int,
+) -> dict[str, np.ndarray]:
+    """
+    Convert catalog-2-based match information to catalog-1-based arrays.
+
+    ``get_cat2_in_cat1_match_info`` stores one entry per catalog-2 row. For a
+    left-join-like table, one entry per catalog-1 row is needed instead. If
+    multiple catalog-2 rows match the same catalog-1 row, the first match is
+    kept.
+
+    :param match_info: Match dictionary from ``get_cat2_in_cat1_match_info``.
+    :type match_info: dict[str, numpy.ndarray]
+    :param len_cat1: Number of rows in catalog 1.
+    :type len_cat1: int
+    :returns: Dictionary with one entry per catalog-1 row.
+    :rtype: dict[str, numpy.ndarray]
+    """
+    cat2_index_for_cat1 = np.full(len_cat1, -1, dtype=int)
+    cat1_has_match = np.zeros(len_cat1, dtype=bool)
+    cat1_match_by_name = np.zeros(len_cat1, dtype=bool)
+    cat1_match_by_coords = np.zeros(len_cat1, dtype=bool)
+    cat1_match_sep_arcsec = np.ma.masked_all(len_cat1, dtype=float)
+
+    matched_cat2_indices = np.where(match_info["mask_cat2_in_cat1"])[0]
+
+    for cat2_index in matched_cat2_indices:
+        # get index in match info corresponding to cat 1
+        cat1_index = match_info["cat1_index_for_cat2"][cat2_index]
+
+        # exit if no match
+        if cat1_index < 0:
+            continue
+
+        # only first row
+        if cat1_has_match[cat1_index]:
+            continue
+
+        # inverse index
+        cat2_index_for_cat1[cat1_index] = cat2_index
+
+        # fill in rest of match info
+        cat1_has_match[cat1_index] = True
+        cat1_match_by_name[cat1_index] = match_info["match_by_name"][
+            cat2_index
+        ]
+        cat1_match_by_coords[cat1_index] = match_info["match_by_coords"][
+            cat2_index
+        ]
+        cat1_match_sep_arcsec[cat1_index] = match_info["sep_arcsec"][
+            cat2_index
+        ]
+
+    return {
+        "cat2_match_index": cat2_index_for_cat1,
+        "cat2_match_by_name": cat1_match_by_name,
+        "cat2_match_by_coords": cat1_match_by_coords,
+        "cat2_match_sep_arcsec": cat1_match_sep_arcsec,
+    }
+
+
+def _get_output_column_name(
+    column_name: str,
+    existing_colnames: list[str],
+    suffix: str,
+) -> str:
+    """
+    Return an output column name that avoids name collisions.
+
+    :param column_name: Original column name.
+    :type column_name: str
+    :param existing_colnames: Names already present in the output table.
+    :type existing_colnames: list[str]
+    :param suffix: Suffix to add if the name already exists.
+    :type suffix: str
+    :returns: Safe output column name.
+    :rtype: str
+    """
+    if column_name in existing_colnames:
+        return f"{column_name}{suffix}"
+
+    return column_name
+
+
+def _build_masked_cat2_columns(
+    cat1: Table,
+    cat2: Table,
+    cat2_cols: list[str],
+    cat2_index_for_cat1: np.ndarray,
+    cat2_suffix: str,
+) -> Table:
+    """
+    Build masked catalog-2 table with columns aligned to catalog-1 rows.
+
+    :param cat1: Left-side catalog whose row count defines the output length.
+    :type cat1: astropy.table.Table
+    :param cat2: Right-side catalog from which values are copied.
+    :type cat2: astropy.table.Table
+    :param cat2_cols: Catalog-2 columns to append.
+    :type cat2_cols: list[str]
+    :param cat2_index_for_cat1: Catalog-2 row index for each catalog-1 row.
+    :type cat2_index_for_cat1: numpy.ndarray
+    :param cat2_suffix: Suffix for catalog-2 columns that collide with cat1.
+    :type cat2_suffix: str
+    :returns: Masked table with catalog-2 columns aligned to catalog 1.
+    :rtype: astropy.table.Table
+    """
+    cat2_matched = Table(masked=True)
+    cat1_rows_with_match = cat2_index_for_cat1 >= 0
+
+    for col in cat2_cols:
+        output_col = _get_output_column_name(
+            col,
+            cat1.colnames,
+            cat2_suffix,
+        )
+        cat2_matched[output_col] = np.ma.masked_all(
+            len(cat1),
+            dtype=cat2[col].dtype,
+        )
+        cat2_matched[output_col][cat1_rows_with_match] = cat2[col][
+            cat2_index_for_cat1[cat1_rows_with_match]
+        ]
+
+    return cat2_matched
+
+
 def add_cat2_to_cat1_by_name_or_coords(
-    cat1,
-    cat2,
-    name_cat1_col,
-    ra_cat1_col,
-    dec_cat1_col,
-    name_cat2_col,
-    ra_cat2_col,
-    dec_cat2_col,
-    r_arcsec,
-    cat2_cols=None,
-    cat2_suffix="_cat2",
-    match_info=None,
-):
+    cat1: Table,
+    cat2: Table,
+    name_cat1_col: str,
+    ra_cat1_col: str,
+    dec_cat1_col: str,
+    name_cat2_col: str,
+    ra_cat2_col: str,
+    dec_cat2_col: str,
+    r_arcsec: float,
+    cat2_cols: list[str] | None = None,
+    cat2_suffix: str = "_cat2",
+    match_info: MatchInfo | None = None,
+) -> Table:
     """
-    Add columns from cat2 to cat1 using a left-join-like match.
+    Add columns from catalog 2 to catalog 1 by name or coordinate match.
 
-    Rows are matched first by name, then by nearest sky coordinate within
-    r_arcsec. All rows from cat1 are preserved.
+    This behaves like a left join: all catalog-1 rows are preserved. Selected
+    catalog-2 columns are appended where a match is found. Matching is done by
+    exact name first and then by nearest sky coordinate within ``r_arcsec``.
 
-    Parameters
-    ----------
-    cat1, cat2 : astropy.table.Table
-        Catalogs to combine.
-    name_cat1_col, name_cat2_col : str
-        Name/id columns used for exact name matching.
-    ra_cat1_col, dec_cat1_col, ra_cat2_col, dec_cat2_col : str
-        Coordinate columns in degrees or with Astropy angular units.
-    r_arcsec : float
-        Maximum coordinate matching radius in arcseconds.
-    cat2_cols : list[str] or None
-        Columns from cat2 to append. If None, all cat2 columns are appended.
-    cat2_suffix : str
-        Suffix added to appended cat2 columns to avoid name collisions.
-    match_info : dict or None
-        Optional precomputed output from get_cat2_in_cat1_match_info. If given,
-        matching is not recomputed.
+    If ``match_info`` is provided, matching is not recomputed.
 
-    Returns
-    -------
-    joined : astropy.table.Table
-        cat1 with selected cat2 columns appended.
+    :param cat1: Left-side catalog.
+    :type cat1: astropy.table.Table
+    :param cat2: Right-side catalog.
+    :type cat2: astropy.table.Table
+    :param name_cat1_col: Name column in catalog 1.
+    :type name_cat1_col: str
+    :param ra_cat1_col: Right ascension column in catalog 1.
+    :type ra_cat1_col: str
+    :param dec_cat1_col: Declination column in catalog 1.
+    :type dec_cat1_col: str
+    :param name_cat2_col: Name column in catalog 2.
+    :type name_cat2_col: str
+    :param ra_cat2_col: Right ascension column in catalog 2.
+    :type ra_cat2_col: str
+    :param dec_cat2_col: Declination column in catalog 2.
+    :type dec_cat2_col: str
+    :param r_arcsec: Maximum coordinate matching distance in arcseconds.
+    :type r_arcsec: float
+    :param cat2_cols: Catalog-2 columns to append. Appends all if ``None``.
+    :type cat2_cols: list[str] or None
+    :param cat2_suffix: Suffix for catalog-2 columns colliding with cat1.
+    :type cat2_suffix: str
+    :param match_info: Optional precomputed catalog-2-to-catalog-1 matches.
+    :type match_info: dict[str, numpy.ndarray] or None
+    :returns: Catalog 1 with matched catalog-2 columns appended.
+    :rtype: astropy.table.Table
     """
-
     if cat2_cols is None:
         cat2_cols = list(cat2.colnames)
 
@@ -192,81 +411,48 @@ def add_cat2_to_cat1_by_name_or_coords(
             r_arcsec=r_arcsec,
         )
 
-    mask_cat2_in_cat1 = match_info["mask_cat2_in_cat1"]
-    cat1_index_for_cat2 = match_info["cat1_index_for_cat2"]
+    cat1_match_info = _invert_cat2_matches_to_cat1(
+        match_info,
+        len(cat1),
+    )
+    cat2_matched = _build_masked_cat2_columns(
+        cat1=cat1,
+        cat2=cat2,
+        cat2_cols=cat2_cols,
+        cat2_index_for_cat1=cat1_match_info["cat2_match_index"],
+        cat2_suffix=cat2_suffix,
+    )
 
-    cat2_index_for_cat1 = np.full(len(cat1), -1, dtype=int)
-    cat1_has_match = np.zeros(len(cat1), dtype=bool)
-    cat1_match_by_name = np.zeros(len(cat1), dtype=bool)
-    cat1_match_by_coords = np.zeros(len(cat1), dtype=bool)
-    cat1_match_sep_arcsec = np.ma.masked_all(len(cat1), dtype=float)
+    cat2_matched["cat2_match_by_name"] = cat1_match_info[
+        "cat2_match_by_name"
+    ]
+    cat2_matched["cat2_match_by_coords"] = cat1_match_info[
+        "cat2_match_by_coords"
+    ]
+    cat2_matched["cat2_match_sep_arcsec"] = cat1_match_info[
+        "cat2_match_sep_arcsec"
+    ]
+    cat2_matched["cat2_match_index"] = cat1_match_info["cat2_match_index"]
 
-    for cat2_index in np.where(mask_cat2_in_cat1)[0]:
-        cat1_index = cat1_index_for_cat2[cat2_index]
-
-        if cat1_index < 0:
-            continue
-
-        # Keep the first match if multiple cat2 rows point to the same cat1 row.
-        if cat1_has_match[cat1_index]:
-            # maybe change to keep the first non null match of the value
-            continue
-
-        cat2_index_for_cat1[cat1_index] = cat2_index
-        cat1_has_match[cat1_index] = True
-        cat1_match_by_name[cat1_index] = match_info["match_by_name"][cat2_index]
-        cat1_match_by_coords[cat1_index] = match_info["match_by_coords"][cat2_index]
-        cat1_match_sep_arcsec[cat1_index] = match_info["sep_arcsec"][cat2_index]
-
-    cat2_matched = Table(masked=True)
-
-    for col in cat2_cols:
-        new_col_name = col
-        if new_col_name in cat1.colnames:
-            new_col_name = f"{col}{cat2_suffix}"
-
-        cat2_matched[new_col_name] = np.ma.masked_all(
-            len(cat1),
-            dtype=cat2[col].dtype,
-        )
-
-        cat1_rows_with_match = cat2_index_for_cat1 >= 0
-        cat2_matched[new_col_name][cat1_rows_with_match] = cat2[col][
-            cat2_index_for_cat1[cat1_rows_with_match]
-        ]
-
-    cat2_matched["cat2_match_by_name"] = cat1_match_by_name
-    cat2_matched["cat2_match_by_coords"] = cat1_match_by_coords
-    cat2_matched["cat2_match_sep_arcsec"] = cat1_match_sep_arcsec
-    cat2_matched["cat2_match_index"] = cat2_index_for_cat1
-
-    joined = hstack([cat1, cat2_matched])
-
-    return joined
+    return hstack([cat1, cat2_matched])
 
 
-
-def nearest_neighbor_distances_units(ra, dec):
+def nearest_neighbor_distances_units(ra: Any, dec: Any) -> np.ndarray:
     """
     Compute nearest-neighbor angular distances for a catalog of stars.
 
-    Parameters
-    ----------
-    ra : array_like
-        Right ascension values in degrees, or Astropy quantities/columns with angular units.
-    dec : array_like
-        Declination values in degrees, or Astropy quantities/columns with angular units.
+    The nearest neighbor is computed on the sky. For catalogs with fewer than
+    two rows, no nearest neighbor exists and ``np.nan`` is returned for each
+    row.
 
-    Returns
-    -------
-    distances_arcsec : numpy.ndarray
-        Array of nearest-neighbor distances in arcseconds,
-        same length as input arrays.
+    :param ra: Right ascension values in degrees or with angular units.
+    :type ra: object
+    :param dec: Declination values in degrees or with angular units.
+    :type dec: object
+    :returns: Nearest-neighbor distances in arcseconds.
+    :rtype: numpy.ndarray
     """
-    stars = SkyCoord(
-        ra=_as_degree_quantity(ra),
-        dec=_as_degree_quantity(dec),
-    )
+    stars = _make_skycoord(ra, dec)
 
     if len(stars) < 2:
         return np.full(len(stars), np.nan)
@@ -275,4 +461,3 @@ def nearest_neighbor_distances_units(ra, dec):
     _, sep2d, _ = stars.match_to_catalog_sky(stars, nthneighbor=2)
 
     return sep2d.arcsec
-
