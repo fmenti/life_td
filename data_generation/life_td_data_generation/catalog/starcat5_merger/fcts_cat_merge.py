@@ -33,6 +33,8 @@ def _make_skycoord(ra: Any, dec: Any) -> SkyCoord:
     """
     Build a sky coordinate object from right ascension and declination.
 
+    This function does not seem necessary but also not too bad if kept.
+
     :param ra: Right ascension values in degrees or with angular units.
     :type ra: object
     :param dec: Declination values in degrees or with angular units.
@@ -55,6 +57,7 @@ def _match_cat2_to_cat1_by_name(
 
     If a name occurs multiple times in catalog 1, the first occurrence is used.
     This preserves the previous first-match behavior.
+    A bit difficult to understand with the loops and dictionaries.
 
     :param name_cat1: Object names in catalog 1.
     :type name_cat1: object
@@ -130,6 +133,8 @@ def get_cat2_in_cat1_match_info(
     2. nearest-neighbor coordinate matching for rows not matched by name.
 
     The returned arrays all have the same length as catalog 2.
+    Is something like cat 2 (in length and indices) with info where in cat 1
+    one can find matched stuff.
 
     :param name_cat1: Object names in catalog 1.
     :type name_cat1: object
@@ -230,6 +235,8 @@ def _invert_cat2_matches_to_cat1(
     left-join-like table, one entry per catalog-1 row is needed instead. If
     multiple catalog-2 rows match the same catalog-1 row, the first match is
     kept.
+    Difficult to understand but okay, is something like cat 1 (in length and
+    indices) with info where in cat 2 one can find matched stuff.
 
     :param match_info: Match dictionary from ``get_cat2_in_cat1_match_info``.
     :type match_info: dict[str, numpy.ndarray]
