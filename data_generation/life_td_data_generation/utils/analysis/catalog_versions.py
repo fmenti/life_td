@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+from astropy.table import Column
+
 import importlib  # reloading external functions after modification
 import sys
 from typing import Any
@@ -297,14 +300,17 @@ def compare():
     ltc_compare(labels, paras, paths=paths)
 
 def plot_cat_paras(paras,catalog_list,
-                   label_list=["cat1","cat2"]):
+                   label_list=["cat1","cat2"],min=[0,0],max=[1e20,1e20]):
+
     fig, ax = plt.subplots(
         figsize=(9, 6)
     )  # subplots so that I can overplot old version?
     for catalog,lab in zip(catalog_list,label_list):
         arr = catalog[paras[0], paras[1]]
-        arr2 = arr[np.where(arr[paras[0]] != 1e20)]
-        data = arr2[np.where(arr2[paras[1]] != 1e20)]
+        min_arr = arr[np.where(min[0] < arr[paras[0]])]
+        max_arr = min_arr[np.where(min_arr[paras[0]] < max[0])]
+        data_min = max_arr[np.where(min[1] < max_arr[paras[1]])]
+        data = data_min[np.where(data_min[paras[1]] < max[1])]
 
         ax.scatter(data[paras[0]], data[paras[1]], s=2, label = lab, alpha=0.5)
     # ax.set_yscale("log")
@@ -312,4 +318,46 @@ def plot_cat_paras(paras,catalog_list,
     ax.set_xlabel(paras[0])
     ax.set_ylabel(paras[1])
     plt.legend()
+    plt.savefig("../../../../plots/" + paras[0]+paras[1]+".png", dpi=300)
+    plt.show()
+
+def spec_dist_plot(spectypes: Sequence[Column], spclass: str,
+                   labels: Sequence[str]) -> None:
+    """
+    Plot spectral-subclass histograms for HPIC and StarCat5-only additions.
+
+    :param spectypes: Catalogs to compare.
+    :type spectypes: sequence[astropy.table.Column]
+    :param spclass: Spectral subclasses to keep and display on the x-axis.
+    :type spclass: str
+    :param labels: Catalog labels.
+    :type labels: sequence[str]
+    :returns: None.
+    :rtype: None
+    """
+    x = [spclass + str(i) for i in range(10)]
+    plt.figure()
+
+    for specs, label in zip(spectypes, labels):
+        spectype = np.array(specs).astype(str)
+
+        # Reduce spectral types to first two characters, e.g. "M3.4" -> "M3".
+        spectype = np.array([s[:2] for s in spectype])
+
+        # Keep only spectral types listed in x.
+        spectype = spectype[np.isin(spectype, x)]
+
+        plt.hist(
+            spectype,
+            bins=np.arange(len(x) + 1) - 0.5,
+            edgecolor="black",
+            label=label,
+            alpha=0.5,
+        )
+
+    plt.xticks(range(len(x)), x)
+    plt.xlabel("Spectral Subclass")
+    plt.ylabel("Number of stars")
+    plt.legend()
+    plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
     plt.show()
