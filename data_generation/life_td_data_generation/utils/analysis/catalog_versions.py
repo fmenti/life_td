@@ -361,3 +361,17 @@ def spec_dist_plot(spectypes: Sequence[Column], spclass: str,
     plt.legend()
     plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
     plt.show()
+
+def hist_plot(catalogs,col,labels,minmax):
+    alf = 0.5
+    edgecol = "black"
+    plt.figure()
+    for i in range(len(labels)):
+        plt.hist(catalogs[i][col], alpha = alf, edgecolor = edgecol,
+             label = labels[i], range = minmax)
+    plt.legend()
+    plt.xlabel(col)
+    plt.ylabel("Count")
+    plt.savefig("../../../../plots/"+col+".png")
+    plt.show()
+    return
