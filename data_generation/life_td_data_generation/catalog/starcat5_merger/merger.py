@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any, Literal
 
-#import importlib
+import importlib
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,6 @@ from astropy.io.ascii import read
 from astropy.table import MaskedColumn, Table, vstack
 from catalog.starcat5_merger.fcts_cat_merge import (
     get_cat2_in_cat1_match_info,
-    get_mask_cat2_in_cat1,
     nearest_neighbor_distances_units,
     add_cat2_to_cat1_by_name_or_coords,
 )
@@ -18,7 +17,7 @@ from scipy.optimize import curve_fit
 from utils.analysis import catalog_versions, finalplot
 from utils.io import load, save, stringtoobject
 
-#importlib.reload(catalog_versions)
+importlib.reload(catalog_versions)
 
 
 ADDITIONAL_DATA_LOCATION = "../../../../additional_data/"
@@ -135,7 +134,9 @@ def get_radius(catalog_ra: np.ndarray, catalog_dec: np.ndarray) -> float:
         color="red",
         label="radius",
     )
+    plt.savefig("../../../../plots/radius_fit.png")
     plt.show()
+
 
     return radius
 
@@ -322,16 +323,22 @@ def plot_para_vs_para(hpic: Table, starcat5_wo_hpic: Table) -> None:
         ["temp_teff_st_value", "temp_radius_st_value"],
         [hpic, starcat5_wo_hpic],
         label_list=labels,
+        min = [2000,0],
+        max = [10000,2.5],
     )
     catalog_versions.plot_cat_paras(
         ["temp_teff_st_value", "temp_mass_st_value"],
         [hpic, starcat5_wo_hpic],
         label_list=labels,
+        min=[2000, 0],
+        max=[10000, 2],
     )
     catalog_versions.plot_cat_paras(
         ["temp_radius_st_value", "temp_mass_st_value"],
         [hpic, starcat5_wo_hpic],
         label_list=labels,
+        min=[0, 0],
+        max=[2.5, 2],
     )
     catalog_versions.plot_cat_paras(
         ["temp_coo_ra", "temp_coo_dec"],
@@ -375,44 +382,6 @@ def analysis_starcat5_not_in_hpic(catalog: Table) -> None:
             ]
         )
 
-
-def spec_dist_plot(catalogs: Sequence[Table], x: Sequence[str]) -> None:
-    """
-    Plot spectral-subclass histograms for HPIC and StarCat5-only additions.
-
-    :param catalogs: Catalogs to compare. Labels are assigned in order as HPIC
-        and StarCat5 addition.
-    :type catalogs: sequence[astropy.table.Table]
-    :param x: Spectral subclasses to keep and display on the x-axis.
-    :type x: sequence[str]
-    :returns: None.
-    :rtype: None
-    """
-    plt.figure()
-
-    labels = ["HPIC", "StarCat5_addition_to_HPIC"]
-    for cat, label in zip(catalogs, labels):
-        spectype = np.array(cat["temp_sptype_string"]).astype(str)
-
-        # Reduce spectral types to first two characters, e.g. "M3.4" -> "M3".
-        spectype = np.array([s[:2] for s in spectype])
-
-        # Keep only spectral types listed in x.
-        spectype = spectype[np.isin(spectype, x)]
-
-        plt.hist(
-            spectype,
-            bins=np.arange(len(x) + 1) - 0.5,
-            edgecolor="black",
-            label=label,
-            alpha=0.5,
-        )
-
-    plt.xticks(range(len(x)), x)
-    plt.xlabel("Spectral Subclass")
-    plt.ylabel("Number of stars")
-    plt.legend()
-    plt.show()
 
 
 def get_merge_column_names() -> tuple[list[str], list[str], list[str]]:
@@ -621,7 +590,7 @@ def prepare_pre_merge_catalogs(
     return pre_merge_starcat, pre_merge_hpic, float_colnames
 
 
-def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
+def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table, Table]:
     """
     Merge HPIC with StarCat5 rows that are not already present in HPIC.
 
@@ -632,13 +601,14 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
 
     :returns: Tuple containing the merged catalog, prepared StarCat5-only table,
         original StarCat5 table, prepared HPIC table, float-column base names,
-        and the StarCat5 rows matched to HPIC.
+        the StarCat5 rows matched to HPIC, and HPIC rows without StarCat5 match.
     :rtype: (
         astropy.table.Table,
         astropy.table.Table,
         astropy.table.Table,
         astropy.table.Table,
         list[str],
+        astropy.table.Table,
         astropy.table.Table
     )
     """
@@ -661,6 +631,11 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
 
     starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
     starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
+
+    hpic_has_starcat5_match = np.zeros(len(hpic), dtype=bool)
+    matched_hpic_indices = match_info["cat1_index_for_cat2"][mask_cat2_in_cat1]
+    hpic_has_starcat5_match[matched_hpic_indices] = True
+    hpic_not_in_starcat5 = hpic[np.invert(hpic_has_starcat5_match)].copy()
 
     # adding mag_u_columns to hpic
     hpic_mag_u_joined = add_cat2_to_cat1_by_name_or_coords(
@@ -698,6 +673,7 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
             pre_merge_hpic,
             pre_merge_starcat,
             starcat5_in_hpic,
+            hpic_not_in_starcat5,
         ],
         [
             "HPIC_StarCat",
@@ -705,6 +681,7 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
             "pre_merge_hpic",
             "pre_merge_starcat",
             "starcat5_in_hpic",
+            "hpic_not_in_starcat5",
         ],
         location=ADDITIONAL_DATA_LOCATION,
     )
@@ -718,4 +695,5 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table]:
         pre_merge_hpic,
         float_colnames,
         starcat5_in_hpic,
+        hpic_not_in_starcat5,
     )
