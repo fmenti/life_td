@@ -419,3 +419,103 @@ def spec_dist_plot_side_by_side(spectypes: Sequence[Column], spclass: str,
     plt.legend()
     plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
     plt.show()
+
+def spec_dist_plot_side_by_side_hatched(
+    spectypes: Sequence[Column],
+    spclass: str,
+    labels: Sequence[str],
+    hatch_flags: Sequence[Column] | None = None,
+    hatch_labels: Sequence[str] | None = None,
+    hatches: Sequence[str] | None = None,
+) -> None:
+    """
+    Plot spectral-subclass histograms side by side, optionally hatching flagged subsets.
+
+    :param spectypes: Catalog spectral-type columns to compare.
+    :type spectypes: sequence[astropy.table.Column]
+    :param spclass: Spectral subclasses to keep and display on the x-axis.
+    :type spclass: str
+    :param labels: Catalog labels.
+    :type labels: sequence[str]
+    :param hatch_flags: Optional boolean flag columns matching ``spectypes``.
+                        Flagged rows are drawn as hatched overlays.
+    :type hatch_flags: sequence[astropy.table.Column] | None
+    :param hatch_labels: Optional legend labels for hatched overlays.
+    :type hatch_labels: sequence[str] | None
+    :param hatches: Optional hatch patterns for each catalog.
+    :type hatches: sequence[str] | None
+    :returns: None.
+    :rtype: None
+    """
+    x = [spclass + str(i) for i in range(10)]
+    plt.figure()
+
+    if hatch_labels is None:
+        hatch_labels = [None] * len(labels)
+    if hatches is None:
+        hatches = ["//", "\\\\", "xx", ".."]
+
+    filtered_spectypes = []
+    filtered_hatch_flags = []
+
+    for i, specs in enumerate(spectypes):
+        spectype = np.array(specs).astype(str)
+
+        # Reduce spectral types to first two characters, e.g. "M3.4" -> "M3".
+        spectype = np.array([s[:2] for s in spectype])
+
+        # Keep only spectral types listed in x.
+        keep = np.isin(spectype, x)
+        filtered_spectypes.append(spectype[keep])
+
+        if hatch_flags is not None:
+            flags = np.array(hatch_flags[i])
+            if flags.dtype.kind in {"U", "S", "O"}:
+                flags = np.array([str(flag).lower() == "true" for flag in flags])
+            filtered_hatch_flags.append(flags[keep].astype(bool))
+
+    bar_centers = np.arange(len(x))
+    total_width = 0.9
+    bar_width = total_width / len(filtered_spectypes)
+
+    for i, spectype in enumerate(filtered_spectypes):
+        counts = np.array([np.count_nonzero(spectype == subclass) for subclass in x])
+
+        bar_positions = (
+            bar_centers
+            - total_width / 2
+            + bar_width / 2
+            + i * bar_width
+        )
+
+        plt.bar(
+            bar_positions,
+            counts,
+            width=bar_width,
+            edgecolor="black",
+            label=labels[i],
+            alpha=0.7,
+        )
+
+        if hatch_flags is not None:
+            hatched_spectype = spectype[filtered_hatch_flags[i]]
+            hatched_counts = np.array(
+                [np.count_nonzero(hatched_spectype == subclass) for subclass in x]
+            )
+
+            plt.bar(
+                bar_positions,
+                hatched_counts,
+                width=bar_width,
+                edgecolor="black",
+                facecolor="none",
+                hatch=hatches[i % len(hatches)],
+                label=hatch_labels[i],
+            )
+
+    plt.xticks(range(len(x)), x)
+    plt.xlabel("Spectral Subclass")
+    plt.ylabel("Number of stars")
+    plt.legend()
+    plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
+    plt.show()
