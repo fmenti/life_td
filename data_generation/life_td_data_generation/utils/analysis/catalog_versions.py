@@ -517,5 +517,5 @@ def spec_dist_plot_side_by_side_hatched(
     plt.xlabel("Spectral Subclass")
     plt.ylabel("Number of stars")
     plt.legend()
-    plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
+    plt.savefig("../../../../plots/" + spclass + "".join(labels) + ".png")
     plt.show()
