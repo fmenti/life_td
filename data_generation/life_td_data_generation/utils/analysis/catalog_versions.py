@@ -375,3 +375,47 @@ def hist_plot(catalogs,col,labels,minmax):
     plt.savefig("../../../../plots/"+col+".png")
     plt.show()
     return
+
+def spec_dist_plot_side_by_side(spectypes: Sequence[Column], spclass: str,
+                   labels: Sequence[str]) -> None:
+    """
+    Plot spectral-subclass histograms for HPIC and StarCat5-only additions.
+
+    :param spectypes: Catalogs to compare.
+    :type spectypes: sequence[astropy.table.Column]
+    :param spclass: Spectral subclasses to keep and display on the x-axis.
+    :type spclass: str
+    :param labels: Catalog labels.
+    :type labels: sequence[str]
+    :returns: None.
+    :rtype: None
+    """
+    x = [spclass + str(i) for i in range(10)]
+    plt.figure()
+
+    filtered_spectypes = []
+    for specs in spectypes:
+        spectype = np.array(specs).astype(str)
+
+        # Reduce spectral types to first two characters, e.g. "M3.4" -> "M3".
+        spectype = np.array([s[:2] for s in spectype])
+
+        # Keep only spectral types listed in x.
+        spectype = spectype[np.isin(spectype, x)]
+        filtered_spectypes.append(spectype)
+
+    plt.hist(
+        filtered_spectypes,
+        bins=np.arange(len(x) + 1) - 0.5,
+        edgecolor="black",
+        label=labels,
+        histtype="bar",
+        rwidth=0.9,
+    )
+
+    plt.xticks(range(len(x)), x)
+    plt.xlabel("Spectral Subclass")
+    plt.ylabel("Number of stars")
+    plt.legend()
+    plt.savefig("../../../../plots/" + spclass + labels[0] + labels[1] + ".png")
+    plt.show()
