@@ -590,26 +590,24 @@ def prepare_pre_merge_catalogs(
     return pre_merge_starcat, pre_merge_hpic, float_colnames
 
 
-def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table, Table]:
+def hpic_merger() -> tuple[Table, Table, Table, Table, list[str]]:
     """
     Merge HPIC with StarCat5 rows that are not already present in HPIC.
 
     The routine loads HPIC and StarCat5, estimates a StarCat5 positional
-    matching radius, identifies StarCat5 rows already present in HPIC, prepares
+    matching radius, flags which rows are present in the other catalog, prepares
     both catalogs to shared temporary column names, stacks them, and saves the
     resulting intermediate products.
 
     :returns: Tuple containing the merged catalog, prepared StarCat5-only table,
-        original StarCat5 table, prepared HPIC table, float-column base names,
-        the StarCat5 rows matched to HPIC, and HPIC rows without StarCat5 match.
+        original StarCat5 table with match flag, prepared HPIC table with match
+        flag, and float-column base names.
     :rtype: (
         astropy.table.Table,
         astropy.table.Table,
         astropy.table.Table,
         astropy.table.Table,
-        list[str],
-        astropy.table.Table,
-        astropy.table.Table
+        list[str]
     )
     """
     hpic = get_catalog("hpic")
@@ -629,13 +627,13 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table, Table]:
 
     mask_cat2_in_cat1 = match_info["mask_cat2_in_cat1"]
 
-    starcat5_in_hpic = starcat5[mask_cat2_in_cat1].copy()
-    starcat5_not_in_hpic = starcat5[np.invert(mask_cat2_in_cat1)]
+    starcat5["in_hpic"] = mask_cat2_in_cat1
 
     hpic_has_starcat5_match = np.zeros(len(hpic), dtype=bool)
     matched_hpic_indices = match_info["cat1_index_for_cat2"][mask_cat2_in_cat1]
     hpic_has_starcat5_match[matched_hpic_indices] = True
-    hpic_not_in_starcat5 = hpic[np.invert(hpic_has_starcat5_match)].copy()
+
+    starcat5_not_in_hpic = starcat5[np.invert(starcat5["in_hpic"])]
 
     # adding mag_u_columns to hpic
     hpic_mag_u_joined = add_cat2_to_cat1_by_name_or_coords(
@@ -660,28 +658,30 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table, Table]:
         match_info=match_info,
     )
 
+    hpic_mag_u_joined["in_starcat5"] = hpic_has_starcat5_match
+
     pre_merge_starcat, pre_merge_hpic, float_colnames = (
         prepare_pre_merge_catalogs(hpic_mag_u_joined, starcat5_not_in_hpic)
     )
 
-    catalog = vstack([pre_merge_hpic, pre_merge_starcat])
+    pre_merge_starcat["in_hpic"] = False
+    pre_merge_starcat["in_starcat5"] = True
+    pre_merge_hpic["in_hpic"] = True
+
+    HPIC_StarCat = vstack([pre_merge_hpic, pre_merge_starcat])
 
     save(
         [
-            catalog,
-            starcat5_not_in_hpic,
+            HPIC_StarCat,
+            starcat5,
             pre_merge_hpic,
             pre_merge_starcat,
-            starcat5_in_hpic,
-            hpic_not_in_starcat5,
         ],
         [
             "HPIC_StarCat",
-            "starcat5_not_in_hpic",
+            "StarCat5_with_HPIC_flag",
             "pre_merge_hpic",
             "pre_merge_starcat",
-            "starcat5_in_hpic",
-            "hpic_not_in_starcat5",
         ],
         location=ADDITIONAL_DATA_LOCATION,
     )
@@ -689,11 +689,9 @@ def hpic_merger() -> tuple[Table, Table, Table, Table, list[str], Table, Table]:
     # merger_analysis(pre_merge_hpic, starcat5, catalog, float_colnames)
 
     return (
-        catalog,
+        HPIC_StarCat,
         pre_merge_starcat,
         starcat5,
         pre_merge_hpic,
         float_colnames,
-        starcat5_in_hpic,
-        hpic_not_in_starcat5,
     )
