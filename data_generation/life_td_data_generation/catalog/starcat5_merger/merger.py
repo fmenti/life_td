@@ -1,3 +1,21 @@
+"""
+Build and analyze the merged HPIC-StarCat5 catalog.
+
+This module loads the HPIC and StarCat5 catalogs, identifies StarCat5 objects
+that are already represented in HPIC, and appends the remaining StarCat5-only
+objects to create a combined catalog. Matching is performed using exact object
+names and sky-coordinate proximity with an estimated angular matching radius.
+
+Before stacking the catalogs, selected columns are renamed to shared temporary
+names, provider-specific null values are masked, and numeric HPIC columns are
+normalized to consistent float types. Additional flags indicate whether each
+object is present in HPIC, StarCat5, or both.
+
+The module also contains plotting and analysis helpers for inspecting nearest-
+neighbor distances, validating the merged catalog, and comparing stellar
+parameters between HPIC, StarCat5-only additions, and the final merged catalog.
+"""
+
 from collections.abc import Sequence
 from typing import Any, Literal
 

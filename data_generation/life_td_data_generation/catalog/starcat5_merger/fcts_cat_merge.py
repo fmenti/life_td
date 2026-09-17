@@ -1,3 +1,20 @@
+"""
+Utility functions for matching and merging astronomical catalogs.
+
+This module provides helpers for comparing two star catalogs by object name and
+sky position. Matches are found first by exact name and then, for unmatched rows,
+by nearest-neighbor coordinate matching within a configurable angular radius.
+
+The main merge helper appends selected columns from a second catalog to a first
+catalog in a left-join-like manner, preserving all rows from the first catalog
+and masking values where no corresponding row is found in the second catalog.
+Additional match metadata columns indicate whether each match was made by name
+or coordinates, the coordinate separation, and the matched row index.
+
+The module also includes a helper for computing nearest-neighbor angular
+distances within a single catalog.
+"""
+
 from typing import Any
 
 import numpy as np
