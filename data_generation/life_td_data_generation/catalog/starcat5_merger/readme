@@ -1,4 +1,4 @@
-Starcat5 HPIC merger catalog
+Starcat5 HPIC merger catalog columns and from which they origin
 
 Columns:
 ['temp_main_id', # main_id if object from starcat5, star_name if from HPIC
@@ -125,6 +125,16 @@ Columns:
 'GCNS_mag_diff', # HPIC entry, masked if from starcat5
 'sy_planets_flag', # HPIC entry, masked if from starcat5
 'hostname', # HPIC entry, masked if from starcat5
+'mag_u_sdss_value', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_err', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_sys', # starcat5 entry, masked if from HPIC
+'mag_u_sdss_ref' # starcat5 entry, masked if from HPIC
+'cat2_match_by_name', # flag True if star matched by identifier method
+'cat2_match_by_coords', # flag True if star matched by coordinate method
+'cat2_match_sep_arcsec', # matching distance to nearest cat1 object
+'cat2_match_index',
+'in_starcat5', # flag True if star is in starcat5 too
+'in_hpic', # flag True if star is in HPIC too
 'coo_gal_l', # starcat5 entry, masked if from HPIC
 'coo_gal_b', # starcat5 entry, masked if from HPIC
 'binary_ref', # starcat5 entry, masked if from HPIC
@@ -148,8 +158,5 @@ Columns:
 'mag_i_sys', # starcat5 entry, masked if from HPIC
 'mag_j_sys', # starcat5 entry, masked if from HPIC
 'mag_g_sys', # starcat5 entry, masked if from HPIC
-'mag_u_sdss_value', # starcat5 entry, masked if from HPIC
-'mag_u_sdss_err', # starcat5 entry, masked if from HPIC
-'mag_u_sdss_sys', # starcat5 entry, masked if from HPIC
-'mag_u_sdss_ref' # starcat5 entry, masked if from HPIC
+
 ]
