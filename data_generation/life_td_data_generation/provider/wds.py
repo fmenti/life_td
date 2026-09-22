@@ -48,14 +48,15 @@ def load_wds_helptab() -> Table:
     return wds_helptab
 
 
-def assign_names(wds_helptab: Table) -> Table:
+def assign_names(wds_querried: Table) -> Table:
     """Assign WDS system/component names.
 
-    :param wds_helptab: Raw WDS helper table.
-    :type wds_helptab: astropy.table.Table
+    :param wds_querried: Raw WDS helper table.
+    :type wds_querried: astropy.table.Table
     :returns: Helper table with name columns populated.
     :rtype: astropy.table.Table
     """
+    wds_helptab = wds_querried.copy()
     for j in range(len(wds_helptab)):
         wds_name = wds_helptab["wds_name"][j]
         wds_comp = wds_helptab["wds_comp"][j]
@@ -141,14 +142,23 @@ def create_wds_helptab(
     :rtype: astropy.table.Table
     """
     print(" querying VizieR for WDS...")
-    wds_helptab = query(wds["provider"]["provider_url"][0], adql_query[0])
+    wds_querried = query(wds["provider"]["provider_url"][0], adql_query[0])
 
     # Match WDS objects with SIMBAD-derived objects to enforce the distance cut.
     for col in ["sim_wds_id", "system_name", "primary", "secondary"]:
-        wds_helptab[col] = wds_helptab["wds_name"].astype(object)
+        wds_querried[col] = wds_querried["wds_name"].astype(object)
 
-    wds_helptab = assign_names(wds_helptab)
+    save([wds_querried], ["wds_querried"])
+
+    wds_helptab = assign_names(wds_querried)
     look_at_test_objects_after_name_assignment(test_objects, wds_helptab)
+    wds_helptab = wds_distance_cut(wds_helptab)
+    look_at_test_objects_after_wds_creation(test_objects, wds_helptab)
+    save([wds_helptab], ["wds_helptab"])
+    return wds_helptab
+
+
+def wds_distance_cut(wds_helptab: Table) -> Any:
     # an alternative would be to query simbad for the main id and then cut
     # by distance
     # this however takes way longer as it joins 150'000 elements
@@ -193,10 +203,9 @@ def create_wds_helptab(
     # here some empty ones when child is known in simbad but no parent. in
     # this case would I want to assign system_name in system main_id? do it
     # later
+
     wds_helptab = vstack([wds_system_cut, wds_primary_cut])
     wds_helptab = vstack([wds_helptab, wds_secondary_cut])
-    look_at_test_objects_after_wds_creation(test_objects, wds_helptab)
-    save([wds_helptab], ["wds_helptab"])
     return wds_helptab
 
 
@@ -226,7 +235,10 @@ def create_wds_helpertable(
                   sep1 as wds_sep1,
                   sep2 as wds_sep2,
                   Obs1 as wds_obs1,
-                  Obs2 as wds_obs2
+                  Obs2 as wds_obs2,
+                  RAJ2000 as wds_ra,
+                  DEJ2000 as wds_dec,
+                  SpType as wds_sptype
            FROM "B/wds/wds" """
     ]
 
@@ -593,6 +605,65 @@ def create_wds_sources_table(wds: dict[str, Table]) -> Table:
     )
 
 
+def create_star_basic(wds_helptab,wds):
+    # add a star_basic table with sptype and coords that in building module
+    # only gets added if simbad data is empty
+    primary = wds_helptab[
+        "primary", "wds_sptype", "wds_ra", "wds_dec"]
+    primary.rename_columns(
+        ["wds_sptype", "wds_ra", "wds_dec"],
+        ["sptype_string", "coo_ra", "coo_dec"])
+    primary = join(primary,wds["ident"]["main_id","id"],
+                   keys_left="primary",keys_right="id",join_type="left")
+
+    secondary = wds_helptab[
+        "secondary", "wds_sptype", "wds_ra", "wds_dec"]
+    secondary.rename_columns(
+        ["wds_sptype", "wds_ra", "wds_dec"],
+        ["sptype_string", "coo_ra", "coo_dec"])
+    secondary = join(secondary,wds["ident"]["main_id","id"],
+                   keys_left="secondary",keys_right="id",join_type="left")
+    wds_star_basic = vstack([primary["main_id","sptype_string", "coo_ra", "coo_dec"],
+                             secondary["main_id","sptype_string", "coo_ra", "coo_dec"]])
+    #wds_star_basic = wds_star_basic[np.where(wds_star_basic["main_id"]!="")]
+    #wds_star_basic = wds_star_basic[np.where(
+    #    wds_star_basic["main_id"].mask == False)]
+    wds_star_basic = unique(wds_star_basic)
+
+    # for rows with same main_id, remove till only one row left each, prefer row where sptype without + as row to be kept
+    keep_rows = []
+    main_id_mask = np.ma.getmaskarray(wds_star_basic["main_id"])
+    unique_main_ids = np.unique(
+        np.asarray(wds_star_basic["main_id"][~main_id_mask], dtype=object)
+    )
+
+    for main_id in unique_main_ids:
+        matching_rows = np.where(wds_star_basic["main_id"] == main_id)[0]
+
+        if len(matching_rows) == 1:
+            keep_rows.append(matching_rows[0])
+            continue
+
+        sptypes = wds_star_basic["sptype_string"][matching_rows]
+        without_plus = [
+            row
+            for row, sptype in zip(matching_rows, sptypes)
+            if not np.ma.is_masked(sptype) and "+" not in str(sptype)
+        ]
+
+        if len(without_plus) > 0:
+            keep_rows.append(without_plus[0])
+        else:
+            keep_rows.append(matching_rows[0])
+
+    wds_star_basic = wds_star_basic[np.array(keep_rows)]
+
+    # other issue, somethimes A companion not there because simbac calls system
+    # and A the same -> accept issue for now as wds-simbad issue
+
+    return wds_star_basic
+
+
 def provider_wds(
     temp: bool = False, test_objects: Sequence[str] | None = None
 ) -> dict[str, Table]:
@@ -618,6 +689,8 @@ def provider_wds(
         wds_helptab, wds, test_objects
     )
     wds["sources"] = create_wds_sources_table(wds)
+    wds["star_basic"] = create_star_basic(wds_helptab,wds)
+
 
     save(list(wds.values()), ["wds_" + element for element in list(wds.keys())])
     return wds
