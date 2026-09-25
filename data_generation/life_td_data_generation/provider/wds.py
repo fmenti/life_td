@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from typing import Any
 
 import numpy as np  # arrays
-from astropy.table import Table, join, unique, vstack
+from astropy.table import Table, join, unique, vstack, Column
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
     create_provider_table,
@@ -14,6 +14,7 @@ from provider.utils import (
     distance_cut,
     ids_from_ident,
     query,
+    replace_value,
 )
 from sdata import empty_dict
 from utils.io import load, save
@@ -657,6 +658,46 @@ def create_star_basic(wds_helptab,wds):
             keep_rows.append(matching_rows[0])
 
     wds_star_basic = wds_star_basic[np.array(keep_rows)]
+
+    # add references:
+    # add columns coo_ref and sptype_ref
+    # fill null values and wds_ref where value not empty
+    empty_column_object_type = Column(data = [
+        "" for _ in range(len(wds_star_basic))], dtype = object)
+    wds_star_basic["sptype_ref"]=empty_column_object_type
+    wds_star_basic["sptype_qual"]=empty_column_object_type
+    # Spectral type reference: fill empty with provider bibcode where value set.
+    non_empty_sptype = np.where(wds_star_basic["sptype_string"] != "")
+    wds_star_basic[non_empty_sptype] = replace_value(
+        wds_star_basic[non_empty_sptype],
+        "sptype_ref",
+        "",
+        wds["provider"]["provider_bibcode"][0],
+    )
+    wds_star_basic[non_empty_sptype] = replace_value(
+        wds_star_basic[non_empty_sptype],
+        "sptype_qual",
+        "",
+        "E",
+    )
+    # same but a bit changed for float instead of string for coo_ref
+    # first initiate as masked astropy column with type float
+    wds_star_basic["coo_ref"] = empty_column_object_type
+    wds_star_basic["coo_qual"] = empty_column_object_type
+    # now wherever coo_ra is not masked, fill with provider bibcode
+    mask_has_val = np.where(wds_star_basic["coo_ra"].mask == False)
+    wds_star_basic[mask_has_val] = replace_value(
+        wds_star_basic[mask_has_val],
+        "coo_ref",
+        "",
+        wds["provider"]["provider_bibcode"][0],
+    )
+    wds_star_basic[mask_has_val] = replace_value(
+        wds_star_basic[mask_has_val],
+        "coo_qual",
+        "",
+        "E",
+    )
 
     # other issue, somethimes A companion not there because simbac calls system
     # and A the same -> accept issue for now as wds-simbad issue
