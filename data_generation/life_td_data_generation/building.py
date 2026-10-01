@@ -13,7 +13,7 @@ from astropy.table import (
     unique,
     vstack,
 )
-from provider.utils import nullvalues, replace_value
+from provider.utils import nullvalues, replace_value, strip_table_metadata
 from sdata import empty_dict, empty_dict_wit_columns, paras_dict, mag_columns
 from utils.io import Path, save
 
@@ -904,17 +904,23 @@ def build_tables(
     return cat
 
 
-def building(prov_tables_dict: dict[str, dict[str, Table]]) -> dict[str, Table]:
+def building(provider_tables_dict: dict[str, dict[str, Table]]) -> dict[str, Table]:
     """
     Builds the complete LIFE database from provider tables and saves it.
 
-    :param prov_tables_dict: Dictionary containing data from providers
+    :param provider_tables_dict: Dictionary containing data from providers
         Simbad, Grant Kennedy, Exo-MerCat, Gaia and WDS.
-    :type prov_tables_dict: dict[str, dict[str, Table]]
+    :type provider_tables_dict: dict[str, dict[str, Table]]
     :returns: Dictionary of processed tables.
     :rtype: dict[str, Table]
     """
-    cat = build_tables(prov_tables_dict)
+
+    # strip table metadata to prevent warnings of merging types
+    for provider_tables in provider_tables_dict.values():
+        for table_name, table in provider_tables.items():
+            provider_tables[table_name] = strip_table_metadata(table)
+
+    cat = build_tables(provider_tables_dict)
 
     # Ensure star_basic has no masked entries after multi-measurement ingestions
     cat["star_basic"] = cat["star_basic"].filled()

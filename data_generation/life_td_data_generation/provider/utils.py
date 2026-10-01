@@ -88,6 +88,13 @@ def create_provider_table(
     provider_table["provider_access"] = [provider_access]
     return provider_table
 
+def strip_table_metadata(cat):
+    cat.meta.clear()
+    for col in cat.itercols():
+        col.meta.clear()
+        col.description = None
+    return cat
+
 
 def query(
     link: str,
@@ -137,11 +144,7 @@ def query(
         cat = result.to_table()
 
         # removing descriptions because merging of data leaves wrong description
-        if no_description:
-            for col in cat.colnames:
-                cat[col].description = ""
-            cat.meta = {}
-        # does not seem to work properly yet, getting warndings for exomercat/building
+        cat = strip_table_metadata(cat)
         print("Service is UP and running.")
         return cat
 
