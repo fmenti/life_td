@@ -173,6 +173,12 @@ def assign_source_idref(
         cat.rename_column("source_id", source_id_col)
         cat.remove_columns("ref")
 
+        # Make source-id columns safe for later joins.  Some parameters in
+        # star_basic, e.g. "coo" and "sptype", do not have a corresponding
+        # "<para>_value" column, so the value-column logic below is not enough.
+        if isinstance(cat[source_id_col], column.MaskedColumn):
+            cat[source_id_col] = cat[source_id_col].filled(999999)
+
         # Handle masked values in parameter column: assign 999999 to ref ID
         if value_column in cat.colnames:
             if isinstance(cat[value_column], column.MaskedColumn):
@@ -336,7 +342,7 @@ def _find_best_quality_measurement(group: Table, para: str) -> Row | None:
     """
     Helper function to find the highest quality measurement in a group.
 
-    Quality levels: A > B > C > D > E > ?.
+    Quality levels: A > B > C > D > E > ? > "".
 
     :param group: Group of measurements for a single object.
     :type group: Table
@@ -345,7 +351,7 @@ def _find_best_quality_measurement(group: Table, para: str) -> Row | None:
     :returns: Row with highest quality measurement or None.
     :rtype: Row or None
     """
-    quality_levels = ["A", "B", "C", "D", "E", "?"]
+    quality_levels = ["A", "B", "C", "D", "E", "?", ""]
     qual_column = f"{para}_qual"
 
     for quality in quality_levels:
@@ -738,6 +744,21 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
         join_type="outer",
         keys=["object_idref", "main_id"],
     )
+
+    # Remove duplicate main_id rows, keeping the row with best coo_qual.
+    # Quality priority: A > B > C > D > E > ?.
+    if len(cat["star_basic"]) > 0 and "coo_qual" in cat["star_basic"].colnames:
+        unique_star_basic = cat["star_basic"][:0].copy()
+        grouped_star_basic = cat["star_basic"].group_by("main_id")
+
+        for group in grouped_star_basic.groups:
+            best_row = _find_best_quality_measurement(group, "coo")
+            if best_row is None:
+                best_row = group[0]
+            unique_star_basic.add_row(best_row)
+
+        cat["star_basic"] = unique_star_basic
+
 
     # Planet basic: include all objects typed as planets
     planets = objects["object_id", "main_id"][np.where(objects["type"] == "pl")]

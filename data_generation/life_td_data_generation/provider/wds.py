@@ -550,7 +550,8 @@ def create_mes_sep_ang_table(
         for _ in range(len(wds_mes_sep_ang))
     ]
 
-    wds_mes_sep_ang.remove_columns(
+    # AI suggests that I might mean remove_row instead of remove_columns
+    wds_mes_sep_ang.remove_rows(
         wds_mes_sep_ang["sep_ang_value"].mask.nonzero()[0]
     )
     # uniqueness where obs date not known
@@ -626,9 +627,11 @@ def create_star_basic(wds_helptab,wds):
                    keys_left="secondary",keys_right="id",join_type="left")
     wds_star_basic = vstack([primary["main_id","sptype_string", "coo_ra", "coo_dec"],
                              secondary["main_id","sptype_string", "coo_ra", "coo_dec"]])
-    #wds_star_basic = wds_star_basic[np.where(wds_star_basic["main_id"]!="")]
-    #wds_star_basic = wds_star_basic[np.where(
-    #    wds_star_basic["main_id"].mask == False)]
+
+    main_id_mask = np.ma.getmaskarray(wds_star_basic["main_id"])
+    wds_star_basic = wds_star_basic[
+        (~main_id_mask) & (wds_star_basic["main_id"] != "")
+    ]
     wds_star_basic = unique(wds_star_basic)
 
     # for rows with same main_id, remove till only one row left each, prefer row where sptype without + as row to be kept
