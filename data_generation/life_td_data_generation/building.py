@@ -205,48 +205,67 @@ def merge_table(cat1: Table, cat2: Table) -> Table:
         return vstack([cat1, cat2])
     return join(cat1, cat2)
 
-
 def best_para_id(mes_table: Table) -> Table:
     """
-    Selects the best identifier for each object based on reference priority.
+    Select identifier rows based on reference priority.
 
-    :param mes_table: Measurement table for identifiers.
-    :type mes_table: Table
-    :returns: Table with prioritized identifier rows.
-    :rtype: Table
+    The ident table can contain the same identifier from multiple providers.
+    This function keeps each identifier only once, preferring rows from higher
+    priority references.
+
+    The id_ref column is used only for this selection and is removed afterwards,
+    matching the previous behavior.
+
+    :param mes_table: Identifier measurement table.
+    :type mes_table: astropy.table.Table
+    :returns: Identifier table with duplicate ids removed.
+    :rtype: astropy.table.Table
     """
-    grouped_mes_table = mes_table.group_by("id_ref")
+    if len(mes_table) == 0:
+        return mes_table
 
-    # 1. Making simbad identifiers the default best parameters
-    simbad_ref = "2000A&AS..143....9W"
-    mask = grouped_mes_table.groups.keys["id_ref"] == simbad_ref
-    best_para_table = grouped_mes_table.groups[mask]
-
-    # 2. Adding identifiers that are not in the best_para_table yet.
-    # Higher quality priority order for provider identifier references.
-    # TBD: use id_ref as variable from provider_bibcode
-    #        instad of constant""")
     priority_refs = [
-        "2022A&A...664A..21Q",
-        "2016A&A...595A...1G",
+        "2000A&AS..143....9W",  # SIMBAD
+        "2022A&A...664A..21Q",  # LIFE
+        "2016A&A...595A...1G",  # Gaia
         "priv. comm.",
-        "2020A&C....3100370A",
-        "2001AJ....122.3466M",
+        "2020A&C....3100370A",  # Exo-MerCat
+        "2001AJ....122.3466M",  # WDS
+    ]
+    priority_rank = {
+        ref: rank for rank, ref in enumerate(priority_refs)
+    }
+
+    mes_table = mes_table.copy()
+
+    # Keep only rows whose reference is in the provider priority list.
+    # This reproduces the old behavior where unknown references were not added.
+    known_reference_mask = np.isin(mes_table["id_ref"], priority_refs)
+    mes_table = mes_table[known_reference_mask]
+
+    if len(mes_table) == 0:
+        if "id_ref" in mes_table.colnames:
+            mes_table.remove_column("id_ref")
+        return mes_table
+
+    # Add temporary helper rank. Lower rank means preferred source.
+    mes_table["_id_ref_rank"] = [
+        priority_rank[str(ref)] for ref in mes_table["id_ref"]
     ]
 
-    for ref in priority_refs:
-        mask = grouped_mes_table.groups.keys["id_ref"] == ref
-        all_ref_ids = grouped_mes_table.groups[mask]
+    # Sort whole rows. The best provider row for each id comes first.
+    mes_table.sort(["id", "_id_ref_rank"])
 
-        # removing those already in best_para_table
-        new_ids = all_ref_ids[
-            np.where(
-                np.invert(np.isin(all_ref_ids["id"], best_para_table["id"]))
-            )
-        ]
-        best_para_table = vstack([best_para_table, new_ids])
+    # Keep each identifier only once.
+    best_para_table = unique(
+        mes_table,
+        keys="id",
+        keep="first",
+        silent=True,
+    )
 
-    best_para_table.remove_column("id_ref")
+    # id_ref was only needed to choose the preferred row.
+    best_para_table.remove_columns(["id_ref", "_id_ref_rank"])
     return best_para_table
 
 
@@ -344,6 +363,9 @@ def _find_best_quality_measurement(group: Table, para: str) -> Row | None:
 
     Quality levels: A > B > C > D > E > ? > "".
 
+    This row-wise helper is kept for small-table/single-group usage. For full
+    tables, prefer best_quality_rows(), which is much faster.
+
     :param group: Group of measurements for a single object.
     :type group: Table
     :param para: Parameter name.
@@ -361,38 +383,81 @@ def _find_best_quality_measurement(group: Table, para: str) -> Row | None:
     return None
 
 
+def quality_to_rank(quality_column: Column | MaskedColumn) -> list[int]:
+    """
+    Convert quality flags into sortable integer ranks.
+
+    Lower rank means better quality:
+    A is best, then B, C, D, E, ?, and empty/masked values last.
+
+    :param quality_column: Column containing quality flags.
+    :type quality_column: astropy.table.Column or astropy.table.MaskedColumn
+    :returns: List of integer quality ranks.
+    :rtype: list[int]
+    """
+    quality_rank = {
+        "A": 0,
+        "B": 1,
+        "C": 2,
+        "D": 3,
+        "E": 4,
+        "?": 5,
+        "": 6,
+    }
+
+    if isinstance(quality_column, MaskedColumn):
+        quality_values = quality_column.filled("")
+    else:
+        quality_values = quality_column
+
+    return [quality_rank.get(str(value), 6) for value in quality_values]
+
+
 def best_para(para: str, mes_table: Table) -> Table:
     """
-    Selects the highest quality measurement for each object in the table.
+    Select the best measurement row for each object.
 
-    :param para: Parameter name (e.g., 'mass', 'id').
+    For normal measurement tables, one row per main_id is kept. The selected row
+    is the one with the best quality flag in <para>_qual.
+
+    :param para: Parameter name, e.g. "teff_st", "radius_st", "mass_st".
     :type para: str
-    :param mes_table: Table containing measurements.
-    :type mes_table: Table
-    :returns: Table with highest quality rows for each unique object.
-    :rtype: Table
+    :param mes_table: Measurement table containing possibly multiple rows per object.
+    :type mes_table: astropy.table.Table
+    :returns: Table containing one best row per object.
+    :rtype: astropy.table.Table
     """
-    # Special case handlers
     if para == "id":
         return best_para_id(mes_table)
     if para == "membership":
         return best_para_membership(mes_table)
 
-    # Define columns based on parameter type
     columns = _get_parameter_columns(para)
+    mes_table = mes_table[columns].copy()
 
-    # Select only needed columns and create empty result table
-    mes_table = mes_table[columns]
-    best_para_table = mes_table[:0].copy()
+    qual_column = f"{para}_qual"
+    rank_column = f"_{para}_quality_rank"
 
-    # Group by main_id and process each group
-    grouped_mes_table = mes_table.group_by("main_id")
+    if len(mes_table) == 0 or qual_column not in mes_table.colnames:
+        return mes_table
 
-    for group in grouped_mes_table.groups:
-        best_measurement = _find_best_quality_measurement(group, para)
-        if best_measurement is not None:
-            best_para_table.add_row(best_measurement)
+    # Add temporary helper column. This does not change the science data.
+    mes_table[rank_column] = quality_to_rank(mes_table[qual_column])
 
+    # Sort whole rows. Columns do not get mixed up.
+    # After this, the best row for each main_id appears first.
+    mes_table.sort(["main_id", rank_column])
+
+    # Keep the first row per main_id, i.e. the best-quality row.
+    best_para_table = unique(
+        mes_table,
+        keys="main_id",
+        keep="first",
+        silent=True,
+    )
+
+    # Remove temporary helper column again.
+    best_para_table.remove_column(rank_column)
     return best_para_table
 
 
@@ -755,40 +820,37 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
     return cat
 
 
-def best_star_basic(cat: dict[str, Table]):
-    # Remove duplicate main_id rows, keeping the row with best coo_qual.
-    # Quality priority: A > B > C > D > E > ?.
-    # used this method as previous one with group and add_row was too slow
-    if len(cat["star_basic"]) > 0 and "coo_qual" in cat["star_basic"].colnames:
-        quality_rank = {
-            "A": 0,
-            "B": 1,
-            "C": 2,
-            "D": 3,
-            "E": 4,
-            "?": 5,
-            "": 6,
-        }
+def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
+    """
+    Remove duplicate star_basic rows, keeping the row with best coo_qual.
 
-        coo_qual = cat["star_basic"]["coo_qual"]
-        if isinstance(coo_qual, MaskedColumn):
-            coo_qual_values = coo_qual.filled("")
-        else:
-            coo_qual_values = coo_qual
+    Quality priority: A > B > C > D > E > ? > "".
 
-        cat["star_basic"]["_coo_quality_rank"] = [
-            quality_rank.get(str(value), 6) for value in coo_qual_values
-        ]
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    star_basic = cat["star_basic"]
 
-        cat["star_basic"].sort(["main_id", "_coo_quality_rank"])
-        cat["star_basic"] = unique(
-            cat["star_basic"],
-            keys="main_id",
-            keep="first",
-            silent=True,
-        )
-        cat["star_basic"].remove_column("_coo_quality_rank")
+    if len(star_basic) == 0 or "coo_qual" not in star_basic.colnames:
+        return cat
 
+    star_basic = star_basic.copy()
+    star_basic["_coo_quality_rank"] = quality_to_rank(star_basic["coo_qual"])
+
+    # Sort whole rows. Values in different columns stay together.
+    star_basic.sort(["main_id", "_coo_quality_rank"])
+
+    star_basic = unique(
+        star_basic,
+        keys="main_id",
+        keep="first",
+        silent=True,
+    )
+
+    star_basic.remove_column("_coo_quality_rank")
+    cat["star_basic"] = star_basic
     return cat
 
 
