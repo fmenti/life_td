@@ -745,25 +745,50 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
         keys=["object_idref", "main_id"],
     )
 
-    # Remove duplicate main_id rows, keeping the row with best coo_qual.
-    # Quality priority: A > B > C > D > E > ?.
-    if len(cat["star_basic"]) > 0 and "coo_qual" in cat["star_basic"].colnames:
-        unique_star_basic = cat["star_basic"][:0].copy()
-        grouped_star_basic = cat["star_basic"].group_by("main_id")
 
-        for group in grouped_star_basic.groups:
-            best_row = _find_best_quality_measurement(group, "coo")
-            if best_row is None:
-                best_row = group[0]
-            unique_star_basic.add_row(best_row)
-
-        cat["star_basic"] = unique_star_basic
-
+    cat  = best_star_basic(cat)
 
     # Planet basic: include all objects typed as planets
     planets = objects["object_id", "main_id"][np.where(objects["type"] == "pl")]
     planets.rename_column("object_id", "object_idref")
     cat["planet_basic"] = planets
+    return cat
+
+
+def best_star_basic(cat: dict[str, Table]):
+    # Remove duplicate main_id rows, keeping the row with best coo_qual.
+    # Quality priority: A > B > C > D > E > ?.
+    # used this method as previous one with group and add_row was too slow
+    if len(cat["star_basic"]) > 0 and "coo_qual" in cat["star_basic"].colnames:
+        quality_rank = {
+            "A": 0,
+            "B": 1,
+            "C": 2,
+            "D": 3,
+            "E": 4,
+            "?": 5,
+            "": 6,
+        }
+
+        coo_qual = cat["star_basic"]["coo_qual"]
+        if isinstance(coo_qual, MaskedColumn):
+            coo_qual_values = coo_qual.filled("")
+        else:
+            coo_qual_values = coo_qual
+
+        cat["star_basic"]["_coo_quality_rank"] = [
+            quality_rank.get(str(value), 6) for value in coo_qual_values
+        ]
+
+        cat["star_basic"].sort(["main_id", "_coo_quality_rank"])
+        cat["star_basic"] = unique(
+            cat["star_basic"],
+            keys="main_id",
+            keep="first",
+            silent=True,
+        )
+        cat["star_basic"].remove_column("_coo_quality_rank")
+
     return cat
 
 
@@ -903,6 +928,19 @@ def build_tables(
     cat = build_rest_of_tables(cat, prov_tables_dict)
     return cat
 
+def inspect_size_and_duplicity(provider_tables_dict):
+    # inspecting size
+    for prov_name, prov_tables in provider_tables_dict.items():
+        print(prov_name)
+        for table_name in ["star_basic", "planet_basic", "mes_sep_ang",
+                           "objects", "ident"]:
+            if table_name in prov_tables:
+                print(" ", table_name, len(prov_tables[table_name]))
+    # duplicates
+    wds_star_basic = provider_tables_dict["wds"]["star_basic"]
+
+    print("rows:", len(wds_star_basic))
+    print("unique main_id:", len(set(wds_star_basic["main_id"])))
 
 def building(provider_tables_dict: dict[str, dict[str, Table]]) -> dict[str, Table]:
     """
@@ -919,6 +957,8 @@ def building(provider_tables_dict: dict[str, dict[str, Table]]) -> dict[str, Tab
     for provider_tables in provider_tables_dict.values():
         for table_name, table in provider_tables.items():
             provider_tables[table_name] = strip_table_metadata(table)
+
+    #inspect_size_and_duplicity(provider_tables_dict)
 
     cat = build_tables(provider_tables_dict)
 
