@@ -185,6 +185,57 @@ def test_best_para_of_id():
     best_para_table = best_para("id", mes_table)
     assert type(best_para_table) == type(Table())
 
+def test_best_para_id_prefers_highest_priority_reference():
+    mes_table = Table(
+        data=[
+            [4, 4],
+            ["sim_id_obj4", "sim_id_obj4"],
+            ["2016A&A...595A...1G", "2000A&AS..143....9W"],
+        ],
+        names=["object_idref", "id", "id_ref"],
+        dtype=[int, object, object],
+    )
+
+    best_para_table = best_para_id(mes_table)
+
+    assert len(best_para_table) == 1
+    assert best_para_table["id"][0] == "sim_id_obj4"
+    assert "id_ref" not in best_para_table.colnames
+
+def test_best_para_id_drops_unknown_references():
+    mes_table = Table(
+        data=[
+            [1],
+            ["unknown_id"],
+            ["not_in_priority_list"],
+        ],
+        names=["object_idref", "id", "id_ref"],
+        dtype=[int, object, object],
+    )
+
+    best_para_table = best_para_id(mes_table)
+
+    assert len(best_para_table) == 0
+    assert "id_ref" not in best_para_table.colnames
+
+def test_best_para_id_keeps_id_source_idref():
+    mes_table = Table(
+        data=[
+            [4, 4],
+            ["sim_id_obj4", "sim_id_obj4"],
+            ["2016A&A...595A...1G", "2000A&AS..143....9W"],
+            [10, 20],
+        ],
+        names=["object_idref", "id", "id_ref", "id_source_idref"],
+        dtype=[int, object, object, int],
+    )
+
+    best_para_table = best_para_id(mes_table)
+
+    assert len(best_para_table) == 1
+    assert best_para_table["id"][0] == "sim_id_obj4"
+    assert best_para_table["id_source_idref"][0] == 20
+    assert "id_ref" not in best_para_table.colnames
 
 def test_best_para_membership():
     mes_table = Table(

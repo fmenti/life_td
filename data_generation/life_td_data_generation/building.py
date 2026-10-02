@@ -213,8 +213,9 @@ def best_para_id(mes_table: Table) -> Table:
     This function keeps each identifier only once, preferring rows from higher
     priority references.
 
-    The id_ref column is used only for this selection and is removed afterwards,
-    matching the previous behavior.
+    The human-readable id_ref column is used for priority ranking only. Its
+    information should already be preserved in id_source_idref by
+    assign_source_idref(), so id_ref is removed after selection.
 
     :param mes_table: Identifier measurement table.
     :type mes_table: astropy.table.Table
