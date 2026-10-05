@@ -13,6 +13,7 @@ from provider.utils import (
     ids_from_ident,
     query,
     replace_value,
+    distance_cut,
 )
 from pyvo.dal import TAPService
 from sdata import empty_dict
@@ -87,9 +88,10 @@ def create_ident_table(gaia_helptab):
     :rtype: astropy.table.table.Table, astropy.table.table.Table
     """
     # ---------------gaia_ident-----------------------
-    gaia_sim_idmatch = fetch_main_id(
+    gaia_helptab["gaia_id"] = gaia_helptab["gaia_id"].astype(object)
+    gaia_sim_idmatch = distance_cut(
         gaia_helptab["gaia_id", "ref"],
-        IdentifierCreator(name="main_id", colname="gaia_id"),
+        colname="gaia_id",main_id = False,
     )
     # should be gaia_id, main_id, ref minus 40 objects that have only gaia_id
     gaia_ident = gaia_sim_idmatch.copy()
@@ -105,8 +107,9 @@ def create_ident_table(gaia_helptab):
     gaia_ident = vstack([gaia_ident, sim_main_id_ident])
     # now need to add the 40 objects that have only gaia_identifiers
     # for setdiff need both columns to be same type
-    for col in gaia_sim_idmatch.colnames:
-        gaia_sim_idmatch[col] = gaia_sim_idmatch[col].astype(str)
+    for col in ["gaia_id","ref"]:
+        gaia_sim_idmatch[col] = gaia_sim_idmatch[col].astype(object)
+        gaia_helptab[col] =gaia_helptab[col].astype(object)
     gaia_only_id = setdiff(
         gaia_helptab["gaia_id", "ref"], gaia_sim_idmatch["gaia_id", "ref"]
     )
@@ -114,7 +117,7 @@ def create_ident_table(gaia_helptab):
     gaia_only_id.rename_columns(["gaia_id", "ref"], ["id", "id_ref"])
     # for vstack need both columns to be same type
     for col in gaia_ident.colnames:
-        gaia_ident[col] = gaia_ident[col].astype(str)
+        gaia_ident[col] = gaia_ident[col].astype(object)
     gaia_ident = vstack([gaia_ident, gaia_only_id])
     # add main_id to gaia table
     gaia_helptab = join(
@@ -142,7 +145,7 @@ def create_objects_table(gaia_helptab, gaia):
     gaia_objects = Table(names=["main_id", "ids"], dtype=[object, object])
     gaia_objects = ids_from_ident(gaia["ident"]["main_id", "id"], gaia_objects)
     gaia_objects["type"] = ["st" for j in range(len(gaia_objects))]
-    gaia_objects["main_id"] = gaia_objects["main_id"].astype(str)
+    gaia_objects["main_id"] = gaia_objects["main_id"].astype(object)
     gaia_objects = join(
         gaia_objects,
         gaia_helptab["main_id", "nss_solution_type"],
