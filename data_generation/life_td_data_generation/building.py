@@ -205,7 +205,7 @@ def merge_table(cat1: Table, cat2: Table) -> Table:
         return vstack([cat1, cat2])
     return join(cat1, cat2)
 
-def best_para_id(mes_table: Table) -> Table:
+def best_para_id(cat: dict[str, Table]) -> Table:
     """
     Select identifier rows based on reference priority.
 
@@ -217,21 +217,30 @@ def best_para_id(mes_table: Table) -> Table:
     information should already be preserved in id_source_idref by
     assign_source_idref(), so id_ref is removed after selection.
 
-    :param mes_table: Identifier measurement table.
-    :type mes_table: astropy.table.Table
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
     :returns: Identifier table with duplicate ids removed.
     :rtype: astropy.table.Table
     """
+    mes_table = cat["ident"]
     if len(mes_table) == 0:
         return mes_table
 
     priority_refs = [
-        "2000A&AS..143....9W",  # SIMBAD
-        "2022A&A...664A..21Q",  # LIFE
-        "2016A&A...595A...1G",  # Gaia
-        "priv. comm.",
-        "2020A&C....3100370A",  # Exo-MerCat
-        "2001AJ....122.3466M",  # WDS
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "SIMBAD")[0][0]],
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "LIFE")[0][0]],
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "Gaia")[0][0]],
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "Grant Kennedy Disks")[0][0]],
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "Exo-MerCat")[
+                0][0]],
+        cat["provider"]["provider_bibcode"][
+            np.where(cat["provider"]["provider_name"] == "WDS")[
+                0][0]],
     ]
     priority_rank = {
         ref: rank for rank, ref in enumerate(priority_refs)
@@ -428,8 +437,6 @@ def best_para(para: str, mes_table: Table) -> Table:
     :returns: Table containing one best row per object.
     :rtype: astropy.table.Table
     """
-    if para == "id":
-        return best_para_id(mes_table)
     if para == "membership":
         return best_para_membership(mes_table)
 
@@ -890,7 +897,7 @@ def build_rest_of_tables(
 
         # Specialized handling by table name
         if table_name == "ident":
-            cat[table_name] = best_para("id", cat[table_name])
+            cat[table_name] = best_para_id(cat)
         elif table_name == "h_link":
             cat = _process_h_link(cat)
         elif table_name == "planet_basic":
