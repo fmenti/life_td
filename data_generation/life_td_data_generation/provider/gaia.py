@@ -6,10 +6,8 @@ import numpy as np  # arrays
 from astropy.table import Table, join, setdiff, vstack
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
-    IdentifierCreator,
     create_provider_table,
     create_sources_table,
-    fetch_main_id,
     ids_from_ident,
     query,
     replace_value,
@@ -73,7 +71,7 @@ def create_gaia_helpertable(distance_cut_in_pc):
         for j in range(len(gaia_helptab))
     ]
     gaia_helptab["ref"] = [
-        "2022arXiv220800211G" for j in range(len(gaia_helptab))
+        gaia["provider"]["provider_bibcode"][0] for j in range(len(gaia_helptab))
     ]
     return gaia_helptab, gaia
 
@@ -188,7 +186,7 @@ def create_mes_binary_table(gaia):
         gaia_mes_binary, "binary_flag", "st", "False"
     )
     gaia_mes_binary["binary_ref"] = [
-        "2016A&A...595A...1G" for j in range(len(gaia_mes_binary))
+        gaia["provider"]["provider_bibcode"][0] for j in range(len(gaia_mes_binary))
     ]
     gaia_mes_binary = assign_quality(
         gaia_mes_binary, "binary_qual", special_mode="gaia_binary"
