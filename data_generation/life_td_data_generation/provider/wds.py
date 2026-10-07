@@ -628,6 +628,17 @@ def create_star_basic(wds_helptab,wds):
     wds_star_basic = vstack([primary["main_id","sptype_string", "coo_ra", "coo_dec"],
                              secondary["main_id","sptype_string", "coo_ra", "coo_dec"]])
 
+    system = wds_helptab[
+        "system_name", "wds_sptype", "wds_ra", "wds_dec"]
+    system.rename_columns(
+        ["wds_sptype", "wds_ra", "wds_dec"],
+        ["sptype_string", "coo_ra", "coo_dec"])
+    system = join(system, wds["ident"]["main_id", "id"],
+                     keys_left="system_name", keys_right="id", join_type="left")
+    wds_star_basic = vstack(
+        [wds_star_basic["main_id", "sptype_string", "coo_ra", "coo_dec"],
+         system["main_id", "sptype_string", "coo_ra", "coo_dec"]])
+
     main_id_mask = np.ma.getmaskarray(wds_star_basic["main_id"])
     wds_star_basic = wds_star_basic[
         (~main_id_mask) & (wds_star_basic["main_id"] != "")
