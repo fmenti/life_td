@@ -3,7 +3,7 @@ Generates the data for the database for the provider gaia.
 """
 
 import numpy as np  # arrays
-from astropy.table import Table, join, setdiff, vstack
+from astropy.table import Table, join, setdiff, vstack, Column
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
     create_provider_table,
@@ -44,7 +44,8 @@ def create_gaia_helpertable(distance_cut_in_pc):
     adql_query = """
     SELECT s.source_id ,p.mass_flame, p.radius_flame,
         p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame,
-        p.teff_gspspec_lower, p.teff_gspspec_upper, p.flags_gspspec
+        p.teff_gspspec_lower, p.teff_gspspec_upper, p.flags_gspspec,
+        s.ra AS coo_ra, s.dec AS coo_dec
     FROM gaiadr3.gaia_source as s
         JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
             LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
@@ -293,6 +294,30 @@ def create_mes_mass_st_table(gaia_helptab):
     gaia_mes_mass_st.remove_column("ref")
     return gaia_mes_mass_st
 
+def create_gaia_star_basic_table(gaia_helptab,gaia):
+    gaia_star_basic = gaia_helptab["main_id", "coo_ra", "coo_dec"]
+    empty_column_object_type = Column(data=[
+        "" for _ in range(len(gaia_star_basic))], dtype=object)
+
+    gaia_star_basic["coo_ref"] = empty_column_object_type
+    gaia_star_basic["coo_qual"] = empty_column_object_type
+    # now wherever coo_ra is not masked, fill with provider bibcode
+    mask_has_val = np.where(gaia_star_basic["coo_ra"].mask == False)
+    gaia_star_basic[mask_has_val] = replace_value(
+        gaia_star_basic[mask_has_val],
+        "coo_ref",
+        "",
+        gaia["provider"]["provider_bibcode"][0],
+    )
+    gaia_star_basic[mask_has_val] = replace_value(
+        gaia_star_basic[mask_has_val],
+        "coo_qual",
+        "",
+        "B",
+    )
+
+    return gaia_star_basic
+
 
 def create_gaia_sources_table(gaia):
     """
@@ -343,6 +368,7 @@ def provider_gaia(distance_cut_in_pc):
     gaia["mes_teff_st"] = create_mes_teff_st_table(gaia_helptab)
     gaia["mes_radius_st"] = create_mes_radius_st_table(gaia_helptab)
     gaia["mes_mass_st"] = create_mes_mass_st_table(gaia_helptab)
+    gaia["star_basic"] = create_gaia_star_basic_table(gaia_helptab,gaia)
     gaia["sources"] = create_gaia_sources_table(gaia)
 
     save(
