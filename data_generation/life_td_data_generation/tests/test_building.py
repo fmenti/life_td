@@ -8,9 +8,104 @@ from building import (
     best_para_membership,
     idsjoin,
     provider_data_merging,
+    build_sources_table,
 )
 from sdata import empty_dict
+from provider.utils import (
+    create_provider_table,
+    create_sources_table,
+)
 
+
+def test_gaia_only_id_added_correctly_to_ident():
+    #data
+    prov_tables_dict = {
+        "sim": empty_dict.copy(),
+        "sdb": empty_dict.copy(),
+        "wds": empty_dict.copy(),
+        "exo": empty_dict.copy(),
+        "life": empty_dict.copy(),
+        "gaia": empty_dict.copy(),
+    }
+
+    prov_tables_dict["gaia"]["ident"] = Table(
+        data=[
+            ["Gaia DR3 1000040361296402432","BD+21   274",
+             "BD+21   274"],
+            ["Gaia DR3 1000040361296402432","Gaia DR3 100586763978318208",
+             "BD+21   274"],
+            ["2016A&A...595A...1G","2000A&AS..143....9W","2000A&AS..143....9W"]
+        ],
+        names = ["main_id","id","id_ref"],
+        dtype=[object, object,object],
+    )
+
+    prov_tables_dict["sim"]["ident"] = Table(
+        data=[
+            ["sim_star1","BD+21   274","sim_star1","BD+21   274"],
+            ["sim_star1","Gaia DR3 100586763978318208","sim_star1id2","BD+21   274"],
+            ["2000A&AS..143....9W","2000A&AS..143....9W","2000A&AS..143....9W","2000A&AS..143....9W"]
+        ],
+        names = ["main_id","id","id_ref"],
+        dtype=[object, object,object],
+    )
+
+    # so how to transform this into input for best_para_id? which takes columns "object_idref", "id", "id_ref"
+
+
+    # for provider data merging I will need prov["provider"]
+
+    prov_tables_dict["sim"]["provider"] = create_provider_table(
+        "SIMBAD",
+        "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
+        "2000A&AS..143....9W",
+    )
+    prov_tables_dict["gaia"]["provider"] = create_provider_table(
+        "Gaia",
+        "https://gea.esac.esa.int/tap-server/tap",
+        "2016A&A...595A...1G"
+    )
+
+    # and cat[sources]
+    for prov in ["sim","gaia"]:
+        prov_tables_dict[prov]["sources"] = create_sources_table(
+        [prov_tables_dict[prov]["ident"]], [["id_ref"]],
+            prov_tables_dict[prov]["provider"]["provider_name"][0]
+        )
+        prov_tables_dict[prov]["sources"]["ref"]=prov_tables_dict[prov]["sources"]["ref"].astype(object)
+        prov_tables_dict[prov]["sources"]["provider_name"] = \
+        prov_tables_dict[prov]["sources"]["provider_name"].astype(object)
+
+    cat = build_sources_table(prov_tables_dict)
+    print(cat)
+    # hm since idref is from simbad but made in provider gaia I get 3 different source_id
+
+    # maybe also objects because I need object_idref to replace main id
+
+
+
+    # cat provider data merging?
+    cat = provider_data_merging(
+                 cat, "ident", prov_tables_dict, para_match=True
+            )
+    print(cat)
+
+    cat["ident"] = best_para("id", cat["ident"])
+    print(cat)
+    # I want table to be like outer join meaning this in the end:
+    # cat["ident"] = Table(
+    #         data=[
+    #             ["Gaia DR3 1000040361296402432","sim_star1","BD+21   274","sim_star1","BD+21   274"],
+    #             ["Gaia DR3 1000040361296402432","sim_star1","Gaia DR3 100586763978318208","sim_star1id2","BD+21   274"],
+    #             ["2016A&A...595A...1G","2000A&AS..143....9W","2000A&AS..143....9W","2000A&AS..143....9W","2000A&AS..143....9W"]
+    #         ],
+    #         names = ["main_id","id","id_ref"],
+    #         dtype=[object, object,object],
+    #     )
+
+    assert len(cat["ident"]) == 5
+    assert "Gaia DR3 1000040361296402432" in cat["ident"]["main_id"]
+    # strange, here everything seems to work but in testbench not
 
 def test_idsjoin_no_mask():
     """Test idsjoin with no masked values."""
@@ -152,6 +247,7 @@ def test_best_para_id():
         len(best_para_table[np.where(best_para_table["object_idref"] == 4)])
         == 1
     )
+    assert "gaia_id_obj2" in best_para_table["id"]
 
 
 def test_best_para_of_id():
