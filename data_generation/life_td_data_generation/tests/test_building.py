@@ -9,6 +9,7 @@ from building import (
     idsjoin,
     provider_data_merging,
     build_sources_table,
+    build_provider_table,
 )
 from sdata import empty_dict
 from provider.utils import (
@@ -16,9 +17,7 @@ from provider.utils import (
     create_sources_table,
 )
 
-
-def test_gaia_only_id_added_correctly_to_ident():
-    #data
+def dicts_with_providers():
     prov_tables_dict = {
         "sim": empty_dict.copy(),
         "sdb": empty_dict.copy(),
@@ -27,6 +26,44 @@ def test_gaia_only_id_added_correctly_to_ident():
         "life": empty_dict.copy(),
         "gaia": empty_dict.copy(),
     }
+
+    prov_tables_dict["sim"]["provider"] = create_provider_table(
+        "SIMBAD",
+        "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
+        "2000A&AS..143....9W",
+    )
+    prov_tables_dict["gaia"]["provider"] = create_provider_table(
+        "Gaia",
+        "https://gea.esac.esa.int/tap-server/tap",
+        "2016A&A...595A...1G"
+    )
+    prov_tables_dict["exo"]["provider"] = create_provider_table(
+        "Exo-MerCat",
+        "http://archives.ia2.inaf.it/vo/tap/projects",
+        "2020A&C....3100370A",
+    )
+    prov_tables_dict["life"]["provider"] = create_provider_table(
+        "LIFE",
+        "www.life-space-mission.com",
+        "2022A&A...664A..21Q"
+    )
+    prov_tables_dict["sdb"]["provider"] = create_provider_table(
+        "Grant Kennedy Disks",
+        "http://drgmk.com/sdb/",
+        "priv. comm.",
+        "2026-04-28",
+    )
+    prov_tables_dict["wds"]["provider"] = create_provider_table(
+        "WDS",
+        "http://tapvizier.u-strasbg.fr/TAPVizieR/tap",
+        "2001AJ....122.3466M",
+    )
+
+    return prov_tables_dict
+
+def test_gaia_only_id_added_correctly_to_ident():
+    #data
+    prov_tables_dict = dicts_with_providers()
 
     prov_tables_dict["gaia"]["ident"] = Table(
         data=[
@@ -53,19 +90,6 @@ def test_gaia_only_id_added_correctly_to_ident():
     # so how to transform this into input for best_para_id? which takes columns "object_idref", "id", "id_ref"
 
 
-    # for provider data merging I will need prov["provider"]
-
-    prov_tables_dict["sim"]["provider"] = create_provider_table(
-        "SIMBAD",
-        "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
-        "2000A&AS..143....9W",
-    )
-    prov_tables_dict["gaia"]["provider"] = create_provider_table(
-        "Gaia",
-        "https://gea.esac.esa.int/tap-server/tap",
-        "2016A&A...595A...1G"
-    )
-
     # and cat[sources]
     for prov in ["sim","gaia"]:
         prov_tables_dict[prov]["sources"] = create_sources_table(
@@ -82,15 +106,22 @@ def test_gaia_only_id_added_correctly_to_ident():
 
     # maybe also objects because I need object_idref to replace main id
 
+    print("prov_tables_dict")
+    print(prov_tables_dict)
 
+    # first merge provider info
+    # (because in best_para_id no longer sources hardcoded)
+    cat = build_provider_table(cat, prov_tables_dict)
 
-    # cat provider data merging?
+    # then merge ident from different providers?
+
     cat = provider_data_merging(
                  cat, "ident", prov_tables_dict, para_match=True
             )
     print(cat)
+    # there should be provider data here but is none
 
-    cat["ident"] = best_para("id", cat["ident"])
+    cat["ident"] = best_para_id(cat)
     print(cat)
     # I want table to be like outer join meaning this in the end:
     # cat["ident"] = Table(
@@ -238,7 +269,12 @@ def test_best_para_id():
         names=["object_idref", "id", "id_ref"],
         dtype=[int, object, object],
     )
-    best_para_table = best_para_id(mes_table)
+    # need to add sources and provider tables for ident priority ref
+    prov_tables_dict = dicts_with_providers()
+    cat["ident"] = mes_table
+    cat = build_sources_table(prov_tables_dict)
+
+    best_para_table = best_para_id(cat)
 
     # non provider reverences don't get included
     assert "irgendein_id_obj1" not in best_para_table["id"]
@@ -278,7 +314,10 @@ def test_best_para_of_id():
         names=["object_idref", "id", "id_ref"],
         dtype=[int, object, object],
     )
-    best_para_table = best_para("id", mes_table)
+    dict = empty_dict
+    dict["ident"] = mes_table
+    best_para_table = best_para_id(dict)
+
     assert type(best_para_table) == type(Table())
 
 def test_best_para_id_prefers_highest_priority_reference():
@@ -292,7 +331,9 @@ def test_best_para_id_prefers_highest_priority_reference():
         dtype=[int, object, object],
     )
 
-    best_para_table = best_para_id(mes_table)
+    dict = empty_dict
+    dict["ident"] = mes_table
+    best_para_table = best_para_id(dict)
 
     assert len(best_para_table) == 1
     assert best_para_table["id"][0] == "sim_id_obj4"
@@ -309,7 +350,9 @@ def test_best_para_id_drops_unknown_references():
         dtype=[int, object, object],
     )
 
-    best_para_table = best_para_id(mes_table)
+    dict = empty_dict
+    dict["ident"] = mes_table
+    best_para_table = best_para_id(dict)
 
     assert len(best_para_table) == 0
     assert "id_ref" not in best_para_table.colnames
@@ -326,7 +369,9 @@ def test_best_para_id_keeps_id_source_idref():
         dtype=[int, object, object, int],
     )
 
-    best_para_table = best_para_id(mes_table)
+    dict = empty_dict
+    dict["ident"] = mes_table
+    best_para_table = best_para_id(dict)
 
     assert len(best_para_table) == 1
     assert best_para_table["id"][0] == "sim_id_obj4"

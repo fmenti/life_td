@@ -82,10 +82,10 @@ def create_provider_table(
     """
     print(f"Trying to create {provider_name} tables from {provider_access}...")
     provider_table = Table()
-    provider_table["provider_name"] = [provider_name]
-    provider_table["provider_url"] = [provider_url]
-    provider_table["provider_bibcode"] = [provider_bibcode]
-    provider_table["provider_access"] = [provider_access]
+    provider_table["provider_name"] = Column([provider_name], dtype=object)
+    provider_table["provider_url"] = Column([provider_url], dtype=object)
+    provider_table["provider_bibcode"] = Column([provider_bibcode], dtype=object)
+    provider_table["provider_access"] = Column([provider_access], dtype=object)
     return provider_table
 
 def strip_table_metadata(cat):
