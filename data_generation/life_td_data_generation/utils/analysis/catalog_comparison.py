@@ -9,7 +9,7 @@ import numpy as np  # arrays
 from utils.io import stringtoobject
 
 
-def testobject_dropout(test_objects, parent_sample, silent=False):
+def dropout_testobject(test_objects, parent_sample, silent=False):
     """
     Find objects in test_objects that are not in parent_sample.
 

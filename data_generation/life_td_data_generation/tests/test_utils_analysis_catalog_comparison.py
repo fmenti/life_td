@@ -1,5 +1,5 @@
 from astropy.table import Table
-from utils.analysis.catalog_comparison import testobject_dropout
+from utils.analysis.catalog_comparison import dropout_testobject
 
 
 def test_testobject_dropout():
@@ -14,7 +14,7 @@ def test_testobject_dropout():
         dtype=[object, float],
     )
 
-    dropout, test_without_dropout = testobject_dropout(
+    dropout, test_without_dropout = dropout_testobject(
         test_objects["main_id"], parent_sample["main_id"]
     )
 

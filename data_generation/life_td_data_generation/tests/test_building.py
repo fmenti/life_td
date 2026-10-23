@@ -271,8 +271,10 @@ def test_best_para_id():
     )
     # need to add sources and provider tables for ident priority ref
     prov_tables_dict = dicts_with_providers()
+    cat = empty_dict
     cat["ident"] = mes_table
-    cat = build_sources_table(prov_tables_dict)
+    cat = build_provider_table(cat, prov_tables_dict)
+
 
     best_para_table = best_para_id(cat)
 
@@ -314,9 +316,11 @@ def test_best_para_of_id():
         names=["object_idref", "id", "id_ref"],
         dtype=[int, object, object],
     )
-    dict = empty_dict
-    dict["ident"] = mes_table
-    best_para_table = best_para_id(dict)
+    prov_tables_dict = dicts_with_providers()
+    cat = empty_dict
+    cat["ident"] = mes_table
+    cat = build_provider_table(cat, prov_tables_dict)
+    best_para_table = best_para_id(cat)
 
     assert type(best_para_table) == type(Table())
 
@@ -331,9 +335,11 @@ def test_best_para_id_prefers_highest_priority_reference():
         dtype=[int, object, object],
     )
 
-    dict = empty_dict
-    dict["ident"] = mes_table
-    best_para_table = best_para_id(dict)
+    prov_tables_dict = dicts_with_providers()
+    cat = empty_dict
+    cat["ident"] = mes_table
+    cat = build_provider_table(cat, prov_tables_dict)
+    best_para_table = best_para_id(cat)
 
     assert len(best_para_table) == 1
     assert best_para_table["id"][0] == "sim_id_obj4"
@@ -350,9 +356,11 @@ def test_best_para_id_drops_unknown_references():
         dtype=[int, object, object],
     )
 
-    dict = empty_dict
-    dict["ident"] = mes_table
-    best_para_table = best_para_id(dict)
+    prov_tables_dict = dicts_with_providers()
+    cat = empty_dict
+    cat["ident"] = mes_table
+    cat = build_provider_table(cat, prov_tables_dict)
+    best_para_table = best_para_id(cat)
 
     assert len(best_para_table) == 0
     assert "id_ref" not in best_para_table.colnames
@@ -586,14 +594,16 @@ def test_provider_data_merging():
     # Create provider tables dictionary with test data
     provider1_data = empty_dict.copy()
     provider1_data["sources"] = Table(
-        {"ref": ["ref1"], "provider_name": ["provider1"]}
+        {"ref": ["ref1"], "provider_name": ["provider1"]},
+        dtype=[object, object],
     )
     provider1_data["objects"] = Table(
         {
             "type": ["st", "st"],
             "ids": ["id1|id2", "id3|id4"],
             "main_id": ["star1", "star2"],
-        }
+        },
+        dtype=[object, object, object],
     )
     provider1_data["provider"] = Table(
         {
@@ -601,19 +611,22 @@ def test_provider_data_merging():
             "provider_url": ["url1"],
             "provider_bibcode": ["bib1"],
             "provider_access": ["access1"],
-        }
+        },
+        dtype=[object, object, object, object],
     )
 
     provider2_data = empty_dict.copy()
     provider2_data["sources"] = Table(
-        {"ref": ["ref2"], "provider_name": ["provider2"]}
+        {"ref": ["ref2"], "provider_name": ["provider2"]},
+        dtype=[object, object],
     )
     provider2_data["objects"] = Table(
         {
             "type": ["st", "pl"],
             "ids": ["id5|id6", "id7"],
             "main_id": ["star3", "planet1"],
-        }
+        },
+        dtype=[object, object, object],
     )
     provider2_data["provider"] = Table(
         {
@@ -621,7 +634,8 @@ def test_provider_data_merging():
             "provider_url": ["url2"],
             "provider_bibcode": ["bib2"],
             "provider_access": ["access2"],
-        }
+        },
+        dtype=[object, object, object, object],
     )
 
     prov_tables_dict = {

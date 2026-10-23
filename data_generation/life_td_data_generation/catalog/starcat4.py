@@ -1,7 +1,7 @@
 import astropy as ap  # Used for votables
 import numpy as np  # Used for arrays
 from provider.utils import query
-from utils.analysis.catalog_comparison import testobject_dropout
+from utils.analysis.catalog_comparison import dropout_testobject
 from utils.io import Path, objecttostring, save
 
 
@@ -123,7 +123,7 @@ def starcat_creation(
 
     if test_objects is not None and len(test_objects) > 0:
         print("in step query:")
-        drop_out, test_objects = testobject_dropout(
+        drop_out, test_objects = dropout_testobject(
             test_objects, catalog["main_id"]
         )
 
@@ -134,7 +134,7 @@ def starcat_creation(
 
     if test_objects is not None and len(test_objects) > 0:
         print("in step main sequence temperature class:")
-        drop_out, test_objects = testobject_dropout(
+        drop_out, test_objects = dropout_testobject(
             test_objects, cat_ms_tempclass["main_id"]
         )
 
@@ -149,7 +149,7 @@ def starcat_creation(
 
     if test_objects is not None and len(test_objects) > 0:
         print("in step main sequence luminocity class:")
-        drop_out, test_objects = testobject_dropout(
+        drop_out, test_objects = dropout_testobject(
             test_objects, cat_ms_lumclass["main_id"]
         )
 
@@ -239,7 +239,7 @@ def starcat_creation(
 
     if test_objects is not None and len(test_objects) > 0:
         print("in step multiplicity:")
-        drop_out, test_objects = testobject_dropout(
+        drop_out, test_objects = dropout_testobject(
             test_objects, StarCat4["main_id"]
         )
 
