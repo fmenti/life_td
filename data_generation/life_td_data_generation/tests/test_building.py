@@ -676,7 +676,7 @@ def test_provider_data_merging():
         len(result["sources"]) == initial_length
     )  # Should not change when merging empty data
 
-def test_best_star_basic_fills_missing_values_from_duplicate_provider_rows():
+def test_best_star_basic_fills_missing_parameter_group_from_duplicate_provider_rows():
     cat = {
         "star_basic": Table(
             {
@@ -701,16 +701,55 @@ def test_best_star_basic_fills_missing_values_from_duplicate_provider_rows():
     assert len(result) == 1
     assert result["main_id"][0] == "star1"
 
-    # Coordinate values come from the best coo_qual row.
+    # Coordinate group comes from the best coordinate row.
     assert result["coo_ra"][0] == 10.0
     assert result["coo_dec"][0] == 20.0
     assert result["coo_qual"][0] == "A"
 
-    # Missing fields are recovered from the duplicate SIMBAD-like row.
+    # Spectral type group is copied as one unit.
     assert result["sptype_string"][0] == "M5V"
     assert result["sptype_qual"][0] == "C"
     assert result["sptype_source_idref"][0] == 2
+
+    # Parallax group is copied as one unit.
     assert result["plx_value"][0] == 500.0
     assert result["plx_err"][0] == 1.0
     assert result["plx_qual"][0] == "B"
     assert result["plx_source_idref"][0] == 2
+
+
+def test_best_star_basic_does_not_mix_columns_inside_sptype_group():
+    cat = {
+        "star_basic": Table(
+            {
+                "main_id": ["star1", "star1"],
+                "object_idref": [1, 1],
+                "coo_ra": [10.0, 10.1],
+                "coo_dec": [20.0, 20.1],
+                "coo_qual": ["A", "B"],
+                "sptype_string": ["M5V", "K7V"],
+                "sptype_qual": ["", "C"],
+                "sptype_source_idref": [1, 2],
+                "plx_value": [500.0, 1e20],
+                "plx_err": [1.0, 1e20],
+                "plx_qual": ["B", ""],
+                "plx_source_idref": [1, 999999],
+            }
+        )
+    }
+
+    result = best_star_basic(cat)["star_basic"]
+
+    assert len(result) == 1
+
+    # The second row has the better complete sptype group, so all sptype
+    # columns come from that row. We do not keep SIMBAD's string and WDS' qual.
+    assert result["sptype_string"][0] == "K7V"
+    assert result["sptype_qual"][0] == "C"
+    assert result["sptype_source_idref"][0] == 2
+
+    # Parallax still comes as a separate whole group from the row that has it.
+    assert result["plx_value"][0] == 500.0
+    assert result["plx_err"][0] == 1.0
+    assert result["plx_qual"][0] == "B"
+    assert result["plx_source_idref"][0] == 1
