@@ -14,7 +14,13 @@ from astropy.table import (
     vstack,
 )
 from provider.utils import nullvalues, replace_value, strip_table_metadata
-from sdata import empty_dict, empty_dict_wit_columns, paras_dict, mag_columns
+from sdata import (
+    empty_dict,
+    empty_dict_wit_columns,
+    paras_dict,
+    mag_columns,
+    para_columns_dict,
+)
 from utils.io import Path, save
 
 
@@ -423,6 +429,26 @@ def quality_to_rank(quality_column: Column | MaskedColumn) -> list[int]:
     return [quality_rank.get(str(value), 6) for value in quality_values]
 
 
+def _is_missing_star_basic_value(value) -> bool:
+    """
+    Return whether a star_basic cell should be treated as missing.
+
+    This is intentionally local to star_basic de-duplication because the table
+    uses both masked values and project sentinel values.
+    """
+    if isinstance(value, np.ma.core.MaskedConstant):
+        return True
+    if value is None:
+        return True
+    if str(value) in ("", "?", "None", "--"):
+        return True
+
+    try:
+        return np.isclose(float(value), 1e20) or np.isclose(float(value), 999999)
+    except (TypeError, ValueError):
+        return False
+
+
 def best_para(para: str, mes_table: Table) -> Table:
     """
     Select the best measurement row for each object.
@@ -827,10 +853,98 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
     cat["planet_basic"] = planets
     return cat
 
+def _available_columns(table: Table, columns: list[str]) -> list[str]:
+    """
+    Return only those columns that exist in table.
+    """
+    return [col for col in columns if col in table.colnames]
+
+
+def _parameter_groups_for_table(
+    table_name: str,
+    table: Table,
+) -> dict[str, dict[str, list[str] | str | None]]:
+    """
+    Return parameter groups for a table, restricted to columns present in table.
+    """
+    groups = para_columns_dict.get(table_name, {})
+
+    return {
+        para: {
+            "primary": definition["primary"],
+            "quality": definition["quality"],
+            "columns": _available_columns(table, definition["columns"]),
+        }
+        for para, definition in groups.items()
+        if definition["primary"] in table.colnames
+    }
+
+
+def _best_row_for_parameter_group(
+    group: Table,
+    primary_column: str,
+    quality_column: str | None,
+) -> Row | None:
+    """
+    Pick one provider row for a parameter group.
+
+    Rows without a usable primary value are ignored. If a quality column exists,
+    the row with the best quality is used. Otherwise the first row with a usable
+    primary value is used.
+    """
+    usable_rows = [
+        row
+        for row in group
+        if not _is_missing_star_basic_value(row[primary_column])
+    ]
+
+    if len(usable_rows) == 0:
+        return None
+
+    if quality_column is None or quality_column not in group.colnames:
+        return usable_rows[0]
+
+    best_row = usable_rows[0]
+    best_rank = quality_to_rank(Column([best_row[quality_column]]))[0]
+
+    for row in usable_rows[1:]:
+        rank = quality_to_rank(Column([row[quality_column]]))[0]
+        if rank < best_rank:
+            best_row = row
+            best_rank = rank
+
+    return best_row
+
+
+def _merge_table_row_groupwise(table_name: str, group: Table) -> Row:
+    """
+    Merge duplicate rows for one main_id without mixing columns inside a
+    parameter group.
+    """
+    merged_row = group[0]
+    parameter_groups = _parameter_groups_for_table(table_name, group)
+
+    for definition in parameter_groups.values():
+        best_row = _best_row_for_parameter_group(
+            group,
+            definition["primary"],
+            definition["quality"],
+        )
+
+        if best_row is None:
+            continue
+
+        for colname in definition["columns"]:
+            merged_row[colname] = best_row[colname]
+
+    return merged_row
 
 def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
     """
-    Remove duplicate star_basic rows, keeping the row with best coo_qual.
+    Remove duplicate star_basic rows while preserving provider consistency.
+
+    For each main_id, every physical parameter group is selected from one
+    provider row as a unit. The parameter groups are defined in sdata.py.
 
     Quality priority: A > B > C > D > E > ? > "".
 
@@ -847,18 +961,20 @@ def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
     star_basic = star_basic.copy()
     star_basic["_coo_quality_rank"] = quality_to_rank(star_basic["coo_qual"])
 
-    # Sort whole rows. Values in different columns stay together.
+    # Sort so group[0] is a sensible base row for bookkeeping columns.
+    # Parameter groups are then selected as whole units.
     star_basic.sort(["main_id", "_coo_quality_rank"])
 
-    star_basic = unique(
-        star_basic,
-        keys="main_id",
-        keep="first",
-        silent=True,
-    )
+    merged_star_basic = star_basic[:0].copy()
+    grouped_star_basic = star_basic.group_by("main_id")
+    indices = grouped_star_basic.groups.indices
 
-    star_basic.remove_column("_coo_quality_rank")
-    cat["star_basic"] = star_basic
+    for group_start, group_end in zip(indices[:-1], indices[1:]):
+        group = grouped_star_basic[group_start:group_end]
+        merged_star_basic.add_row(_merge_table_row_groupwise("star_basic", group))
+
+    merged_star_basic.remove_column("_coo_quality_rank")
+    cat["star_basic"] = merged_star_basic
     return cat
 
 

@@ -6,6 +6,7 @@ from building import (
     best_para,
     best_para_id,
     best_para_membership,
+    best_star_basic,
     idsjoin,
     provider_data_merging,
     build_sources_table,
@@ -674,3 +675,42 @@ def test_provider_data_merging():
     assert (
         len(result["sources"]) == initial_length
     )  # Should not change when merging empty data
+
+def test_best_star_basic_fills_missing_values_from_duplicate_provider_rows():
+    cat = {
+        "star_basic": Table(
+            {
+                "main_id": ["star1", "star1"],
+                "object_idref": [1, 1],
+                "coo_ra": [10.0, 10.1],
+                "coo_dec": [20.0, 20.1],
+                "coo_qual": ["A", "B"],
+                "sptype_string": ["", "M5V"],
+                "sptype_qual": ["", "C"],
+                "sptype_source_idref": [999999, 2],
+                "plx_value": [1e20, 500.0],
+                "plx_err": [1e20, 1.0],
+                "plx_qual": ["", "B"],
+                "plx_source_idref": [999999, 2],
+            }
+        )
+    }
+
+    result = best_star_basic(cat)["star_basic"]
+
+    assert len(result) == 1
+    assert result["main_id"][0] == "star1"
+
+    # Coordinate values come from the best coo_qual row.
+    assert result["coo_ra"][0] == 10.0
+    assert result["coo_dec"][0] == 20.0
+    assert result["coo_qual"][0] == "A"
+
+    # Missing fields are recovered from the duplicate SIMBAD-like row.
+    assert result["sptype_string"][0] == "M5V"
+    assert result["sptype_qual"][0] == "C"
+    assert result["sptype_source_idref"][0] == 2
+    assert result["plx_value"][0] == 500.0
+    assert result["plx_err"][0] == 1.0
+    assert result["plx_qual"][0] == "B"
+    assert result["plx_source_idref"][0] == 2

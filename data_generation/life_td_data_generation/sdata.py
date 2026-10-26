@@ -60,6 +60,102 @@ paras_dict = {
     "h_link": ["h_link"],
 }
 
+def create_mag_parameter_columns():
+    mag_parameter_columns = {}
+    for mag in mags:
+        mag_parameter_columns[mag] = {
+            "primary": f"{mag}_value",
+            "quality": f"{mag}_qual",
+            "columns": [
+                f"{mag}_value",
+                f"{mag}_err",
+                f"{mag}_qual",
+                f"{mag}_source_idref",
+                f"{mag}_ref",
+                f"{mag}_sys",
+            ],
+        }
+    return mag_parameter_columns
+
+
+para_columns_dict = {
+    "star_basic": {
+        "coo": {
+            "primary": "coo_ra",
+            "quality": "coo_qual",
+            "columns": [
+                "coo_ra",
+                "coo_dec",
+                "coo_err_angle",
+                "coo_err_maj",
+                "coo_err_min",
+                "coo_qual",
+                "coo_source_idref",
+                "coo_ref",
+            ],
+        },
+        "coo_gal": {
+            "primary": "coo_gal_l",
+            "quality": "coo_gal_qual",
+            "columns": [
+                "coo_gal_l",
+                "coo_gal_b",
+                "coo_gal_err_angle",
+                "coo_gal_err_maj",
+                "coo_gal_err_min",
+                "coo_gal_qual",
+                "coo_gal_source_idref",
+                "coo_gal_ref",
+            ],
+        },
+        "plx": {
+            "primary": "plx_value",
+            "quality": "plx_qual",
+            "columns": [
+                "plx_value",
+                "plx_err",
+                "plx_qual",
+                "plx_source_idref",
+                "plx_ref",
+            ],
+        },
+        "dist_st": {
+            "primary": "dist_st_value",
+            "quality": "dist_st_qual",
+            "columns": [
+                "dist_st_value",
+                "dist_st_err",
+                "dist_st_qual",
+                "dist_st_source_idref",
+                "dist_st_ref",
+            ],
+        },
+        "sptype": {
+            "primary": "sptype_string",
+            "quality": "sptype_qual",
+            "columns": [
+                "sptype_string",
+                "sptype_err",
+                "sptype_qual",
+                "sptype_source_idref",
+                "sptype_ref",
+            ],
+        },
+        "class": {
+            "primary": "class_temp",
+            "quality": None,
+            "columns": [
+                "class_temp",
+                "class_temp_nr",
+                "class_lum",
+                "class_source_idref",
+                "class_ref",
+            ],
+        },
+        **create_mag_parameter_columns(),
+    },
+}
+
 empty_dict = {
     "sources": Table(),
     "objects": Table(),
