@@ -819,10 +819,9 @@ def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
     cat["best_h_link"] = best_para("membership", h_link)
     return cat
 
-
-def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
+def create_star_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
     """
-    Specialized processing for star_basic and planet_basic.
+    Create the star_basic table.
 
     :param cat: Dictionary of cumulative tables.
     :type cat: dict[str, Table]
@@ -844,10 +843,19 @@ def _process_basic_tables(cat: dict[str, Table]) -> dict[str, Table]:
         keys=["object_idref", "main_id"],
     )
 
+    return best_star_basic(cat)
 
-    cat  = best_star_basic(cat)
+def create_planet_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
+    """
+    Create the planet_basic table.
 
-    # Planet basic: include all objects typed as planets
+    :param cat: Dictionary of cumulative tables.
+    :type cat: dict[str, Table]
+    :returns: Updated dictionary of cumulative tables.
+    :rtype: dict[str, Table]
+    """
+    objects = cat["objects"]
+
     planets = objects["object_id", "main_id"][np.where(objects["type"] == "pl")]
     planets.rename_column("object_id", "object_idref")
     cat["planet_basic"] = planets
@@ -880,64 +888,70 @@ def _parameter_groups_for_table(
     }
 
 
-def _best_row_for_parameter_group(
-    group: Table,
+def _best_index_for_parameter_group(
+    table: Table,
+    group_start: int,
+    group_end: int,
     primary_column: str,
     quality_column: str | None,
-) -> Row | None:
+) -> int | None:
     """
-    Pick one provider row for a parameter group.
+    Pick one row index for a parameter group.
 
     Rows without a usable primary value are ignored. If a quality column exists,
     the row with the best quality is used. Otherwise the first row with a usable
     primary value is used.
     """
-    usable_rows = [
-        row
-        for row in group
-        if not _is_missing_star_basic_value(row[primary_column])
+    usable_indices = [
+        row_index
+        for row_index in range(group_start, group_end)
+        if not _is_missing_star_basic_value(table[primary_column][row_index])
     ]
 
-    if len(usable_rows) == 0:
+    if len(usable_indices) == 0:
         return None
 
-    if quality_column is None or quality_column not in group.colnames:
-        return usable_rows[0]
+    if quality_column is None or quality_column not in table.colnames:
+        return usable_indices[0]
 
-    best_row = usable_rows[0]
-    best_rank = quality_to_rank(Column([best_row[quality_column]]))[0]
+    quality_ranks = quality_to_rank(table[quality_column])
 
-    for row in usable_rows[1:]:
-        rank = quality_to_rank(Column([row[quality_column]]))[0]
-        if rank < best_rank:
-            best_row = row
-            best_rank = rank
-
-    return best_row
+    return min(
+        usable_indices,
+        key=lambda row_index: quality_ranks[row_index],
+    )
 
 
-def _merge_table_row_groupwise(table_name: str, group: Table) -> Row:
+def _copy_parameter_groups_to_base_row(
+    table_name: str,
+    table: Table,
+    group_start: int,
+    group_end: int,
+) -> None:
     """
-    Merge duplicate rows for one main_id without mixing columns inside a
-    parameter group.
+    Copy each parameter group into the first row of a main_id group.
+
+    Columns inside one parameter group are always copied from the same source
+    row, so value/error/quality/reference columns cannot be mixed between
+    providers.
     """
-    merged_row = group[0]
-    parameter_groups = _parameter_groups_for_table(table_name, group)
+    parameter_groups = _parameter_groups_for_table(table_name, table)
 
     for definition in parameter_groups.values():
-        best_row = _best_row_for_parameter_group(
-            group,
+        best_index = _best_index_for_parameter_group(
+            table,
+            group_start,
+            group_end,
             definition["primary"],
             definition["quality"],
         )
 
-        if best_row is None:
+        if best_index is None:
             continue
 
         for colname in definition["columns"]:
-            merged_row[colname] = best_row[colname]
+            table[colname][group_start] = table[colname][best_index]
 
-    return merged_row
 
 def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
     """
@@ -961,18 +975,24 @@ def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
     star_basic = star_basic.copy()
     star_basic["_coo_quality_rank"] = quality_to_rank(star_basic["coo_qual"])
 
-    # Sort so group[0] is a sensible base row for bookkeeping columns.
-    # Parameter groups are then selected as whole units.
+    # Sort so the first row of each main_id group is the bookkeeping/base row.
     star_basic.sort(["main_id", "_coo_quality_rank"])
 
-    merged_star_basic = star_basic[:0].copy()
     grouped_star_basic = star_basic.group_by("main_id")
     indices = grouped_star_basic.groups.indices
 
-    for group_start, group_end in zip(indices[:-1], indices[1:]):
-        group = grouped_star_basic[group_start:group_end]
-        merged_star_basic.add_row(_merge_table_row_groupwise("star_basic", group))
+    keep_indices = []
 
+    for group_start, group_end in zip(indices[:-1], indices[1:]):
+        _copy_parameter_groups_to_base_row(
+            "star_basic",
+            grouped_star_basic,
+            group_start,
+            group_end,
+        )
+        keep_indices.append(group_start)
+
+    merged_star_basic = grouped_star_basic[keep_indices]
     merged_star_basic.remove_column("_coo_quality_rank")
     cat["star_basic"] = merged_star_basic
     return cat
@@ -1017,7 +1037,9 @@ def build_rest_of_tables(
         elif table_name == "h_link":
             cat = _process_h_link(cat)
         elif table_name == "planet_basic":
-            cat = _process_basic_tables(cat)
+            cat = create_planet_basic_table(cat)
+        elif table_name == "star_basic":
+            cat = create_star_basic_table(cat)
         elif table_name == "mes_teff_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
