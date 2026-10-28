@@ -449,7 +449,9 @@ def _is_missing_star_basic_value(value) -> bool:
         return False
 
 
-def best_para(para: str, mes_table: Table) -> Table:
+def best_para(para: str,
+              mes_table: Table,
+              columns: list[str] | None = None) -> Table:
     """
     Select the best measurement row for each object.
 
@@ -466,7 +468,10 @@ def best_para(para: str, mes_table: Table) -> Table:
     if para == "membership":
         return best_para_membership(mes_table)
 
-    columns = _get_parameter_columns(para)
+    if columns is None:
+        columns = _get_parameter_columns(para)
+    else:
+        columns = ["main_id"]+columns
     mes_table = mes_table[columns].copy()
 
     qual_column = f"{para}_qual"
@@ -489,7 +494,6 @@ def best_para(para: str, mes_table: Table) -> Table:
         keep="first",
         silent=True,
     )
-
     # Remove temporary helper column again.
     best_para_table.remove_column(rank_column)
     return best_para_table
@@ -515,7 +519,7 @@ def best_parameters_ingestion(
     :returns: Updated basic table.
     :rtype: Table
     """
-    best_para_cat_mes = best_para(para, cat_mes)
+    best_para_cat_mes = best_para(para, cat_mes,columns)
     if columns:
         cat_basic.remove_columns(columns)
     return join(cat_basic, best_para_cat_mes, join_type="left")
@@ -819,31 +823,52 @@ def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
     cat["best_h_link"] = best_para("membership", h_link)
     return cat
 
-def create_star_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
-    """
-    Create the star_basic table.
-
-    :param cat: Dictionary of cumulative tables.
-    :type cat: dict[str, Table]
-    :returns: Updated dictionary of cumulative tables.
-    :rtype: dict[str, Table]
-    """
+def create_multi_measurement_star_basic_table(cat: dict[str, Table]) -> \
+    dict[str, Table]:
+    print("starting to create multi measurement star basic table")
     objects = cat["objects"]
 
     # Star basic: include all objects typed as stars or systems
-    stars = objects["object_id", "main_id"][np.where(objects["type"] == "st")]
-    systems = objects["object_id", "main_id"][np.where(objects["type"] == "sy")]
+    stars = objects["object_id", "main_id"][
+        np.where(objects["type"] == "st")]
+    systems = objects["object_id", "main_id"][
+        np.where(objects["type"] == "sy")]
     temp = vstack([stars, systems])
     temp.rename_column("object_id", "object_idref")
 
-    cat["star_basic"] = join(
+    mes_star_basic = join(
         cat["star_basic"],
         temp,
         join_type="outer",
         keys=["object_idref", "main_id"],
     )
 
-    return best_star_basic(cat)
+    print("finished creating multi measurement star basic table")
+
+    return mes_star_basic
+
+def create_best_para_star_basic(mes_star_basic):
+    #issue this is a column and not a table
+    star_basic = unique(mes_star_basic,keys = "main_id")
+
+    parameter_groups = para_columns_dict["star_basic"]
+
+    # memory crash issue, try using generators
+    print(parameter_groups.keys())
+
+    for para in parameter_groups:
+        print(f"ingesting {para}")
+        temp_mes_table = mes_star_basic[["main_id"] + parameter_groups[para]["columns"]]
+        print(temp_mes_table)
+
+        star_basic = best_parameters_ingestion(
+            temp_mes_table,
+            star_basic,
+            para,
+            parameter_groups[para]["columns"],
+        )
+        print(star_basic)
+        return star_basic
 
 def create_planet_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
     """
@@ -859,142 +884,6 @@ def create_planet_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
     planets = objects["object_id", "main_id"][np.where(objects["type"] == "pl")]
     planets.rename_column("object_id", "object_idref")
     cat["planet_basic"] = planets
-    return cat
-
-def _available_columns(table: Table, columns: list[str]) -> list[str]:
-    """
-    Return only those columns that exist in table.
-    """
-    return [col for col in columns if col in table.colnames]
-
-
-def _parameter_groups_for_table(
-    table_name: str,
-    table: Table,
-) -> dict[str, dict[str, list[str] | str | None]]:
-    """
-    Return parameter groups for a table, restricted to columns present in table.
-    """
-    groups = para_columns_dict.get(table_name, {})
-
-    return {
-        para: {
-            "primary": definition["primary"],
-            "quality": definition["quality"],
-            "columns": _available_columns(table, definition["columns"]),
-        }
-        for para, definition in groups.items()
-        if definition["primary"] in table.colnames
-    }
-
-
-def _best_index_for_parameter_group(
-    table: Table,
-    group_start: int,
-    group_end: int,
-    primary_column: str,
-    quality_column: str | None,
-) -> int | None:
-    """
-    Pick one row index for a parameter group.
-
-    Rows without a usable primary value are ignored. If a quality column exists,
-    the row with the best quality is used. Otherwise the first row with a usable
-    primary value is used.
-    """
-    usable_indices = [
-        row_index
-        for row_index in range(group_start, group_end)
-        if not _is_missing_star_basic_value(table[primary_column][row_index])
-    ]
-
-    if len(usable_indices) == 0:
-        return None
-
-    if quality_column is None or quality_column not in table.colnames:
-        return usable_indices[0]
-
-    quality_ranks = quality_to_rank(table[quality_column])
-
-    return min(
-        usable_indices,
-        key=lambda row_index: quality_ranks[row_index],
-    )
-
-
-def _copy_parameter_groups_to_base_row(
-    table_name: str,
-    table: Table,
-    group_start: int,
-    group_end: int,
-) -> None:
-    """
-    Copy each parameter group into the first row of a main_id group.
-
-    Columns inside one parameter group are always copied from the same source
-    row, so value/error/quality/reference columns cannot be mixed between
-    providers.
-    """
-    parameter_groups = _parameter_groups_for_table(table_name, table)
-
-    for definition in parameter_groups.values():
-        best_index = _best_index_for_parameter_group(
-            table,
-            group_start,
-            group_end,
-            definition["primary"],
-            definition["quality"],
-        )
-
-        if best_index is None:
-            continue
-
-        for colname in definition["columns"]:
-            table[colname][group_start] = table[colname][best_index]
-
-
-def best_star_basic(cat: dict[str, Table]) -> dict[str, Table]:
-    """
-    Remove duplicate star_basic rows while preserving provider consistency.
-
-    For each main_id, every physical parameter group is selected from one
-    provider row as a unit. The parameter groups are defined in sdata.py.
-
-    Quality priority: A > B > C > D > E > ? > "".
-
-    :param cat: Dictionary of cumulative tables.
-    :type cat: dict[str, Table]
-    :returns: Updated dictionary of cumulative tables.
-    :rtype: dict[str, Table]
-    """
-    star_basic = cat["star_basic"]
-
-    if len(star_basic) == 0 or "coo_qual" not in star_basic.colnames:
-        return cat
-
-    star_basic = star_basic.copy()
-    star_basic["_coo_quality_rank"] = quality_to_rank(star_basic["coo_qual"])
-
-    # Sort so the first row of each main_id group is the bookkeeping/base row.
-    star_basic.sort(["main_id", "_coo_quality_rank"])
-
-    grouped_star_basic = star_basic.group_by("main_id")
-    indices = grouped_star_basic.groups.indices
-
-    keep_indices = []
-
-    for group_start, group_end in zip(indices[:-1], indices[1:]):
-        _copy_parameter_groups_to_base_row(
-            "star_basic",
-            grouped_star_basic,
-            group_start,
-            group_end,
-        )
-        keep_indices.append(group_start)
-
-    merged_star_basic = grouped_star_basic[keep_indices]
-    merged_star_basic.remove_column("_coo_quality_rank")
-    cat["star_basic"] = merged_star_basic
     return cat
 
 
@@ -1039,7 +928,8 @@ def build_rest_of_tables(
         elif table_name == "planet_basic":
             cat = create_planet_basic_table(cat)
         elif table_name == "star_basic":
-            cat = create_star_basic_table(cat)
+            mes_star_basic = create_multi_measurement_star_basic_table(cat)
+            cat["star_basic"] = create_best_para_star_basic(mes_star_basic)
         elif table_name == "mes_teff_st":
             cat["star_basic"] = best_parameters_ingestion(
                 cat[table_name],
