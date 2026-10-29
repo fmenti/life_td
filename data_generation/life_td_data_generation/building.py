@@ -825,7 +825,6 @@ def _process_h_link(cat: dict[str, Table]) -> dict[str, Table]:
 
 def create_multi_measurement_star_basic_table(cat: dict[str, Table]) -> \
     dict[str, Table]:
-    print("starting to create multi measurement star basic table")
     objects = cat["objects"]
 
     # Star basic: include all objects typed as stars or systems
@@ -843,8 +842,6 @@ def create_multi_measurement_star_basic_table(cat: dict[str, Table]) -> \
         keys=["object_idref", "main_id"],
     )
 
-    print("finished creating multi measurement star basic table")
-
     return mes_star_basic
 
 def create_best_para_star_basic(mes_star_basic):
@@ -853,13 +850,9 @@ def create_best_para_star_basic(mes_star_basic):
 
     parameter_groups = para_columns_dict["star_basic"]
 
-    # memory crash issue, try using generators
-    print(parameter_groups.keys())
-
     for para in parameter_groups:
         print(f"ingesting {para}")
         temp_mes_table = mes_star_basic[["main_id"] + parameter_groups[para]["columns"]]
-        print(temp_mes_table)
 
         star_basic = best_parameters_ingestion(
             temp_mes_table,
@@ -867,8 +860,7 @@ def create_best_para_star_basic(mes_star_basic):
             para,
             parameter_groups[para]["columns"],
         )
-        print(star_basic)
-        return star_basic
+    return star_basic
 
 def create_planet_basic_table(cat: dict[str, Table]) -> dict[str, Table]:
     """
