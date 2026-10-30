@@ -479,7 +479,6 @@ def best_para(para: str,
 
     if len(mes_table) == 0 or qual_column not in mes_table.colnames:
         return mes_table
-
     # Add temporary helper column. This does not change the science data.
     mes_table[rank_column] = quality_to_rank(mes_table[qual_column])
 
@@ -853,7 +852,6 @@ def create_best_para_star_basic(mes_star_basic):
     for para in parameter_groups:
         print(f"ingesting {para}")
         temp_mes_table = mes_star_basic[["main_id"] + parameter_groups[para]["columns"]]
-
         star_basic = best_parameters_ingestion(
             temp_mes_table,
             star_basic,

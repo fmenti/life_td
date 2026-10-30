@@ -150,6 +150,7 @@ para_columns_dict = {
                 "class_lum",
                 "class_source_idref",
                 "class_ref",
+                "class_qual",
             ],
         },
         **create_mag_parameter_columns(),
@@ -220,6 +221,7 @@ empty_dict_wit_columns = {
     "star_basic": Table(
         names=[
             "object_idref",
+
             "coo_ra",
             "coo_dec",
             "coo_err_angle",
@@ -228,6 +230,7 @@ empty_dict_wit_columns = {
             "coo_qual",
             "coo_source_idref",
             "coo_ref",
+
             "coo_gal_l",
             "coo_gal_b",
             "coo_gal_err_angle",
@@ -236,6 +239,7 @@ empty_dict_wit_columns = {
             "coo_gal_qual",
             "coo_gal_source_idref",
             "coo_gal_ref",
+
               ]
             + create_mag_columns()[0]
             +[
@@ -244,40 +248,49 @@ empty_dict_wit_columns = {
             "plx_qual",
             "plx_source_idref",
             "plx_ref",
+
             "dist_st_value",
             "dist_st_err",
             "dist_st_qual",
             "dist_st_source_idref",
             "dist_st_ref",
+
             "sptype_string",
             "sptype_err",  # outdated
             "sptype_qual",
             "sptype_source_idref",
             "sptype_ref",
+
             "class_temp",
             "class_temp_nr",
             "class_lum",
+            "class_qual",
             "class_source_idref",
             "class_ref",
+
             "teff_st_value",
             "teff_st_err",
             "teff_st_qual",
             "teff_st_source_idref",
             "teff_st_ref",
+
             "radius_st_value",
             "radius_st_err",
             "radius_st_qual",
             "radius_st_source_idref",
             "radius_st_ref",
+
             "mass_st_value",
             "mass_st_err",
             "mass_st_qual",
             "mass_st_source_idref",
             "mass_st_ref",
+
             "binary_flag",
             "binary_qual",
             "binary_source_idref",
             "binary_ref",
+
             "sep_ang_value",
             "sep_ang_err",
             "sep_ang_obs_date",
@@ -287,6 +300,7 @@ empty_dict_wit_columns = {
         ],
         dtype=[
             int,
+
             float,
             float,
             float,
@@ -295,6 +309,7 @@ empty_dict_wit_columns = {
             object,
             int,
             object,
+
             float,
             float,
             float,
@@ -303,6 +318,7 @@ empty_dict_wit_columns = {
             object,
             int,
             object,
+
             ]
         + create_mag_columns()[1]
         + [
@@ -311,40 +327,49 @@ empty_dict_wit_columns = {
             object,
             int,
             object,
+
             float,
             float,
             object,
             int,
             object,
+
             object,
             float,
             object,
             int,
             object,
+
             object,
-            object,
-            object,
-            int,
-            object,
-            float,
-            float,
-            object,
-            int,
-            object,
-            float,
-            float,
-            object,
-            int,
-            object,
-            float,
-            float,
-            object,
-            int,
             object,
             object,
             object,
             int,
             object,
+
+            float,
+            float,
+            object,
+            int,
+            object,
+
+            float,
+            float,
+            object,
+            int,
+            object,
+
+            float,
+            float,
+            object,
+            int,
+            object,
+
+            object,
+            object,
+            int,
+            object,
+
             float,
             float,
             int,

@@ -1,22 +1,29 @@
 import numpy as np  # arrays
-from astropy.table import MaskedColumn, Table, setdiff
+from astropy.table import (
+    MaskedColumn,
+    Table,
+    setdiff,
+    vstack,
+)
 from building import (
     assign_source_idref,
     assign_type,
     best_para,
     best_para_id,
     best_para_membership,
-    best_star_basic,
     idsjoin,
     provider_data_merging,
     build_sources_table,
     build_provider_table,
+    create_best_para_star_basic,
 )
-from sdata import empty_dict
+from sdata import empty_dict, empty_dict_wit_columns
 from provider.utils import (
     create_provider_table,
     create_sources_table,
 )
+from utils.io import string_to_object_whole_dict
+
 
 def dicts_with_providers():
     prov_tables_dict = {
@@ -677,7 +684,8 @@ def test_provider_data_merging():
     )  # Should not change when merging empty data
 
 def test_best_star_basic_fills_missing_parameter_group_from_duplicate_provider_rows():
-    cat = {
+
+    cat2 = {
         "star_basic": Table(
             {
                 "main_id": ["star1", "star1"],
@@ -695,10 +703,20 @@ def test_best_star_basic_fills_missing_parameter_group_from_duplicate_provider_r
             }
         )
     }
+    cat2 = string_to_object_whole_dict(cat2)
+    cat = empty_dict_wit_columns.copy()
+    cat["star_basic"] = vstack([cat["star_basic"],cat2["star_basic"]])
+    print(cat["star_basic"])
 
-    result = best_star_basic(cat)["star_basic"]
+    result = create_best_para_star_basic(cat["star_basic"])
 
     assert len(result) == 1
+    # huch why is this failing, function not doing what it should??
+    # issue is that if no data given in a para for all main_id it returns both
+    # hm ingesting class does not lead to best_para...
+    # class_qual columns does not exist. if I add it in sdata empty column dict I run into other error
+    # updated also in para to include it in sdata but still same issue
+    # had a semicolon missing, now a different error
     assert result["main_id"][0] == "star1"
 
     # Coordinate group comes from the best coordinate row.
@@ -719,7 +737,7 @@ def test_best_star_basic_fills_missing_parameter_group_from_duplicate_provider_r
 
 
 def test_best_star_basic_does_not_mix_columns_inside_sptype_group():
-    cat = {
+    cat2 = {
         "star_basic": Table(
             {
                 "main_id": ["star1", "star1"],
@@ -738,7 +756,11 @@ def test_best_star_basic_does_not_mix_columns_inside_sptype_group():
         )
     }
 
-    result = best_star_basic(cat)["star_basic"]
+    cat2 = string_to_object_whole_dict(cat2)
+    cat = empty_dict_wit_columns.copy()
+    cat["star_basic"] = vstack([cat["star_basic"], cat2["star_basic"]])
+
+    result = create_best_para_star_basic(cat["star_basic"])
 
     assert len(result) == 1
 
