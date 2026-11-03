@@ -343,7 +343,6 @@ def _get_parameter_columns(para: str) -> list[str]:
         cols.extend(
             [
                 f"{para}_value",
-                f"{para}_rel",
                 f"{para}_err_max",
                 f"{para}_err_min",
                 f"{para}_qual",

@@ -20,5 +20,3 @@ def test_best_parameters_ingestion_loop():
         if para == "plx":
             for i in range(len(parameter_groups[para]["columns"])):
                 assert parameter_groups[para]["columns"][i] == plx_colnames[i]
-
-    assert False
