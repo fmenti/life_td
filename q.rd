@@ -1476,9 +1476,9 @@ tables may change at any time without prior warning.
         <code>
             self.assertHasStrings(
                 "Matched: 3",
-                "*  14 Her c", # planet id (main ids can change over time)
+                "*  14 Her d", # planet id (main ids can change over time)
                 "17.90",  # Distance
-                "7.1")  # planet mass of planet c (can change over time)
+                "0.28")  # planet mass of planet d (can change over time)
         </code>
         </regTest>
 
