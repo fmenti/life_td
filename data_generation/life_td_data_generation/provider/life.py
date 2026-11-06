@@ -53,7 +53,7 @@ def assign_null_values(table, index):
 
 def deal_with_leading_d_sptype(table, index):
     """
-    Deals with old annotation of leading d in spectraltype representing dwarf star.
+    Deals with old annotation of leading d in spectral type representing dwarf star.
 
     :param table: Table containing column 'sptype_string'.
     :type table: astropy.table.table.Table
@@ -322,7 +322,8 @@ def _match_spectral_type_to_model(sptype, model_param):
                     "Mass": model_param["Mass"][i],
                 }
 
-        # If no .5 match found, fall back to the integer value (e.g., K2.5V -> K2V)
+        # If no .5 match found, fall back to the integer value
+        # (e.g., K2.5V -> K2V)
         fallback_sptype = (
             sptype[0] + sptype[1] + sptype[4:]
         )  # e.g., 'K' + '2' + 'V'
@@ -353,7 +354,8 @@ def spec(cat):
         simbad names, no binary subtypes and modeled parameters.
     :rtype: astropy.table.table.Table
     """
-    # Do I even need realspectype function? I can just take cat where class_temp not empty
+    # Do I even need realspectype function? I can just take cat where
+    # class_temp not empty
     cat = realspectype(cat)
     # model_param=votable.parse_single_table(\
     # f"catalogs/model_param.xml").to_table()
@@ -399,7 +401,8 @@ def create_star_basic_table():
     life_star_basic["dist_st_value"] = np.round(
         life_star_basic["dist_st_value"], 2
     )
-    # null value treatment: plx_value has masked entries therefore distance_values too
+    # null value treatment: plx_value has masked entries therefore
+    # distance_values too
     # ref:
     life_star_basic["dist_st_ref"] = MaskedColumn(
         dtype=object,
@@ -418,7 +421,8 @@ def create_star_basic_table():
             )
         )
     ]
-    # can I do the same transformation with the errors? -> try on some examples and compare to simbad ones
+    # can I do the same transformation with the errors? -> try on some examples
+    # and compare to simbad ones
     life_star_basic["coo_gal_err_angle"] = [
         -1 for j in range(len(life_star_basic))
     ]
@@ -471,10 +475,13 @@ def create_life_helpertable(life):
     """
     # applying model from E. E. Mamajek on SIMBAD spectral type
 
-    # instead of only using objects with simbad type "st" take all except planets
+    # instead of only using objects with simbad type "st" take all except
+    # planets
     # because later db processing can still change a sy to a st value
 
-    # tbd: check if I need to adapt someting because motvation was: if I take only st objects from sim_star_basic I don't loose objects during realspectype
+    # tbd: check if I need to adapt someting because motvation was:
+    # if I take only st objects from sim_star_basic I don't loose objects
+    # during realspectype
 
     [sim_objects] = load(["sim_objects"], stringtoobjects=False)
 
@@ -591,7 +598,8 @@ def triple_star_handling():
     [wds_ident, wds_h_link] = load(["wds_ident", "wds_h_link"])
 
     triple_ident = wds_ident[
-        sorting_number_of_id(wds_ident["main_id"], 3, wds_ident["main_id"])
+        sorting_number_of_id(wds_ident["main_id"], 3,
+                             wds_ident["main_id"])
     ]
     print(triple_ident)
     triple_systems = unique(triple_ident, keys="main_id")["main_id"]
@@ -632,7 +640,8 @@ def provider_life():
     """
     life = create_star_basic_table()
     life_helptab = create_life_helpertable(life)
-    # removing this column because I had to adapt it where there was a leadin d entry but change not useful for db just for
+    # removing this column because I had to adapt it where there was a leadin d
+    # entry but change not useful for db just for
     # life parameter creation
     life["star_basic"].remove_column("sptype_string")
     life["mes_teff_st"] = create_mes_teff_st_table(life_helptab)
