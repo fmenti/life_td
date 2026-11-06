@@ -16,7 +16,7 @@ from astropy.table import (
     vstack,
 )
 from pyvo.dal import DALServiceError, TAPService
-from utils.io import load
+from utils.io import load, save
 
 
 def sorting_number_of_id(input_column, occurences, match_column):
@@ -102,6 +102,7 @@ def query(
     upload_tables: list[table.Table] | None = None,
     no_description=True,
     sync=False,
+    name: str = "unnamed_query"
 ) -> table.Table:
     """
     Perform a TAP query against a service.
@@ -146,6 +147,7 @@ def query(
         # removing descriptions because merging of data leaves wrong description
         cat = strip_table_metadata(cat)
         print("Service is UP and running.")
+        save([cat],[name])
         return cat
 
     except DALServiceError as e:
@@ -369,6 +371,7 @@ def distance_cut(
             cat, sim["temp1", "main_id"], keys_left=colname, keys_right="temp1"
         )
         cat.remove_columns(["temp1"])
+    cat = unique(cat)
     return cat
 
 
