@@ -3,7 +3,14 @@ Generates the data for the database for the provider gaia.
 """
 
 import numpy as np  # arrays
-from astropy.table import Table, join, setdiff, vstack, Column
+from astropy.table import (
+    Table,
+    join,
+    setdiff,
+    vstack,
+    unique,
+    Column
+)
 from provider.assign_quality_funcs import assign_quality
 from provider.utils import (
     create_provider_table,
@@ -17,10 +24,12 @@ from pyvo.dal import TAPService
 from sdata import empty_dict
 
 # self created modules
-from utils.io import save
+from utils.io import save, load
+
+gaia_ref = "2016A&A...595A...1G"
 
 
-def create_gaia_helpertable(distance_cut_in_pc):
+def create_gaia_helpertable(distance_cut_in_pc,temp):
     """
     Creates helper table.
 
@@ -28,6 +37,8 @@ def create_gaia_helpertable(distance_cut_in_pc):
     use the synchronous query is used.
 
     :param float distance_cut_in_pc: Distance up to which stars are included.
+    :param temp: If ``True``, load cached helper data instead of querying.
+    :type temp: bool
     :returns: Helper table.
     :rtype: astropy.table.table.Table
     """
@@ -37,32 +48,38 @@ def create_gaia_helpertable(distance_cut_in_pc):
 
     gaia = empty_dict.copy()
     gaia["provider"] = create_provider_table(
-        "Gaia", "https://gea.esac.esa.int/tap-server/tap", "2016A&A...595A...1G"
+        "Gaia", "https://gea.esac.esa.int/tap-server/tap", gaia_ref
     )
 
-    # query
-    adql_query = """
-    SELECT s.source_id ,p.mass_flame, p.radius_flame,
-        p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame,
-        p.teff_gspspec_lower, p.teff_gspspec_upper, p.flags_gspspec,
-        s.ra AS coo_ra, s.dec AS coo_dec
-    FROM gaiadr3.gaia_source as s
-        JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
-            LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
-    WHERE s.parallax >=""" + str(plx_in_mas_cut)
+    if temp:
+        print(" loading...")
+        [gaia_helptab] = load(["gaia_helptab_query"])
+    else:
+        # query
+        adql_query = """
+        SELECT s.source_id ,p.mass_flame, p.radius_flame,
+            p.teff_gspphot, p.teff_gspspec, m.nss_solution_type, p.age_flame,
+            p.teff_gspspec_lower, p.teff_gspspec_upper, p.flags_gspspec,
+            s.ra AS coo_ra, s.dec AS coo_dec
+        FROM gaiadr3.gaia_source as s
+            JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
+                LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
+        WHERE s.parallax >=""" + str(plx_in_mas_cut)
 
-    try:
-        gaia_helptab = query(
-            gaia["provider"]["provider_url"][0], adql_query, sync=True
-        )
+        try:
+            gaia_helptab = query(
+                gaia["provider"]["provider_url"][0], adql_query, sync=False,
+                name = "gaia_helptab_query"
+            )
+
+        except:
+            # because of bug in gaia server where async not working currently
+            gaia_helptab = query(
+                gaia["provider"]["provider_url"][0], adql_query, sync=True,
+                name="gaia_helptab_query"
+            )
         if len(gaia_helptab) > 1500000:
             print("query might be truncated", len(gaia_helptab))
-
-    except:
-        # because of bug in gaia server where async not working currently
-        service = TAPService(gaia["provider"]["provider_url"][0])
-        result = service.run_sync(adql_query.format(**locals()), maxrec=160000)
-        gaia_helptab = result.to_table()
 
     gaia_helptab.rename_columns(
         ["mass_flame", "radius_flame"], ["mass_st_value", "radius_st_value"]
@@ -95,15 +112,23 @@ def create_ident_table(gaia_helptab):
     # should be gaia_id, main_id, ref minus 40 objects that have only gaia_id
     gaia_ident = gaia_sim_idmatch.copy()
     gaia_ident.rename_columns(["gaia_id", "ref"], ["id", "id_ref"])
-    gaia_ident["id_ref"] = gaia_ident["id_ref"].astype(str)
+    gaia_ident["id_ref"] = gaia_ident["id_ref"].astype(object)
     # creating simbad main_id ident rows
     sim_main_id_ident = Table()
     sim_main_id_ident["main_id"] = gaia_ident["main_id"]
     sim_main_id_ident["id"] = gaia_ident["main_id"]
-    sim_main_id_ident["id_ref"] = [
-        "2000A&AS..143....9W" for j in range(len(gaia_ident))
-    ]
+    sim_ref = "2000A&AS..143....9W"
+    sim_main_id_ident["id_ref"] = Column(data = [
+        sim_ref for _ in range(len(sim_main_id_ident))
+        ], dtype=object)
+    condition = np.isin(gaia_ident["id"],
+                                 sim_main_id_ident["main_id"])
+    gaia_ident["id_ref"][condition] = (
+        [sim_ref for _ in range(len(gaia_ident[condition]))])
     gaia_ident = vstack([gaia_ident, sim_main_id_ident])
+
+    gaia_ident = unique(gaia_ident)
+
     # now need to add the 40 objects that have only gaia_identifiers
     # for setdiff need both columns to be same type
     for col in ["gaia_id","ref"]:
@@ -114,6 +139,7 @@ def create_ident_table(gaia_helptab):
     )
     gaia_only_id["main_id"] = gaia_only_id["gaia_id"]
     gaia_only_id.rename_columns(["gaia_id", "ref"], ["id", "id_ref"])
+    gaia_only_id = gaia_only_id[gaia_only_id["id_ref"] == gaia_ref]
     # for vstack need both columns to be same type
     for col in gaia_ident.colnames:
         gaia_ident[col] = gaia_ident[col].astype(object)
@@ -351,17 +377,19 @@ def create_gaia_sources_table(gaia):
     return gaia_sources
 
 
-def provider_gaia(distance_cut_in_pc):
+def provider_gaia(distance_cut_in_pc,temp: bool = False):
     """
     Obtains and arranges gaia data.
 
     :param float distance_cut_in_pc: Distance up to which stars are included.
+    :param temp: If ``True``, load cached helper data instead of querying.
+    :type temp: bool
     :returns: Dictionary with names and astropy tables containing
         reference data, provider data, object data, identifier data,
         stellar effective temperature, radius, mass and binarity data.
     :rtype: dict(str,astropy.table.table.Table)
     """
-    gaia_helptab, gaia = create_gaia_helpertable(distance_cut_in_pc)
+    gaia_helptab, gaia = create_gaia_helpertable(distance_cut_in_pc,temp)
     gaia["ident"], gaia_helptab = create_ident_table(gaia_helptab)
     gaia["objects"] = create_objects_table(gaia_helptab, gaia)
     gaia["mes_binary"] = create_mes_binary_table(gaia)
