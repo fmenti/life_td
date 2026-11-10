@@ -611,6 +611,12 @@ def create_star_basic_table(stars: Table) -> Table:
         str
     )
     sim_star_basic["sptype_qual"] = sim_star_basic["sptype_qual"].astype(str)
+    sim_star_basic["sptype_qual"] = nullvalues(sim_star_basic,
+                                               "sptype_qual",
+                                               "?")
+    sim_star_basic["sptype_qual"] = replace_value(sim_star_basic,
+                                                  "sptype_qual", "",
+                                                  sim_star_basic["sptype_qual"].fill_value)
     sim_star_basic["sptype_ref"] = sim_star_basic["sptype_ref"].astype(str)
     return sim_star_basic
 
