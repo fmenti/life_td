@@ -568,7 +568,7 @@ tables may change at any time without prior warning.
                 <map key="dist_st_err" nullExpr="1e+20" />
                 <map key="dist_st_qual" nullExpr="'?'" />
                 <map key="dist_st_source_idref" nullExpr="999999" />
-                <map key="sptype_string" nullExpr="'None'" />
+                <map key="sptype_string" nullExpr="'?'" />
                 <map key="sptype_err" nullExpr="1e+20" />
                 <map key="sptype_qual" nullExpr="'?'" />
                 <map key="sptype_source_idref" nullExpr="999999" />
