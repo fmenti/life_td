@@ -13,9 +13,13 @@ from provider.utils import (
     initiate_columns,
     replace_value,
     sorting_number_of_id,
+    lower_quality,
 )
 from sdata import empty_dict
 from utils.io import Path, load, save, stringtoobject
+
+# hardcoded stuff
+life_ref = "2022A&A...664A..21Q"
 
 
 def extract_lum_class(nr, sptype):
@@ -48,6 +52,7 @@ def assign_null_values(table, index):
     table["class_temp_nr"][index] = "?"
     table["class_lum"][index] = "?"
     table["class_ref"][index] = "?"
+    table["class_qual"][index] = "?"
     return table
 
 
@@ -90,6 +95,7 @@ def decimal_sptype(i, sptype, table):
         table["class_lum"][i] = extract_lum_class(4, sptype)
     else:
         table["class_lum"][i] = "V"  # assumption
+        table["class_qual"][i] = lower_quality(table["class_qual"][i])
     return table
 
 
@@ -123,8 +129,10 @@ def assign_diff_lum_classes(i, sptype, table):
             table["class_lum"][i] = extract_lum_class(2, sptype)
         else:
             table["class_lum"][i] = "V"  # assumption
+            table["class_qual"][i] = lower_quality(table["class_qual"][i])
     else:
         table["class_lum"][i] = "V"  # assumption
+        table["class_qual"][i] = lower_quality(table["class_qual"][i])
     return table
 
 
@@ -149,9 +157,9 @@ def sptype_string_to_class(table, ref):
     """
     table = initiate_columns(
         table,
-        ["class_temp", "class_temp_nr", "class_lum", "class_ref"],
-        [object, object, object, object],
-        [True, True, True, True],
+        ["class_temp", "class_temp_nr", "class_lum", "class_ref","class_qual"],
+        [object, object, object, object,object],
+        [True, True, True, True,True],
     )
 
     for i in range(len(table)):
@@ -172,6 +180,7 @@ def sptype_string_to_class(table, ref):
             table["class_temp"][i] = sptype[0]
             table["class_ref"][i] = ref
             table = assign_diff_lum_classes(i, sptype, table)
+            table["class_qual"][i] = lower_quality(table["sptype_qual"][i])
         else:
             table = assign_null_values(table, i)
         table["sptype_string"][i] = sptype
@@ -384,7 +393,7 @@ def create_star_basic_table():
     """
     life = empty_dict.copy()
     life["provider"] = create_provider_table(
-        "LIFE", "www.life-space-mission.com", "2022A&A...664A..21Q"
+        "LIFE", "www.life-space-mission.com", life_ref
     )
 
     # galactic coordinates:  transformed from simbad ircs coordinates using astropy
@@ -455,6 +464,7 @@ def create_star_basic_table():
         "dist_st_value",
         "dist_st_ref",
         "sptype_string",
+        "sptype_qual"
     ]
 
     life_star_basic = sptype_string_to_class(
@@ -643,7 +653,7 @@ def provider_life():
     # removing this column because I had to adapt it where there was a leadin d
     # entry but change not useful for db just for
     # life parameter creation
-    life["star_basic"].remove_column("sptype_string")
+    life["star_basic"].remove_columns(["sptype_string", "sptype_qual"])
     life["mes_teff_st"] = create_mes_teff_st_table(life_helptab)
     life["mes_radius_st"] = create_mes_radius_st_table(life_helptab)
     life["mes_mass_st"] = create_mes_mass_st_table(life_helptab)
