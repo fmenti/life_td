@@ -668,10 +668,12 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
             "binary_flag",
             "binary_qual",
             "mass_st_qual",
+            "sptype_string",
             "sptype_qual",
+            "sptype_ref",
             "class_temp",
             "class_temp_nr",
-            "sptype_ref"] +
+        ] +
             mag_columns[1] +
             mag_columns[3] +
             mag_columns[4],
