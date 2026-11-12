@@ -95,6 +95,49 @@ def strip_table_metadata(cat):
         col.description = None
     return cat
 
+def sync_or_async_query(link: str,
+    adql_query: str,
+    upload_tables: list[table.Table] | None = None,
+    no_description=True,
+    name: str = "unnamed_query"
+) -> table.Table:
+    """
+    Perform a TAP query against a service.
+
+    If upload tables are provided, they are made available to the service
+    as TAP_UPLOAD tables.
+
+    :param link: Service access URL.
+    :type link: str
+    :param adql_query: Query to execute (ADQL).
+    :type adql_query: str
+    :param upload_tables: Optional tables to upload for join operations.
+    :type upload_tables: list[astropy.table.table.Table]
+    :returns: Result table returned by the TAP service.
+    :rtype: astropy.table.table.Table
+    """
+    try:
+        result = query(
+            link,
+            adql_query,
+            upload_tables=upload_tables,
+            no_description=no_description,
+            sync=False,
+            name=name
+        )
+
+    except:
+        result = query(
+            link,
+            adql_query,
+            upload_tables=upload_tables,
+            no_description=no_description,
+            sync=True,
+            name=name
+        )
+    if len(result) > 1500000:
+        print("query might be truncated", len(result))
+    return result
 
 def query(
     link: str,
@@ -126,10 +169,10 @@ def query(
         service = TAPService(link)
 
         if sync:
-            print("Running synchronously")
+            print("Trying to run synchronously")
             run_query = service.run_sync
         else:
-            print("Running asynchronously")
+            print("Trying to run asynchronously")
             run_query = service.run_async
 
         if upload_tables == []:
@@ -146,7 +189,7 @@ def query(
 
         # removing descriptions because merging of data leaves wrong description
         cat = strip_table_metadata(cat)
-        print("Service is UP and running.")
+        print("Service successfully accessed. Saving return as ",name)
         save([cat],[name])
         return cat
 
