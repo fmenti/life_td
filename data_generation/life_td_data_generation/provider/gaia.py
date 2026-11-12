@@ -16,7 +16,7 @@ from provider.utils import (
     create_provider_table,
     create_sources_table,
     ids_from_ident,
-    query,
+    sync_or_async_query,
     replace_value,
     distance_cut,
 )
@@ -66,20 +66,12 @@ def create_gaia_helpertable(distance_cut_in_pc,temp):
                 LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id
         WHERE s.parallax >=""" + str(plx_in_mas_cut)
 
-        try:
-            gaia_helptab = query(
-                gaia["provider"]["provider_url"][0], adql_query, sync=False,
+
+        gaia_helptab = sync_or_async_query(
+                gaia["provider"]["provider_url"][0], adql_query,
                 name = "gaia_helptab_query"
             )
 
-        except:
-            # because of bug in gaia server where async not working currently
-            gaia_helptab = query(
-                gaia["provider"]["provider_url"][0], adql_query, sync=True,
-                name="gaia_helptab_query"
-            )
-        if len(gaia_helptab) > 1500000:
-            print("query might be truncated", len(gaia_helptab))
 
     gaia_helptab.rename_columns(
         ["mass_flame", "radius_flame"], ["mass_st_value", "radius_st_value"]
