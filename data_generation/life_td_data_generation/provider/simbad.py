@@ -13,11 +13,17 @@ from provider.utils import (
     create_sources_table,
     fetch_main_id,
     nullvalues,
-    query,
     replace_value,
+    sync_or_async_query,
 )
-from sdata import empty_dict, filter_abbrev,mag_columns
-from utils.io import save
+from sdata import (
+    empty_dict,
+    filter_abbrev,
+    mag_columns,
+    sim_backup_server,
+    sim_server,
+)
+from utils.io import save, load
 
 # ---------------define queries--------------------------------------
 
@@ -95,6 +101,7 @@ adql_upload_queries = {
 def create_simbad_helpertable(
     distance_cut_in_pc: float,
     test_objects: Sequence[str] | None,
+    temp,
 ) -> tuple[Table, dict[str, Table]]:
     """
     Create the main SIMBAD helper table.
@@ -114,29 +121,34 @@ def create_simbad_helpertable(
     sim = empty_dict.copy()
     sim["provider"] = create_provider_table(
         "SIMBAD",
-        "http://simbad.u-strasbg.fr:80/simbad/sim-tap",
+        sim_backup_server,
         "2000A&AS..143....9W",
     )
 
     # ------------------querrying----------------------------------------
     # perform query for objects with in distance given
-    sim_helptab = query(
-        sim["provider"]["provider_url"][0], main_adql_queries(plx_cut)
-    )
-    save([sim_helptab], ["sim_helptab_query"])
-    # querries parent and children objects with no parallax value
-    parents_without_plx = query(
-        sim["provider"]["provider_url"][0],
-        adql_upload_queries["sy_without_plx_but_child_with_upload"],
-        [sim_helptab],
-    )
-    save([parents_without_plx], ["parents_without_plx_query"])
-    children_without_plx = query(
-        sim["provider"]["provider_url"][0],
-        adql_upload_queries["pl_without_plx_but_host_with_upload"],
-        [sim_helptab],
-    )
-    save([children_without_plx], ["children_without_plx_query"])
+    if temp:
+        [sim_helptab,parents_without_plx,children_without_plx] = load(
+            ["sim_helptab_query","parents_without_plx_query",
+             "children_without_plx_query"])
+    else:
+        sim_helptab = sync_or_async_query(
+            sim["provider"]["provider_url"][0], main_adql_queries(plx_cut),
+            name="sim_helptab_query"
+        )
+        # querries parent and children objects with no parallax value
+        parents_without_plx = sync_or_async_query(
+            sim["provider"]["provider_url"][0],
+            adql_upload_queries["sy_without_plx_but_child_with_upload"],
+            [sim_helptab],
+            name="sim_parents_without_plx_query"
+        )
+        children_without_plx = sync_or_async_query(
+            sim["provider"]["provider_url"][0],
+            adql_upload_queries["pl_without_plx_but_host_with_upload"],
+            [sim_helptab],
+            name="sim_children_without_plx_query"
+        )
 
     test_objects = np.array(test_objects)
     if len(test_objects) > 0:
@@ -216,7 +228,6 @@ def create_simbad_helpertable(
                 np.where(np.isin(test_objects, sim_helptab["main_id"]))
             ],
         )
-
     return sim_helptab, sim
 
 
@@ -391,26 +402,16 @@ def expanding_helpertable_stars(
     stars["plx_qual"] = stars["plx_qual"].astype(object)
     stars = replace_value(stars, "plx_qual", "", stars["plx_qual"].fill_value)
 
-
-    # Spectral type reference: fill empty with provider bibcode where value set.
-    non_empty_sptype = np.where(stars["sptype_string"] != "")
-    stars[non_empty_sptype] = replace_value(
-        stars[non_empty_sptype],
-        "sptype_ref",
-        "",
-        sim["provider"]["provider_bibcode"][0],
-    )
-
-    # Make the remaining ones into masked entries.
-    stars["sptype_ref"] = MaskedColumn(stars["sptype_ref"])
-    stars["sptype_ref"].mask[np.where(stars["sptype_ref"] == "")] = [
-        True for _ in range(len(stars[np.where(stars["sptype_ref"] == "")]))
+    stars["sptype_string"] = MaskedColumn(stars["sptype_string"])
+    stars["sptype_string"][stars["sptype_string"] == ""].mask = [
+        True for _ in range(len(stars[stars["sptype_string"] == ""]))
     ]
 
-    # Handle parallax and coordinate references similarly.
+    # Handle parallax, sptectral type and coordinate references:
+    # fill empty with provider bibcode where value set.
     for colname, colval in zip(
-        ["plx_ref", "coo_ref"],
-        ["plx_value", "coo_ra"],
+        ["plx_ref", "coo_ref","sptype_ref"]+ mag_columns[1],
+        ["plx_value", "coo_ra","sptype_string"]+ mag_columns[0],
     ):
         stars[colname] = MaskedColumn(stars[colname])
         mask_has_val = np.where(stars[colval].mask == False)
@@ -433,7 +434,7 @@ def expanding_helpertable_stars(
     return stars
 
 
-def create_ident_table(sim_helptab: Table, sim: dict[str, Table]) -> Table:
+def create_ident_table(sim_helptab: Table, sim: dict[str, Table],temp) -> Table:
     """
     Create the identifier table.
 
@@ -447,11 +448,15 @@ def create_ident_table(sim_helptab: Table, sim: dict[str, Table]) -> Table:
     :returns: Identifier table with id and id_ref columns.
     :rtype: astropy.table.Table
     """
-    sim_ident = query(
-        sim["provider"]["provider_url"][0],
-        adql_upload_queries["ids_from_upload"],
-        [sim_helptab["oid", "main_id"][:].copy()],
-    )
+    if temp:
+        [sim_ident] = load(["sim_ident_query"])
+    else:
+        sim_ident = sync_or_async_query(
+            sim["provider"]["provider_url"][0],
+            adql_upload_queries["ids_from_upload"],
+            [sim_helptab["oid", "main_id"][:].copy()],
+            name = "sim_ident_query"
+        )
     sim_ident["id_ref"] = [
         sim["provider"]["provider_bibcode"][0] for _ in range(len(sim_ident))
     ]
@@ -464,6 +469,7 @@ def create_h_link_table(
     sim_helptab: Table,
     sim: dict[str, Table],
     stars: Table,
+    temp: bool
 ) -> Table:
     """
     Create the hierarchical link (parent-child) table.
@@ -491,11 +497,15 @@ def create_h_link_table(
     sim_h_link = sim_h_link[
         np.where(np.isin(sim_h_link["parent_oid"], stars["oid"]))
     ]
-
-    # Resolve parent oid to main_id.
-    sim_h_link = fetch_main_id(
-        sim_h_link, OidCreator(name="parent_main_id", colname="parent_oid")
-    )
+    if temp:
+        [sim_h_link] = load(["sim_h_link_fetched_main_id"])
+    else:
+        # Resolve parent oid to main_id.
+        sim_h_link = fetch_main_id(
+            sim_h_link, OidCreator(name="parent_main_id", colname="parent_oid"),
+            sim_backup_server
+        )
+        save([sim_h_link],["sim_h_link_fetched_main_id"])
     sim_h_link.remove_column("parent_oid")
 
     # Convert to int and normalize nulls to a sentinel value for joins.
@@ -611,12 +621,12 @@ def create_star_basic_table(stars: Table) -> Table:
         str
     )
     sim_star_basic["sptype_qual"] = sim_star_basic["sptype_qual"].astype(str)
-    sim_star_basic["sptype_qual"] = nullvalues(sim_star_basic,
+    sim_star_basic = nullvalues(sim_star_basic,
                                                "sptype_qual",
                                                "?")
-    sim_star_basic["sptype_qual"] = replace_value(sim_star_basic,
+    sim_star_basic = replace_value(sim_star_basic,
                                                   "sptype_qual", "",
-                                                  sim_star_basic["sptype_qual"].fill_value)
+                                                  "?")
     sim_star_basic["sptype_ref"] = sim_star_basic["sptype_ref"].astype(str)
     return sim_star_basic
 
@@ -624,6 +634,7 @@ def create_star_basic_table(stars: Table) -> Table:
 def provider_simbad(
     distance_cut_in_pc: float,
     test_objects: Sequence[str] | None = None,
+    temp: bool = False,
 ) -> dict[str, Table]:
     """
     Obtain and arrange SIMBAD data.
@@ -645,11 +656,11 @@ def provider_simbad(
     _test_objects = list(test_objects) if test_objects is not None else []
 
     sim_helptab, sim = create_simbad_helpertable(
-        distance_cut_in_pc, _test_objects
+        distance_cut_in_pc, _test_objects,temp
     )
     stars = creating_helpertable_stars(sim_helptab)
-    sim["ident"] = create_ident_table(sim_helptab, sim)
-    sim["h_link"] = create_h_link_table(sim_helptab, sim, stars)
+    sim["ident"] = create_ident_table(sim_helptab, sim,temp)
+    sim["h_link"] = create_h_link_table(sim_helptab, sim, stars,temp)
     stars = expanding_helpertable_stars(sim_helptab, sim, stars)
     sim["objects"] = create_objects_table(sim_helptab, stars)
     sim["sources"] = create_sim_sources_table(stars, sim)

@@ -40,7 +40,8 @@ def query_exomercat(adql_query: str, exo: dict) -> Table:
         "http://archives.ia2.inaf.it/vo/tap/projects",
         "2020A&C....3100370A",
     )  # change bibcode once paper on ads
-    exo_helptab = query(exo["provider"]["provider_url"][0], adql_query)
+    exo_helptab = query(exo["provider"]["provider_url"][0], adql_query,
+                        name = "exomercat")
     return exo_helptab
 
 
