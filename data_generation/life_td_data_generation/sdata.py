@@ -10,6 +10,11 @@ from __future__ import annotations
 
 from astropy.table import Table
 
+sim_backup_server = "https://simbad.idia.ac.za/simbad/sim-tap/"
+sim_server = "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
+vizier_server = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap"
+vizier_backup_server = "https://vizier.cfa.harvard.edu/viz-bin/VizieR"
+
 
 FILTER_ABBREV = ["i", "j", "u", "g", "k", "u_sdss"]
 PROVIDERS = ["sim", "sdb", "wds", "exo", "life", "gaia"]

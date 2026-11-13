@@ -16,7 +16,11 @@ from provider.utils import (
     query,
     replace_value,
 )
-from sdata import empty_dict
+from sdata import (
+    empty_dict,
+    vizier_server,
+    vizier_backup_server,
+)
 from utils.io import load, save
 
 
@@ -143,7 +147,8 @@ def create_wds_helptab(
     :rtype: astropy.table.Table
     """
     print(" querying VizieR for WDS...")
-    wds_querried = query(wds["provider"]["provider_url"][0], adql_query[0])
+    wds_querried = query(wds["provider"]["provider_url"][0], adql_query[0],
+                         name="wds_querry")
 
     # Match WDS objects with SIMBAD-derived objects to enforce the distance cut.
     for col in ["sim_wds_id", "system_name", "primary", "secondary"]:
@@ -226,7 +231,7 @@ def create_wds_helpertable(
     wds: dict[str, Table] = empty_dict.copy()
     wds["provider"] = create_provider_table(
         "WDS",
-        "http://tapvizier.u-strasbg.fr/TAPVizieR/tap",
+        vizier_server,
         "2001AJ....122.3466M",
     )
 

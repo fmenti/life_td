@@ -17,6 +17,7 @@ from astropy.table import (
 )
 from pyvo.dal import DALServiceError, TAPService
 from utils.io import load, save
+from sdata import sim_server
 
 
 def sorting_number_of_id(input_column, occurences, match_column):
@@ -125,6 +126,7 @@ def sync_or_async_query(link: str,
             sync=False,
             name=name
         )
+        # moves on after trying for 10 minutes
 
     except:
         result = query(
@@ -256,7 +258,6 @@ def fill_sources_table(
                 )
             else:
                 cat_reflist.extend(cat[ref_columns[k]])
-
         cat_sources["ref"] = cat_reflist
         cat_sources = unique(cat_sources)
 
@@ -360,6 +361,7 @@ class IdentifierCreator:
 def fetch_main_id(
     cat: table.Table,
     id_creator: object = OidCreator(name="main_id", colname="oid"),
+    TAP_service = sim_server
 ) -> table.Table:
     """
     Attach SIMBAD main_id to a table via an ADQL join strategy.
@@ -377,7 +379,6 @@ def fetch_main_id(
     :rtype: astropy.table.table.Table
     """
     # tbd option to match on position instead of main_id or oid
-    TAP_service = "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
     main_id_query = id_creator.create_main_id_query()
     return query(TAP_service, main_id_query, [cat])
 
