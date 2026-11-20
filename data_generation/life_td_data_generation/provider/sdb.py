@@ -11,7 +11,7 @@ from provider.utils import (
     fetch_main_id,
     replace_value,
 )
-from sdata import empty_dict
+from sdata import empty_dict, sim_backup_server
 from utils.io import save, stringtoobject
 
 
@@ -57,6 +57,7 @@ def create_sdb_helpertable(distance_cut_in_pc, sdb_ref, data):
     sdb_helptab = fetch_main_id(
         sdb_helptab,
         IdentifierCreator(name="main_id", colname="sdb_host_main_id"),
+        TAP_service = sim_backup_server
     )
     return sdb_helptab
 

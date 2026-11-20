@@ -19,7 +19,7 @@ from provider.utils import (
     query,
     replace_value,
 )
-from sdata import empty_dict
+from sdata import empty_dict, sim_backup_server
 from utils.io import Path, load, save, stringtoobject
 
 
@@ -190,6 +190,7 @@ def _fetch_sim_names(exo_helptab: Table) -> Table:
         IdentifierCreator(  # id_creator config for SIMBAD-planet lookup
             name="sim_planet_main_id", colname="planet_main_id"
         ),
+        TAP_service=sim_backup_server
     )
     exo_helptab = join(
         exo_helptab,
