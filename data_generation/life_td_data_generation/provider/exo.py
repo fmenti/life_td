@@ -6,7 +6,7 @@ Distance cut is performed by joining on life_db simbad objects.
 import numpy as np  # arrays
 from astropy.io import ascii
 from astropy.table import Column, Table, join, setdiff, unique, vstack
-from provider.assign_quality_funcs import assign_quality
+from provider.assign_quality_funcs import assign_quality, betterthan
 from provider.utils import (
     IdentifierCreator,
     create_provider_table,
@@ -16,10 +16,15 @@ from provider.utils import (
     ids_from_ident,
     lower_quality,
     nullvalues,
-    query,
+    sync_or_async_query,
     replace_value,
 )
-from sdata import empty_dict, sim_backup_server
+from sdata import (
+    empty_dict,
+    sim_backup_server,
+    exo_server,
+    exo_ref,
+)
 from utils.io import Path, load, save, stringtoobject
 
 
@@ -37,10 +42,10 @@ def query_exomercat(adql_query: str, exo: dict) -> Table:
     """
     exo["provider"] = create_provider_table(
         "Exo-MerCat",
-        "http://archives.ia2.inaf.it/vo/tap/projects",
-        "2020A&C....3100370A",
+        exo_server,
+        exo_ref,
     )  # change bibcode once paper on ads
-    exo_helptab = query(exo["provider"]["provider_url"][0], adql_query,
+    exo_helptab = sync_or_async_query(exo["provider"]["provider_url"][0], adql_query,
                         name = "exomercat")
     return exo_helptab
 
@@ -59,8 +64,8 @@ def load_exomercat(exo: dict) -> Table:
     """
     exo["provider"] = create_provider_table(
         "Exo-MerCat",
-        "http://archives.ia2.inaf.it/vo/tap/projects",
-        "2020A&C....3100370A",
+        exo_server,
+        exo_ref,
         "2024-12-13",
     )
     exo_helptab = ascii.read(
@@ -402,30 +407,6 @@ def create_para_exo_mes_mass_pl(
     # remove placeholder null values
     table = table[np.where(table["mass_pl_value"] != 1e20)]
     return table
-
-
-def betterthan(qual1: str, qual2: str) -> bool:
-    """
-    Compare Exo-MerCat/DB quality flags.
-
-    Returns True if qual1 is strictly better than qual2 according to
-    the order A > B > C > D > E > ?.
-
-    :param qual1: Candidate quality flag.
-    :type qual1: str
-    :param qual2: Other quality flag.
-    :type qual2: str
-    :returns: True if qual1 ranks better than qual2, else False.
-    :rtype: bool
-    """
-    quals = ["A", "B", "C", "D", "E", "?"]
-    for i in [0, 1, 2, 3, 4]:
-        if qual1 == quals[i] and qual2 in quals[i + 1 :]:
-            result = True
-            return result
-        else:
-            result = False
-    return result
 
 
 def bestmass_better_qual(

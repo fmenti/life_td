@@ -133,3 +133,26 @@ def _default_quality(column, special_mode):
     elif special_mode == "sim_binary":
         return "D"
     return "?"  # Default to unknown quality flag
+
+def betterthan(qual1: str, qual2: str) -> bool:
+    """
+    Compare Exo-MerCat/DB quality flags.
+
+    Returns True if qual1 is strictly better than qual2 according to
+    the order A > B > C > D > E > ?.
+
+    :param qual1: Candidate quality flag.
+    :type qual1: str
+    :param qual2: Other quality flag.
+    :type qual2: str
+    :returns: True if qual1 ranks better than qual2, else False.
+    :rtype: bool
+    """
+    quals = ["A", "B", "C", "D", "E", "?"]
+    for i in [0, 1, 2, 3, 4]:
+        if qual1 == quals[i] and qual2 in quals[i + 1 :]:
+            result = True
+            return result
+        else:
+            result = False
+    return result
