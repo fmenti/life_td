@@ -22,6 +22,7 @@ from sdata import (
     mag_columns,
     sim_backup_server,
     sim_server,
+    sim_ref,
 )
 from utils.io import save, load
 
@@ -122,7 +123,7 @@ def create_simbad_helpertable(
     sim["provider"] = create_provider_table(
         "SIMBAD",
         sim_backup_server,
-        "2000A&AS..143....9W",
+        sim_ref,
     )
 
     # ------------------querrying----------------------------------------

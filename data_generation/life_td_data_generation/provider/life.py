@@ -15,11 +15,9 @@ from provider.utils import (
     sorting_number_of_id,
     lower_quality,
 )
-from sdata import empty_dict
+from sdata import empty_dict, life_ref, mamajek_ref
 from utils.io import Path, load, save, stringtoobject
 
-# hardcoded stuff
-life_ref = "2022A&A...664A..21Q"
 
 
 def extract_lum_class(nr, sptype):
@@ -526,7 +524,7 @@ def create_mes_teff_st_table(life_helptab):
     life_mes_teff_st.rename_column("mod_Teff", "teff_st_value")
     life_mes_teff_st = assign_quality(life_mes_teff_st, "teff_st_qual", "model")
     life_mes_teff_st["teff_st_ref"] = [
-        "2013ApJS..208....9P" for i in range(len(life_mes_teff_st))
+        mamajek_ref for i in range(len(life_mes_teff_st))
     ]
     return life_mes_teff_st
 
@@ -546,7 +544,7 @@ def create_mes_radius_st_table(life_helptab):
         life_mes_radius_st, "radius_st_qual", "model"
     )
     life_mes_radius_st["radius_st_ref"] = [
-        "2013ApJS..208....9P" for i in range(len(life_mes_radius_st))
+        mamajek_ref for i in range(len(life_mes_radius_st))
     ]
     return life_mes_radius_st
 
@@ -564,7 +562,7 @@ def create_mes_mass_st_table(life_helptab):
     life_mes_mass_st.rename_column("mod_M", "mass_st_value")
     life_mes_mass_st = assign_quality(life_mes_mass_st, "mass_st_qual", "model")
     life_mes_mass_st["mass_st_ref"] = [
-        "2013ApJS..208....9P" for i in range(len(life_mes_mass_st))
+        mamajek_ref for i in range(len(life_mes_mass_st))
     ]
 
     # specifying stars cocerning multiplicity

@@ -20,6 +20,7 @@ from sdata import (
     empty_dict,
     vizier_server,
     vizier_backup_server,
+    wds_ref,
 )
 from utils.io import load, save
 
@@ -231,8 +232,8 @@ def create_wds_helpertable(
     wds: dict[str, Table] = empty_dict.copy()
     wds["provider"] = create_provider_table(
         "WDS",
-        vizier_server,
-        "2001AJ....122.3466M",
+        vizier_backup_server,
+        wds_ref,
     )
 
     adql_query = [

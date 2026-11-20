@@ -21,12 +21,17 @@ from provider.utils import (
     distance_cut,
 )
 from pyvo.dal import TAPService
-from sdata import empty_dict
+from sdata import (
+    empty_dict,
+    gaia_server,
+    gaia_ref,
+    sim_ref
+)
 
 # self created modules
 from utils.io import save, load
 
-gaia_ref = "2016A&A...595A...1G"
+
 
 
 def create_gaia_helpertable(distance_cut_in_pc,temp):
@@ -48,7 +53,7 @@ def create_gaia_helpertable(distance_cut_in_pc,temp):
 
     gaia = empty_dict.copy()
     gaia["provider"] = create_provider_table(
-        "Gaia", "https://gea.esac.esa.int/tap-server/tap", gaia_ref
+        "Gaia", gaia_server, gaia_ref
     )
 
     if temp:
@@ -109,7 +114,6 @@ def create_ident_table(gaia_helptab):
     sim_main_id_ident = Table()
     sim_main_id_ident["main_id"] = gaia_ident["main_id"]
     sim_main_id_ident["id"] = gaia_ident["main_id"]
-    sim_ref = "2000A&AS..143....9W"
     sim_main_id_ident["id_ref"] = Column(data = [
         sim_ref for _ in range(len(sim_main_id_ident))
         ], dtype=object)

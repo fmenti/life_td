@@ -14,7 +14,17 @@ sim_backup_server = "https://simbad.idia.ac.za/simbad/sim-tap/"
 sim_server = "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
 vizier_server = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap"
 vizier_backup_server = "https://vizier.cfa.harvard.edu/viz-bin/VizieR"
+# hm this backup is not a tap...
+gaia_server = "https://gea.esac.esa.int/tap-server/tap"
+exo_server = "http://archives.ia2.inaf.it/vo/tap/projects"
 
+gaia_ref = "2016A&A...595A...1G"
+exo_ref = "2020A&C....3100370A"
+sim_ref = "2000A&AS..143....9W"
+life_ref = "2022A&A...664A..21Q"
+mamajek_ref = "2013ApJS..208....9P"
+wds_ref = "2001AJ....122.3466M"
+sdb_ref = "priv. comm."
 
 FILTER_ABBREV = ["i", "j", "u", "g", "k", "u_sdss"]
 PROVIDERS = ["sim", "sdb", "wds", "exo", "life", "gaia"]

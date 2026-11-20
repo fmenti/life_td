@@ -11,7 +11,11 @@ from provider.utils import (
     fetch_main_id,
     replace_value,
 )
-from sdata import empty_dict, sim_backup_server
+from sdata import (
+    empty_dict,
+    sim_backup_server,
+    sdb_ref
+)
 from utils.io import save, stringtoobject
 
 
@@ -185,7 +189,7 @@ def provider_sdb(distance_cut_in_pc, data):
     sdb["provider"] = create_provider_table(
         "Grant Kennedy Disks",
         "http://drgmk.com/sdb/",
-        "priv. comm.",
+        sdb_ref,
         "2026-04-28",
     )
     sdb_helptab = create_sdb_helpertable(
