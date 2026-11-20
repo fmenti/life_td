@@ -1,25 +1,43 @@
 from astropy.table import Table
-from provider.utils import query
+from provider.utils import sync_or_async_query
 from provider.simbad import main_adql_queries
+from sdata import (
+    sim_backup_server,
+    sim_server,
+    vizier_backup_server,
+    vizier_server,
+    gaia_server,
+    exo_server,
+)
+
 
 
 def test_wds_queryable():
     wds_provider = Table()
-    wds_provider["provider_url"] = [
-        "http://tapvizier.u-strasbg.fr/TAPVizieR/tap"
+    wds_provider["provider_url"] = [vizier_server
     ]
     adql_query = [
         """SELECT top 10 *
                 FROM "B/wds/wds" """
     ]
-    wds = query(wds_provider["provider_url"][0], adql_query[0])
+    wds = sync_or_async_query(wds_provider["provider_url"][0], adql_query[0])
+    assert type(wds) == type(Table())
+
+def test_wds_backup_server_queryable():
+    wds_provider = Table()
+    wds_provider["provider_url"] = [vizier_backup_server
+    ]
+    adql_query = [
+        """SELECT top 10 *
+                FROM "B/wds/wds" """
+    ]
+    wds = sync_or_async_query(wds_provider["provider_url"][0], adql_query[0])
     assert type(wds) == type(Table())
 
 
 def test_simbad_queryable():
     simbad_provider = Table()
-    simbad_provider["provider_url"] = [
-        "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
+    simbad_provider["provider_url"] = [sim_server
     ]
     # http://simbad.cds.unistra.fr/simbad/sim-tap currently on topcat
     # http://simbad.u-strasbg.fr:80/simbad/sim-tap old tap I had here
@@ -27,38 +45,50 @@ def test_simbad_queryable():
         """SELECT top 10 *
                 FROM basic"""
     ]
-    simbad = query(simbad_provider["provider_url"][0], adql_query[0])
+    simbad = sync_or_async_query(simbad_provider["provider_url"][0], adql_query[0])
+    assert type(simbad) == type(Table())
+
+def test_simbad_backup_queryable():
+    simbad_provider = Table()
+    simbad_provider["provider_url"] = [sim_backup_server
+    ]
+    # http://simbad.cds.unistra.fr/simbad/sim-tap currently on topcat
+    # http://simbad.u-strasbg.fr:80/simbad/sim-tap old tap I had here
+    adql_query = [
+        """SELECT top 10 *
+                FROM basic"""
+    ]
+    simbad = sync_or_async_query(simbad_provider["provider_url"][0], adql_query[0])
     assert type(simbad) == type(Table())
 
 def test_simbad_all_queryable():
         simbad_provider = Table()
-        simbad_provider["provider_url"] = [
-            "http://simbad.u-strasbg.fr:80/simbad/sim-tap"
+        simbad_provider["provider_url"] = [sim_server
         ]
         # http://simbad.cds.unistra.fr/simbad/sim-tap currently on topcat
         # http://simbad.u-strasbg.fr:80/simbad/sim-tap old tap I had here
         adql_query = [
             'SELECT TOP 100 ' + main_adql_queries(20)[6:]
         ]
-        simbad = query(simbad_provider["provider_url"][0], adql_query[0])
+        simbad = sync_or_async_query(simbad_provider["provider_url"][0], adql_query[0])
         assert type(simbad) == type(Table())
         assert len(simbad) == 100
 
 
 def test_gaia_queryable():
     gaia_provider = Table()
-    gaia_provider["provider_url"] = ["https://gea.esac.esa.int/tap-server/tap"]
+    gaia_provider["provider_url"] = [gaia_server]
     adql_query = [
         """SELECT top 10 *
                 FROM gaiadr3.gaia_source """
     ]
-    gaia = query(gaia_provider["provider_url"][0], adql_query[0])
+    gaia = sync_or_async_query(gaia_provider["provider_url"][0], adql_query[0])
     assert type(gaia) == type(Table())
 
 
 def test_gaia_columns_queryable():
     gaia_provider = Table()
-    gaia_provider["provider_url"] = ["https://gea.esac.esa.int/tap-server/tap"]
+    gaia_provider["provider_url"] = [gaia_server]
     adql_query = [
         """SELECT TOP 10
                     s.source_id ,p.mass_flame, p.radius_flame,
@@ -67,7 +97,7 @@ def test_gaia_columns_queryable():
                     JOIN gaiadr3.astrophysical_parameters as p ON s.source_id=p.source_id
                     LEFT JOIN gaiadr3.nss_two_body_orbit as m ON s.source_id=m.source_id"""
     ]
-    gaia = query(gaia_provider["provider_url"][0], adql_query[0])
+    gaia = sync_or_async_query(gaia_provider["provider_url"][0], adql_query[0])
     assert gaia.colnames == [
         "source_id",
         "mass_flame",
@@ -81,21 +111,20 @@ def test_gaia_columns_queryable():
 
 def test_exo_queryable():
     exo_provider = Table()
-    exo_provider["provider_url"] = [
-        "http://archives.ia2.inaf.it/vo/tap/projects"
+    exo_provider["provider_url"] = [exo_server
     ]
     adql_query = [
         """SELECT top 10 *
                 FROM exomercat.exomercat """
     ]
-    exo = query(exo_provider["provider_url"][0], adql_query[0])
+    exo = sync_or_async_query(exo_provider["provider_url"][0], adql_query[0])
     assert type(exo) == type(Table())
 
 
 def test_exo_columns_queryable():
     exo_provider = Table()
     exo_provider["provider_url"] = [
-        "http://archives.ia2.inaf.it/vo/tap/projects"
+        exo_server
     ]
     adql_query = [
         """SELECT TOP 10
@@ -103,7 +132,7 @@ def test_exo_columns_queryable():
                     binary,letter
                     FROM exomercat.exomercat"""
     ]
-    exo = query(exo_provider["provider_url"][0], adql_query[0])
+    exo = sync_or_async_query(exo_provider["provider_url"][0], adql_query[0])
     assert exo.colnames == [
         "main_id",
         "host",
@@ -116,11 +145,11 @@ def test_exo_columns_queryable():
 def test_whole_exo_queryable():
     exo_provider = Table()
     exo_provider["provider_url"] = [
-        "http://archives.ia2.inaf.it/vo/tap/projects"
+        exo_server
     ]
     adql_query = [
         """SELECT *
                 FROM exomercat.exomercat """
     ]
-    exo = query(exo_provider["provider_url"][0], adql_query[0])
+    exo = sync_or_async_query(exo_provider["provider_url"][0], adql_query[0])
     assert type(exo) == type(Table())
