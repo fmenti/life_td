@@ -380,7 +380,7 @@ def fetch_main_id(
     """
     # tbd option to match on position instead of main_id or oid
     main_id_query = id_creator.create_main_id_query()
-    return query(TAP_service, main_id_query, [cat])
+    return sync_or_async_query(TAP_service, main_id_query, [cat])
 
 
 def distance_cut(

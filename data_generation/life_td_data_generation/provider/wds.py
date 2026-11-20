@@ -13,7 +13,7 @@ from provider.utils import (
     create_sources_table,
     distance_cut,
     ids_from_ident,
-    query,
+    sync_or_async_query,
     replace_value,
 )
 from sdata import (
@@ -147,7 +147,7 @@ def create_wds_helptab(
     :rtype: astropy.table.Table
     """
     print(" querying VizieR for WDS...")
-    wds_querried = query(wds["provider"]["provider_url"][0], adql_query[0],
+    wds_querried = sync_or_async_query(wds["provider"]["provider_url"][0], adql_query[0],
                          name="wds_querry")
 
     # Match WDS objects with SIMBAD-derived objects to enforce the distance cut.
