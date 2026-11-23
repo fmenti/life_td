@@ -172,11 +172,15 @@ def test_false_positives_coord_match():
         dec_cat2=starcat5["coo_dec"],
         r_arcsec=radius,
     )
-
+    print(match_info["match_by_name"][np.where(starcat5["main_id"] == "BD+66    34A")])
     print(match_info["sep_arcsec"][np.where(starcat5["main_id"] == "BD+66    34A")])
-    # 11.88040573
+    print(starcat5["main_id"][np.where(starcat5["main_id"] == "BD+66      34A")])
+    # how come there is no separation for BD+66    34A, is it matched by name?
+    # [] , BD+66    34A
+    # 11.88040573, alf cen A
     print(match_info["sep_arcsec"][np.where(starcat5["main_id"] == "BD+66    34B")])
-    # 13.89590673
+    # [0.01219395], BD+66    34B
+    # 13.89590673, alf cen B
 
     # ok so radius would need to be very small (11, 13) to not match the alf cens
     # test for others that went wrong above
