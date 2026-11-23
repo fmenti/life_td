@@ -301,3 +301,38 @@ def test_runs_as_script():
         check=False,
     )
     assert result.returncode == 0
+
+from catalog.starcat5 import add_unresolved_binaries
+
+def test_specific_object():
+    #name = "BD+66    34A" # is considered system wich children
+    name = "WDS J00321+6715Aa"
+    service = "http://dc.g-vo.org/tap"
+    distance_cut = 30
+
+    queried_stars = query_stars(service, distance_cut)
+    queried_children = query_children(service)
+    queried_systems = query_systems(service, distance_cut)
+
+    stars_with_ub = add_unresolved_binaries(
+        queried_systems,
+        queried_children,
+        queried_stars,
+    )
+    flagged_non_ms = flag_non_main_sequence_stars(stars_with_ub)
+    singles, multiples = flag_trivial_binaries(flagged_non_ms, queried_children)
+
+    # not all systems are added, just unresolved binaries ones. (meaning no children in children table)
+    # my object has wds children
+
+    [starcat5] = load(["catalogs/StarCat5"])
+
+    print(stars_with_ub[np.where(stars_with_ub["main_id"] == name)])
+    # "WDS J00321+6715Aa" not in stars table because does not have a distance measure
+    # it is part in the children table
+    # should I add children without distance to cat in multiples?
+    # wds would have sptype, ra and dec
+    # does this bug happen often enough to be worth my time?
+    assert len(stars_with_ub[np.where(stars_with_ub["main_id"] == name)]) == 1
+    #assert len(stars_with_ub[np.where(stars_with_ub["main_id"] == name)]) == 1
+    assert len(starcat5[np.where(starcat5["main_id"] == name)]) == 1
