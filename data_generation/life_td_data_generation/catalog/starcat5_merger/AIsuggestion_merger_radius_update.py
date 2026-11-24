@@ -14,7 +14,69 @@ from catalog.starcat5_merger.fcts_cat_merge import (
     add_cat2_to_cat1_by_name_or_coords,
 )
 
-# ... existing code ...
+def get_radius_mismatch_table(
+    hpic: Table,
+    starcat5: Table,
+    matched_starcat_indices: np.ndarray,
+    matched_hpic_indices: np.ndarray,
+    nearest_hpic_indices: np.ndarray,
+    nearest_distances: u.Quantity,
+) -> Table:
+    """
+    Build a diagnostics table for ID-matched stars whose nearest HPIC coordinate
+    match is not their ID-matched HPIC row.
+
+    :param hpic: HPIC catalog.
+    :type hpic: astropy.table.Table
+    :param starcat5: StarCat5 catalog.
+    :type starcat5: astropy.table.Table
+    :param matched_starcat_indices: StarCat5 indices for rows with ID matches.
+    :type matched_starcat_indices: numpy.ndarray
+    :param matched_hpic_indices: HPIC indices of the corresponding ID matches.
+    :type matched_hpic_indices: numpy.ndarray
+    :param nearest_hpic_indices: HPIC indices of nearest coordinate matches.
+    :type nearest_hpic_indices: numpy.ndarray
+    :param nearest_distances: Angular distances to nearest HPIC matches.
+    :type nearest_distances: astropy.units.Quantity
+    :returns: Diagnostics table for mismatched nearest-neighbor cases.
+    :rtype: astropy.table.Table
+    """
+    nearest_is_id_match = nearest_hpic_indices == matched_hpic_indices
+    failed_indices = np.where(~nearest_is_id_match)[0]
+
+    failed_starcat_indices = matched_starcat_indices[failed_indices]
+    failed_id_matched_hpic_indices = matched_hpic_indices[failed_indices]
+    failed_nearest_hpic_indices = nearest_hpic_indices[failed_indices]
+
+    failed_starcat_coords = SkyCoord(
+        ra=np.asarray(starcat5["coo_ra"][failed_starcat_indices]) * u.deg,
+        dec=np.asarray(starcat5["coo_dec"][failed_starcat_indices]) * u.deg,
+    )
+    failed_id_matched_hpic_coords = SkyCoord(
+        ra=np.asarray(hpic["ra"][failed_id_matched_hpic_indices]) * u.deg,
+        dec=np.asarray(hpic["dec"][failed_id_matched_hpic_indices]) * u.deg,
+    )
+
+    id_matched_distances = failed_starcat_coords.separation(
+        failed_id_matched_hpic_coords,
+    )
+
+    return Table(
+        {
+            "starcat_name": starcat5["main_id"][failed_starcat_indices],
+            "id_matched_hpic_name": hpic["simbad_name"][
+                failed_id_matched_hpic_indices
+            ],
+            "nearest_hpic_name": hpic["simbad_name"][failed_nearest_hpic_indices],
+            "id_matched_dist_arcsec": id_matched_distances.arcsec,
+            "nearest_hpic_dist_arcsec": nearest_distances[
+                failed_indices
+            ].arcsec,
+            "starcat_index": failed_starcat_indices,
+            "id_matched_hpic_index": failed_id_matched_hpic_indices,
+            "nearest_hpic_index": failed_nearest_hpic_indices,
+        }
+    )
 
 
 def get_radius(hpic: Table, starcat5: Table) -> float:
@@ -40,13 +102,14 @@ def get_radius(hpic: Table, starcat5: Table) -> float:
     :raises ValueError: If no ID matches are found or if any ID match is not the
         nearest coordinate match.
     """
-    hpic_name_to_index = {}
+    hpic_name_to_index = {} # dictionary [name: index]
     for hpic_index, name in enumerate(hpic["simbad_name"]):
         if name not in hpic_name_to_index:
             hpic_name_to_index[name] = hpic_index
 
     matched_starcat_indices = []
     matched_hpic_indices = []
+    # if name in hpic and starcat then add index to matched lists each
 
     for starcat_index, name in enumerate(starcat5["main_id"]):
         if name in hpic_name_to_index:
@@ -75,13 +138,23 @@ def get_radius(hpic: Table, starcat5: Table) -> float:
     nearest_is_id_match = nearest_hpic_indices == matched_hpic_indices
 
     if not np.all(nearest_is_id_match):
-        failed_indices = np.where(~nearest_is_id_match)[0]
-        failed_starcat_indices = matched_starcat_indices[failed_indices]
+        radius_mismatch_table = get_radius_mismatch_table(
+            hpic=hpic,
+            starcat5=starcat5,
+            matched_starcat_indices=matched_starcat_indices,
+            matched_hpic_indices=matched_hpic_indices,
+            nearest_hpic_indices=nearest_hpic_indices,
+            nearest_distances=sep2d,
+        )
+
+        print(radius_mismatch_table)
+        print(radius_mismatch_table["starcat_name","nearest_hpic_name",
+              "nearest_hpic_dist_arcsec","id_matched_dist_arcsec"])
 
         raise ValueError(
             "Cannot estimate radius: not all ID-matched StarCat5 stars have "
             "their ID-matched HPIC star as nearest coordinate neighbor. "
-            f"Number of failed rows: {len(failed_starcat_indices)}."
+            f"Number of failed rows: {len(radius_mismatch_table)}."
         )
 
     radius = float(np.max(sep2d.arcsec))
