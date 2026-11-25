@@ -57,6 +57,7 @@ def query_returns(monkeypatch):
                 ["ref_coo", "ref_coo", "ref_coo2", "ref_coo"], dtype=object
             ),
             "coo_qual": ["A", "A", "C", "C"],
+            "coo_epoch": MaskedColumn([2000,2000,2000,2000]),
             "sptype_string": np.array(
                 ["M7.0V", "", "M5.0V+M9", ""], dtype=object
             ),
@@ -135,6 +136,7 @@ def query_returns(monkeypatch):
             4,
             "",
             "",
+            np.ma.masked,
             "",
             "",
             "",
@@ -173,6 +175,7 @@ def query_returns(monkeypatch):
             5,
             "",
             "",
+            np.ma.masked,
             "",
             "",
             "",
@@ -234,10 +237,10 @@ def query_returns(monkeypatch):
 
     tables_iter = iter([t0, parents_without_plx, children_without_plx, ident])
 
-    def fake_query(url, adql, uploads=None):
+    def fake_query(url, adql, uploads=None,name= "testing_query"):
         return next(tables_iter)
 
-    monkeypatch.setattr(simbad_module, "query", fake_query)
+    monkeypatch.setattr(simbad_module, "sync_or_async_query", fake_query)
 
     result_sim_helptab, result_sim = create_simbad_helpertable(
         distance_cut_in_pc, test_objects
@@ -387,7 +390,7 @@ def test_create_h_link_table(query_returns, monkeypatch):
         }
     )
 
-    def fake_fetch_main_id(sim_h_link, id_creator):
+    def fake_fetch_main_id(sim_h_link, id_creator,url):
         return main_id_table
 
     monkeypatch.setattr(simbad_module, "fetch_main_id", fake_fetch_main_id)

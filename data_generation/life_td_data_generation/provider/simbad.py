@@ -46,9 +46,14 @@ def all_magnitudes():
     return select, join
 
 adql_queries_moduls = {
-    "select_statement": """SELECT b.main_id,b.ra AS coo_ra,b.dec AS coo_dec,
-        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,b.oid,
-        b.coo_bibcode AS coo_ref, b.coo_qual,b.sp_type AS sptype_string,
+    "select_statement": """SELECT b.main_id, b.oid,
+        b.ra AS coo_ra,b.dec AS coo_dec,
+        b.coo_err_angle, b.coo_err_maj, b.coo_err_min,
+        b.coo_bibcode AS coo_ref, b.coo_qual,
+        b.pmra AS pm_ra,b.pmdec AS pm_dec,
+        b.pm_err_angle, b.pm_err_maj, b.pm_err_min,
+        b.pm_bibcode AS pm_ref, b.pm_qual,
+        b.sp_type AS sptype_string,
         b.sp_qual AS sptype_qual, b.sp_bibcode AS sptype_ref,
         b.plx_err, b.plx_value, b.plx_bibcode AS plx_ref,b.plx_qual,
         h_link.membership, h_link.parent AS parent_oid,
@@ -102,7 +107,7 @@ adql_upload_queries = {
 def create_simbad_helpertable(
     distance_cut_in_pc: float,
     test_objects: Sequence[str] | None,
-    temp,
+    temp: bool = False,
 ) -> tuple[Table, dict[str, Table]]:
     """
     Create the main SIMBAD helper table.
@@ -180,11 +185,12 @@ def create_simbad_helpertable(
     print(" sorting object types...")
 
     # sorting from object type into star, system and planet type
-    sim_helptab["type"] = ["None" for i in range(len(sim_helptab))]
+    sim_helptab["type"] = ["None" for _ in range(len(sim_helptab))]
     sim_helptab["type"] = sim_helptab["type"].astype(object)
     sim_helptab["binary_flag"] = np.array(
         ["False" for i in range(len(sim_helptab))], dtype=object
     )
+    sim_helptab["coo_epoch"] = [2000 for _ in range(len(sim_helptab))]
     to_remove_list = []
     removed_otypes = []
     for i in range(len(sim_helptab)):
@@ -415,9 +421,11 @@ def expanding_helpertable_stars(
         ["plx_value", "coo_ra","sptype_string"]+ mag_columns[0],
     ):
         stars[colname] = MaskedColumn(stars[colname])
-        mask_has_val = np.where(stars[colval].mask == False)
-        stars[mask_has_val] = replace_value(
-            stars[mask_has_val],
+        mask_has_val = np.where((~stars[colval].mask))
+        stars_with_values = stars[mask_has_val][stars[mask_has_val][colval] != ""]
+        # what if it is not masked but "" instead?
+        stars_with_values = replace_value(
+            stars_with_values,
             colname,
             "",
             sim["provider"]["provider_bibcode"][0],
@@ -435,7 +443,11 @@ def expanding_helpertable_stars(
     return stars
 
 
-def create_ident_table(sim_helptab: Table, sim: dict[str, Table],temp) -> Table:
+def create_ident_table(
+    sim_helptab: Table,
+    sim: dict[str, Table],
+    temp: bool = False
+) -> Table:
     """
     Create the identifier table.
 
@@ -470,7 +482,7 @@ def create_h_link_table(
     sim_helptab: Table,
     sim: dict[str, Table],
     stars: Table,
-    temp: bool
+    temp: bool = False
 ) -> Table:
     """
     Create the hierarchical link (parent-child) table.
@@ -602,7 +614,15 @@ def create_star_basic_table(stars: Table) -> Table:
         "coo_err_maj",
         "coo_err_min",
         "coo_qual",
+        "coo_epoch"
         "coo_ref",
+        "pm_ra",
+        "pm_dec",
+        "pm_err_angle",
+        "pm_err_maj",
+        "pm_err_min",
+        "pm_qual",
+        "pm_ref",
         "sptype_string",
         "sptype_qual",
         "sptype_ref",

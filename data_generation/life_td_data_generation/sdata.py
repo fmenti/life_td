@@ -16,6 +16,7 @@ vizier_server = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap"
 vizier_backup_server = "https://vizier.cfa.harvard.edu/viz-bin/VizieR"
 # hm this backup is not a tap...
 gaia_server = "https://gea.esac.esa.int/tap-server/tap"
+gaia_backup_server = "ivo://esavo/gaia/tap"
 exo_server = "http://archives.ia2.inaf.it/vo/tap/projects"
 
 gaia_ref = "2016A&A...595A...1G"
@@ -75,9 +76,25 @@ PARAMETER_SPECS = {
             "coo_err_angle",
             "coo_err_maj",
             "coo_err_min",
+            "coo_epoch",
             "coo_qual",
             "coo_source_idref",
             "coo_ref",
+        ],
+        dtype=[float, float, float, float, float, int, object, int, object],
+    ),
+    "pm": _parameter_spec(
+        primary = "pm_ra",
+        quality = "pm_qual",
+        columns = [
+            "pm_ra",
+            "pm_dec",
+            "pm_err_angle",
+            "pm_err_maj",
+            "pm_err_min",
+            "pm_qual",
+            "pm_source_idref",
+            "pm_ref",
         ],
         dtype=[float, float, float, float, float, object, int, object],
     ),
