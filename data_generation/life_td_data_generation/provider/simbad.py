@@ -435,6 +435,11 @@ def expanding_helpertable_stars(
             True for _ in range(len(stars[np.where(stars[colname] == "")]))
         ]
 
+    stars["coo_epoch"] = MaskedColumn(stars["coo_epoch"])
+    masked = np.where((stars["coo_ra"].mask))
+    stars["coo_epoch"][masked].mask = [True for _ in
+                                              range(len(stars[masked]))]
+
     # Binarity columns.
     stars["binary_ref"] = [
         sim["provider"]["provider_bibcode"][0] for _ in range(len(stars))
@@ -614,7 +619,7 @@ def create_star_basic_table(stars: Table) -> Table:
         "coo_err_maj",
         "coo_err_min",
         "coo_qual",
-        "coo_epoch"
+        "coo_epoch",
         "coo_ref",
         "pm_ra",
         "pm_dec",
