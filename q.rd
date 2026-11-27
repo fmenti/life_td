@@ -253,6 +253,11 @@ tables may change at any time without prior warning.
             tablehead="coo_qual"
             description="Coordinate quality (A:best, E:worst)"
             verbLevel="1"/>
+        <column name="coo_epoch" type="integer"
+            ucd="time.epoch"
+            tablehead="coo_epoch"
+            description="Coordinate epoch"
+            verbLevel="1"/>
         <column name="coo_source_idref" type="integer"
             ucd="meta.ref"
             tablehead="coo_source_id"
@@ -261,6 +266,54 @@ tables may change at any time without prior warning.
             verbLevel="1">
               <values nullLiteral="-1"/>
         </column>
+
+        <column name="pm_ra" type="double precision"
+            ucd="pos.pm;pos.eq.ra" unit="mas.yr-1"
+            tablehead="PM RA"
+            description="Proper motion in RA"
+            verbLevel="1" displayHint="sf=7"/>
+        <column name="pm_dec" type="double precision"
+            ucd="pos.pm;pos.eq.dec" unit="mas.yr-1"
+            tablehead="PM DEC"
+            description="Proper motion in DEC"
+            verbLevel="1" displayHint="sf=7"/>
+        <column name="pm_err_angle" type="smallint"
+            ucd="pos.posAng;pos.errorEllipse;pos.pm" unit="deg"
+            tablehead="pm_err_angle"
+            description="Proper motion error angle"
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="pm_err_maj" type="real"
+            ucd="phys.angSize.smajAxis;pos.errorEllipse;pos.pm"
+            unit="mas"
+            tablehead="pm_err_maj"
+            description="Proper motion  error major axis"
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="pm_err_min" type="real"
+            ucd="phys.angSize.sminAxis;pos.errorEllipse;pos.pm"
+            unit="mas"
+            tablehead="pm_err_min"
+            description="Proper motion  error minor axis"
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+        <column name="pm_qual" type="text"
+            ucd="meta.code.qual;pos.pm"
+            tablehead="pm_qual"
+            description="Proper motion  quality (A:best, E:worst)"
+            verbLevel="1"/>
+        <column name="pm_source_idref" type="integer"
+            ucd="meta.ref"
+            tablehead="pm_source_id"
+            description="Source identifier corresponding
+            to the proper motion  (pm) parameters."
+            verbLevel="1">
+              <values nullLiteral="-1"/>
+        </column>
+
         <column name="coo_gal_l" type="double precision"
             ucd="pos.galactic.lon" unit="deg"
             tablehead="coo_gal_l"
@@ -541,7 +594,17 @@ tables may change at any time without prior warning.
                 <map key="coo_err_maj" nullExpr="1e+20" />
                 <map key="coo_err_min" nullExpr="1e+20" />
                 <map key="coo_qual" nullExpr="'?'" />
+                <map key="coo_epoch" nullExpr="999999" />
                 <map key="coo_source_idref" nullExpr="999999" />
+
+                <map key="pm_ra" nullExpr="1e+20" />
+                <map key="pm_dec" nullExpr="1e+20" />
+                <map key="pm_err_angle" nullExpr="1e+20" />
+                <map key="pm_err_maj" nullExpr="1e+20" />
+                <map key="pm_err_min" nullExpr="1e+20" />
+                <map key="pm_qual" nullExpr="'?'" />
+                <map key="pm_source_idref" nullExpr="999999" />
+
                 <map key="coo_gal_l" nullExpr="1e+20" />
                 <map key="coo_gal_b" nullExpr="1e+20" />
                 <!-- <map key="coo_gal_err_angle" nullExpr="1e+20" />

@@ -659,6 +659,7 @@ def unify_null_values(cat: dict[str, Table]) -> dict[str, Table]:
     columns_map = [
         [
             "coo_qual",
+            "pm_qual",
             "coo_gal_qual",
             "plx_qual",
             "dist_st_qual",
